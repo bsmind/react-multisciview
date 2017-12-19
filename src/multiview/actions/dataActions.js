@@ -17,3 +17,21 @@ export function getSampleKinds() {
             });
     };
 }
+
+export function getAttributes() {
+    return dispatch => {
+        axios.get('/api/data/attr')
+            .then(response => {
+                dispatch({
+                    type: 'GET_SAMPLE_ATTR',
+                    payload: response.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: 'GET_SAMPLE_ATTR_REJECTED',
+                    payload: e
+                });
+            });
+    };
+}

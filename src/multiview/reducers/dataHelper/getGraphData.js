@@ -88,3 +88,13 @@ export function getGraphDataFromSampleNames(sampleNames, separator = '_') {
 
     return {nodes, links};
 }
+
+function getSampleKinds(state, payload) {
+    const {nodes, links} = getGraphDataFromSampleNames(payload)
+    return {...state, 
+        sampleKinds: payload,
+        graphData: {
+            nodes,
+            links
+    }};
+}

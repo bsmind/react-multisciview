@@ -1,29 +1,21 @@
-import forEach from 'lodash.foreach';
-import {getGraphDataFromSampleNames} from './getGraphData';
-
+import {
+    getSampleAttr
+} from './dataHelper';
 
 const INITIAL_STATE = {
     sampleKinds: {},
-    graphData: {
-        nodes: [], // 'id', 'r', 'group'
-        links: []  // 'source', 'target', 'level'
-    }
+
+    attrKinds: {},
+    attrMinMax: {}, // global min, max
+    attrTypes: {}
 }
 
-function getSampleKinds(state, payload) {
-    const {nodes, links} = getGraphDataFromSampleNames(payload)
-    return {...state, 
-        sampleKinds: payload,
-        graphData: {
-            nodes,
-            links
-    }};
-}
 
 export function dataReducers (state=INITIAL_STATE, action) {
     const {type, payload} = action;
     switch(type) {
-        case "GET_SAMPLE_KINDS": return getSampleKinds(state, payload);
+        case "GET_SAMPLE_KINDS": return {...state, sampleKinds: payload};
+        case "GET_SAMPLE_ATTR": return getSampleAttr(state, payload);
         default: return state;
     }
 }

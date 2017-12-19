@@ -8,6 +8,7 @@
     --appbar-contrast: var(--color-black);
     --appbar-title-font-size: calc(1.8 * var(--unit));
     --databox-width: 22%;
+    --mainbox-width: calc(100% - var(--databox-width));
 }
 
 .appBar {
@@ -25,5 +26,16 @@
     z-index: var(--z-index-high);
     font-family: var(--preferred-font);
     font-size: var(--font-size);
+    height: 100%;
+}
+
+.toolbox {
+    background: var(--color-background);
+    padding: 0px 1px 0px 1px;
+    position: fixed;
+    left: var(--databox-width);
+    top: var(--appbar-height);
+    width: var(--mainbox-width);
+    z-index: var(--z-index-high);
     height: 100%;
 }

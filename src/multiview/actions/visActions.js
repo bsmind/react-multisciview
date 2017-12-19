@@ -11,3 +11,10 @@ export function changeSampleColor(key) {
         payload: key
     };
 }
+
+export function setAttr(dim, value) {
+    return {
+        type: "SET_ATTR",
+        payload: {dim, value}
+    };
+}
