@@ -1,0 +1,32 @@
+@import 'colors.css';
+@import 'variables.css';
+@import 'autocomplete/theme.css';
+@import 'list/theme.css';
+@import 'list/config.css';
+
+:root {
+    --list-vertical-padding: calc(0.5 * var(--unit));
+    --list-item-max-height: calc(3.0 * var(--unit));
+}
+
+
+.autocomplete {
+    padding: 0;
+    padding-top: 1px;
+}
+
+.item {
+    max-width: 100%;
+    min-height: var(--list-item-max-height);
+    max-height: var(--list-item-max-height);
+}
+
+.itemContentRoot {
+    min-width: 0;
+}
+
+.itemText {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

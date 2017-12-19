@@ -1,0 +1,29 @@
+@import 'colors.css';
+@import 'variables.css';
+@import 'app_bar/config.css';
+
+:root {
+    --unit: '6.5px';
+    --appbar-color: var(--palette-grey-400);
+    --appbar-contrast: var(--color-black);
+    --appbar-title-font-size: calc(1.8 * var(--unit));
+    --databox-width: 22%;
+}
+
+.appBar {
+    background: var(--appbar-color);
+    color: var(--appbar-contrast);
+}
+
+.databox {
+    background: var(--color-background);
+    padding: 0px 1px 0px 1px;
+    position: fixed;
+    left: 0;
+    top: var(--appbar-height);
+    width: var(--databox-width);
+    z-index: var(--z-index-high);
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);
+    height: 100%;
+}

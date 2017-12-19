@@ -2,11 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {Provider} from 'react-redux';
-import {createStore} from 'redux';
+import {createStore, applyMiddleware} from 'redux';
 import thunk from 'redux-thunk';
 
 import {overrideComponentTypeChecker} from 'react-toolbox';
 import reducers from './multiview/reducers';
+
+import MultiViewApp from './multiview';
 
 const middleware = applyMiddleware(thunk);
 const store = createStore(reducers, middleware);
@@ -14,7 +16,7 @@ const store = createStore(reducers, middleware);
 const render = () => {
     ReactDOM.render(
         <Provider store={store}>
-            <div>test</div>
+            <MultiViewApp />
         </Provider>
     , document.getElementById('app'));
 };
