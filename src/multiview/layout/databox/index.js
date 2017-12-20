@@ -84,7 +84,7 @@ class DataBox extends React.Component {
     render() {
         return (
             <div className={this.props.className}>
-                <div style={{height: '5%'}}>
+                <div className={theme.btndiv}>
                     <table>
                         <tbody>
                             <tr>
@@ -103,7 +103,7 @@ class DataBox extends React.Component {
                     </table>
                 </div>
 
-                <div style={{height: '6%'}}>
+                <div className={theme.seldiv}>
                     <Autocomplete 
                         direction='down'
                         selectedPosition='none'
@@ -117,14 +117,14 @@ class DataBox extends React.Component {
                     />
                 </div>
 
-                <div style={{overflowY: 'scroll', height: '60%'}}>
+                <div className={theme.listdiv}>
                     <List selectable>
                         <ListSubHeader caption='Selected samples' />
                         {this.renderSampleList()}
                     </List>
                 </div>
 
-                <div style={{height: '29%', padding: '2px 5px 2px 5px'}}>
+                <div className={theme.infodiv}>
                     reserved to show sample information
                 </div>
             </div>

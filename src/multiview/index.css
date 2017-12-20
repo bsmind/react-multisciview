@@ -7,13 +7,38 @@
     --appbar-color: var(--palette-grey-400);
     --appbar-contrast: var(--color-black);
     --appbar-title-font-size: calc(1.8 * var(--unit));
+    --footer-height: calc(0.1 * var(--appbar-height));
+    --content-height: calc(100% - var(--appbar-height) - var(--footer-height));
     --databox-width: 22%;
-    --mainbox-width: calc(100% - var(--databox-width));
+    --chartbox-width: calc(100% - var(--databox-width));
+    --toolbox-height: 56.81px;
 }
 
 .appBar {
     background: var(--appbar-color);
     color: var(--appbar-contrast);
+}
+
+.footer {
+    background: var(--appbar-color);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--footer-height);
+    z-index: var(--z-index-high);    
+}
+
+.ctlbox {
+    font-family: var(--preferred-font);
+    font-size: var(--appbar-title-font-size);
+    position: fixed;
+    left: var(--databox-width);
+    top: 0;
+    height: var(--appbar-height);
+    align-items: center;
+    display: flex;
+    width: 100%;
 }
 
 .databox {
@@ -26,7 +51,7 @@
     z-index: var(--z-index-high);
     font-family: var(--preferred-font);
     font-size: var(--font-size);
-    height: 100%;
+    height: var(--content-height);
 }
 
 .toolbox {
@@ -35,7 +60,20 @@
     position: fixed;
     left: var(--databox-width);
     top: var(--appbar-height);
-    width: var(--mainbox-width);
+    width: var(--chartbox-width);
     z-index: var(--z-index-high);
-    height: 100%;
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);    
+}
+
+.chartbox {
+    background: var(--color-background);
+    padding: 5px 10px 0px 10px;
+    position: fixed;
+    left: var(--databox-width);
+    top: calc(var(--appbar-height) + var(--toolbox-height));
+    width: var(--chartbox-width);
+    height: calc(var(--content-height) - var(--toolbox-height));
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);    
 }

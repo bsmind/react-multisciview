@@ -63,7 +63,7 @@ class ToolBox extends React.Component {
         
         return (
             <div className={this.props.className}>
-                <div style={{height: '5%'}}>
+                <div style={{height: '25.83px'}}>
                     <table>
                         <tbody>
                             <tr>
@@ -87,7 +87,7 @@ class ToolBox extends React.Component {
                     </table>
 
                 </div>
-                <div style={{height: '6%'}}>
+                <div style={{height: '30.99px'}}>
                     {this.renderAttrSelectors()}
                 </div>
             </div>

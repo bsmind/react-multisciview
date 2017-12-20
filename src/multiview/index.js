@@ -19,7 +19,9 @@ import {AppBar} from 'react-toolbox/lib/app_bar';
 
 import {
     DataBox,
-    ToolBox
+    ToolBox,
+    ControlBox,
+    ChartBox
 } from './layout';
 
 import theme from './index.css';
@@ -63,22 +65,25 @@ class MultiViewApp extends React.Component {
                 </NavDrawer>
                 <Panel>
                     <AppBar title='React-MultiView' leftIcon='menu' onLeftIconClick={null} theme={theme}>
+                        <ControlBox className={theme.ctlbox} toolId={this.state.toolSelected} />
                     </AppBar>
                 </Panel>
-                <DataBox className={theme.databox}
-                    sampleKinds={this.props.sampleKinds}
-                    samples={this.props.sampleSelected}
-                    colors={this.props.sampleColors}
-                    onSampleChange={this.handleSampleChange}
-                    onColorChange={key => this.props.changeSampleColor(key)}
-                />
-                <ToolBox className={theme.toolbox}
-                    toolid={this.state.toolSelected}
-                    attrKinds={this.props.attrKinds}
-                    attr={this.props.attr}
-                    onAttrChange={this.handleAttrChange}
-                    onToolChange={this.handleToolChange}                    
-                />
+                    <DataBox className={theme.databox}
+                        sampleKinds={this.props.sampleKinds}
+                        samples={this.props.sampleSelected}
+                        colors={this.props.sampleColors}
+                        onSampleChange={this.handleSampleChange}
+                        onColorChange={key => this.props.changeSampleColor(key)}
+                    />
+                    <ToolBox className={theme.toolbox}
+                        toolid={this.state.toolSelected}
+                        attrKinds={this.props.attrKinds}
+                        attr={this.props.attr}
+                        onAttrChange={this.handleAttrChange}
+                        onToolChange={this.handleToolChange}                    
+                    />
+                    <ChartBox className={theme.chartbox} />                
+                    <div className={theme.footer} />
             </Layout>
         );
     }
