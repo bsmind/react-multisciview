@@ -5,71 +5,64 @@ import { bindActionCreators } from 'redux';
 
 import theme from './index.css';
 
+import TestSizeMe from './testSizeMe';
+import MyComponent from './myComponent';
+
 class ChartBox extends React.Component {
     constructor() {
         super();
         this.state = {
-            scatter: {width: 0, height: 0}
-        }
-    }
-
-    componentDidMount() {
-        window.addEventListener("resize", () => this.handleResize());
-        this.handleResize();
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("resize", () => this.handleResize());
-    }
-
-    handleResize = () => {
-        if (this.scatter) {
-            console.log('offsetWidth: ', this.scatter.offsetWidth);
-            console.log('offsetHeight: ', this.scatter.offsetHeight);
-            console.log('offsetLeft', this.scatter.offsetLeft);
-            console.log('offsetTop', this.scatter.offsetTop)
-            //this.setState({width: this.container.offsetWidth});
-        }
+            width: 0,
+            height: 0
+        };
     }
 
     // componentDidMount() {
-    //     const width = this.scatter.offsetWidth;
-    //     const height = this.scatter.offsetHeight;
-    //     console.log(
-    //         this.scatter.offsetHeight,
-    //         this.scatter.offsetLeft,
-    //         this.scatter.offsetTop,
-    //         this.scatter.offsetWidth,
-    //         this.scatter.clientHeight,
-    //         this.scatter.clientLeft,
-    //         this.scatter.clientTop,
-    //         this.scatter.clientWidth
-    //     )
+    //     window.addEventListener("resize", () => this.handleResize());
+    //     this.handleResize();
+    // }
 
-    //     // console.log(this.divScatter.offsetHeight, this.divScatter.offsetWidth)
-    //     // console.log(this.divScatter.height)
-    //     // this.setState({scatter: {width, height}});
+    // componentWillUnmount() {
+    //     window.removeEventListener("resize", () => this.handleResize());
+    // }
+
+    // handleResize = () => {
+    //     if (this.rect) {
+    //         const width = this.rect.clientWidth;
+    //         const height = this.rect.clientHeight;
+    //         console.log(document.documentElement.clientWidth);
+    //         console.log(document.documentElement.clientHeight);
+    //         this.setState({width, height});
+    //     }                
     // }
 
     render() {
+        const {width, height} = this.props;
+
+        const scatter_width = Math.floor(width - 100 - 20);
+        const scatter_height = Math.floor(height - 100 - 10);
+
         return (
             <div className={this.props.className}>
                 <div className={theme.up}>
-                    <div className={theme.left}>
-                        projx
+                    <div className={theme.left}> 
+                        <svg width={scatter_width} height={100}
+                            style={{backgroundColor: 'green', opacity: 0.5}} />
                     </div>
-                    <div className={theme.right}>
+                    <div className={theme.right}> 
                         up-right
                     </div>                    
                 </div>
+
                 <div className={theme.bottom}>
-                    <div className={theme.left}
-                        ref={c => this.scatter = c}
-                    >
-                        scatter
+                    <div className={theme.left}> 
+                        <svg width={scatter_width} height={scatter_height} 
+                            style={{backgroundColor: 'blue', opacity: 0.5}}
+                        />
                     </div>
-                    <div className={theme.right}>
-                        projy
+                    <div className={theme.right}> 
+                        <svg width={100} height={scatter_height}
+                            style={{backgroundColor: 'red', opacity: 0.5}} />
                     </div>
                 </div>
             </div>

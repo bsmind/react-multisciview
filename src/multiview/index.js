@@ -32,13 +32,35 @@ class MultiViewApp extends React.Component {
     constructor() {
         super();
         this.state = {
-            toolSelected: 0
+            toolSelected: 0,
+            width: 0,
+            height: 0
         }
+    }
+
+    componentWillMount() {
+        this.handleResize();
     }
 
     componentDidMount() {
         this.props.getSampleKinds();
         this.props.getAttributes();
+
+        window.addEventListener("resize", () => this.handleResize());
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", () => this.handleResize());
+    }
+
+    handleResize = () => {
+        let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+        width = width - 200;
+        height = height - 41.6 - 56.81 - 4.15;
+
+        this.setState({width, height});
     }
 
     handleSampleChange = (action, keys) => {
@@ -58,6 +80,9 @@ class MultiViewApp extends React.Component {
     }
 
     render() {
+        const {width, height} = this.state;
+       // console.log(width, height);
+
         return (
             <Layout>
                 <NavDrawer active={false} onOverlayClick={null} pinned={false}>
@@ -68,22 +93,27 @@ class MultiViewApp extends React.Component {
                         <ControlBox className={theme.ctlbox} toolId={this.state.toolSelected} />
                     </AppBar>
                 </Panel>
-                    <DataBox className={theme.databox}
-                        sampleKinds={this.props.sampleKinds}
-                        samples={this.props.sampleSelected}
-                        colors={this.props.sampleColors}
-                        onSampleChange={this.handleSampleChange}
-                        onColorChange={key => this.props.changeSampleColor(key)}
-                    />
-                    <ToolBox className={theme.toolbox}
-                        toolid={this.state.toolSelected}
-                        attrKinds={this.props.attrKinds}
-                        attr={this.props.attr}
-                        onAttrChange={this.handleAttrChange}
-                        onToolChange={this.handleToolChange}                    
-                    />
-                    <ChartBox className={theme.chartbox} />                
-                    <div className={theme.footer} />
+
+                <DataBox className={theme.databox} width={200} height={height}
+                    sampleKinds={this.props.sampleKinds}
+                    samples={this.props.sampleSelected}
+                    colors={this.props.sampleColors}
+                    onSampleChange={this.handleSampleChange}
+                    onColorChange={key => this.props.changeSampleColor(key)}
+                />
+
+                <ToolBox className={theme.toolbox}
+                    toolid={this.state.toolSelected}
+                    attrKinds={this.props.attrKinds}
+                    attr={this.props.attr}
+                    onAttrChange={this.handleAttrChange}
+                    onToolChange={this.handleToolChange}                    
+                />
+
+                <ChartBox className={theme.chartbox} width={width} height={height} />   
+
+                <div className={theme.footer} />
+
             </Layout>
         );
     }

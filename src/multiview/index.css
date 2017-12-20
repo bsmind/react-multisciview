@@ -6,10 +6,11 @@
     --unit: '6.5px';
     --appbar-color: var(--palette-grey-400);
     --appbar-contrast: var(--color-black);
+    --appbar-height: 41.6px;
     --appbar-title-font-size: calc(1.8 * var(--unit));
     --footer-height: calc(0.1 * var(--appbar-height));
     --content-height: calc(100% - var(--appbar-height) - var(--footer-height));
-    --databox-width: 22%;
+    --databox-width: 200px;
     --chartbox-width: calc(100% - var(--databox-width));
     --toolbox-height: 56.81px;
 }
@@ -68,7 +69,7 @@
 
 .chartbox {
     background: var(--color-background);
-    padding: 5px 10px 0px 10px;
+    padding: 10px 10px 0px 10px;
     position: fixed;
     left: var(--databox-width);
     top: calc(var(--appbar-height) + var(--toolbox-height));

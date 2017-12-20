@@ -82,8 +82,10 @@ class DataBox extends React.Component {
     }
         
     render() {
+        const {width, height} = this.props;
+
         return (
-            <div className={this.props.className}>
+            <div className={this.props.className} style={{width: `${width}`}}>
                 <div className={theme.btndiv}>
                     <table>
                         <tbody>
@@ -117,14 +119,14 @@ class DataBox extends React.Component {
                     />
                 </div>
 
-                <div className={theme.listdiv}>
+                <div className={theme.listdiv} style={{height: `${0.7 * height}px`}}>
                     <List selectable>
                         <ListSubHeader caption='Selected samples' />
                         {this.renderSampleList()}
                     </List>
                 </div>
 
-                <div className={theme.infodiv}>
+                <div className={theme.infodiv} style={{height: `${0.3 * height}px`}}>
                     reserved to show sample information
                 </div>
             </div>

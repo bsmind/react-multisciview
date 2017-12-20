@@ -27,6 +27,8 @@
     width: var(--left-width);
     height: 100%;
     padding: 0px;
+    display: block;
+    margin: auto;
 }
 
 .right {
@@ -34,4 +36,6 @@
     width: var(--right-width);
     height: 100%;
     padding: 0px;
+    display: block;
+    margin: auto;    
 }
