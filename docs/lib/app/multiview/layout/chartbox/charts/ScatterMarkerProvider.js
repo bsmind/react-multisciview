@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { fitWidth } from 'react-multiview/lib/helper';
+import { markerProvider } from 'react-multiview/lib/series';
 
 import uniqBy from 'lodash.uniqby';
 import sortBy from 'lodash.sortby';
@@ -12,21 +13,87 @@ import {
 } from 'd3-scale';
 
 
+
 class ScatterMarkerProviderTest extends React.Component {
     constructor() {
         super();
         this.ctx = null;
         this.marker = null;
+        
+        this.state = {
+            mProvider: null
+        }
     }
 
     componentDidMount() {
         this.ctx = this.node.getContext("2d");
-        this.calculateMarkers();
+        //this.calculateMarkers();
+        this.calculateMarkersWidthProvider();
     }
 
     componentWillReceiveProps(nextProps) {
         // todo: comparison (shallow comparison)
-        this.calculateMarkers(nextProps);
+        //this.calculateMarkers(nextProps);
+        this.calculateMarkersWidthProvider(nextProps);
+    }
+
+    calculateMarkersWidthProvider = (props = this.props) => {
+        const {
+            data,
+            valueAccessor,
+            width,
+            height,
+            ratio
+        } = props;
+
+        if (data == null || data.length === 0) {
+            console.log('empty data');
+            return;
+        }
+
+        //console.log('check point')
+
+        let mProvider = markerProvider(
+            null, 
+            valueAccessor,
+            {
+                type: 'square',
+                width: 12,
+                height: 12,
+            },
+            ratio
+        );
+
+        mProvider = mProvider.calculateMarkers(data);
+        //this.mProvider = mProvider;
+
+        //console.log(mProvider.getMarkers());
+        const ctx = this.ctx;
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.clearRect(-1, -1, ctx.canvas.width + 2, ctx.canvas.height + 2);
+		ctx.scale(ratio, ratio);
+
+        ctx.save();
+
+        const markers = mProvider.getMarkers();
+        const markerIDs = Object.keys(markers);
+        const numMarkerInRow = 10;
+        const spacing = 4;
+        markerIDs.forEach( (id, index) => {
+            const irow = Math.floor(index / numMarkerInRow);
+            const icol = index % numMarkerInRow;
+
+            const x = spacing + icol * (12 + spacing);
+            const y = spacing + irow * (12 + spacing);
+            mProvider.drawAt(ctx, x, y, id);
+        });
+
+        ctx.restore();
+        //mProvider.draw(this.ctx, ratio);
+        //this.setState({
+        //    mProvider
+        //});
+        //this.drawPoints(data, xAccessor, yAccessor);
     }
 
     calculateMarkers = (props = this.props) => {
@@ -111,15 +178,15 @@ class ScatterMarkerProviderTest extends React.Component {
         console.log('processing time: ' + (t1 - t0) + 'ms');
     }
 
+
     render() {
         const {
             width, height, ratio
         } = this.props;
 
+
         const canvasWidth = width * ratio;
         const canvasHeight = width * ratio;
-
-        //console.log(width, height, ratio)
 
         return (
             <div style={{position: "absolute", zIndex: 1}}>

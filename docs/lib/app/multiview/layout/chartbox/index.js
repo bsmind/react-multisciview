@@ -11,6 +11,7 @@ import {
     ScatterChart
 } from './charts';
 
+
 import Test from './charts/ScatterMarkerProvider';
 
 import {
@@ -41,34 +42,35 @@ class ChartBox extends React.Component {
             colorsBySampleNames
         } = this.props;
 
-
-        return (
-            <div className={this.props.className}>
-                <Test
-                    width={width}
-                    height={height}
-                    data={data}
-                    valueAccessor={xAccessor}
-                />
-            </div>
-        );
+        //console.log('ChartBox::data ', data)
 
         // return (
         //     <div className={this.props.className}>
-        //         <ScatterChart
+        //         <Test
         //             width={width}
         //             height={height}
         //             data={data}
-        //             extents={extents}
-        //             xAccessor={xAccessor}
-        //             yAccessor={yAccessor}
-        //             zAccessor={zAccessor}
-        //             groups={selectedSampleNames}
-        //             groupAccessor={sampleAccessor}
-        //             colorsByGroup={colorsBySampleNames}
+        //             valueAccessor={xAccessor}
         //         />
         //     </div>
         // );
+
+        return (
+            <div className={this.props.className}>
+                <ScatterChart
+                    width={width}
+                    height={height}
+                    data={data}
+                    extents={extents}
+                    xAccessor={xAccessor}
+                    yAccessor={yAccessor}
+                    zAccessor={zAccessor}
+                    groups={selectedSampleNames}
+                    groupAccessor={sampleAccessor}
+                    colorsByGroup={colorsBySampleNames}
+                />
+            </div>
+        );
     }
 }
 

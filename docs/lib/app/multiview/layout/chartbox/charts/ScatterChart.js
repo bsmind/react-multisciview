@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { fitWidth } from 'react-multiview/lib/helper';
+import { markerProvider } from 'react-multiview/lib/series';
 import { ChartCanvas, Chart, Series } from 'react-multiview/lib/core';
 import { XAxis, YAxis } from 'react-multiview/lib/axes';
 import { ScatterSeries, CircleMarker } from 'react-multiview/lib/series';
@@ -37,6 +38,18 @@ import randomColor from 'randomcolor';
 
 class ScatterChart extends React.Component {
 
+    componentDidMount() {
+
+    }
+
+    componentWillReceiveProps(nextProps) {
+
+    }
+
+    shouldComponentUpdate(nextProps) {
+        return true;        
+    }
+
     render() {
         const margin= {left: 80, right: 40, top: 30, bottom: 40};
         const {
@@ -47,6 +60,7 @@ class ScatterChart extends React.Component {
             extents,
             xAccessor,
             yAccessor,
+            zAccessor,
             groups,
             colorsByGroup,
             groupAccessor
@@ -58,12 +72,42 @@ class ScatterChart extends React.Component {
         const xExtents = xAccessor(extents);
         const yExtents = yAccessor(extents);
 
-        // const groups = uniqBy(dataToUse, 'group').map(d => d.group);
-        // const colorsByGroup = getColorsByGroup(groups);
-        // console.log(colorsByGroup, data, groups)
-        // data.forEach( (d, index) => {
-        //     console.log(index, colorsByGroup[groupAccessor(d)])
-        // })
+        let mProvider;
+        if (zAccessor == null) {
+            mProvider = markerProvider(
+                groupAccessor,
+                {
+                    type: 'square',
+                    width: 6,
+                    height: 6,
+                    style: {
+                        //stroke: d => colorsByGroup[groupAccessor(d) || d],
+                        strokeWidth: 1,
+                        opacity: 0.5
+                    }
+                },
+                ratio 
+            );
+            mProvider = mProvider.colorSet(colorsByGroup);
+        } else {
+            mProvider = markerProvider(
+                zAccessor,
+                {
+                    type: 'square',
+                    width: 6,
+                    height: 6,
+                    style: {
+                        //stroke: d => colorsByGroup[groupAccessor(d) || d],
+                        strokeWidth: 1,
+                        opacity: 0.5
+                    }
+                },
+                ratio 
+            );
+        }
+        mProvider.calculateMarkers(data);
+        
+        //console.log(mProvider.getMarkers());
 
         const markerProps = {
             r: 3,
@@ -72,9 +116,6 @@ class ScatterChart extends React.Component {
             opacity: 0.5,
             strokeWidth: 1
         }
-
-        //console.log(dataToUse.length)
-        //return null;
 
         return (
             <ChartCanvas
@@ -104,6 +145,7 @@ class ScatterChart extends React.Component {
                             yAccessor={yAccessor}
                             marker={CircleMarker}
                             markerProps={markerProps}
+                            markerProvider={mProvider}
                             drawOrder={groups}
                             orderAccessor={groupAccessor}
                         />

@@ -18,14 +18,15 @@ class ScatterSeries extends React.Component {
     }
 
     componentDidMount() {
-        this.calculateMarkers();
+        //this.calculateMarkers(); // for, v1
     }
 
     componentWillReceiveProps(nextProps) {
         // todo: check if it needs to make new set of markers
-        this.calculateMarkers(nextProps);
+        //this.calculateMarkers(nextProps); // for, v1
     }
 
+    // fast, v1
     calculateMarkers = (props = this.props) => {
         const { drawOrder, markerProvider, markerProps, marker } = props;
         const { ratio } = props.shared;
@@ -70,6 +71,7 @@ class ScatterSeries extends React.Component {
         this.markers = markers;
     }
 
+    // fast, v1
     drawMarkers = (offCanvas, offctx, ctx, moreProps) => {
     	const { yAccessor, orderAccessor, shared: {ratio} } = this.props;
         const {
@@ -113,7 +115,7 @@ class ScatterSeries extends React.Component {
         });
     }
 
-    // deprecated
+    // deprecated, slow
     makePoint = (moreProps) => {
     	const { yAccessor, markerProvider, markerProps } = this.props;
         let { marker } = this.props;
@@ -158,6 +160,7 @@ class ScatterSeries extends React.Component {
     	});
     }
 
+    // deprecated, slow
     drawMarkersOrig = (ctx, moreProps) => {
         const { drawOrder, orderAccessor } = this.props;
         const points = this.makePoint(moreProps);
@@ -209,9 +212,44 @@ class ScatterSeries extends React.Component {
         }
     }
 
+    drawMarkersWithProvider = (ctx, moreProps) => {
+    	const { 
+            yAccessor, 
+            drawOrder,
+            orderAccessor, 
+            shared: {ratio},
+            markerProvider 
+        } = this.props;
+
+        const {
+            xScale,
+            xAccessor,
+            plotData,
+            chartConfig: { yScale }
+        } = moreProps;
+
+        const nest = d3Nest()
+            .key(d => orderAccessor(d))
+            .entries(plotData);
+
+        //console.log(nest);
+        drawOrder.forEach(key => {
+            const group = nest.find(d => d.key === key);
+            if (group == null) return;
+
+            const {key: groupKey, values: groupValues} = group;
+            groupValues.forEach(d => {
+                const x = xScale(xAccessor(d));
+                const y = yScale(yAccessor(d));
+                markerProvider.drawAt(ctx, x, y, d.markerID);
+            });
+        });
+    }
+
     draw = (ctx, moreProps) => {
 
-        if (true) {
+        if (false) {
+            // fast, v1
             const { ratio } = this.props.shared;
             const offCanvas = document.getElementById('off');
             const offctx = offCanvas.getContext('2d');
@@ -219,7 +257,11 @@ class ScatterSeries extends React.Component {
             clearCanvas([offctx], ratio);
             this.drawMarkers(offCanvas, offctx, ctx, moreProps);
             clearCanvas([offctx], ratio);
+        } else if (true) {
+            // fast, v2, using markerProvider
+            this.drawMarkersWithProvider(ctx, moreProps);
         } else {
+            // slow, unused
             this.drawMarkersOrig(ctx, moreProps);
         }
     }
