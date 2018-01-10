@@ -74,6 +74,8 @@ class SubscriberExt extends React.Component {
         const { xScale, plotData } = nextProps.shared;
         const { chartConfig } = nextProps;
 
+        //console.log('SubscriberExt:newProps ', plotData, xScale.domain())
+
         this.moreProps = {
             ...this.moreProps,
             // ...getMutableState(),

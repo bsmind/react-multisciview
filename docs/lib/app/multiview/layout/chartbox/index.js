@@ -23,6 +23,12 @@ import {
     getZAccessor,
     getSelectedSampleNames,
     getColorsBySampleNames,
+    getXScale,
+    getYScale,
+    getXType,
+    getYType,
+    getAttrX,
+    getAttrY
 } from './selector';
 
 
@@ -33,10 +39,17 @@ class ChartBox extends React.Component {
             width,
             height,
             data,
-            extents,
+            xAttr,
+            yAttr,
+            xExtents,
+            yExtents,
             xAccessor,
             yAccessor,
             zAccessor,
+            xScale,
+            yScale,
+            xType,
+            yType,
             selectedSampleNames,
             sampleAccessor,
             colorsBySampleNames
@@ -61,10 +74,17 @@ class ChartBox extends React.Component {
                     width={width}
                     height={height}
                     data={data}
-                    extents={extents}
+                    xAttr={xAttr}
+                    yAttr={yAttr}
+                    xExtents={xExtents}
+                    yExtents={yExtents}
                     xAccessor={xAccessor}
                     yAccessor={yAccessor}
                     zAccessor={zAccessor}
+                    xScale={xScale}
+                    yScale={yScale}
+                    xType={xType}
+                    yType={yType}
                     groups={selectedSampleNames}
                     groupAccessor={sampleAccessor}
                     colorsByGroup={colorsBySampleNames}
@@ -77,17 +97,27 @@ class ChartBox extends React.Component {
 ChartBox.propTypes = {};
 ChartBox.defaultProps = {};
 
+
 function mapStateToProps(state) {
-    const { data, extents } = getSelectedSortedDataArray(state);
+    const { data, xExtents, yExtents } = getSelectedSortedDataArray(state);
+
+    
 
     //console.log(getColorsBySampleNames(state))
 
     return {
         data,
-        extents,
+        xExtents,
+        yExtents,
+        xAttr: getAttrX(state),
+        yAttr: getAttrY(state),
         xAccessor: getXAccessor(state),
         yAccessor: getYAccessor(state),
         zAccessor: getZAccessor(state),
+        xScale: getXScale(state),
+        yScale: getYScale(state),
+        xType: getXType(state),
+        yType: getYType(state),
         selectedSampleNames: getSelectedSampleNames(state),
         colorsBySampleNames: getColorsBySampleNames(state),
         sampleAccessor: d => d.sample

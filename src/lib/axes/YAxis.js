@@ -40,10 +40,50 @@ class YAxis extends React.Component {
     			labelY: y + dx
     		};
     	});
-    }
+	}
+	
+    getTicksOrdinary = (yScale) => {
+		const { ticks, tickFormat, innerTickSize, orient } = this.props;
+		const { yExtents, height, yStep } = this.props.chartConfig;
+    	const { fontSize } = this.props.labelStyle;
+		//const { yScale } = this.props.chartConfig;
+    	const sign = orient === "left" || orient === "top" ? -1 : 1;
+    	const dx = fontSize * 0.35;
+
+		
+		//console.log(yScale.domain(), yScale.range())
+		const yLabels = yExtents.slice();
+		yLabels.reverse();
+		const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
+		const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
+
+		//const yStep = Math.abs(yScale(0) - yScale(1));
+		//console.log('YAxis', yStep)
+
+		const tickArray = [];
+		for (let i=minval; i<maxval; ++i) {
+			const y = yScale(i);
+
+			if (y < 0 || y > height) {
+				continue;
+			}
+
+			tickArray.push({
+				value: i,
+				label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...': yLabels[i],
+				x1: 0,
+				y1: y - yStep/2,
+				x2: sign * innerTickSize,
+				y2: y - yStep/2,
+				labelX: sign * ( 1.2 * innerTickSize + dx),
+				labelY: y + dx - yStep/2
+			});
+		}
+		return tickArray;
+    }	
 
     draw = (ctx, moreProps) => {
-    	const { showDomain, showTicks, showTickLabel } = this.props;
+    	const { showDomain, showTicks, showTickLabel, ordinary } = this.props;
     	const { chartConfig: { yScale } } = moreProps;
 
     	const axisLocation = this.getAxisLocation();
@@ -57,8 +97,9 @@ class YAxis extends React.Component {
 
     	if (showTicks) {
     		const { orient, labelStyle } = this.props;
-    		const textAnchor = orient === "left" ? "end" : "start";
-    		drawTicks(ctx, this.getTicks(yScale),
+			const textAnchor = orient === "left" ? "end" : "start";
+			drawTicks(ctx, 
+				ordinary ? this.getTicksOrdinary(yScale): this.getTicks(yScale),
     			this.props.tickStyle,
     			showTickLabel ? { ...labelStyle, textAnchor } : null
     		);
@@ -207,8 +248,8 @@ YAxis.defaultProps = {
 	},
 
 	labelStyle: {
-		fontSize: 12,
-		fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+		fontSize: 6,
+		fontFamily: "Roboto, sans-serif",
 		textAnchor: "start",
 		tickLabelFill: "#000000"
 	},

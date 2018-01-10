@@ -25,8 +25,9 @@ export default function markerProvider(
         type: 'square',
         width: 12,
         height: 12,
+        defaultColor: '#FF0000',
         style: {
-            stroke: () => 'none',
+            //stroke: () => 'none',
             strokeWidth: 0,
             opacity: 0.5
         }
@@ -94,7 +95,8 @@ providerProto.calculateMarkers = function(data) {
     if (colorSet != null) {
         colorScale = d => colorSet[d];
     } else {
-        const dataExtents = d3Extent(data, accessor);
+        const dataExtents = d3Extent(data.filter(d => accessor(d) != null), accessor);
+        //console.log(dataExtents)
         colorScale = scaleSequential(interpolateViridis).domain(dataExtents);
     }
 
@@ -102,7 +104,8 @@ providerProto.calculateMarkers = function(data) {
         type: markerType,
         width: markerWidth, 
         height: markerHeight,
-        style
+        style,
+        defaultColor
     } = this._shape;
     switch (markerType) {
         case 'circle':
@@ -135,7 +138,7 @@ providerProto.calculateMarkers = function(data) {
     let i = 0;
     data.forEach( d => {
         const value = accessor(d);
-        const color = colorScale(value);
+        const color = value == null ? defaultColor: colorScale(value);
 
         if (markers[color] == null) {
             const irow = Math.floor(i / gridWidth),
@@ -161,6 +164,8 @@ providerProto.calculateMarkers = function(data) {
     this._vSpacing = vSpacing;
     this._markers = markers;
     this.draw();
+
+    //console.log(markers)
 
     return this;
 }

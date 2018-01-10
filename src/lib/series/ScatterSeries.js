@@ -217,7 +217,7 @@ class ScatterSeries extends React.Component {
             yAccessor, 
             drawOrder,
             orderAccessor, 
-            shared: {ratio},
+            shared: {ratio, xStep},
             markerProvider 
         } = this.props;
 
@@ -225,22 +225,27 @@ class ScatterSeries extends React.Component {
             xScale,
             xAccessor,
             plotData,
-            chartConfig: { yScale }
+            chartConfig: { yScale, yStep, yStepEnabled }
         } = moreProps;
 
         const nest = d3Nest()
             .key(d => orderAccessor(d))
             .entries(plotData);
 
+        const yOffset = yStepEnabled ? yStep/2: 0;
+        const xOffset = xStep / 2;
         //console.log(nest);
+        //console.log(yScale.domain(), yScale.range(), xOffset, yOffset)
+
         drawOrder.forEach(key => {
             const group = nest.find(d => d.key === key);
             if (group == null) return;
 
             const {key: groupKey, values: groupValues} = group;
             groupValues.forEach(d => {
-                const x = xScale(xAccessor(d));
-                const y = yScale(yAccessor(d));
+                const x = xScale(xAccessor(d)) + xOffset;
+                const y = yScale(yAccessor(d)) - yOffset;
+                //console.log(x, y)
                 markerProvider.drawAt(ctx, x, y, d.markerID);
             });
         });

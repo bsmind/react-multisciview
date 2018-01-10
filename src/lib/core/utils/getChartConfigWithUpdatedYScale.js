@@ -1,37 +1,39 @@
 import { extent } from "d3-array";
 import { set } from "d3-collection";
 import flattenDeep from "lodash.flattendeep";
+import { isArrayOfString, isArraySize2AndNumber } from '../../utils';
 
 export default function(
 	chartConfig,
-	{
-		plotData,
-		xAccessor,
-		xDispAccessor,
-		fullData
-	},
-    xDomain,
+	plotData,
     update = false,
 	dy = null,
 	chartsToPan = null
 ) {
 	const yDomains = chartConfig.map(config => {
-		const { yExtentsCalculator, yExtents, yScale } = config;
+		const {yExtents, yScale, yStepEnabled} = config;
 
-		const realYDomain = yExtentsCalculator
-			? yExtentsCalculator({ plotData, xDomain, xAccessor, xDispAccessor, fullData })
-			: update ? yDomainFromYExtents(yExtents, yScale, plotData) : yScale.domain();
+		const realYDomain = isArrayOfString(yExtents) 
+				? [0, yExtents.length]
+				: isArraySize2AndNumber(yExtents)
+					? yExtents
+					: yDomainFromYExtents(yExtents, yScale, plotData);
 
+		const prevYDomain = yScale.domain();
+
+		if (yStepEnabled) {
+			realYDomain[0] = Math.floor(realYDomain[0]);
+			realYDomain[1] = Math.ceil(realYDomain[1]);
+		}
+		
         const yDomainPan = dy != null
             ? yScale.range().map(each => each - dy).map(yScale.invert)
-            : realYDomain;
+            : prevYDomain;
 
-        //console.log('update', update, realYDomain, yDomainPan)
-
-		return {
-            realYDomain,
-            yDomainPan,
-			prevYDomain: yScale.domain()
+		return { 
+			realYDomain, 
+			yDomainPan,
+			prevYDomain
 		};
 	});
 
@@ -43,22 +45,32 @@ export default function(
 			yScale,
 			yPan,
 			yFlip,
-			yPanEnabled = false
+			yStepEnabled,
+			yExtents,
+			yDomainUpdate
 		} = config;
 
 		const { realYDomain, yDomainPan, prevYDomain } = yDomains[index];
 
-		// chartsToPan ??
-		const another = chartsToPan != null
-			? chartsToPan.indexOf(id) > -1
-			: true;
+		let domain;
+		//console.log('update: ', update, 'yDomainUpdate: ', yDomainUpdate)
+		if (chartsToPan != null && chartsToPan.indexOf(id) > -1) {
+			//console.log('use paned domain')
+			domain = yDomainPan;
+		} else if (update && yDomainUpdate){
+			//console.log('use full domain')
+			domain = realYDomain; 
+		}
+		else {
+			//console.log('use prev domain')
+			domain = prevYDomain;
+		}
 
-		const domain = yPan && yPanEnabled
-			? another ? yDomainPan: prevYDomain
-            : realYDomain;
-
-        //console.log(yPan, yPanEnabled)
-        //console.log(another, chartsToPan, domain)
+		if (yStepEnabled) {
+			domain[0] = Math.max(domain[0], 0);
+			domain[1] = Math.min(domain[1], yExtents.length);
+		}
+		//console.log(domain)
 
 		const newYScale = setRange(
 			yScale.copy().domain(domain),
@@ -67,10 +79,13 @@ export default function(
 			yFlip
 		);
 
+		const yStep = Math.abs(newYScale(0) - newYScale(1));
+
 		return {
 			...config,
 			yScale: newYScale,
-			yDomain: domain
+			yDomain: domain,
+			yStep,
 		};
 	});
 }

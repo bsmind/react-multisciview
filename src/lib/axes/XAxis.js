@@ -41,10 +41,70 @@ class XAxis extends React.Component {
     			labelY: sign * 2 * innerTickSize + dy
     		};
     	});
-    }
+	}
+	
+	getTicksOrdinary = (xScale) => {
+    	const { ticks, tickFormat, innerTickSize, orient } = this.props;
+    	const { fontSize } = this.props.labelStyle;
+		const { xExtents, xStep } = this.props.shared;
+		
+    	const sign = orient === "top" || orient === "left" ? -1 : 1;
+    	const dy = fontSize * 0.71;
+
+		const xLabels = xExtents.slice();
+		const minval = Math.max(Math.floor(xScale.invert(xScale.range()[0])), 0);
+		const maxval = Math.min(Math.ceil(xScale.invert(xScale.range()[1])), xLabels.length);
+
+		//console.log(minval, maxval, xStep)
+		const maxLabelLength = Math.floor(xStep / 5);
+
+		const tickArray = [];
+		for (let i=minval; i<maxval; ++i) {
+			const x = xScale(i);
+
+			if (x < 0) continue;
+
+			tickArray.push({
+				value: i,
+				label: xLabels[i].length < maxLabelLength ? xLabels[i] : xLabels[i].substring(0, maxLabelLength) + '...',
+    			x1: x + xStep/2,
+    			y1: 0,
+    			x2: x + xStep/2,
+    			y2: sign * innerTickSize,
+    			labelX: x + xStep/2,
+    			labelY: sign * 2 * innerTickSize + dy				
+			});
+		}
+		return tickArray;
+
+    	const baseFormat = xScale.tickFormat
+    		? xScale.tickFormat(ticks)
+    		: d => d;
+
+    	const format = tickFormat
+    		? d => tickFormat(d) || ""
+    		: baseFormat;
+
+    	const tickValues = xScale.ticks(ticks);
+
+
+    	return tickValues.map(d => {
+    		const x = xScale(d); // Math.round(xScale(d));
+    		return {
+    			value: d,
+    			label: format(d),
+    			x1: x,
+    			y1: 0,
+    			x2: x,
+    			y2: sign * innerTickSize,
+    			labelX: x,
+    			labelY: sign * 2 * innerTickSize + dy
+    		};
+    	});		
+	}
 
     draw = (ctx, moreProps) => {
-    	const { showDomain, showTicks, showTickLabel } = this.props;
+    	const { showDomain, showTicks, showTickLabel, ordinary } = this.props;
     	//const { xScale } = this.props.shared;
         const { xScale } = moreProps;
 
@@ -54,11 +114,13 @@ class XAxis extends React.Component {
     	ctx.translate(0, axisLocation);
 
     	if (showDomain) {
+			//console.log('xaxis range: ', xScale.range());
     		drawAxisLine(ctx, this.props, xScale.range());
     	}
 
     	if (showTicks) {
-    		drawTicks(ctx, this.getTicks(xScale),
+			drawTicks(ctx, 
+				ordinary ? this.getTicksOrdinary(xScale) : this.getTicks(xScale),
     			this.props.tickStyle,
     			showTickLabel ? this.props.labelStyle : null
     		);
@@ -204,8 +266,8 @@ XAxis.defaultProps = {
 	},
 
 	labelStyle: {
-		fontSize: 12,
-		fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+		fontSize: 6,
+		fontFamily: "Roboto, sans-serif",
 		textAnchor: "middle",
 		tickLabelFill: "#000000"
 	},

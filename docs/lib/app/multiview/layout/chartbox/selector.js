@@ -2,6 +2,10 @@ import { createSelector } from 'reselect';
 import forEach from 'lodash.foreach';
 import uniqBy from 'lodash.uniqby';
 import get from 'lodash.get';
+import { scaleLinear, scalePoint } from 'd3-scale';
+import { extent as d3Extent } from 'd3-array';
+
+import { sortAlphaNum } from '../../utils';
 
 const getDataBySamples = state => state.data.dataBySamples;
 const getSampleKinds = state => state.data.sampleKinds;
@@ -10,9 +14,9 @@ const getAttrTypes = state => state.data.attrTypes;
 const getSelectedSampleKeys = state => state.vis.samples;
 const getSelectedSampleColors = state => state.vis.sampleColors;
 
-const getAttrX = state => state.vis.attrx;
-const getAttrY = state => state.vis.attry;
-const getAttrZ = state => state.vis.attrz;
+export const getAttrX = state => state.vis.attrx;
+export const getAttrY = state => state.vis.attry;
+export const getAttrZ = state => state.vis.attrz;
 
 
 export const getXAccessor = createSelector(
@@ -24,12 +28,52 @@ export const getXAccessor = createSelector(
     }
 );
 
+export const getXType = createSelector(
+    [
+        getAttrX,
+        getAttrTypes
+    ],
+    (attrx, types) => {
+        return types[attrx];
+    }
+);
+
+export const getXScale = createSelector(
+    [
+        getAttrX,
+        getXType
+    ],
+    (attrx, type) => {
+        return type === 'num' ? scaleLinear(): scalePoint();
+    }
+);
+
 export const getYAccessor = createSelector(
     [
         getAttrY
     ],
     (attry) => {
         return attry.length ? d => get(d, attry): null;
+    }
+);
+
+export const getYType = createSelector(
+    [
+        getAttrY,
+        getAttrTypes
+    ],
+    (attry, types) => {
+        return types[attry];
+    }
+);
+
+export const getYScale = createSelector(
+    [
+        getAttrY,
+        getYType
+    ],
+    (attry, type) => {
+        return type === 'num' ? scaleLinear(): scalePoint();
     }
 );
 
@@ -78,12 +122,12 @@ export const getSelectedDataArray = createSelector(
     [
         getSelectedSampleNames,
         getDataBySamples,
-        getAttrTypes
+        getAttrTypes,
     ],
     (
         selectedSampleNames,
         data,
-        types
+        types,
     ) => {
         let selectedDataArray = [];
         const g_minmax = {};
@@ -91,8 +135,10 @@ export const getSelectedDataArray = createSelector(
         forEach(data, (dataObject, sampleName) => {
            if (selectedSampleNames.includes(sampleName)) {
                 const { data, indexById, minmax } = dataObject;
+
                 selectedDataArray = selectedDataArray.concat(data);
 
+                //console.log(sampleName, minmax);
                 forEach(minmax, (value, attr) => {
                     if (g_minmax[attr] == null) {
                         g_minmax[attr] = value;
@@ -119,26 +165,50 @@ export const getSelectedDataArray = createSelector(
     }
 );
 
+const getExtent = (data, accessor, type) => {
+    return type === 'num'
+        ? d3Extent(data, accessor)
+        : uniqBy(data, accessor)
+            .map(accessor)
+            .sort(sortAlphaNum);
+}
+
 export const getSelectedSortedDataArray = createSelector(
     [
         getSelectedDataArray,
         getXAccessor,
-        getYAccessor
+        getYAccessor,
+        getXType,
+        getYType
     ],
     (
         {data, extents},
         xAccessor,
-        yAccessor
+        yAccessor,
+        xType,
+        yType
     ) => {
-        if (xAccessor == null || yAccessor == null)
+        if (xAccessor == null || yAccessor == null || data == null || data.length === 0)
             return {data: null, extents: null};
 
-        const sortedData = data.filter(d => (xAccessor(d) != undefined && yAccessor(d) != undefined))
-                                .sort((a, b) => xAccessor(a) - xAccessor(b));
+        const comparator = xType === 'num'
+            ? (a, b) => xAccessor(a) - xAccessor(b)
+            : (a, b) => sortAlphaNum(xAccessor(a), xAccessor(b));
+
+        const dataFilter = d => {
+            return (xAccessor(d) != undefined && yAccessor(d) != undefined);
+        };
+
+        const filteredData = data.filter(dataFilter).sort(comparator);
+        //console.log(filteredData)
+
+        const xExtents = getExtent(filteredData, xAccessor, xType);
+        const yExtents = getExtent(filteredData, yAccessor, yType);
 
         return {
-            data: sortedData,
-            extents
+            data: filteredData,
+            xExtents,
+            yExtents
         }
     }
 );

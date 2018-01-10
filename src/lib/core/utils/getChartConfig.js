@@ -1,7 +1,6 @@
 import React from "react";
 import Chart from "../Chart";
-
-import { functor } from "../../utils";
+import { functor, isArrayOfString, isArraySize2AndNumber } from "../../utils";
 
 export default function(
 	innerDimension,
@@ -20,14 +19,13 @@ export default function(
 		const {
 			id,
 			origin,
-			yAccessor,
 			yExtents: yExtentsProp,
 			yScale: yScaleProp,
 			yFlip,
 			yPadding,
-			yPan
+			yPan,
+			yAttr
 		} = chartProps;
-		let { yPanEnabled } = chartProps;
 
 		const yScale = yScaleProp.copy();
 
@@ -37,37 +35,18 @@ export default function(
 			availableHeight
 		} = getDimensions(innerDimension, chartProps);
 
-		// const yExtent = typeof yExtentProp === 'function'
-		//     ? undefined
-		//     : yExtentProp;
-
-		const yExtents = yExtentsProp
-			? (Array.isArray(yExtentsProp) ? yExtentsProp : [yExtentsProp]).map(functor)
-			: undefined;
+		let yStepEnabled = false;
+		const yExtents = isArrayOfString(yExtentsProp)
+			? (yStepEnabled = true, yExtentsProp)
+			: (Array.isArray(yExtentsProp) ? yExtentsProp: [yExtentsProp]).map(functor); 
 
 		const prevConfig = existingChartConfig.find(d => d.id === id);
-
-		if (isArraySize2AndNumber(yExtentsProp)) {
-			console.log("check1");
-			if (prevConfig
-                && prevConfig.yPan
-                && prevConfig.yPanEnabled
-                && yPan
-                && yPanEnabled
-                // && prevConfig.origYExtent == yExtentProp
-                && prevConfig.origYExtents[0] === yExtentsProp[0]
-                && prevConfig.origYExtents[1] === yExtentsProp[1]
-			) {
-				yScale.domain(prevConfig.yScale.domain());
-			} else {
-				yScale.domain(yExtentsProp);
-			}
-		} else if (prevConfig && prevConfig.yPanEnabled) {
-			console.log("check2");
+		let yDomainUpdate = true;
+		if (prevConfig && prevConfig.yAttr === yAttr) {
+			yScale.domain(prevConfig.yScale.domain());
+			yDomainUpdate = false;
 		}
-
-        yPanEnabled = true;
-
+			
 		return {
 			id,
 			origin,
@@ -79,8 +58,10 @@ export default function(
 			yFlip,
 			yScale,
 			yPan,
-			yPanEnabled,
-			yPadding
+			yPadding,
+			yStepEnabled,
+			yAttr,
+			yDomainUpdate
 		};
 	}).filter(c => c != undefined);
 }
@@ -94,10 +75,40 @@ function getDimensions( { width, height }, chartProps) {
 	};
 }
 
-function isArraySize2AndNumber(yExtentsProp) {
-	if (Array.isArray(yExtentsProp) && yExtentsProp.length === 2) {
-		const [a, b] = yExtentsProp;
-		return (typeof a == "number" && typeof b == "number");
-	}
-	return false;
-}
+
+		// let yStepEnabled = false;
+		// if (isArraySize2AndNumber(yExtentsProp)) {
+		// 	if (prevConfig
+        //         && prevConfig.yPan
+        //         && yPan
+        //         && prevConfig.origYExtents[0] === yExtentsProp[0]
+        //         && prevConfig.origYExtents[1] === yExtentsProp[1]
+		// 	) {
+		// 		yScale.domain(prevConfig.yScale.domain());
+		// 	} else {
+		// 		yScale.domain(yExtentsProp);
+		// 	}
+		// } else if (isArrayOfString(yExtentsProp)) {
+		// 	if (prevConfig
+        //         && prevConfig.yPan
+        //         && prevConfig.yPanEnabled
+        //         && yPan
+		// 		&& yPanEnabled
+		// 		&& prevConfig.origYExtents.length === yExtentsProp.length 
+		// 		&& prevConfig.origYExtents.every((d,index) => d === yExtentsProp[index])
+		// 	) {
+		// 		yScale.domain(prevConfig.yScale.domain());
+		// 	} else {
+		// 		yScale.domain([0, yExtentsProp.length]);
+		// 		//console.log('getChartConfig: ', yScale.domain());
+		// 	}
+		// 	yStepEnabled = true;
+		// } else if (prevConfig && prevConfig.yPanEnabled) {
+		// 	if (isArraySize2AndNumber(prevConfig.origYExtents)) {
+		// 		// do nothing
+		// 	} else {
+		// 		yScale.domain(prevConfig.yScale.domain())
+		// 		yPanEnabled = true;
+		// 	}
+		// 	//console.log("check2");
+		// }

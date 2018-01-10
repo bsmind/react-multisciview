@@ -7,4 +7,4 @@ export { default as getChartConfig } from "./getChartConfig";
 export { default as getChartConfigWithUpdatedYScale } from "./getChartConfigWithUpdatedYScale";
 export { default as getCurrentCharts } from './getCurrentCharts';
 export { default as getCurrentItem } from './getCurrentItem';
-
+export { default as getExtents } from './getExtents';

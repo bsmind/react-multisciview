@@ -72,7 +72,7 @@ export function AddData(action, sampleNames) {
             const dataHave = Object.keys(dataBySamples);
 
             sampleNames.forEach(name => {
-                if (dataHave.findIndex(d => d === sample) === -1)
+                if (dataHave.findIndex(d => d === name) === -1)
                     dataToQuery.push(name);
             });
 

@@ -40,6 +40,8 @@ const calculateDataStat = (data, types, attrs) => {
         indexById[dict['_id']] = index;
     });
 
+    //console.log(minmax)
+
     return {
         indexById,
         minmax

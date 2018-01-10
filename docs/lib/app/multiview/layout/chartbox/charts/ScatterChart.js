@@ -51,16 +51,23 @@ class ScatterChart extends React.Component {
     }
 
     render() {
-        const margin= {left: 80, right: 40, top: 30, bottom: 40};
+        const margin= {left: 60, right: 40, top: 10, bottom: 60};
         const {
             width,
             height,
             ratio,
             data,
-            extents,
-            xAccessor,
-            yAccessor,
+            xAttr,
+            yAttr,
+            xExtents,
+            yExtents,
+            xAccessor: xAccessorProp,
+            yAccessor: yAccessorProp,
             zAccessor,
+            xScale,
+            yScale,
+            xType,
+            yType,
             groups,
             colorsByGroup,
             groupAccessor
@@ -69,46 +76,44 @@ class ScatterChart extends React.Component {
         if (data == null)
             return null;
 
-        const xExtents = xAccessor(extents);
-        const yExtents = yAccessor(extents);
-
-        let mProvider;
-        if (zAccessor == null) {
-            mProvider = markerProvider(
-                groupAccessor,
-                {
-                    type: 'square',
-                    width: 6,
-                    height: 6,
-                    style: {
-                        //stroke: d => colorsByGroup[groupAccessor(d) || d],
-                        strokeWidth: 1,
-                        opacity: 0.5
-                    }
-                },
-                ratio 
-            );
+        let mProvider = markerProvider(
+            zAccessor == null ? groupAccessor: zAccessor,
+            {
+                type: 'square',
+                width: 6,
+                height: 6,
+                defaultColor: '#FF0000',
+                style: {
+                    strokeWidth: 1,
+                    opacity: 0.5
+                }
+            },
+            ratio 
+        );
+        if (zAccessor == null)
             mProvider = mProvider.colorSet(colorsByGroup);
-        } else {
-            mProvider = markerProvider(
-                zAccessor,
-                {
-                    type: 'square',
-                    width: 6,
-                    height: 6,
-                    style: {
-                        //stroke: d => colorsByGroup[groupAccessor(d) || d],
-                        strokeWidth: 1,
-                        opacity: 0.5
-                    }
-                },
-                ratio 
-            );
-        }
         mProvider.calculateMarkers(data);
-        
-        //console.log(mProvider.getMarkers());
 
+        let yAccessor;
+        if (yType === 'str') {
+            yAccessor =  d => {
+                const index = yExtents.findIndex(each => each === yAccessorProp(d));
+                return yExtents.length - index - 1;
+            }
+        } else {
+            yAccessor = yAccessorProp;
+        }
+
+        let xAccessor;
+        if (xType === 'str') {
+            xAccessor = d => {
+                const index = xExtents.findIndex(each => each === xAccessorProp(d));
+                return index;
+            }
+        } else {
+            xAccessor = xAccessorProp;
+        }
+        
         const markerProps = {
             r: 3,
             stroke: d => colorsByGroup[groupAccessor(d) || d],
@@ -117,6 +122,9 @@ class ScatterChart extends React.Component {
             strokeWidth: 1
         }
 
+        //console.log('ScatterChart: ', xExtents)
+        //console.log(yExtents)
+
         return (
             <ChartCanvas
                 width={width}
@@ -124,22 +132,35 @@ class ScatterChart extends React.Component {
                 ratio={ratio}
                 margin={margin}
                 data={data}
+                xAttr={xAttr}
                 xAccessor={xAccessor}
                 xExtents={xExtents}
                 xScale={scaleLinear()}
                 xFlip={false}
                 xPadding={0}
+                clamp={true}
             >
                 <Chart
                     id={1}
                     //height={height}
-                    yExtents={yAccessor}
+                    yAttr={yAttr}
+                    yExtents={yExtents}
                     yScale={scaleLinear()}
                     yFlip={false}
                     yPadding={0}
                 >
-                    <XAxis axisAt='bottom' orient='bottom' axisHeight={25} />
-                    <YAxis axisAt='left' orient='left' axisWidth={40} />
+                    <XAxis 
+                        axisAt='bottom' 
+                        orient='bottom' 
+                        axisHeight={25} 
+                        ordinary={xType === 'str'}
+                    />
+                    <YAxis 
+                        axisAt='left' 
+                        orient='left' 
+                        axisWidth={40} 
+                        ordinary={yType === 'str'}
+                    />
                     <Series>
                         <ScatterSeries
                             yAccessor={yAccessor}
