@@ -6358,19 +6358,22 @@ exports.RETURN = RETURN;
 /*!*********************************!*\
   !*** ./src/lib/series/index.js ***!
   \*********************************/
-/*! exports provided: LineSeries, ScatterSeries, CircleMarker, markerProvider */
-/*! exports used: CircleMarker, ScatterSeries, markerProvider */
+/*! exports provided: LineSeries, ScatterSeries, PCPPolyLineSeries, CircleMarker, markerProvider */
+/*! exports used: CircleMarker, PCPPolyLineSeries, ScatterSeries, markerProvider */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__LineSeries__ = __webpack_require__(/*! ./LineSeries */ 530);
 /* unused harmony reexport LineSeries */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ScatterSeries__ = __webpack_require__(/*! ./ScatterSeries */ 531);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__ScatterSeries__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__CircleMarker__ = __webpack_require__(/*! ./CircleMarker */ 664);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__CircleMarker__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__MarkerProvider__ = __webpack_require__(/*! ./MarkerProvider */ 665);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_3__MarkerProvider__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_1__ScatterSeries__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__PCPPolyLineSeries__ = __webpack_require__(/*! ./PCPPolyLineSeries */ 687);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__PCPPolyLineSeries__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__CircleMarker__ = __webpack_require__(/*! ./CircleMarker */ 664);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__CircleMarker__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__MarkerProvider__ = __webpack_require__(/*! ./MarkerProvider */ 665);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_4__MarkerProvider__["a"]; });
+
 
 
 
@@ -44764,13 +44767,18 @@ var ChartBox = function (_React$Component) {
         }, _this.renderParallelCoordinateChart = function (h) {
             var _this$props2 = _this.props,
                 pcpDimension = _this$props2.pcpDimension,
-                pcpData = _this$props2.pcpData;
+                pcpData = _this$props2.pcpData,
+                colorsBySampleNames = _this$props2.colorsBySampleNames,
+                sampleAccessor = _this$props2.sampleAccessor;
             //console.log(pcpDimension)
+            //console.log(pcpData)
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__charts__["a" /* ParallelCoordinateChart */], {
                 height: h,
                 data: pcpData,
-                dimension: pcpDimension
+                dimension: pcpDimension,
+                colorsByGroup: colorsBySampleNames,
+                groupAccessor: sampleAccessor
             });
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
@@ -45034,7 +45042,7 @@ var ScatterChart = function (_React$Component) {
 
             if (data == null) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null);
 
-            var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* markerProvider */])(zAccessor == null ? groupAccessor : zAccessor, {
+            var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["d" /* markerProvider */])(zAccessor == null ? groupAccessor : zAccessor, {
                 type: 'square',
                 width: 6,
                 height: 6,
@@ -45127,7 +45135,7 @@ var ScatterChart = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["e" /* Series */],
                         null,
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["b" /* ScatterSeries */], {
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* ScatterSeries */], {
                             yAccessor: yAccessor,
                             marker: __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["a" /* CircleMarker */],
                             markerProps: markerProps,
@@ -53338,7 +53346,7 @@ var ScatterChart = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["e" /* Series */],
                         null,
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_series__["b" /* ScatterSeries */], {
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_series__["c" /* ScatterSeries */], {
                             yAccessor: yAccessor,
                             marker: __WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_series__["a" /* CircleMarker */],
                             markerProps: markerProps,
@@ -53418,7 +53426,7 @@ var ScatterMarkerProviderTest = function (_React$Component) {
 
             //console.log('check point')
 
-            var mProvider = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_series__["c" /* markerProvider */])(null, valueAccessor, {
+            var mProvider = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_series__["d" /* markerProvider */])(null, valueAccessor, {
                 type: 'square',
                 width: 12,
                 height: 12
@@ -53608,7 +53616,7 @@ ScatterMarkerProviderTest = Object(__WEBPACK_IMPORTED_MODULE_1_react_multiview_l
 /*!************************************************************!*\
   !*** ./docs/lib/app/multiview/layout/chartbox/selector.js ***!
   \************************************************************/
-/*! exports provided: getAttrX, getAttrY, getAttrZ, getXAccessor, getXType, getXScale, getYAccessor, getYType, getYScale, getZAccessor, getColorAccessorBySample, getColorsBySampleNames, getSelectedSampleNames, getSelectedDataArray, getSelectedSortedDataArray, getPCPDimension, getPCPData, test */
+/*! exports provided: getAttrX, getAttrY, getAttrZ, getXAccessor, getXType, getXScale, getYAccessor, getYType, getYScale, getZAccessor, getColorAccessorBySample, getColorsBySampleNames, getSelectedSampleNames, getSelectedDataArray, getSelectedDataObject, getSelectedSortedDataArray, getPCPDimension, getPCPData, test */
 /*! exports used: getAttrX, getAttrY, getColorsBySampleNames, getSelectedDataArray, getSelectedSampleNames, getSelectedSortedDataArray, getXAccessor, getXScale, getXType, getYAccessor, getYScale, getYType, getZAccessor */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -53627,6 +53635,7 @@ ScatterMarkerProviderTest = Object(__WEBPACK_IMPORTED_MODULE_1_react_multiview_l
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getColorsBySampleNames; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getSelectedSampleNames; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getSelectedDataArray; });
+/* unused harmony export getSelectedDataObject */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getSelectedSortedDataArray; });
 /* unused harmony export getPCPDimension */
 /* unused harmony export getPCPData */
@@ -53767,6 +53776,52 @@ var getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["create
     });
     return {
         data: selectedDataArray,
+        extents: g_minmax
+    };
+});
+
+var getSelectedDataObject = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"])([getSelectedSampleNames, getDataBySamples, getAttrTypes], function (selectedSampleNames, data, types) {
+    if (selectedSampleNames.length === 0) return {
+        data: null,
+        extents: null
+    };
+
+    var selectedDataObject = {};
+    var g_minmax = {};
+
+    __WEBPACK_IMPORTED_MODULE_1_lodash_foreach___default()(data, function (dataObject, sampleName) {
+        if (selectedSampleNames.includes(sampleName)) {
+            var _data2 = dataObject.data,
+                indexById = dataObject.indexById,
+                minmax = dataObject.minmax;
+
+
+            selectedDataObject[sampleName] = dataObject;
+
+            //console.log(sampleName, minmax);
+            __WEBPACK_IMPORTED_MODULE_1_lodash_foreach___default()(minmax, function (value, attr) {
+                if (g_minmax[attr] == null) {
+                    g_minmax[attr] = value;
+                } else {
+                    var t = types[attr];
+                    var g_value = g_minmax[attr];
+                    if (t === 'num') {
+                        g_value[0] = Math.min(g_value[0], value[0]);
+                        g_value[1] = Math.max(g_value[1], value[1]);
+                    } else if (t === 'str') {
+                        g_value = __WEBPACK_IMPORTED_MODULE_2_lodash_uniqby___default()(g_value.concat(value), function (d) {
+                            return d;
+                        });
+                        g_minmax[attr] = g_value;
+                    } else {
+                        // ignore unknown type
+                    }
+                }
+            });
+        }
+    });
+    return {
+        data: selectedDataObject,
         extents: g_minmax
     };
 });
@@ -54272,22 +54327,21 @@ var ParallelCoordinateChart = function (_React$Component) {
                 height = _props.height,
                 ratio = _props.ratio,
                 dimension = _props.dimension,
-                data = _props.data;
-            //console.log(this.props)
+                data = _props.data,
+                colorsByGroup = _props.colorsByGroup,
+                groupAccessor = _props.groupAccessor;
 
-            if (data.length === 0) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null);
 
-            var numDim = 2; //dimName.length;    
-            var dimName = ['sample', 'metadata_extract.data.annealing_temperature']; //Object.keys(dimension);
-            //const dimExtents = dimName.map(name => dimension[name]);
+            if (data == null || data.length === 0) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null);
 
-            var xExtents = [0, numDim];
+            var dimName = ['sample', 'metadata_extract.data.annealing_time', 'metadata_extract.data.annealing_temperature'];
+            //const xExtents = [0, numDim];
 
-            var yAccessors = dimName.map(function (name) {
-                return function (d) {
-                    return __WEBPACK_IMPORTED_MODULE_5_lodash_get___default()(d, name);
-                };
-            });
+            // const yAccessor = dimName.map(name => {
+            //     return d => get(d, name);
+            // });
+            //const yAccessor = (d, name) => get(d, name);
+
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */], {
                 width: width,
@@ -54300,7 +54354,13 @@ var ParallelCoordinateChart = function (_React$Component) {
                 dimExtents: dimension,
                 dimAccessor: function dimAccessor(d, name) {
                     return __WEBPACK_IMPORTED_MODULE_5_lodash_get___default()(d, name);
-                }
+                },
+                data: data,
+
+                colorAccessor: function colorAccessor(d) {
+                    return colorsByGroup[groupAccessor(d)];
+                },
+                opacity: 0.3
             });
         }
     }]);
@@ -54327,9 +54387,12 @@ ParallelCoordinateChart = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__CanvasContainer__ = __webpack_require__(/*! ./CanvasContainer */ 650);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__axes__ = __webpack_require__(/*! ../axes */ 127);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils__ = __webpack_require__(/*! ./utils */ 135);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(/*! ../utils */ 18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__series__ = __webpack_require__(/*! ../series */ 73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(/*! ./utils */ 135);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../utils */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_lodash_foreach__ = __webpack_require__(/*! lodash.foreach */ 111);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_lodash_foreach___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_lodash_foreach__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -54339,6 +54402,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
 
 
 
@@ -54371,14 +54437,14 @@ var PCPCanvas = function (_React$Component) {
         _this.clearThreeCanvas = function () {
             var canvases = _this.getCanvasContexts();
             if (canvases && canvases.axes) {
-                clearCanvas([canvases.axes, canvases.mouseCoord, canvases.bg], _this.props.ratio);
+                Object(__WEBPACK_IMPORTED_MODULE_5__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord, canvases.bg], _this.props.ratio);
             }
         };
 
         _this.clearBothCanvas = function () {
             var canvases = _this.getCanvasContexts();
             if (canvases && canvases.axes) {
-                clearCanvas([canvases.axes, canvases.mouseCoord], _this.props.ratio);
+                Object(__WEBPACK_IMPORTED_MODULE_5__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord], _this.props.ratio);
             }
         };
 
@@ -54390,7 +54456,7 @@ var PCPCanvas = function (_React$Component) {
         _this.subscribe = function (id, rest) {
             // getPanConditions
             var _rest$getPanCondition = rest.getPanConditions,
-                getPanConditions = _rest$getPanCondition === undefined ? Object(__WEBPACK_IMPORTED_MODULE_5__utils__["g" /* functor */])({
+                getPanConditions = _rest$getPanCondition === undefined ? Object(__WEBPACK_IMPORTED_MODULE_6__utils__["g" /* functor */])({
                 draggable: false,
                 panEnabled: true
             }) : _rest$getPanCondition;
@@ -54413,19 +54479,97 @@ var PCPCanvas = function (_React$Component) {
 
         _this.resetChart = function () {
             var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props;
+            var dimName = props.dimName,
+                dimExtents = props.dimExtents,
+                dimAccessor = props.dimAccessor,
+                data = props.data,
+                colorAccessor = props.colorAccessor,
+                opacity = props.opacity;
+
+
+            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* dimension */])(props);
+            var xScale = Object(__WEBPACK_IMPORTED_MODULE_8_d3_scale__["c" /* scalePoint */])().domain(dimName).range([0, canvasDim.width]).padding(0);
+
+            // getDimConfig
+            var dimConfig = {};
+            dimName.forEach(function (name) {
+                var axisExtents = dimAccessor(dimExtents, name);
+                var ordinary = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["k" /* isArrayOfString */])(axisExtents);
+
+                var yScale = Object(__WEBPACK_IMPORTED_MODULE_8_d3_scale__["b" /* scaleLinear */])();
+                var domain = ordinary ? [0, axisExtents.length] : axisExtents;
+                yScale.domain(domain).range([canvasDim.height, 0]);
+
+                var yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
+                dimConfig[name] = {
+                    title: name,
+                    extents: axisExtents,
+                    ordinary: ordinary,
+                    scale: yScale,
+                    step: yStep,
+                    active: true,
+                    flip: false,
+                    position: xScale(name)
+                };
+            });
+            // end of getDimConfig
+
+            // calculateDataFromNewDimConfig
+            //console.log(data)
+            var plotData = data.map(function (d) {
+                var points = dimName.map(function (name) {
+                    var _dimConfig$name = dimConfig[name],
+                        x = _dimConfig$name.position,
+                        scale = _dimConfig$name.scale,
+                        ordinary = _dimConfig$name.ordinary,
+                        extents = _dimConfig$name.extents,
+                        step = _dimConfig$name.step;
+
+
+                    var yValue = dimAccessor(d, name);
+                    var y = ordinary ? scale(extents.findIndex(function (v) {
+                        return v === yValue;
+                    })) - step / 2 : scale(yValue);
+
+                    return [x, y];
+                });
+                points.stroke = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["j" /* hexToRGBA */])(colorAccessor(d), opacity);
+                points.strokeWidth = 1;
+                return points;
+            });
+            //console.log(plotData)
+            // end
+
+            return {
+                xScale: xScale,
+                dimConfig: dimConfig,
+                plotData: plotData
+            };
         };
 
         _this.mutableState = {};
         _this.subscriptions = [];
+        _this.state = {
+            xScale: null,
+            dimConfig: {}
+        };
         return _this;
     }
 
     _createClass(PCPCanvas, [{
         key: 'componentWillMount',
-        value: function componentWillMount() {}
+        value: function componentWillMount() {
+            var state = this.resetChart();
+            this.setState(state);
+        }
     }, {
         key: 'componentWillReceiveProps',
-        value: function componentWillReceiveProps(nextProps) {}
+        value: function componentWillReceiveProps(nextProps) {
+            var newState = this.resetChart(nextProps);
+
+            this.clearThreeCanvas();
+            this.setState(newState);
+        }
     }, {
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate() {
@@ -54448,17 +54592,13 @@ var PCPCanvas = function (_React$Component) {
             };
 
             var _props = this.props,
-                dimName = _props.dimName,
-                dimExtents = _props.dimExtents,
-                dimAccessor = _props.dimAccessor,
                 margin = _props.margin,
+                ratio = _props.ratio,
                 width = _props.width,
                 height = _props.height,
-                ratio = _props.ratio;
+                zIndex = _props.zIndex;
 
-            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_4__utils__["b" /* dimension */])(this.props);
-
-            var xScale = Object(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["c" /* scalePoint */])().domain(dimName).range([0, canvasDim.width]).padding(0);
+            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* dimension */])({ width: width, height: height, margin: margin });
 
             var shared = {
                 margin: margin,
@@ -54469,22 +54609,24 @@ var PCPCanvas = function (_React$Component) {
 
                 subscribe: this.subscribe,
                 unsubscribe: this.unsubscribe,
-                getCanvasContexts: this.getCanvasContexts
+                getCanvasContexts: this.getCanvasContexts,
 
-                //console.log(this.props.dimension)
+                xScale: this.state.xScale
+            };
 
-            };var pcpYAxisList = dimName.map(function (name) {
-                var axisExtents = dimAccessor(dimExtents, name);
-                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__axes__["a" /* PCPYAxis */], { key: 'pcp-yaxis-' + name,
-                    title: name,
-                    axisLocation: xScale(name),
-                    extents: dimAccessor(dimExtents, name),
+            var pcpYAxisList = [];
+            __WEBPACK_IMPORTED_MODULE_7_lodash_foreach___default()(this.state.dimConfig, function (config, title) {
+                if (!config.active) return;
+                pcpYAxisList.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__axes__["a" /* PCPYAxis */], { key: 'pcp-yaxis-' + title,
+                    title: title,
+                    axisLocation: config.position,
                     axisWidth: 25,
                     height: canvasDim.height,
                     orient: 'left',
-                    ordinary: Object(__WEBPACK_IMPORTED_MODULE_5__utils__["k" /* isArrayOfString */])(axisExtents),
-                    shared: shared
-                });
+                    shared: shared,
+                    ordinary: config.ordinary,
+                    config: config
+                }));
             });
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -54497,10 +54639,10 @@ var PCPCanvas = function (_React$Component) {
                     ref: function ref(node) {
                         return _this2.canvasContainerNode = node;
                     },
-                    ratio: this.props.ratio,
+                    ratio: ratio,
                     width: width,
                     height: height,
-                    zIndex: 1
+                    zIndex: zIndex
                 }),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'svg',
@@ -54516,7 +54658,14 @@ var PCPCanvas = function (_React$Component) {
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'g',
                             null,
-                            pcpYAxisList
+                            pcpYAxisList,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__series__["b" /* PCPPolyLineSeries */], {
+                                data: this.state.plotData
+                                //dimName={this.props.dimName}
+                                //dimConfig={this.state.dimConfig}
+                                //dimAccessor={this.props.dimAccessor}                                
+                                , shared: shared
+                            })
                         )
                     )
                 )
@@ -54587,7 +54736,7 @@ var PCPYAxis = function (_React$Component) {
 			    innerTickSize = _this$props.innerTickSize,
 			    orient = _this$props.orient;
 			var fontSize = _this.props.labelStyle.fontSize;
-			//const { yScale } = this.props.chartConfig;
+
 
 			var baseFormat = yScale.tickFormat ? yScale.tickFormat(ticks) : function (d) {
 				return d;
@@ -54621,26 +54770,22 @@ var PCPYAxis = function (_React$Component) {
 			    tickFormat = _this$props2.tickFormat,
 			    innerTickSize = _this$props2.innerTickSize,
 			    orient = _this$props2.orient,
-			    yExtents = _this$props2.extents,
 			    height = _this$props2.height;
-			//const { yExtents, height, yStep } = this.props.chartConfig;
-
 			var fontSize = _this.props.labelStyle.fontSize;
-			//const { yScale } = this.props.chartConfig;
+			var _this$props$config = _this.props.config,
+			    yStep = _this$props$config.step,
+			    yExtents = _this$props$config.extents,
+			    flip = _this$props$config.flip;
+
 
 			var sign = orient === "left" || orient === "top" ? -1 : 1;
 			var dx = fontSize * 0.35;
 
-			var yStep = Math.abs(yScale(0) - yScale(1));
-
-			//console.log(yScale.domain(), yScale.range())
 			var yLabels = yExtents.slice();
-			yLabels.reverse();
+			if (!flip) yLabels.reverse();
+
 			var minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
 			var maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
-
-			//const yStep = Math.abs(yScale(0) - yScale(1));
-			//console.log('YAxis', yStep)
 
 			var tickArray = [];
 			for (var i = minval; i < maxval; ++i) {
@@ -54666,19 +54811,12 @@ var PCPYAxis = function (_React$Component) {
 			var _this$props3 = _this.props,
 			    axisLocation = _this$props3.axisLocation,
 			    height = _this$props3.height,
-			    extentsProp = _this$props3.extents,
 			    showDomain = _this$props3.showDomain,
 			    showTicks = _this$props3.showTicks,
 			    showTickLabel = _this$props3.showTickLabel,
 			    ordinary = _this$props3.ordinary;
-			//const { chartConfig: { yScale } } = moreProps;
+			var yScale = _this.props.config.scale;
 
-			console.log(_this.props);
-
-			var extents = ordinary ? [0, extentsProp.length] : extentsProp;
-
-			var yScale = Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["b" /* scaleLinear */])().domain(extents).range([height, 0]);
-			//const axisLocation = this.getAxisLocation();
 
 			ctx.save();
 			ctx.translate(axisLocation, 0);
@@ -54797,7 +54935,7 @@ PCPYAxis.propTypes = {
 PCPYAxis.defaultProps = {
 	ticks: 10,
 
-	outerTickSize: 10,
+	outerTickSize: 0,
 	stroke: "#000000",
 	strokeWidth: 1,
 	opacity: 1,
@@ -55053,6 +55191,111 @@ var PCPSubscriberExt = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["a"] = (PCPSubscriberExt);
+
+/***/ }),
+/* 687 */
+/*!*********************************************!*\
+  !*** ./src/lib/series/PCPPolyLineSeries.js ***!
+  \*********************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core__ = __webpack_require__(/*! ../core */ 51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_collection__ = __webpack_require__(/*! d3-collection */ 117);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+var PCPPolyLineSeries = function (_React$Component) {
+    _inherits(PCPPolyLineSeries, _React$Component);
+
+    function PCPPolyLineSeries() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        _classCallCheck(this, PCPPolyLineSeries);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPPolyLineSeries.__proto__ || Object.getPrototypeOf(PCPPolyLineSeries)).call.apply(_ref, [this].concat(args))), _this), _this.draw = function (ctx, moreProps) {
+            var plotData = _this.props.data;
+
+
+            var nest = Object(__WEBPACK_IMPORTED_MODULE_3_d3_collection__["b" /* nest */])().key(function (d) {
+                return d.stroke;
+            }).entries(plotData);
+
+            var x = function x(d) {
+                return d[0];
+            },
+                y = function y(d) {
+                return d[1];
+            };
+
+            ctx.save();
+            nest.forEach(function (groupByStroke) {
+                var stroke = groupByStroke.key,
+                    group = groupByStroke.values;
+
+
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 1;
+
+                group.forEach(function (points) {
+                    ctx.beginPath();
+                    for (var i = 0; i < points.length - 1; ++i) {
+                        var p1 = points[i];
+                        var p2 = points[i + 1];
+                        ctx.moveTo(x(p1), y(p1));
+                        ctx.lineTo(x(p2), y(p2));
+                    }
+                    ctx.stroke();
+                });
+            });
+            ctx.restore();
+        }, _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(PCPPolyLineSeries, [{
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__core__["d" /* PCPSubscriberExt */], {
+                canvas: function canvas(contexts) {
+                    return contexts.axes;
+                },
+                clip: false,
+                edgeClip: false,
+                draw: this.draw,
+                drawOn: ["pan"],
+                shared: this.props.shared
+            });
+        }
+    }]);
+
+    return PCPPolyLineSeries;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (PCPPolyLineSeries);
 
 /***/ })
 /******/ ]);

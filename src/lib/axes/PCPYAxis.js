@@ -14,7 +14,6 @@ class PCPYAxis extends React.Component {
     getTicks = (yScale) => {
     	const { ticks, tickFormat, innerTickSize, orient } = this.props;
     	const { fontSize } = this.props.labelStyle;
-    	//const { yScale } = this.props.chartConfig;
 
     	const baseFormat = yScale.tickFormat
     		? yScale.tickFormat(ticks)
@@ -45,24 +44,18 @@ class PCPYAxis extends React.Component {
 	}
 	
     getTicksOrdinary = (yScale) => {
-		const { ticks, tickFormat, innerTickSize, orient, extents: yExtents, height } = this.props;
-        //const { yExtents, height, yStep } = this.props.chartConfig;
+		const { ticks, tickFormat, innerTickSize, orient, height } = this.props;
     	const { fontSize } = this.props.labelStyle;
-		//const { yScale } = this.props.chartConfig;
-    	const sign = orient === "left" || orient === "top" ? -1 : 1;
+        const { step: yStep, extents: yExtents, flip} = this.props.config; 
+
+        const sign = orient === "left" || orient === "top" ? -1 : 1;
     	const dx = fontSize * 0.35;
 
-        const yStep = Math.abs(yScale(0) - yScale(1));
-
-		
-		//console.log(yScale.domain(), yScale.range())
 		const yLabels = yExtents.slice();
-		yLabels.reverse();
+        if (!flip) yLabels.reverse();
+        
 		const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
-
-		//const yStep = Math.abs(yScale(0) - yScale(1));
-		//console.log('YAxis', yStep)
 
 		const tickArray = [];
 		for (let i=minval; i<maxval; ++i) {
@@ -88,18 +81,9 @@ class PCPYAxis extends React.Component {
 
     draw = (ctx, moreProps) => {
     	const {
-            axisLocation, height, extents: extentsProp,
+            axisLocation, height, 
             showDomain, showTicks, showTickLabel, ordinary } = this.props;
-        //const { chartConfig: { yScale } } = moreProps;
-        
-        console.log(this.props)
-
-        const extents = ordinary ? [0, extentsProp.length] : extentsProp;
-
-        const yScale = scaleLinear()
-                            .domain(extents)
-                            .range([height, 0]);
-    	//const axisLocation = this.getAxisLocation();
+        const { scale: yScale } = this.props.config;
 
     	ctx.save();
     	ctx.translate(axisLocation, 0);
@@ -212,7 +196,7 @@ PCPYAxis.propTypes = {
 PCPYAxis.defaultProps = {
 	ticks: 10,
 
-	outerTickSize: 10,
+	outerTickSize: 0,
 	stroke: "#000000",
 	strokeWidth: 1,
 	opacity: 1,

@@ -165,6 +165,59 @@ export const getSelectedDataArray = createSelector(
     }
 );
 
+export const getSelectedDataObject = createSelector(
+    [
+        getSelectedSampleNames,
+        getDataBySamples,
+        getAttrTypes,
+    ],
+    (
+        selectedSampleNames,
+        data,
+        types,
+    ) => {
+        if (selectedSampleNames.length === 0)
+            return {
+                data: null,
+                extents: null
+            }
+
+        let selectedDataObject = {};
+        const g_minmax = {};
+
+        forEach(data, (dataObject, sampleName) => {
+           if (selectedSampleNames.includes(sampleName)) {
+                const { data, indexById, minmax } = dataObject;
+
+                selectedDataObject[sampleName] = dataObject;
+
+                //console.log(sampleName, minmax);
+                forEach(minmax, (value, attr) => {
+                    if (g_minmax[attr] == null) {
+                        g_minmax[attr] = value;
+                    } else {
+                        const t = types[attr];
+                        let g_value = g_minmax[attr];
+                        if (t === 'num') {
+                            g_value[0] = Math.min(g_value[0], value[0]);
+                            g_value[1] = Math.max(g_value[1], value[1]);
+                        } else if (t === 'str') {
+                            g_value = uniqBy(g_value.concat(value), d => d);
+                            g_minmax[attr] = g_value;
+                        } else {
+                            // ignore unknown type
+                        }
+                    }
+                });
+           }
+        });
+        return {
+            data: selectedDataObject,
+            extents: g_minmax
+        }
+    }
+);
+
 const getExtent = (data, accessor, type) => {
     return type === 'num'
         ? d3Extent(data, accessor)

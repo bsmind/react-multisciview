@@ -2,20 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import CanvasContainer from './CanvasContainer';
-import { PCPYAxis } from '../axes'
+import { PCPYAxis } from '../axes';
+import { PCPPolyLineSeries } from '../series';
 
 import {
     dimension as getCanvasDimension,
+    clearCanvas
 } from './utils';
 
 import {
     functor,
-    isArrayOfString
+    isArrayOfString,
+    hexToRGBA
 } from '../utils';
 
+import forEach from 'lodash.foreach';
 
 
-import { scalePoint } from 'd3-scale';
+
+import { scalePoint, scaleLinear } from 'd3-scale';
 
 class PCPCanvas extends React.Component {
     constructor() {
@@ -23,6 +28,10 @@ class PCPCanvas extends React.Component {
 
         this.mutableState = {};
         this.subscriptions = [];
+        this.state = {
+            xScale: null,
+            dimConfig: {}
+        };
     }
     getCanvasContexts = () => {
     	if (this.canvasContainerNode)
@@ -81,15 +90,89 @@ class PCPCanvas extends React.Component {
 
 
     resetChart = (props = this.props) => {
+        const {
+            dimName,
+            dimExtents,
+            dimAccessor,
+            data,
+            colorAccessor,
+            opacity
+        } = props;
 
+        const canvasDim = getCanvasDimension(props);
+        const xScale = scalePoint()
+                        .domain(dimName)
+                        .range([0, canvasDim.width])
+                        .padding(0);
+        
+        // getDimConfig
+        const dimConfig = {}; 
+        dimName.forEach(name => {
+            const axisExtents = dimAccessor(dimExtents, name);
+            const ordinary = isArrayOfString(axisExtents);
+
+            const yScale = scaleLinear();
+            const domain = ordinary ? [0, axisExtents.length] : axisExtents;
+            yScale.domain(domain)
+                  .range([canvasDim.height, 0]);
+
+            const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
+            dimConfig[name] = {
+                title: name,
+                extents: axisExtents,
+                ordinary,
+                scale: yScale,
+                step: yStep,
+                active: true,
+                flip: false,
+                position: xScale(name)
+            }
+        });
+        // end of getDimConfig
+
+        // calculateDataFromNewDimConfig
+        //console.log(data)
+        const plotData = data.map(d => {
+            const points = dimName.map(name => {
+                const {
+                    position: x, 
+                    scale,
+                    ordinary,
+                    extents,
+                    step
+                } = dimConfig[name];
+
+                const yValue = dimAccessor(d, name);
+                const y = ordinary
+                    ? scale(extents.findIndex(v => v === yValue)) - step/2
+                    : scale(yValue);
+
+                return [x, y];
+            });
+            points.stroke = hexToRGBA(colorAccessor(d), opacity);
+            points.strokeWidth = 1;
+            return points;
+        });
+        //console.log(plotData)
+        // end
+
+        return {
+            xScale,
+            dimConfig,
+            plotData
+        }
     }
 
     componentWillMount() {
-
+        const state = this.resetChart();
+        this.setState(state);
     }
 
     componentWillReceiveProps(nextProps) {
+        const newState = this.resetChart(nextProps);
 
+        this.clearThreeCanvas();
+        this.setState(newState);
     }
 
     shouldComponentUpdate() {
@@ -111,16 +194,13 @@ class PCPCanvas extends React.Component {
     	};
 
         const {
-            dimName, 
-            dimExtents,
-            dimAccessor,
-            margin, width, height, ratio} = this.props;
-        const canvasDim = getCanvasDimension(this.props);
-
-        const xScale = scalePoint()
-                        .domain(dimName)
-                        .range([0, canvasDim.width])
-                        .padding(0);
+            margin,
+            ratio,
+            width,
+            height,
+            zIndex,
+        } = this.props;
+        const canvasDim = getCanvasDimension({width, height, margin});
 
         const shared = {
             margin,
@@ -129,30 +209,27 @@ class PCPCanvas extends React.Component {
             chartWidth: canvasDim.width,
             chartHeight: canvasDim.height,
 
-
             subscribe: this.subscribe,
             unsubscribe: this.unsubscribe,
-            getCanvasContexts: this.getCanvasContexts
+            getCanvasContexts: this.getCanvasContexts,
+
+            xScale: this.state.xScale
         }
 
-        //console.log(this.props.dimension)
-
-        const pcpYAxisList = dimName.map(name => {
-            const axisExtents = dimAccessor(dimExtents, name);
-            return (
-                <PCPYAxis key={`pcp-yaxis-${name}`}
-                    title={name}
-                    axisLocation={xScale(name)}
-                    extents={dimAccessor(dimExtents, name)}
-                    axisWidth={25}
-                    height={canvasDim.height}
-                    orient={'left'}
-                    ordinary={isArrayOfString(axisExtents)}
-                    shared={shared}
-                />
-            );
+        const pcpYAxisList = [];
+        forEach(this.state.dimConfig, (config, title) => {
+            if (!config.active) return;
+            pcpYAxisList.push( <PCPYAxis key={`pcp-yaxis-${title}`}
+                title={title}
+                axisLocation={config.position}
+                axisWidth={25}
+                height={canvasDim.height}
+                orient={'left'}
+                shared={shared}
+                ordinary={config.ordinary}
+                config={config}
+            />);
         });
-
 
         return (
             <div
@@ -161,10 +238,10 @@ class PCPCanvas extends React.Component {
             >
                 <CanvasContainer
                     ref={node => this.canvasContainerNode = node}
-                    ratio={this.props.ratio}
+                    ratio={ratio}
                     width={width}
                     height={height}
-                    zIndex={1}
+                    zIndex={zIndex}
                 />
                 <svg
                     className={""}
@@ -176,6 +253,13 @@ class PCPCanvas extends React.Component {
                         {/* <EventHandler /> */}
                         <g>
                             {pcpYAxisList}
+                            <PCPPolyLineSeries 
+                                data={this.state.plotData}
+                                //dimName={this.props.dimName}
+                                //dimConfig={this.state.dimConfig}
+                                //dimAccessor={this.props.dimAccessor}                                
+                                shared={shared}
+                            />
                         </g>
                     </g>
                 </svg>

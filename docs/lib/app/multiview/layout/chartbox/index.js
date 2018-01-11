@@ -19,6 +19,7 @@ import {
     test,
     getSelectedDataArray,
     getSelectedSortedDataArray,
+    getSelectedDataObject,
     getXAccessor,
     getYAccessor,
     getZAccessor,
@@ -60,13 +61,18 @@ class ChartBox extends React.Component {
     renderParallelCoordinateChart = (h) => {
         const {
             pcpDimension,
-            pcpData
+            pcpData,
+            colorsBySampleNames,
+            sampleAccessor
         } = this.props;
        //console.log(pcpDimension)
+       //console.log(pcpData)
         return <ParallelCoordinateChart
             height={h}
             data={pcpData}
             dimension={pcpDimension}
+            colorsByGroup={colorsBySampleNames}
+            groupAccessor={sampleAccessor}
         />
     }
 

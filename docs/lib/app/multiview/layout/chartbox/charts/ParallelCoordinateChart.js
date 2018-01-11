@@ -16,22 +16,25 @@ class ParallelCoordinateChart extends React.Component {
             height,
             ratio,
             dimension,
-            data
+            data,
+            colorsByGroup,
+            groupAccessor
         } = this.props;
-        //console.log(this.props)
 
-        if (data.length === 0)
+        if (data == null || data.length === 0)
             return <div/>
 
-        const numDim = 2;//dimName.length;    
-        const dimName = ['sample', 'metadata_extract.data.annealing_temperature'];//Object.keys(dimension);
-        //const dimExtents = dimName.map(name => dimension[name]);
+        const dimName = [
+            'sample', 
+            'metadata_extract.data.annealing_time',
+            'metadata_extract.data.annealing_temperature'
+        ];
+        //const xExtents = [0, numDim];
 
-        const xExtents = [0, numDim];
-
-        const yAccessors = dimName.map(name => {
-            return d => get(d, name);
-        });
+        // const yAccessor = dimName.map(name => {
+        //     return d => get(d, name);
+        // });
+        //const yAccessor = (d, name) => get(d, name);
 
         
         return (
@@ -45,6 +48,10 @@ class ParallelCoordinateChart extends React.Component {
                 dimName={dimName}
                 dimExtents={dimension}
                 dimAccessor={(d, name) => get(d, name)}
+                data={data}
+
+                colorAccessor={d => colorsByGroup[groupAccessor(d)]}
+                opacity={0.3}
             >
             </PCPCanvas>
         );
