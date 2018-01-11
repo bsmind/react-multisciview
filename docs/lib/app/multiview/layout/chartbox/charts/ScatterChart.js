@@ -74,7 +74,7 @@ class ScatterChart extends React.Component {
         } = this.props;
 
         if (data == null)
-            return null;
+            return <div/>
 
         let mProvider = markerProvider(
             zAccessor == null ? groupAccessor: zAccessor,

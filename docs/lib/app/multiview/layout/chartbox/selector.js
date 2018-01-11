@@ -213,6 +213,53 @@ export const getSelectedSortedDataArray = createSelector(
     }
 );
 
+// pcp
+
+// sample, meta.data.annealing_temperature
+const getPCPExtents = (outExtents, inExtents, key, type) => {
+    if (outExtents[key] == null) {
+        outExtents[key] = inExtents[key];
+        return;
+    } 
+    if (type === 'num') {
+        const extents = outExtents[key];
+        extents[0] = Math.min(extents[0], inExtents[key][0]);
+        extents[1] = Math.min(extents[1], inExtents[key][1]);
+    } else { // type === 'str'
+        outExtents[key] = outExtents[key].concat(inExtents[key]);
+    }
+}
+export const getPCPDimension = createSelector(
+    [
+        getDataBySamples
+    ],
+    (
+        dataBySamples
+    ) => {
+        const g_minmax = {};
+        forEach(dataBySamples, (each, sampleName) => {
+            const {minmax} = each;
+
+            //const keys = Object.keys(minmax);
+            getPCPExtents(g_minmax, minmax, 'sample', 'str');
+            getPCPExtents(g_minmax, minmax, 'metadata_extract.data.annealing_temperature', 'num');
+        });
+        return g_minmax;
+    }
+);
+export const getPCPData = createSelector(
+    [
+        getSelectedDataArray
+    ],
+    (
+        {data, extents}
+    ) => {
+        console.log(data, extents);
+    }
+);
+// end pcp
+
+
 export const test = createSelector(
     [
         getSelectedDataArray
@@ -221,3 +268,5 @@ export const test = createSelector(
         console.log('test selector', output)
     }
 );
+
+

@@ -8,7 +8,8 @@ import get from 'lodash.get';
 import theme from './index.css';
 
 import {
-    ScatterChart
+    ScatterChart,
+    ParallelCoordinateChart
 } from './charts';
 
 
@@ -28,67 +29,55 @@ import {
     getXType,
     getYType,
     getAttrX,
-    getAttrY
+    getAttrY,
+
+    getPCPDimension,
+    getPCPData
 } from './selector';
 
 
 class ChartBox extends React.Component {
 
-    render() {
+    renderScatterChart = (h) => {
         const {
-            width,
-            height,
-            data,
-            xAttr,
-            yAttr,
-            xExtents,
-            yExtents,
-            xAccessor,
-            yAccessor,
-            zAccessor,
-            xScale,
-            yScale,
-            xType,
-            yType,
-            selectedSampleNames,
+            children, height,
+            selectedSampleNames, 
             sampleAccessor,
-            colorsBySampleNames
+            colorsBySampleNames,
+            ...rest
         } = this.props;
 
-        //console.log('ChartBox::data ', data)
+        return <ScatterChart
+            height={h}
+            groups={selectedSampleNames}
+            groupAccessor={sampleAccessor}
+            colorsByGroup={colorsBySampleNames}
+            {...rest}
+        />
 
-        // return (
-        //     <div className={this.props.className}>
-        //         <Test
-        //             width={width}
-        //             height={height}
-        //             data={data}
-        //             valueAccessor={xAccessor}
-        //         />
-        //     </div>
-        // );
+    }
 
+    renderParallelCoordinateChart = (h) => {
+        const {
+            pcpDimension,
+            pcpData
+        } = this.props;
+       //console.log(pcpDimension)
+        return <ParallelCoordinateChart
+            height={h}
+            data={pcpData}
+            dimension={pcpDimension}
+        />
+    }
+
+    render() {
+        const { height } = this.props;
+        const scatterHeight = height / 2;
+        const pcpHeight = height - scatterHeight;
         return (
             <div className={this.props.className}>
-                <ScatterChart
-                    width={width}
-                    height={height}
-                    data={data}
-                    xAttr={xAttr}
-                    yAttr={yAttr}
-                    xExtents={xExtents}
-                    yExtents={yExtents}
-                    xAccessor={xAccessor}
-                    yAccessor={yAccessor}
-                    zAccessor={zAccessor}
-                    xScale={xScale}
-                    yScale={yScale}
-                    xType={xType}
-                    yType={yType}
-                    groups={selectedSampleNames}
-                    groupAccessor={sampleAccessor}
-                    colorsByGroup={colorsBySampleNames}
-                />
+                {this.renderParallelCoordinateChart(pcpHeight)}
+                {this.renderScatterChart(scatterHeight)}
             </div>
         );
     }
@@ -101,9 +90,14 @@ ChartBox.defaultProps = {};
 function mapStateToProps(state) {
     const { data, xExtents, yExtents } = getSelectedSortedDataArray(state);
 
+   // const pcpDimension = getPCPDimension(state);
     
-
     //console.log(getColorsBySampleNames(state))
+    //const pcpData = getPCPData(state);
+    const {
+        data: pcpData,
+        extents: pcpExtents
+    } = getSelectedDataArray(state);
 
     return {
         data,
@@ -120,7 +114,10 @@ function mapStateToProps(state) {
         yType: getYType(state),
         selectedSampleNames: getSelectedSampleNames(state),
         colorsBySampleNames: getColorsBySampleNames(state),
-        sampleAccessor: d => d.sample
+        sampleAccessor: d => d.sample,
+
+        pcpDimension: pcpExtents,
+        pcpData: pcpData
     };
 }
 

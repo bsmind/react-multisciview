@@ -28,102 +28,7 @@ import {
     extent as d3Extent
 } from 'd3-array';
 
-function calculateData(props) {
-	const {
-		xScale,
-		clamp,
-		pointsPerPxThreshold,
-		minPointsPerPxThreshold,
-	} = props;
 
-	const { dataFilter } = evaluator({
-		xScale,
-		useWholeData: false,
-		clamp,
-		pointsPerPxThreshold,
-		minPointsPerPxThreshold
-	});
-
-	return {
-		xScale: xScale.copy(),
-		dataFilter
-	};
-}
-
-function calculateState(props) {
-	const dir = xDirection(props.xFlip);
-    const dim = dimension(props);
-
-	const { xExtents: xExtentsProps } = props;
-	let xExtents, xStepEnabled = false;
-	if (typeof xExtentsProps === 'function') {
-		xExtents = props.xExtents(props.data);
-	} else if (isArrayOfString(xExtentsProps)) {
-		xExtents = [0, xExtentsProps.length];
-		xStepEnabled = true;
-	} else {
-		xExtents = d3Extent(xExtentsProps.map(d => functor(d)).map(each => {
-			return each(props.data, props.xAccessor);
-		}));
-	}
-	// const xExtents = xExtentsProps === "function"
-	// 	? props.xExtents(props.data)
-	// 	: d3Extent(xExtentsProps.map(d => functor(d)).map(each => {
-    //         return each(props.data, props.xAccessor);
-    //     }));
-	//console.log(xExtents);
-
-	const { xScale, dataFilter } = calculateData(props);
-	let updatedXScale = setXRange(xScale, dim.width, props.xPadding, dir);
-	const { plotData, domain } = dataFilter(
-		props.data,
-		xExtents,
-		props.xAccessor,
-		updatedXScale
-	);
-
-	//console.log(domain)
-	updatedXScale = updatedXScale.domain(domain);
-	const xStep = xStepEnabled 
-		? Math.abs(updatedXScale(0) - updatedXScale(1))
-		: 0;
-	//console.log(xStep)
-
-	return {
-		plotData,
-		xScale: updatedXScale,
-		dataFilter,
-		xStepEnabled,
-		xStep
-	};
-}
-
-function resetChart(props, first = false) {
-	const state = calculateState(props);
-
-	const {
-		plotData,
-		xScale
-	} = state;
-
-	const dim = dimension(props);
-	const chartConfig = getChartConfigWithUpdatedYScale(
-		getChartConfig(dim, props.children),
-		{
-            plotData,
-            xAccessor: props.xAccessor,
-            xDispAccessor: props.xDispAccessor,
-            fullData: props.data
-        },
-        xScale.domain(),
-        true
-	);
-
-	return {
-		...state,
-		chartConfig
-	};
-}
 
 class ChartCanvas extends React.Component {
 	constructor() {
@@ -178,7 +83,6 @@ class ChartCanvas extends React.Component {
     	return this.lastSubscriptionId;
     }
 
-    // partial
     subscribe = (id, rest) => {
         // getPanConditions
 		const { getPanConditions = functor({
