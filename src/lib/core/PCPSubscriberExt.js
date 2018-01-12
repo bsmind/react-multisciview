@@ -41,7 +41,11 @@ class PCPSubscriberExt extends React.Component {
     }
 
     getMoreProps = () => {
+        const {shared, dimConfig} = this.props;
+
         return {
+            ...shared,
+            dimConfig,
             ...this.moreProps
         }
     }
@@ -88,12 +92,39 @@ class PCPSubscriberExt extends React.Component {
 
     }
 
-    listener = () => {
+    updateMoreProps = (moreProps) => {
+        Object.keys(moreProps).forEach(key => {
+            this.moreProps[key] = moreProps[key];
+        });
 
+        const { dimConfig: dimConfigList } = moreProps;
+        if (dimConfigList) {
+            if (this.props.useAllDim) {
+                // do nothing
+            } else {
+                const {title: axisTitle} = this.props.dimConfig;
+                const dimConfig = dimConfigList[axisTitle];
+                this.moreProps.dimConfig = dimConfig;    
+            }
+        }
     }
 
-    draw = () => {
+    listener = (type, moreProps, state, e) => {
+        if (moreProps) {
+            this.updateMoreProps(moreProps);
+        }
+        this.evalInProgress = true;
+        //this.evalType(type, e);
+        this.evalInProgress = false;
+    }
 
+    draw = ({trigger, force} = {force: false}) => {
+        const type = trigger;//aliases[trigger] || trigger;
+        const proceed = this.props.drawOn.indexOf(type) > -1;
+
+        if (proceed || force) {
+            this.handleDraw();
+        }
     }
 
     render () {

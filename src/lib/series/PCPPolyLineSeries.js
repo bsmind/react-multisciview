@@ -2,33 +2,66 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { PCPSubscriberExt } from '../core';
+import { hexToRGBA } from '../utils';
 
 import { nest as d3Nest } from 'd3-collection';
 
 class PCPPolyLineSeries extends React.Component {
     draw = (ctx, moreProps) => {
-        const { data: plotData } = this.props;
+        const { 
+            //shared: { plotData, xScale },  
+            plotData,
+            xScale,
+            dimConfig
+        } = moreProps;
+        const { opacity, strokeWidth } = this.props;
 
+        //console.log(moreProps)
         const nest = d3Nest()
                         .key(d => d.stroke)
                         .entries(plotData);
 
-        const x = d => d[0], y = d => d[1];
+        const dimOrder = xScale.domain();
+        //console.log(dimOrder)
+
+        const yAccessor = (d, config) => {
+            const {ordinary, scale, accessor, extents, step} = config;
+            return ordinary
+                ? scale(extents.indexOf(accessor(d))) - step/2
+                : scale(accessor(d));
+        };
+
+        const xAccessor = (config) => {
+            return config.position;
+        }
+            //     const y = ordinary
+            //         ? scale(extents.findIndex(v => v === yValue)) - step/2
+            //         : scale(yValue);
+
+        let p1Config, p2Config, p1, p2;
 
         ctx.save();
         nest.forEach(groupByStroke => {
             const {key: stroke, values: group} = groupByStroke;
 
-            ctx.strokeStyle = stroke;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = hexToRGBA(stroke, opacity);
+            ctx.lineWidth = strokeWidth;
 
-            group.forEach(points => {
+            group.forEach(d => {
                 ctx.beginPath();
-                for (let i=0; i<points.length - 1; ++i) {
-                    const p1 = points[i];
-                    const p2 = points[i+1];
-                    ctx.moveTo(x(p1), y(p1));
-                    ctx.lineTo(x(p2), y(p2));
+
+                p1Config = dimConfig[dimOrder[0]];
+                p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+                ctx.moveTo(p1[0], p1[1]);
+                for (let i=1; i<dimOrder.length; ++i) {
+                    
+                    p2Config = dimConfig[dimOrder[i]];
+                    p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
+                    //ctx.moveTo(p1[0], p1[1]);
+                    ctx.lineTo(p2[0], p2[1]);
+
+                    //p1Config = p2Config;
+                    //p1 = p2;
                 }
                 ctx.stroke();
             });
@@ -42,8 +75,10 @@ class PCPPolyLineSeries extends React.Component {
             clip={false}
             edgeClip={false}
             draw={this.draw}
-            drawOn={["pan"]}
+            drawOn={["moveaxis"]}
             shared={this.props.shared}
+            dimConfig={this.props.dimConfig}
+            useAllDim={true}
         />
     }
 }

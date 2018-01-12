@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import CanvasContainer from './CanvasContainer';
+import PCPEventHandler from './PCPEventHandler';
+import Series from './Series';
 import { PCPYAxis } from '../axes';
 import { PCPPolyLineSeries } from '../series';
 
@@ -13,7 +15,8 @@ import {
 import {
     functor,
     isArrayOfString,
-    hexToRGBA
+    hexToRGBA,
+    cursorStyle
 } from '../utils';
 
 import forEach from 'lodash.foreach';
@@ -30,8 +33,10 @@ class PCPCanvas extends React.Component {
         this.subscriptions = [];
         this.state = {
             xScale: null,
-            dimConfig: {}
+            dimConfig: {},
+            plotData: []
         };
+        this.axisMoveInProgress = false;
     }
     getCanvasContexts = () => {
     	if (this.canvasContainerNode)
@@ -96,7 +101,7 @@ class PCPCanvas extends React.Component {
             dimAccessor,
             data,
             colorAccessor,
-            opacity
+            axisWidth
         } = props;
 
         const canvasDim = getCanvasDimension(props);
@@ -125,37 +130,45 @@ class PCPCanvas extends React.Component {
                 step: yStep,
                 active: true,
                 flip: false,
-                position: xScale(name)
+                position: xScale(name),
+                axisWidth,
+                accessor: d => d[name]
             }
         });
         // end of getDimConfig
 
         // calculateDataFromNewDimConfig
-        //console.log(data)
+        //console.log(data).. filtering for each dimension..
         const plotData = data.map(d => {
-            const points = dimName.map(name => {
-                const {
-                    position: x, 
-                    scale,
-                    ordinary,
-                    extents,
-                    step
-                } = dimConfig[name];
-
-                const yValue = dimAccessor(d, name);
-                const y = ordinary
-                    ? scale(extents.findIndex(v => v === yValue)) - step/2
-                    : scale(yValue);
-
-                return [x, y];
+            const flattened = {};
+            dimName.forEach(name => {
+                flattened[name] = dimAccessor(d, name);
             });
-            points.stroke = hexToRGBA(colorAccessor(d), opacity);
-            points.strokeWidth = 1;
-            return points;
+            flattened.stroke = colorAccessor(d);
+            return flattened;
+            // const points = dimName.map(name => {
+            //     const {
+            //         position: x, 
+            //         scale,
+            //         ordinary,
+            //         extents,
+            //         step
+            //     } = dimConfig[name];
+
+            //     const yValue = dimAccessor(d, name);
+            //     const y = ordinary
+            //         ? scale(extents.findIndex(v => v === yValue)) - step/2
+            //         : scale(yValue);
+
+            //     return [x, y];
+            // });
+            // points.stroke = colorAccessor(d);//hexToRGBA(colorAccessor(d), opacity);
+            // return points;
         });
         //console.log(plotData)
         // end
 
+        //this.fullData = plotData;
         return {
             xScale,
             dimConfig,
@@ -176,7 +189,121 @@ class PCPCanvas extends React.Component {
     }
 
     shouldComponentUpdate() {
-        return true;
+        return !this.axisMoveInProgress;
+    }
+
+    triggerEvent = (type, props, e) => {
+        this.subscriptions.forEach(each => {
+            const state = {
+                ...this.state,
+                fullData: this.props.data,
+                subscriptions: this.subscriptions
+            };
+            each.listener(type, props, state, e);
+        });
+    }
+
+    draw = (props) => {
+        this.subscriptions.forEach(each => {
+            if (each.draw)
+                each.draw(props);
+        })
+    }
+
+    axisMoveHelper = (dx, axisToMove, initDimOrder, force = false) => {
+        // as axis is moving...
+        // 1. x position of axis changes, ok
+        // 2. corresponding data changes
+        // 3. if needed, swap location..
+        const { 
+            dimConfig: initDimConfig, 
+        } = this.state;
+
+        const newDimOrder = initDimOrder.map(title => {
+            const { position } = initDimConfig[title];
+            const newPosition = (title === axisToMove)
+                ? position + dx
+                : position;
+
+            return {
+                x: newPosition,
+                id: title
+            }
+        }).sort((a,b) => a.x - b.x);
+
+        const canvasDim = getCanvasDimension(this.props);
+        const xScale = scalePoint()
+                        .domain(newDimOrder.map(d => d.id))
+                        .range([0, canvasDim.width])
+                        .padding(0);
+        
+
+        const newDimConfig = {};
+        newDimOrder.forEach( each => {
+            const {x, id} = each;
+            const prevConfig = initDimConfig[id];
+            const { position } = prevConfig;
+
+            const newPosition = (id === axisToMove && !force)
+                ? x
+                : xScale(id);
+
+            newDimConfig[id] = {
+                ...prevConfig,
+                position: newPosition
+            }
+        });
+
+        return {
+            dimConfig: newDimConfig,
+            xScale
+        }
+    }
+
+    handleAxisMove = (axisTitle, moveDist, e) => {
+        if (!this.waitingForAxisMoveAnimationFrame) {
+            this.waitingForAxisMoveAnimationFrame = true;
+            this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+            this.__dimOrder = this.__dimOrder || this.state.xScale.domain();
+            
+            const state = this.axisMoveHelper(moveDist, axisTitle, this.__dimOrder);
+
+            this.__dimConfig = state.dimConfig;
+            this.__dimOrder = state.xScale.domain();
+            //console.log(__dimOrder)
+
+            this.axisMoveInProgress = true;
+
+            this.triggerEvent('moveaxis', state, e);
+            requestAnimationFrame(() => {
+                this.waitingForAxisMoveAnimationFrame = false;
+                this.clearThreeCanvas();
+                this.draw({trigger: 'moveaxis'});
+            });
+        }
+    }
+
+    handleAxisMoveEnd = (axisTitle, moveDist, e) => {
+        
+        const state = this.axisMoveHelper(moveDist, axisTitle,this.__dimOrder, true);
+
+        this.__dimConfig = null;
+        this.__dimOrder = null;
+        this.axisMoveInProgress = false;
+
+        const {
+            dimConfig,
+            xScale
+        } = state;
+        this.triggerEvent('moveaxis', state, e);
+
+        requestAnimationFrame(() => {
+            this.clearThreeCanvas();
+            this.setState({
+                dimConfig,
+                xScale
+            });
+        });
     }
 
 
@@ -199,7 +326,9 @@ class PCPCanvas extends React.Component {
             width,
             height,
             zIndex,
+            axisWidth: axisWidthProp
         } = this.props;
+        const axisWidth = (axisWidthProp%2 === 0) ? axisWidthProp: axisWidthProp + 1 || 26;
         const canvasDim = getCanvasDimension({width, height, margin});
 
         const shared = {
@@ -213,23 +342,49 @@ class PCPCanvas extends React.Component {
             unsubscribe: this.unsubscribe,
             getCanvasContexts: this.getCanvasContexts,
 
-            xScale: this.state.xScale
+            xScale: this.state.xScale,
+            plotData: this.state.plotData,
         }
 
         const pcpYAxisList = [];
         forEach(this.state.dimConfig, (config, title) => {
             if (!config.active) return;
-            pcpYAxisList.push( <PCPYAxis key={`pcp-yaxis-${title}`}
-                title={title}
-                axisLocation={config.position}
-                axisWidth={25}
-                height={canvasDim.height}
-                orient={'left'}
-                shared={shared}
-                ordinary={config.ordinary}
-                config={config}
-            />);
+            pcpYAxisList.push( 
+                <PCPYAxis key={`pcp-yaxis-${title}`}
+                    title={title}
+                    axisLocation={config.position}
+                    axisWidth={axisWidth}
+                    height={canvasDim.height}
+                    orient={'left'}
+                    shared={shared}
+                    ordinary={config.ordinary}
+                    dimConfig={config}
+                    //onAxisMove={this.handleAxisMove}
+                    //onAxisMoveEnd={this.handleAxisMoveEnd}
+                />
+            );
         });
+
+        const seriesList = [];
+        let keyCount = 0;
+        React.Children.forEach(this.props.children, child => {
+            if (!React.isValidElement(child)) return;
+            if (child.type === Series) {
+                seriesList.push(React.cloneElement(child, {
+                    key: `pcp-series-${keyCount}`,
+                    shared,
+                    dimConfig: this.state.dimConfig
+                }));
+                keyCount += 1;
+            }
+        });
+
+        const axisMoveHandlerYRange = [
+            [0, margin.top/2 - 1],
+            [margin.top/2 + canvasDim.height + 1, margin.top + canvasDim.height]
+        ];
+
+        const cursor = cursorStyle(true);
 
         return (
             <div
@@ -249,17 +404,22 @@ class PCPCanvas extends React.Component {
                     height={height}
                     style={svgStyle}
                 >
-                    <g transform={`translate(${margin.left},${margin.top})`}>
-                        {/* <EventHandler /> */}
+                    {cursor}
+                    <g transform={`translate(${margin.left - axisWidth/2},${margin.top/2})`}>
+                        <PCPEventHandler
+                            ref={node => this.eventHandlerNode = node}
+                            width={canvasDim.width + axisWidth}
+                            height={canvasDim.height + margin.top}
+                            dimConfig={this.state.dimConfig}
+                            axisMoveHandlerYRange={axisMoveHandlerYRange}
+                            axisMoveHandlerXOffset={axisWidth/2}
+                            onAxisMove={this.handleAxisMove}
+                            onAxisMoveEnd={this.handleAxisMoveEnd}
+                            onMouseDown={this.handleAxisMove}
+                        />
                         <g>
+                            {seriesList}
                             {pcpYAxisList}
-                            <PCPPolyLineSeries 
-                                data={this.state.plotData}
-                                //dimName={this.props.dimName}
-                                //dimConfig={this.state.dimConfig}
-                                //dimAccessor={this.props.dimAccessor}                                
-                                shared={shared}
-                            />
                         </g>
                     </g>
                 </svg>

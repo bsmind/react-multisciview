@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { fitWidth } from 'react-multiview/lib/helper';
 import { ChartCanvas, PCPCanvas, Chart, Series } from 'react-multiview/lib/core';
+import { PCPPolyLineSeries } from 'react-multiview/lib/series';
 
 import { scaleLinear } from 'd3-scale';
 
@@ -10,7 +11,7 @@ import get from 'lodash.get';
 
 class ParallelCoordinateChart extends React.Component {
     render () {
-        const margin= {left: 60, right: 40, top: 10, bottom: 60};
+        const margin= {left: 60, right: 40, top: 20, bottom: 10};
         const {
             width,
             height,
@@ -51,8 +52,16 @@ class ParallelCoordinateChart extends React.Component {
                 data={data}
 
                 colorAccessor={d => colorsByGroup[groupAccessor(d)]}
-                opacity={0.3}
+                axisWidth={26}
             >
+                <Series>
+                    <PCPPolyLineSeries
+                        //colorAccessor={d => colorsByGroup[groupAccessor(d)]} 
+                        //groupAccessor={groupAccessor}
+                        opacity={0.3}
+                        strokeWidth={1}
+                    />
+                </Series>
             </PCPCanvas>
         );
     }

@@ -21531,15 +21531,18 @@ function styleValue(node, name) {
 /*!************************************!*\
   !*** ./src/lib/axes/draw/index.js ***!
   \************************************/
-/*! exports provided: drawAxisLine, drawTicks */
-/*! exports used: drawAxisLine, drawTicks */
+/*! exports provided: drawAxisLine, drawTicks, drawAxisTitle */
+/*! exports used: drawAxisLine, drawAxisTitle, drawTicks */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__drawAxisLine__ = __webpack_require__(/*! ./drawAxisLine */ 641);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__drawAxisLine__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__drawTicks__ = __webpack_require__(/*! ./drawTicks */ 648);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__drawTicks__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_1__drawTicks__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__drawAxisTitle__ = __webpack_require__(/*! ./drawAxisTitle */ 688);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__drawAxisTitle__["a"]; });
+
 
 
 
@@ -49380,7 +49383,7 @@ var XAxis = function (_React$Component) {
       }
 
       if (showTicks) {
-        Object(__WEBPACK_IMPORTED_MODULE_3__draw__["b" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(xScale) : _this.getTicks(xScale), _this.props.tickStyle, showTickLabel ? _this.props.labelStyle : null);
+        Object(__WEBPACK_IMPORTED_MODULE_3__draw__["c" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(xScale) : _this.getTicks(xScale), _this.props.tickStyle, showTickLabel ? _this.props.labelStyle : null);
       }
 
       ctx.restore();
@@ -51031,7 +51034,7 @@ var YAxis = function (_React$Component) {
             labelStyle = _this$props4.labelStyle;
 
         var textAnchor = orient === "left" ? "end" : "start";
-        Object(__WEBPACK_IMPORTED_MODULE_3__draw__["b" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(yScale) : _this.getTicks(yScale), _this.props.tickStyle, showTickLabel ? _extends({}, labelStyle, { textAnchor: textAnchor }) : null);
+        Object(__WEBPACK_IMPORTED_MODULE_3__draw__["c" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(yScale) : _this.getTicks(yScale), _this.props.tickStyle, showTickLabel ? _extends({}, labelStyle, { textAnchor: textAnchor }) : null);
       }
 
       ctx.restore();
@@ -54288,9 +54291,10 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_helper__ = __webpack_require__(/*! react-multiview/lib/helper */ 114);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__ = __webpack_require__(/*! react-multiview/lib/core */ 51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_get__ = __webpack_require__(/*! lodash.get */ 50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__ = __webpack_require__(/*! react-multiview/lib/series */ 73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_get__ = __webpack_require__(/*! lodash.get */ 50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_lodash_get__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54298,6 +54302,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -54321,7 +54326,7 @@ var ParallelCoordinateChart = function (_React$Component) {
     _createClass(ParallelCoordinateChart, [{
         key: 'render',
         value: function render() {
-            var margin = { left: 60, right: 40, top: 10, bottom: 60 };
+            var margin = { left: 60, right: 40, top: 20, bottom: 10 };
             var _props = this.props,
                 width = _props.width,
                 height = _props.height,
@@ -54343,25 +54348,38 @@ var ParallelCoordinateChart = function (_React$Component) {
             //const yAccessor = (d, name) => get(d, name);
 
 
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */], {
-                width: width,
-                height: height,
-                ratio: ratio,
-                margin: margin,
-                zIndex: 1,
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */],
+                {
+                    width: width,
+                    height: height,
+                    ratio: ratio,
+                    margin: margin,
+                    zIndex: 1,
 
-                dimName: dimName,
-                dimExtents: dimension,
-                dimAccessor: function dimAccessor(d, name) {
-                    return __WEBPACK_IMPORTED_MODULE_5_lodash_get___default()(d, name);
-                },
-                data: data,
+                    dimName: dimName,
+                    dimExtents: dimension,
+                    dimAccessor: function dimAccessor(d, name) {
+                        return __WEBPACK_IMPORTED_MODULE_6_lodash_get___default()(d, name);
+                    },
+                    data: data,
 
-                colorAccessor: function colorAccessor(d) {
-                    return colorsByGroup[groupAccessor(d)];
+                    colorAccessor: function colorAccessor(d) {
+                        return colorsByGroup[groupAccessor(d)];
+                    },
+                    axisWidth: 26
                 },
-                opacity: 0.3
-            });
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["e" /* Series */],
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__["b" /* PCPPolyLineSeries */]
+                    //colorAccessor={d => colorsByGroup[groupAccessor(d)]} 
+                    //groupAccessor={groupAccessor}
+                    , { opacity: 0.3,
+                        strokeWidth: 1
+                    })
+                )
+            );
         }
     }]);
 
@@ -54386,13 +54404,15 @@ ParallelCoordinateChart = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__CanvasContainer__ = __webpack_require__(/*! ./CanvasContainer */ 650);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__axes__ = __webpack_require__(/*! ../axes */ 127);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__series__ = __webpack_require__(/*! ../series */ 73);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(/*! ./utils */ 135);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../utils */ 18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_lodash_foreach__ = __webpack_require__(/*! lodash.foreach */ 111);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_lodash_foreach___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_lodash_foreach__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__PCPEventHandler__ = __webpack_require__(/*! ./PCPEventHandler */ 689);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Series__ = __webpack_require__(/*! ./Series */ 253);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__axes__ = __webpack_require__(/*! ../axes */ 127);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__series__ = __webpack_require__(/*! ../series */ 73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ./utils */ 135);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils__ = __webpack_require__(/*! ../utils */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_foreach__ = __webpack_require__(/*! lodash.foreach */ 111);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_foreach___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_lodash_foreach__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_d3_scale__ = __webpack_require__(/*! d3-scale */ 42);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -54402,6 +54422,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
 
 
 
@@ -54437,14 +54459,14 @@ var PCPCanvas = function (_React$Component) {
         _this.clearThreeCanvas = function () {
             var canvases = _this.getCanvasContexts();
             if (canvases && canvases.axes) {
-                Object(__WEBPACK_IMPORTED_MODULE_5__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord, canvases.bg], _this.props.ratio);
+                Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord, canvases.bg], _this.props.ratio);
             }
         };
 
         _this.clearBothCanvas = function () {
             var canvases = _this.getCanvasContexts();
             if (canvases && canvases.axes) {
-                Object(__WEBPACK_IMPORTED_MODULE_5__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord], _this.props.ratio);
+                Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.axes, canvases.mouseCoord], _this.props.ratio);
             }
         };
 
@@ -54456,7 +54478,7 @@ var PCPCanvas = function (_React$Component) {
         _this.subscribe = function (id, rest) {
             // getPanConditions
             var _rest$getPanCondition = rest.getPanConditions,
-                getPanConditions = _rest$getPanCondition === undefined ? Object(__WEBPACK_IMPORTED_MODULE_6__utils__["g" /* functor */])({
+                getPanConditions = _rest$getPanCondition === undefined ? Object(__WEBPACK_IMPORTED_MODULE_8__utils__["g" /* functor */])({
                 draggable: false,
                 panEnabled: true
             }) : _rest$getPanCondition;
@@ -54484,19 +54506,19 @@ var PCPCanvas = function (_React$Component) {
                 dimAccessor = props.dimAccessor,
                 data = props.data,
                 colorAccessor = props.colorAccessor,
-                opacity = props.opacity;
+                axisWidth = props.axisWidth;
 
 
-            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* dimension */])(props);
-            var xScale = Object(__WEBPACK_IMPORTED_MODULE_8_d3_scale__["c" /* scalePoint */])().domain(dimName).range([0, canvasDim.width]).padding(0);
+            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
+            var xScale = Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["c" /* scalePoint */])().domain(dimName).range([0, canvasDim.width]).padding(0);
 
             // getDimConfig
             var dimConfig = {};
             dimName.forEach(function (name) {
                 var axisExtents = dimAccessor(dimExtents, name);
-                var ordinary = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["k" /* isArrayOfString */])(axisExtents);
+                var ordinary = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["k" /* isArrayOfString */])(axisExtents);
 
-                var yScale = Object(__WEBPACK_IMPORTED_MODULE_8_d3_scale__["b" /* scaleLinear */])();
+                var yScale = Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["b" /* scaleLinear */])();
                 var domain = ordinary ? [0, axisExtents.length] : axisExtents;
                 yScale.domain(domain).range([canvasDim.height, 0]);
 
@@ -54509,37 +54531,47 @@ var PCPCanvas = function (_React$Component) {
                     step: yStep,
                     active: true,
                     flip: false,
-                    position: xScale(name)
+                    position: xScale(name),
+                    axisWidth: axisWidth,
+                    accessor: function accessor(d) {
+                        return d[name];
+                    }
                 };
             });
             // end of getDimConfig
 
             // calculateDataFromNewDimConfig
-            //console.log(data)
+            //console.log(data).. filtering for each dimension..
             var plotData = data.map(function (d) {
-                var points = dimName.map(function (name) {
-                    var _dimConfig$name = dimConfig[name],
-                        x = _dimConfig$name.position,
-                        scale = _dimConfig$name.scale,
-                        ordinary = _dimConfig$name.ordinary,
-                        extents = _dimConfig$name.extents,
-                        step = _dimConfig$name.step;
-
-
-                    var yValue = dimAccessor(d, name);
-                    var y = ordinary ? scale(extents.findIndex(function (v) {
-                        return v === yValue;
-                    })) - step / 2 : scale(yValue);
-
-                    return [x, y];
+                var flattened = {};
+                dimName.forEach(function (name) {
+                    flattened[name] = dimAccessor(d, name);
                 });
-                points.stroke = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["j" /* hexToRGBA */])(colorAccessor(d), opacity);
-                points.strokeWidth = 1;
-                return points;
+                flattened.stroke = colorAccessor(d);
+                return flattened;
+                // const points = dimName.map(name => {
+                //     const {
+                //         position: x, 
+                //         scale,
+                //         ordinary,
+                //         extents,
+                //         step
+                //     } = dimConfig[name];
+
+                //     const yValue = dimAccessor(d, name);
+                //     const y = ordinary
+                //         ? scale(extents.findIndex(v => v === yValue)) - step/2
+                //         : scale(yValue);
+
+                //     return [x, y];
+                // });
+                // points.stroke = colorAccessor(d);//hexToRGBA(colorAccessor(d), opacity);
+                // return points;
             });
             //console.log(plotData)
             // end
 
+            //this.fullData = plotData;
             return {
                 xScale: xScale,
                 dimConfig: dimConfig,
@@ -54547,12 +54579,125 @@ var PCPCanvas = function (_React$Component) {
             };
         };
 
+        _this.triggerEvent = function (type, props, e) {
+            _this.subscriptions.forEach(function (each) {
+                var state = _extends({}, _this.state, {
+                    fullData: _this.props.data,
+                    subscriptions: _this.subscriptions
+                });
+                each.listener(type, props, state, e);
+            });
+        };
+
+        _this.draw = function (props) {
+            _this.subscriptions.forEach(function (each) {
+                if (each.draw) each.draw(props);
+            });
+        };
+
+        _this.axisMoveHelper = function (dx, axisToMove, initDimOrder) {
+            var force = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+            // as axis is moving...
+            // 1. x position of axis changes, ok
+            // 2. corresponding data changes
+            // 3. if needed, swap location..
+            var initDimConfig = _this.state.dimConfig;
+
+
+            var newDimOrder = initDimOrder.map(function (title) {
+                var position = initDimConfig[title].position;
+
+                var newPosition = title === axisToMove ? position + dx : position;
+
+                return {
+                    x: newPosition,
+                    id: title
+                };
+            }).sort(function (a, b) {
+                return a.x - b.x;
+            });
+
+            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(_this.props);
+            var xScale = Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["c" /* scalePoint */])().domain(newDimOrder.map(function (d) {
+                return d.id;
+            })).range([0, canvasDim.width]).padding(0);
+
+            var newDimConfig = {};
+            newDimOrder.forEach(function (each) {
+                var x = each.x,
+                    id = each.id;
+
+                var prevConfig = initDimConfig[id];
+                var position = prevConfig.position;
+
+
+                var newPosition = id === axisToMove && !force ? x : xScale(id);
+
+                newDimConfig[id] = _extends({}, prevConfig, {
+                    position: newPosition
+                });
+            });
+
+            return {
+                dimConfig: newDimConfig,
+                xScale: xScale
+            };
+        };
+
+        _this.handleAxisMove = function (axisTitle, moveDist, e) {
+            if (!_this.waitingForAxisMoveAnimationFrame) {
+                _this.waitingForAxisMoveAnimationFrame = true;
+                _this.__dimConfig = _this.__dimConfig || _this.state.dimConfig;
+                _this.__dimOrder = _this.__dimOrder || _this.state.xScale.domain();
+
+                var state = _this.axisMoveHelper(moveDist, axisTitle, _this.__dimOrder);
+
+                _this.__dimConfig = state.dimConfig;
+                _this.__dimOrder = state.xScale.domain();
+                //console.log(__dimOrder)
+
+                _this.axisMoveInProgress = true;
+
+                _this.triggerEvent('moveaxis', state, e);
+                requestAnimationFrame(function () {
+                    _this.waitingForAxisMoveAnimationFrame = false;
+                    _this.clearThreeCanvas();
+                    _this.draw({ trigger: 'moveaxis' });
+                });
+            }
+        };
+
+        _this.handleAxisMoveEnd = function (axisTitle, moveDist, e) {
+
+            var state = _this.axisMoveHelper(moveDist, axisTitle, _this.__dimOrder, true);
+
+            _this.__dimConfig = null;
+            _this.__dimOrder = null;
+            _this.axisMoveInProgress = false;
+
+            var dimConfig = state.dimConfig,
+                xScale = state.xScale;
+
+            _this.triggerEvent('moveaxis', state, e);
+
+            requestAnimationFrame(function () {
+                _this.clearThreeCanvas();
+                _this.setState({
+                    dimConfig: dimConfig,
+                    xScale: xScale
+                });
+            });
+        };
+
         _this.mutableState = {};
         _this.subscriptions = [];
         _this.state = {
             xScale: null,
-            dimConfig: {}
+            dimConfig: {},
+            plotData: []
         };
+        _this.axisMoveInProgress = false;
         return _this;
     }
 
@@ -54573,7 +54718,7 @@ var PCPCanvas = function (_React$Component) {
     }, {
         key: 'shouldComponentUpdate',
         value: function shouldComponentUpdate() {
-            return true;
+            return !this.axisMoveInProgress;
         }
     }, {
         key: 'render',
@@ -54596,9 +54741,11 @@ var PCPCanvas = function (_React$Component) {
                 ratio = _props.ratio,
                 width = _props.width,
                 height = _props.height,
-                zIndex = _props.zIndex;
+                zIndex = _props.zIndex,
+                axisWidthProp = _props.axisWidth;
 
-            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* dimension */])({ width: width, height: height, margin: margin });
+            var axisWidth = axisWidthProp % 2 === 0 ? axisWidthProp : axisWidthProp + 1 || 26;
+            var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])({ width: width, height: height, margin: margin });
 
             var shared = {
                 margin: margin,
@@ -54611,23 +54758,44 @@ var PCPCanvas = function (_React$Component) {
                 unsubscribe: this.unsubscribe,
                 getCanvasContexts: this.getCanvasContexts,
 
-                xScale: this.state.xScale
+                xScale: this.state.xScale,
+                plotData: this.state.plotData
             };
 
             var pcpYAxisList = [];
-            __WEBPACK_IMPORTED_MODULE_7_lodash_foreach___default()(this.state.dimConfig, function (config, title) {
+            __WEBPACK_IMPORTED_MODULE_9_lodash_foreach___default()(this.state.dimConfig, function (config, title) {
                 if (!config.active) return;
-                pcpYAxisList.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__axes__["a" /* PCPYAxis */], { key: 'pcp-yaxis-' + title,
+                pcpYAxisList.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__axes__["a" /* PCPYAxis */], { key: 'pcp-yaxis-' + title,
                     title: title,
                     axisLocation: config.position,
-                    axisWidth: 25,
+                    axisWidth: axisWidth,
                     height: canvasDim.height,
                     orient: 'left',
                     shared: shared,
                     ordinary: config.ordinary,
-                    config: config
+                    dimConfig: config
+                    //onAxisMove={this.handleAxisMove}
+                    //onAxisMoveEnd={this.handleAxisMoveEnd}
                 }));
             });
+
+            var seriesList = [];
+            var keyCount = 0;
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.Children.forEach(this.props.children, function (child) {
+                if (!__WEBPACK_IMPORTED_MODULE_0_react___default.a.isValidElement(child)) return;
+                if (child.type === __WEBPACK_IMPORTED_MODULE_4__Series__["a" /* default */]) {
+                    seriesList.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, {
+                        key: 'pcp-series-' + keyCount,
+                        shared: shared,
+                        dimConfig: _this2.state.dimConfig
+                    }));
+                    keyCount += 1;
+                }
+            });
+
+            var axisMoveHandlerYRange = [[0, margin.top / 2 - 1], [margin.top / 2 + canvasDim.height + 1, margin.top + canvasDim.height]];
+
+            var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* cursorStyle */])(true);
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
@@ -54652,20 +54820,28 @@ var PCPCanvas = function (_React$Component) {
                         height: height,
                         style: svgStyle
                     },
+                    cursor,
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'g',
-                        { transform: 'translate(' + margin.left + ',' + margin.top + ')' },
+                        { transform: 'translate(' + (margin.left - axisWidth / 2) + ',' + margin.top / 2 + ')' },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__PCPEventHandler__["a" /* default */], {
+                            ref: function ref(node) {
+                                return _this2.eventHandlerNode = node;
+                            },
+                            width: canvasDim.width + axisWidth,
+                            height: canvasDim.height + margin.top,
+                            dimConfig: this.state.dimConfig,
+                            axisMoveHandlerYRange: axisMoveHandlerYRange,
+                            axisMoveHandlerXOffset: axisWidth / 2,
+                            onAxisMove: this.handleAxisMove,
+                            onAxisMoveEnd: this.handleAxisMoveEnd,
+                            onMouseDown: this.handleAxisMove
+                        }),
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'g',
                             null,
-                            pcpYAxisList,
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__series__["b" /* PCPPolyLineSeries */], {
-                                data: this.state.plotData
-                                //dimName={this.props.dimName}
-                                //dimConfig={this.state.dimConfig}
-                                //dimAccessor={this.props.dimAccessor}                                
-                                , shared: shared
-                            })
+                            seriesList,
+                            pcpYAxisList
                         )
                     )
                 )
@@ -54716,268 +54892,321 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 var PCPYAxis = function (_React$Component) {
-	_inherits(PCPYAxis, _React$Component);
+    _inherits(PCPYAxis, _React$Component);
 
-	function PCPYAxis() {
-		var _ref;
+    function PCPYAxis() {
+        var _ref;
 
-		var _temp, _this, _ret;
+        var _temp, _this, _ret;
 
-		_classCallCheck(this, PCPYAxis);
+        _classCallCheck(this, PCPYAxis);
 
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
-		}
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
 
-		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPYAxis.__proto__ || Object.getPrototypeOf(PCPYAxis)).call.apply(_ref, [this].concat(args))), _this), _this.getTicks = function (yScale) {
-			var _this$props = _this.props,
-			    ticks = _this$props.ticks,
-			    tickFormat = _this$props.tickFormat,
-			    innerTickSize = _this$props.innerTickSize,
-			    orient = _this$props.orient;
-			var fontSize = _this.props.labelStyle.fontSize;
-
-
-			var baseFormat = yScale.tickFormat ? yScale.tickFormat(ticks) : function (d) {
-				return d;
-			};
-
-			var format = tickFormat ? function (d) {
-				return tickFormat(d) || "";
-			} : baseFormat;
-
-			var tickValues = yScale.ticks(ticks);
-
-			var sign = orient === "left" || orient === "top" ? -1 : 1;
-			var dx = fontSize * 0.35;
-
-			return tickValues.map(function (d) {
-				var y = yScale(d); // Math.round(xScale(d));
-				return {
-					value: d,
-					label: format(d),
-					x1: 0,
-					y1: y,
-					x2: sign * innerTickSize,
-					y2: y,
-					labelX: sign * (1.2 * innerTickSize + dx),
-					labelY: y + dx
-				};
-			});
-		}, _this.getTicksOrdinary = function (yScale) {
-			var _this$props2 = _this.props,
-			    ticks = _this$props2.ticks,
-			    tickFormat = _this$props2.tickFormat,
-			    innerTickSize = _this$props2.innerTickSize,
-			    orient = _this$props2.orient,
-			    height = _this$props2.height;
-			var fontSize = _this.props.labelStyle.fontSize;
-			var _this$props$config = _this.props.config,
-			    yStep = _this$props$config.step,
-			    yExtents = _this$props$config.extents,
-			    flip = _this$props$config.flip;
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPYAxis.__proto__ || Object.getPrototypeOf(PCPYAxis)).call.apply(_ref, [this].concat(args))), _this), _this.getTicks = function (yScale) {
+            var _this$props = _this.props,
+                ticks = _this$props.ticks,
+                tickFormat = _this$props.tickFormat,
+                innerTickSize = _this$props.innerTickSize,
+                orient = _this$props.orient;
+            var fontSize = _this.props.labelStyle.fontSize;
 
 
-			var sign = orient === "left" || orient === "top" ? -1 : 1;
-			var dx = fontSize * 0.35;
+            var baseFormat = yScale.tickFormat ? yScale.tickFormat(ticks) : function (d) {
+                return d;
+            };
 
-			var yLabels = yExtents.slice();
-			if (!flip) yLabels.reverse();
+            var format = tickFormat ? function (d) {
+                return tickFormat(d) || "";
+            } : baseFormat;
 
-			var minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
-			var maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
+            var tickValues = yScale.ticks(ticks);
 
-			var tickArray = [];
-			for (var i = minval; i < maxval; ++i) {
-				var y = yScale(i);
+            var sign = orient === "left" || orient === "top" ? -1 : 1;
+            var dx = fontSize * 0.35;
 
-				if (y < 0 || y > height) {
-					continue;
-				}
-
-				tickArray.push({
-					value: i,
-					label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...' : yLabels[i],
-					x1: 0,
-					y1: y - yStep / 2,
-					x2: sign * innerTickSize,
-					y2: y - yStep / 2,
-					labelX: sign * (1.2 * innerTickSize + dx),
-					labelY: y + dx - yStep / 2
-				});
-			}
-			return tickArray;
-		}, _this.draw = function (ctx, moreProps) {
-			var _this$props3 = _this.props,
-			    axisLocation = _this$props3.axisLocation,
-			    height = _this$props3.height,
-			    showDomain = _this$props3.showDomain,
-			    showTicks = _this$props3.showTicks,
-			    showTickLabel = _this$props3.showTickLabel,
-			    ordinary = _this$props3.ordinary;
-			var yScale = _this.props.config.scale;
-
-
-			ctx.save();
-			ctx.translate(axisLocation, 0);
-
-			if (showDomain) {
-				Object(__WEBPACK_IMPORTED_MODULE_3__draw__["a" /* drawAxisLine */])(ctx, _this.props, [0, height]);
-			}
-
-			if (showTicks) {
-				var _this$props4 = _this.props,
-				    orient = _this$props4.orient,
-				    labelStyle = _this$props4.labelStyle;
-
-				var textAnchor = orient === "left" ? "end" : "start";
-				Object(__WEBPACK_IMPORTED_MODULE_3__draw__["b" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(yScale) : _this.getTicks(yScale), _this.props.tickStyle, showTickLabel ? _extends({}, labelStyle, { textAnchor: textAnchor }) : null);
-			}
-
-			ctx.restore();
-		}, _this.getDrawRegion = function () {
-			var _this$props5 = _this.props,
-			    axisWidth = _this$props5.axisWidth,
-			    orient = _this$props5.orient,
-			    height = _this$props5.height;
+            return tickValues.map(function (d) {
+                var y = yScale(d); // Math.round(xScale(d));
+                return {
+                    value: d,
+                    label: format(d),
+                    x1: 0,
+                    y1: y,
+                    x2: sign * innerTickSize,
+                    y2: y,
+                    labelX: sign * (1.2 * innerTickSize + dx),
+                    labelY: y + dx
+                };
+            });
+        }, _this.getTicksOrdinary = function (yScale, moreProps) {
+            var _this$props2 = _this.props,
+                ticks = _this$props2.ticks,
+                tickFormat = _this$props2.tickFormat,
+                innerTickSize = _this$props2.innerTickSize,
+                orient = _this$props2.orient,
+                height = _this$props2.height;
+            var fontSize = _this.props.labelStyle.fontSize;
+            var _moreProps$dimConfig = moreProps.dimConfig,
+                yStep = _moreProps$dimConfig.step,
+                yExtents = _moreProps$dimConfig.extents,
+                flip = _moreProps$dimConfig.flip;
 
 
-			var x = orient === 'left' ? -axisWidth : 0,
-			    y = 0,
-			    w = axisWidth,
-			    h = height;
+            var sign = orient === "left" || orient === "top" ? -1 : 1;
+            var dx = fontSize * 0.35;
 
-			return { x: x, y: y, width: w, height: h };
-		}, _temp), _possibleConstructorReturn(_this, _ret);
-	}
+            var yLabels = yExtents.slice();
+            if (!flip) yLabels.reverse();
 
-	_createClass(PCPYAxis, [{
-		key: 'render',
-		value: function render() {
-			var _this2 = this;
+            var minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
+            var maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
 
-			var axisLocation = this.props.axisLocation;
+            var tickArray = [];
+            for (var i = minval; i < maxval; ++i) {
+                var y = yScale(i);
+
+                if (y < 0 || y > height) {
+                    continue;
+                }
+
+                tickArray.push({
+                    value: i,
+                    label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...' : yLabels[i],
+                    x1: 0,
+                    y1: y - yStep / 2,
+                    x2: sign * innerTickSize,
+                    y2: y - yStep / 2,
+                    labelX: sign * (1.2 * innerTickSize + dx),
+                    labelY: y + dx - yStep / 2
+                });
+            }
+            return tickArray;
+        }, _this.draw = function (ctx, moreProps) {
+            //console.log('moreProps: ', moreProps);
+            //console.log('props: ', this.props)
+            var _this$props3 = _this.props,
+                height = _this$props3.height,
+                showDomain = _this$props3.showDomain,
+                showTicks = _this$props3.showTicks,
+                showTitle = _this$props3.showTitle,
+                showTickLabel = _this$props3.showTickLabel,
+                titleFormat = _this$props3.titleFormat,
+                labelStyle = _this$props3.labelStyle;
+            // const { scale: yScale, title } = this.props.config;
+
+            var fontSize = labelStyle.fontSize;
+            var margin = _this.props.shared.margin;
+            var _moreProps$dimConfig2 = moreProps.dimConfig,
+                yScale = _moreProps$dimConfig2.scale,
+                axisLocation = _moreProps$dimConfig2.position,
+                title = _moreProps$dimConfig2.title,
+                ordinary = _moreProps$dimConfig2.ordinary;
 
 
-			var rect = this.getDrawRegion();
+            ctx.save();
+            ctx.translate(axisLocation, 0);
 
-			//console.log(this.props)
+            if (showTitle) {
+                //drawAxisTitle(ctx)
+                Object(__WEBPACK_IMPORTED_MODULE_3__draw__["b" /* drawAxisTitle */])(ctx, {
+                    label: titleFormat(title),
+                    x: 0,
+                    y: -fontSize
+                }, _extends({}, labelStyle, {
+                    textAnchor: 'middle'
+                }));
+            }
 
-			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-				'g',
-				{ transform: 'translate(' + axisLocation + ',' + 0 + ')' },
-				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__PCPAxisEventHandler__["a" /* default */], rect),
-				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__core__["d" /* PCPSubscriberExt */], {
-					ref: function ref(node) {
-						return _this2.node = node;
-					},
-					canvas: function canvas(contexts) {
-						return contexts.axes;
-					},
-					clip: false,
-					edgeClip: false,
-					draw: this.draw,
-					drawOn: ['zoom'],
-					shared: this.props.shared
-				})
-			);
-		}
-	}]);
+            if (showDomain) {
+                Object(__WEBPACK_IMPORTED_MODULE_3__draw__["a" /* drawAxisLine */])(ctx, _this.props, [0, height]);
+            }
 
-	return PCPYAxis;
+            if (showTicks) {
+                var orient = _this.props.orient;
+
+                var textAnchor = orient === "left" ? "end" : "start";
+                Object(__WEBPACK_IMPORTED_MODULE_3__draw__["c" /* drawTicks */])(ctx, ordinary ? _this.getTicksOrdinary(yScale, moreProps) : _this.getTicks(yScale), _this.props.tickStyle, showTickLabel ? _extends({}, labelStyle, { textAnchor: textAnchor }) : null);
+            }
+
+            ctx.restore();
+        }, _this.getDrawRegion = function () {
+            var _this$props4 = _this.props,
+                axisWidth = _this$props4.axisWidth,
+                orient = _this$props4.orient,
+                height = _this$props4.height;
+            var margin = _this.props.shared.margin;
+
+
+            var x = 0,
+                y = margin.top / 2,
+                w = axisWidth,
+                h = height;
+
+            //const halfAxisWidth = newAxisWidth/2;
+            //const tx = (orient === 'left') ? -halfAxisWidth: halfAxisWidth;
+            //const ty = 0;
+            //const transform = `translate(${tx},${ty})`;
+
+            return {
+                x: x, y: y, width: w, height: h
+                //tx 
+            };
+        }, _this.handleAxisMove = function (moveDist, e) {
+            if (_this.props.onAxisMove && _this.props.title) _this.props.onAxisMove(_this.props.title, moveDist, e);
+        }, _this.handleAxisMoveEnd = function (moveDist) {
+            if (_this.props.onAxisMoveEnd && _this.props.title) _this.props.onAxisMoveEnd(_this.props.title, moveDist);
+        }, _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(PCPYAxis, [{
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var _props = this.props,
+                axisLocation = _props.axisLocation,
+                margin = _props.shared.margin,
+                height = _props.height,
+                title = _props.title;
+
+
+            var rect = this.getDrawRegion();
+
+            //console.log(this.props)
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'g',
+                { transform: 'translate(' + axisLocation + ',' + 0 + ')' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__PCPAxisEventHandler__["a" /* default */], _extends({}, rect, {
+                    //topHeight={height}
+                    //tx={0}
+                    //onAxisMove={this.handleAxisMove}
+                    //onAxisMoveEnd={this.handleAxisMoveEnd}
+                    moveCursorClassName: "react-multiview-grabbing-cursor",
+                    zoomCursorClassName: "react-multiview-ns-resize-cursor"
+                })),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__core__["d" /* PCPSubscriberExt */], {
+                    ref: function ref(node) {
+                        return _this2.node = node;
+                    },
+                    canvas: function canvas(contexts) {
+                        return contexts.axes;
+                    },
+                    clip: false,
+                    edgeClip: false,
+                    draw: this.draw,
+                    drawOn: ['moveaxis'],
+                    shared: this.props.shared,
+                    dimConfig: this.props.dimConfig
+                })
+            );
+        }
+    }]);
+
+    return PCPYAxis;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 PCPYAxis.propTypes = {
-	width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	axisWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    axisWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
 
-	axisAt: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOf(["left", "right", "middle"]), __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number]).isRequired,
-	orient: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOf(["left", "right"]).isRequired,
+    axisAt: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOf(["left", "right", "middle"]), __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number]).isRequired,
+    orient: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOf(["left", "right"]).isRequired,
 
-	ticks: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	tickFormat: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+    ticks: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    tickFormat: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
 
-	// for axis line
-	outerTickSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	stroke: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-	strokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	opacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    // for axis line
+    outerTickSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    stroke: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    strokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    opacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
 
-	// for ticks
-	innerTickSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-	tickStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-		tickStroke: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-		tickStrokeOpacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-		tickStrokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-	}),
+    // for ticks
+    innerTickSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    tickStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+        tickStroke: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+        tickStrokeOpacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+        tickStrokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
+    }),
 
-	labelStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-		fontSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-		fontFamily: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-		textAnchor: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-		tickLabelFill: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string
-	}),
+    labelStyle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+        fontSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+        fontFamily: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+        textAnchor: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+        tickLabelFill: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string
+    }),
 
-	showTicks: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-	showTickLabel: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-	showDomain: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    showTicks: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    showTickLabel: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    showTitle: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    showDomain: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
 
-	className: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-	domainClassName: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    titleFormat: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
 
-	zoomEnabled: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-	getMouseDelta: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
-	// onContextMenu: PropTypes.func,
-	// onDoubleBlick: PropTypes.func,
+    className: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+    domainClassName: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+
+    zoomEnabled: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    getMouseDelta: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
+    // onContextMenu: PropTypes.func,
+    // onDoubleBlick: PropTypes.func,
 };
 
 PCPYAxis.defaultProps = {
-	ticks: 10,
+    ticks: 10,
 
-	outerTickSize: 0,
-	stroke: "#000000",
-	strokeWidth: 1,
-	opacity: 1,
+    outerTickSize: 0,
+    stroke: "#000000",
+    strokeWidth: 1,
+    opacity: 1,
 
-	innerTickSize: 5,
-	tickStyle: {
-		tickStroke: "#000000",
-		tickStrokeOpacity: 1,
-		tickStrokeWidth: 1
-	},
+    innerTickSize: 5,
+    tickStyle: {
+        tickStroke: "#000000",
+        tickStrokeOpacity: 1,
+        tickStrokeWidth: 1
+    },
 
-	labelStyle: {
-		fontSize: 6,
-		fontFamily: "Roboto, sans-serif",
-		textAnchor: "start",
-		tickLabelFill: "#000000"
-	},
+    labelStyle: {
+        fontSize: 6,
+        fontFamily: "Roboto, sans-serif",
+        textAnchor: "start",
+        tickLabelFill: "#000000"
+    },
 
-	showTicks: true,
-	showTickLabel: true,
-	showDomain: true,
+    showTicks: true,
+    showTickLabel: true,
+    showTitle: true,
+    showDomain: true,
 
-	className: "",
-	domainClassName: "",
+    titleFormat: function titleFormat(d) {
+        return d;
+    },
 
-	// tickPadding: 6,
-	// tickStroke: '#000000',
-	// tickStrokeOpacity: 1,
+    className: "",
+    domainClassName: "",
 
-	// fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
-	// fontSize: 12,
+    // tickPadding: 6,
+    // tickStroke: '#000000',
+    // tickStrokeOpacity: 1,
 
-	// xZoomHeight: 25,
-	zoomEnabled: true,
-	getMouseDelta: function getMouseDelta(startXY, mouseXY) {
-		return startXY[1] - mouseXY[1];
-	},
-	getInverted: function getInverted(scale, XY) {
-		return scale.invert(XY[1]);
-	}
+    // fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
+    // fontSize: 12,
 
-	// fill: 'none',
+    // xZoomHeight: 25,
+    zoomEnabled: true,
+    getMouseDelta: function getMouseDelta(startXY, mouseXY) {
+        return startXY[1] - mouseXY[1];
+    },
+    getInverted: function getInverted(scale, XY) {
+        return scale.invert(XY[1]);
+    }
+
+    // fill: 'none',
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (PCPYAxis);
@@ -54996,6 +55225,8 @@ PCPYAxis.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_selection__ = __webpack_require__(/*! d3-selection */ 255);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -55007,13 +55238,69 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+
+
+
+
 var PCPAxisEventHandler = function (_React$Component) {
     _inherits(PCPAxisEventHandler, _React$Component);
 
     function PCPAxisEventHandler() {
         _classCallCheck(this, PCPAxisEventHandler);
 
-        return _possibleConstructorReturn(this, (PCPAxisEventHandler.__proto__ || Object.getPrototypeOf(PCPAxisEventHandler)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (PCPAxisEventHandler.__proto__ || Object.getPrototypeOf(PCPAxisEventHandler)).call(this));
+
+        _this.handleMouseDown = function (e) {
+            e.preventDefault();
+
+            var _this$props = _this.props,
+                topHeight = _this$props.topHeight,
+                tx = _this$props.tx;
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["m" /* mousePosition */])(e);
+            //console.log(tx)
+
+            if (mouseXY[1] < topHeight) {
+                console.log('handle filtering');
+            } else {
+                //console.log('move axis')
+                var x = mouseXY[0];
+                var xAtCanvas = x + tx;
+
+                Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_2__utils__["f" /* d3Window */])(_this.node)).on('mousemove.axismove', _this.handleDrag, false).on('mouseup.axismove', _this.handleDragEnd, false);
+
+                _this.setState({
+                    startX: xAtCanvas
+                });
+            }
+        };
+
+        _this.handleDrag = function () {
+            var startX = _this.state.startX;
+            var tx = _this.props.tx;
+
+            var e = __WEBPACK_IMPORTED_MODULE_3_d3_selection__["a" /* event */];
+
+            if (startX) {
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["b" /* mouse */])(_this.node);
+                var diff = mouseXY[0] + tx - startX;
+                if (_this.props.onAxisMove) {
+                    _this.props.onAxisMove(diff, e);
+                }
+            }
+        };
+
+        _this.handleDragEnd = function () {
+            __WEBPACK_IMPORTED_MODULE_3_d3_selection__["c" /* select */].apply(Object(__WEBPACK_IMPORTED_MODULE_2__utils__["f" /* d3Window */])(_this.node)).on('mousemove.axismove', null).on('mouseup.axismove', null);
+
+            _this.setState({ startX: null });
+        };
+
+        _this.state = {
+            startX: null
+        };
+        //this.mouseInteraction = false;
+        return _this;
     }
 
     _createClass(PCPAxisEventHandler, [{
@@ -55021,16 +55308,19 @@ var PCPAxisEventHandler = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
+            var cursor = this.state.startX ? this.props.moveCursorClassName : 'react-multiview-default-cursor';
+
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
                 ref: function ref(node) {
                     return _this2.node = node;
                 },
-                className: '',
+                className: 'react-multiview-enable-interaction ' + cursor,
                 x: this.props.x,
                 y: this.props.y,
                 width: this.props.width,
                 height: this.props.height,
-                style: { fill: "green", opacity: 0.3 }
+                style: { fill: "black", opacity: 0.3 }
+                //onMouseDown={this.handleMouseDown}
             });
         }
     }]);
@@ -55080,7 +55370,14 @@ var PCPSubscriberExt = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (PCPSubscriberExt.__proto__ || Object.getPrototypeOf(PCPSubscriberExt)).call(this));
 
         _this.getMoreProps = function () {
-            return _extends({}, _this.moreProps);
+            var _this$props = _this.props,
+                shared = _this$props.shared,
+                dimConfig = _this$props.dimConfig;
+
+
+            return _extends({}, shared, {
+                dimConfig: dimConfig
+            }, _this.moreProps);
         };
 
         _this.handleDraw = function () {
@@ -55100,9 +55397,9 @@ var PCPSubscriberExt = function (_React$Component) {
         _this.preDraw = function (ctx) {
             ctx.save();
 
-            var _this$props = _this.props,
-                edgeClip = _this$props.edgeClip,
-                clip = _this$props.clip;
+            var _this$props2 = _this.props,
+                edgeClip = _this$props2.edgeClip,
+                clip = _this$props2.clip;
             var _this$props$shared = _this.props.shared,
                 margin = _this$props$shared.margin,
                 ratio = _this$props$shared.ratio,
@@ -55130,9 +55427,46 @@ var PCPSubscriberExt = function (_React$Component) {
             ctx.restore();
         };
 
-        _this.listener = function () {};
+        _this.updateMoreProps = function (moreProps) {
+            Object.keys(moreProps).forEach(function (key) {
+                _this.moreProps[key] = moreProps[key];
+            });
 
-        _this.draw = function () {};
+            var dimConfigList = moreProps.dimConfig;
+
+            if (dimConfigList) {
+                if (_this.props.useAllDim) {
+                    // do nothing
+                } else {
+                    var axisTitle = _this.props.dimConfig.title;
+
+                    var dimConfig = dimConfigList[axisTitle];
+                    _this.moreProps.dimConfig = dimConfig;
+                }
+            }
+        };
+
+        _this.listener = function (type, moreProps, state, e) {
+            if (moreProps) {
+                _this.updateMoreProps(moreProps);
+            }
+            _this.evalInProgress = true;
+            //this.evalType(type, e);
+            _this.evalInProgress = false;
+        };
+
+        _this.draw = function () {
+            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { force: false },
+                trigger = _ref.trigger,
+                force = _ref.force;
+
+            var type = trigger; //aliases[trigger] || trigger;
+            var proceed = _this.props.drawOn.indexOf(type) > -1;
+
+            if (proceed || force) {
+                _this.handleDraw();
+            }
+        };
 
         _this.state = {
             id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()('pcp-subscriber-')
@@ -55207,7 +55541,8 @@ var PCPSubscriberExt = function (_React$Component) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core__ = __webpack_require__(/*! ../core */ 51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_collection__ = __webpack_require__(/*! d3-collection */ 117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_collection__ = __webpack_require__(/*! d3-collection */ 117);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -55215,6 +55550,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -55238,19 +55574,43 @@ var PCPPolyLineSeries = function (_React$Component) {
         }
 
         return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPPolyLineSeries.__proto__ || Object.getPrototypeOf(PCPPolyLineSeries)).call.apply(_ref, [this].concat(args))), _this), _this.draw = function (ctx, moreProps) {
-            var plotData = _this.props.data;
+            var plotData = moreProps.plotData,
+                xScale = moreProps.xScale,
+                dimConfig = moreProps.dimConfig;
+            var _this$props = _this.props,
+                opacity = _this$props.opacity,
+                strokeWidth = _this$props.strokeWidth;
 
+            //console.log(moreProps)
 
-            var nest = Object(__WEBPACK_IMPORTED_MODULE_3_d3_collection__["b" /* nest */])().key(function (d) {
+            var nest = Object(__WEBPACK_IMPORTED_MODULE_4_d3_collection__["b" /* nest */])().key(function (d) {
                 return d.stroke;
             }).entries(plotData);
 
-            var x = function x(d) {
-                return d[0];
-            },
-                y = function y(d) {
-                return d[1];
+            var dimOrder = xScale.domain();
+            //console.log(dimOrder)
+
+            var yAccessor = function yAccessor(d, config) {
+                var ordinary = config.ordinary,
+                    scale = config.scale,
+                    accessor = config.accessor,
+                    extents = config.extents,
+                    step = config.step;
+
+                return ordinary ? scale(extents.indexOf(accessor(d))) - step / 2 : scale(accessor(d));
             };
+
+            var xAccessor = function xAccessor(config) {
+                return config.position;
+            };
+            //     const y = ordinary
+            //         ? scale(extents.findIndex(v => v === yValue)) - step/2
+            //         : scale(yValue);
+
+            var p1Config = void 0,
+                p2Config = void 0,
+                p1 = void 0,
+                p2 = void 0;
 
             ctx.save();
             nest.forEach(function (groupByStroke) {
@@ -55258,16 +55618,24 @@ var PCPPolyLineSeries = function (_React$Component) {
                     group = groupByStroke.values;
 
 
-                ctx.strokeStyle = stroke;
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["j" /* hexToRGBA */])(stroke, opacity);
+                ctx.lineWidth = strokeWidth;
 
-                group.forEach(function (points) {
+                group.forEach(function (d) {
                     ctx.beginPath();
-                    for (var i = 0; i < points.length - 1; ++i) {
-                        var p1 = points[i];
-                        var p2 = points[i + 1];
-                        ctx.moveTo(x(p1), y(p1));
-                        ctx.lineTo(x(p2), y(p2));
+
+                    p1Config = dimConfig[dimOrder[0]];
+                    p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+                    ctx.moveTo(p1[0], p1[1]);
+                    for (var i = 1; i < dimOrder.length; ++i) {
+
+                        p2Config = dimConfig[dimOrder[i]];
+                        p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
+                        //ctx.moveTo(p1[0], p1[1]);
+                        ctx.lineTo(p2[0], p2[1]);
+
+                        //p1Config = p2Config;
+                        //p1 = p2;
                     }
                     ctx.stroke();
                 });
@@ -55286,8 +55654,10 @@ var PCPPolyLineSeries = function (_React$Component) {
                 clip: false,
                 edgeClip: false,
                 draw: this.draw,
-                drawOn: ["pan"],
-                shared: this.props.shared
+                drawOn: ["moveaxis"],
+                shared: this.props.shared,
+                dimConfig: this.props.dimConfig,
+                useAllDim: true
             });
         }
     }]);
@@ -55296,6 +55666,200 @@ var PCPPolyLineSeries = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["a"] = (PCPPolyLineSeries);
+
+/***/ }),
+/* 688 */
+/*!********************************************!*\
+  !*** ./src/lib/axes/draw/drawAxisTitle.js ***!
+  \********************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function (ctx, title, labelStyle) {
+    var fontSize = labelStyle.fontSize,
+        fontFamily = labelStyle.fontFamily,
+        tickLabelFill = labelStyle.tickLabelFill,
+        textAnchor = labelStyle.textAnchor;
+
+
+    ctx.font = fontSize + 'px ' + fontFamily;
+    ctx.fillStyle = tickLabelFill;
+    ctx.textAlign = textAnchor === 'middle' ? 'center' : textAnchor;
+    ctx.beginPath();
+    ctx.fillText(title.label, title.x, title.y);
+});
+
+/***/ }),
+/* 689 */
+/*!*****************************************!*\
+  !*** ./src/lib/core/PCPEventHandler.js ***!
+  \*****************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_selection__ = __webpack_require__(/*! d3-selection */ 255);
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+var PCPEventHandler = function (_React$Component) {
+    _inherits(PCPEventHandler, _React$Component);
+
+    function PCPEventHandler() {
+        _classCallCheck(this, PCPEventHandler);
+
+        var _this = _possibleConstructorReturn(this, (PCPEventHandler.__proto__ || Object.getPrototypeOf(PCPEventHandler)).call(this));
+
+        _this.inAxisHandlerY = function (y) {
+            var axisMoveHandlerYRange = _this.props.axisMoveHandlerYRange;
+
+            for (var i = 0; i < axisMoveHandlerYRange.length; ++i) {
+                var _axisMoveHandlerYRang = _slicedToArray(axisMoveHandlerYRange[i], 2),
+                    miny = _axisMoveHandlerYRang[0],
+                    maxy = _axisMoveHandlerYRang[1];
+
+                if (miny <= y && y <= maxy) return true;
+            }
+            return false;
+        };
+
+        _this.findSelectedAxis = function (x) {
+            var _this$props = _this.props,
+                axisMoveHandlerXOffset = _this$props.axisMoveHandlerXOffset,
+                dimConfig = _this$props.dimConfig;
+
+            var xAtCanvas = x - axisMoveHandlerXOffset;
+
+            var dimTitles = Object.keys(dimConfig);
+            for (var i = 0; i < dimTitles.length; ++i) {
+                var _dimConfig$dimTitles$ = dimConfig[dimTitles[i]],
+                    position = _dimConfig$dimTitles$.position,
+                    axisWidth = _dimConfig$dimTitles$.axisWidth,
+                    title = _dimConfig$dimTitles$.title;
+
+                var minx = position - axisWidth / 2,
+                    maxx = position + axisWidth / 2;
+
+                if (minx <= xAtCanvas && xAtCanvas <= maxx) return title;
+            }
+            return null;
+        };
+
+        _this.handleMouseDown = function (e) {
+            e.preventDefault();
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["m" /* mousePosition */])(e);
+
+            if (_this.inAxisHandlerY(mouseXY[1])) {
+                //console.log('inside')
+                var axisTitle = _this.findSelectedAxis(mouseXY[0]);
+                if (axisTitle) {
+                    Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_2__utils__["f" /* d3Window */])(_this.node)).on('mousemove.axismove', _this.handleDrag, false).on('mouseup.axismove', _this.handleDragEnd, false);
+
+                    _this.setState({
+                        axisMoveInProgress: true,
+                        startX: mouseXY[0],
+                        moveAxis: axisTitle
+                    });
+                }
+            }
+        };
+
+        _this.handleDrag = function () {
+            var _this$state = _this.state,
+                axisMoveInProgress = _this$state.axisMoveInProgress,
+                startX = _this$state.startX,
+                moveAxis = _this$state.moveAxis;
+
+
+            var e = __WEBPACK_IMPORTED_MODULE_3_d3_selection__["a" /* event */];
+
+            if (axisMoveInProgress) {
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["b" /* mouse */])(_this.node);
+                var moveDist = mouseXY[0] - startX;
+                if (_this.props.onAxisMove) {
+                    _this.props.onAxisMove(moveAxis, moveDist, e);
+                }
+            }
+        };
+
+        _this.handleDragEnd = function () {
+            var _this$state2 = _this.state,
+                axisMoveInProgress = _this$state2.axisMoveInProgress,
+                startX = _this$state2.startX,
+                moveAxis = _this$state2.moveAxis;
+
+            var e = __WEBPACK_IMPORTED_MODULE_3_d3_selection__["a" /* event */];
+
+            if (axisMoveInProgress) {
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["b" /* mouse */])(_this.node);
+                var moveDist = mouseXY[0] - startX;
+                if (_this.props.onAxisMoveEnd) _this.props.onAxisMoveEnd(moveAxis, moveDist, e);
+            }
+
+            Object(__WEBPACK_IMPORTED_MODULE_3_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_2__utils__["f" /* d3Window */])(_this.node)).on('mousemove.axismove', null).on('mouseup.axismove', null);
+
+            _this.setState({
+                axisMoveInProgress: false,
+                startX: null,
+                moveAxis: null
+            });
+        };
+
+        _this.state = {
+            axisMoveInProgress: false,
+            startX: null,
+            moveAxis: null
+        };
+        return _this;
+    }
+
+    _createClass(PCPEventHandler, [{
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var className = this.state.axisMoveInProgress ? 'react-multiview-grabbing-cursor' : 'react-multiview-default-cursor';
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
+                ref: function ref(node) {
+                    return _this2.node = node;
+                },
+                className: className,
+                width: this.props.width,
+                height: this.props.height,
+                style: { fill: 'red', opacity: 0. },
+                onMouseDown: this.handleMouseDown
+            });
+        }
+    }]);
+
+    return PCPEventHandler;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (PCPEventHandler);
 
 /***/ })
 /******/ ]);

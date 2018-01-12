@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import PCPAxisEventHandler from './PCPAxisEventHandler';
 import {
 	drawAxisLine,
-	drawTicks
+    drawTicks,
+    drawAxisTitle
 } from "./draw";
 import { PCPSubscriberExt } from '../core';
 
@@ -43,10 +44,10 @@ class PCPYAxis extends React.Component {
     	});
 	}
 	
-    getTicksOrdinary = (yScale) => {
+    getTicksOrdinary = (yScale, moreProps) => {
 		const { ticks, tickFormat, innerTickSize, orient, height } = this.props;
     	const { fontSize } = this.props.labelStyle;
-        const { step: yStep, extents: yExtents, flip} = this.props.config; 
+        const { step: yStep, extents: yExtents, flip} = moreProps.dimConfig; 
 
         const sign = orient === "left" || orient === "top" ? -1 : 1;
     	const dx = fontSize * 0.35;
@@ -80,23 +81,47 @@ class PCPYAxis extends React.Component {
     }	
 
     draw = (ctx, moreProps) => {
+        //console.log('moreProps: ', moreProps);
+        //console.log('props: ', this.props)
     	const {
-            axisLocation, height, 
-            showDomain, showTicks, showTickLabel, ordinary } = this.props;
-        const { scale: yScale } = this.props.config;
+            height, 
+            showDomain, showTicks, showTitle, showTickLabel, 
+            titleFormat,
+            labelStyle } = this.props;
+        // const { scale: yScale, title } = this.props.config;
+        const { fontSize } = labelStyle;
+        const { margin } = this.props.shared;
+        const { 
+            scale: yScale, 
+            position: axisLocation,
+            title,
+            ordinary 
+        } = moreProps.dimConfig;
 
     	ctx.save();
     	ctx.translate(axisLocation, 0);
+
+        if (showTitle) {
+            //drawAxisTitle(ctx)
+            drawAxisTitle(ctx,{
+                label: titleFormat(title),
+                x: 0,
+                y: -fontSize
+            }, {
+                ...labelStyle,
+                textAnchor: 'middle'
+            });
+        }
 
     	if (showDomain) {
     		drawAxisLine(ctx, this.props, [0, height]);
     	}
 
     	if (showTicks) {
-    		const { orient, labelStyle } = this.props;
+    		const { orient } = this.props;
 			const textAnchor = orient === "left" ? "end" : "start";
 			drawTicks(ctx, 
-				ordinary ? this.getTicksOrdinary(yScale): this.getTicks(yScale),
+				ordinary ? this.getTicksOrdinary(yScale, moreProps): this.getTicks(yScale),
     			this.props.tickStyle,
     			showTickLabel ? { ...labelStyle, textAnchor } : null
     		);
@@ -107,19 +132,42 @@ class PCPYAxis extends React.Component {
 
     getDrawRegion = () => {
         const { axisWidth, orient, height } = this.props;
-        
+        const { margin } = this.props.shared;
+
         const 
-            x = (orient === 'left') ? -axisWidth: 0,
-            y = 0,
+            x = 0,
+            y = margin.top/2,
             w = axisWidth,
             h = height;
 
-        return { x, y, width: w, height: h }
+    
+        //const halfAxisWidth = newAxisWidth/2;
+        //const tx = (orient === 'left') ? -halfAxisWidth: halfAxisWidth;
+        //const ty = 0;
+        //const transform = `translate(${tx},${ty})`;
+        
+        return { 
+            x, y, width: w, height: h,
+            //tx 
+        }
+    }
+
+    handleAxisMove = (moveDist, e) => {
+        if (this.props.onAxisMove && this.props.title)
+            this.props.onAxisMove(this.props.title, moveDist, e);
+    }
+
+    handleAxisMoveEnd = (moveDist) => {
+        if (this.props.onAxisMoveEnd && this.props.title)
+            this.props.onAxisMoveEnd(this.props.title, moveDist);
     }
 
     render () {
         const {
-            axisLocation
+            axisLocation,
+            shared: {margin},
+            height,
+            title
         } = this.props;
 
         const rect = this.getDrawRegion();
@@ -130,6 +178,12 @@ class PCPYAxis extends React.Component {
             <g transform={`translate(${axisLocation},${0})`}>
                 <PCPAxisEventHandler
                     {...rect}
+                    //topHeight={height}
+                    //tx={0}
+                    //onAxisMove={this.handleAxisMove}
+                    //onAxisMoveEnd={this.handleAxisMoveEnd}
+                    moveCursorClassName={"react-multiview-grabbing-cursor"}
+                    zoomCursorClassName={"react-multiview-ns-resize-cursor"}
                 />
                 <PCPSubscriberExt 
                     ref={node => this.node = node}
@@ -137,8 +191,9 @@ class PCPYAxis extends React.Component {
                     clip={false}
                     edgeClip={false}
                     draw={this.draw}
-                    drawOn={['zoom']}
+                    drawOn={['moveaxis']}
                     shared={this.props.shared}
+                    dimConfig={this.props.dimConfig}
                 />
             </g>
         );
@@ -181,8 +236,11 @@ PCPYAxis.propTypes = {
 	}),
 
 	showTicks: PropTypes.bool,
-	showTickLabel: PropTypes.bool,
-	showDomain: PropTypes.bool,
+    showTickLabel: PropTypes.bool,
+    showTitle: PropTypes.bool,
+    showDomain: PropTypes.bool,
+    
+    titleFormat: PropTypes.func,
 
 	className: PropTypes.string,
 	domainClassName: PropTypes.string,
@@ -216,8 +274,11 @@ PCPYAxis.defaultProps = {
 	},
 
 	showTicks: true,
-	showTickLabel: true,
-	showDomain: true,
+    showTickLabel: true,
+    showTitle: true,
+    showDomain: true,
+    
+    titleFormat: d => d,
 
 	className: "",
 	domainClassName: "",
