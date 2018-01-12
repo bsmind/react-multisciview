@@ -82,8 +82,8 @@ class ChartBox extends React.Component {
         const pcpHeight = height - scatterHeight;
         return (
             <div className={this.props.className}>
-                {this.renderParallelCoordinateChart(pcpHeight)}
                 {this.renderScatterChart(scatterHeight)}
+                {this.renderParallelCoordinateChart(pcpHeight)}
             </div>
         );
     }

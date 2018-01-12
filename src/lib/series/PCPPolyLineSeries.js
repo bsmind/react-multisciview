@@ -9,7 +9,6 @@ import { nest as d3Nest } from 'd3-collection';
 class PCPPolyLineSeries extends React.Component {
     draw = (ctx, moreProps) => {
         const { 
-            //shared: { plotData, xScale },  
             plotData,
             xScale,
             dimConfig
@@ -25,7 +24,10 @@ class PCPPolyLineSeries extends React.Component {
         //console.log(dimOrder)
 
         const yAccessor = (d, config) => {
-            const {ordinary, scale, accessor, extents, step} = config;
+            const {ordinary, scale, accessor, extents, step, nullPositionY} = config;
+            //console.log(d, accessor)
+            const yValue = accessor(d);
+            if (yValue == null) return nullPositionY;
             return ordinary
                 ? scale(extents.indexOf(accessor(d))) - step/2
                 : scale(accessor(d));

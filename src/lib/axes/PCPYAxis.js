@@ -78,7 +78,16 @@ class PCPYAxis extends React.Component {
 			});
 		}
 		return tickArray;
-    }	
+	}	
+	
+	drawNullMarker = (ctx, moreProps) => {
+		const { dimConfig: {position, nullPositionY, title} } = moreProps;
+		//console.log(title, position, nullPositionY);
+		//ctx.fillRect(position-2, nullPositionY, 4, 4);
+		ctx.beginPath();
+		ctx.rect(-2, nullPositionY-2, 4, 4);
+		ctx.fill();
+	}
 
     draw = (ctx, moreProps) => {
         //console.log('moreProps: ', moreProps);
@@ -114,7 +123,10 @@ class PCPYAxis extends React.Component {
         }
 
     	if (showDomain) {
-    		drawAxisLine(ctx, this.props, [0, height]);
+			drawAxisLine(ctx, this.props, [0, height]);
+			// drawNullMarker
+			this.drawNullMarker(ctx, moreProps);
+			// end drawNullMarker
     	}
 
     	if (showTicks) {

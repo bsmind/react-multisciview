@@ -101,7 +101,8 @@ class PCPCanvas extends React.Component {
             dimAccessor,
             data,
             colorAccessor,
-            axisWidth
+            axisWidth,
+            margin
         } = props;
 
         const canvasDim = getCanvasDimension(props);
@@ -110,10 +111,16 @@ class PCPCanvas extends React.Component {
                         .range([0, canvasDim.width])
                         .padding(0);
         
+        //console.log(xScale.domain())
         // getDimConfig
         const dimConfig = {}; 
         dimName.forEach(name => {
-            const axisExtents = dimAccessor(dimExtents, name);
+            let axisExtents = dimAccessor(dimExtents, name);
+            if (axisExtents == null) {
+                axisExtents = [0, 1];
+            //     accessor = d => null;
+            }
+
             const ordinary = isArrayOfString(axisExtents);
 
             const yScale = scaleLinear();
@@ -132,13 +139,13 @@ class PCPCanvas extends React.Component {
                 flip: false,
                 position: xScale(name),
                 axisWidth,
-                accessor: d => d[name]
+                accessor: d => d[name],
+                nullPositionY: canvasDim.height + margin.bottom/2
             }
         });
         // end of getDimConfig
 
         // calculateDataFromNewDimConfig
-        //console.log(data).. filtering for each dimension..
         const plotData = data.map(d => {
             const flattened = {};
             dimName.forEach(name => {
@@ -146,26 +153,7 @@ class PCPCanvas extends React.Component {
             });
             flattened.stroke = colorAccessor(d);
             return flattened;
-            // const points = dimName.map(name => {
-            //     const {
-            //         position: x, 
-            //         scale,
-            //         ordinary,
-            //         extents,
-            //         step
-            //     } = dimConfig[name];
-
-            //     const yValue = dimAccessor(d, name);
-            //     const y = ordinary
-            //         ? scale(extents.findIndex(v => v === yValue)) - step/2
-            //         : scale(yValue);
-
-            //     return [x, y];
-            // });
-            // points.stroke = colorAccessor(d);//hexToRGBA(colorAccessor(d), opacity);
-            // return points;
         });
-        //console.log(plotData)
         // end
 
         //this.fullData = plotData;
@@ -176,13 +164,97 @@ class PCPCanvas extends React.Component {
         }
     }
 
+    updateChart = (props = this.props) => {
+        const {
+            dimName,
+            dimExtents,
+            dimAccessor,
+            data,
+            colorAccessor,
+            axisWidth,
+            margin
+        } = props;
+
+        const canvasDim = getCanvasDimension(props);
+
+        // updateDimConfig
+        const { 
+            xScale: initialXScale,
+            dimConfig: initialDimConfig 
+        } = this.state;
+        const initialDimOrder = initialXScale.domain();
+
+        dimName.forEach(name => {
+            if ( initialDimOrder.indexOf(name) === -1) 
+                initialDimOrder.push(name);                
+        });
+
+        const newDimOrder = [];
+        initialDimOrder.forEach(name => {
+            if ( dimName.indexOf(name) >= 0)
+                newDimOrder.push(name);
+        });
+
+        const newXScale = scalePoint()
+                            .domain(newDimOrder)
+                            .range([0, canvasDim.width])
+                            .padding(0);
+
+        const newDimConfig = {};
+        newDimOrder.forEach(name => {
+            let axisExtents = dimAccessor(dimExtents, name);
+            if (axisExtents == null)
+                axisExtents = [0, 1];
+
+            const ordinary = isArrayOfString(axisExtents);
+            
+            const yScale = scaleLinear();
+            const domain = ordinary ? [0, axisExtents.length] : axisExtents;
+            yScale.domain(domain)
+                    .range([canvasDim.height, 0]);
+            
+            const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
+            newDimConfig[name] = {
+                title: name,
+                extents: axisExtents,
+                ordinary,
+                scale: yScale,
+                step: yStep,
+                active: true,
+                flip: false,
+                position: newXScale(name),
+                axisWidth,
+                accessor: d => d[name],
+                nullPositionY: canvasDim.height + margin.bottom/2
+            }
+        });
+
+       // console.log(newDimOrder)
+       const plotData = data.map(d => {
+            const flattened = {};
+            dimName.forEach(name => {
+                flattened[name] = dimAccessor(d, name);
+            });
+            flattened.stroke = colorAccessor(d);
+            return flattened;
+        });
+
+        return {
+            xScale: newXScale,
+            dimConfig: newDimConfig,
+            plotData
+        }
+        // end updateDimConfig
+    }
+
     componentWillMount() {
         const state = this.resetChart();
         this.setState(state);
     }
 
     componentWillReceiveProps(nextProps) {
-        const newState = this.resetChart(nextProps);
+        //const newState = this.resetChart(nextProps);
+        const newState = this.updateChart(nextProps);
 
         this.clearThreeCanvas();
         this.setState(newState);

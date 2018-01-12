@@ -89,7 +89,13 @@ class PCPSubscriberExt extends React.Component {
     }    
 
     componentWillReceiveProps(nextProps) {
-
+        const {shared, dimConfig} = nextProps;
+                        
+        this.moreProps = {
+            ...this.moreProps,
+            ...shared,
+            dimConfig
+        };
     }
 
     updateMoreProps = (moreProps) => {

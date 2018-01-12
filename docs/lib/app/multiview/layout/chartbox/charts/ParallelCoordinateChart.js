@@ -25,10 +25,12 @@ class ParallelCoordinateChart extends React.Component {
         if (data == null || data.length === 0)
             return <div/>
 
+        //console.log(dimension)
         const dimName = [
             'sample', 
             'metadata_extract.data.annealing_time',
-            'metadata_extract.data.annealing_temperature'
+            'metadata_extract.data.annealing_temperature',
+            //'linecut_qr.data.fit_peaks_sigma1'
         ];
         //const xExtents = [0, numDim];
 
