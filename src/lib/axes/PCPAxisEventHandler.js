@@ -17,63 +17,87 @@ class PCPAxisEventHandler extends React.Component {
     constructor() {
         super();
         this.state = {
-            startX: null
+            mouseInside: false,
+            startY: null
         };
         //this.mouseInteraction = false;
+        //this.mouseInside = false;
+    }
+
+    componentDidMount() {
+        if (this.node) {
+            select(this.node)
+                .on("mouseenter", this.handleEnter)
+                .on('mouseleave', this.handleLeave);
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.node) {
+            select(this.node)
+                .on('mouseenter', null)
+                .on('mouseleave', null);
+        }
+    }
+
+    handleEnter = () => {
+        this.setState({mouseInside: true});
+    }
+
+    handleLeave = () => {
+        this.setState({mouseInside: false});
     }
 
     handleMouseDown = (e) => {
-        e.preventDefault();
+        if (e.button !== 0) return;
+        if (!this.state.mouseInside) return;
 
-        const { topHeight, tx } = this.props;
         const mouseXY = mousePosition(e);
-        //console.log(tx)
+        select(d3Window(this.node))
+            .on('mousemove', this.handleRangeSelect)
+            .on('mouseup', this.handleRangeSelectEnd);
 
-        if (mouseXY[1] < topHeight) {
-            console.log('handle filtering')
-        } else {
-            //console.log('move axis')
-            const x = mouseXY[0];
-            const xAtCanvas = x + tx;
-
-            select(d3Window(this.node))
-                .on('mousemove.axismove', this.handleDrag, false)
-                .on('mouseup.axismove', this.handleDragEnd, false);
-
-            this.setState({
-                startX: xAtCanvas
-            });
-        }
+        this.setState({startY: mouseXY[1]});
+        e.preventDefault();        
     }
 
-    handleDrag = () => {
-        const { startX } = this.state;
-        const { tx } = this.props;
+    getMouseY = () => {
+        return Math.round(mouse(this.node)[1] - this.props.y);
+    }
+
+    handleRangeSelect = () => {
         const e = d3Event;
 
-        if (startX) {
-            const mouseXY = mouse(this.node);
-            const diff = (mouseXY[0] + tx) - startX;
-            if (this.props.onAxisMove) {
-                this.props.onAxisMove(diff, e);
-            }
+        const mouseY = this.getMouseY();
+        if (this.props.onRangeSelect) {
+            this.props.onRangeSelect(this.state.startY, mouseY, e);
         }
     }
 
-    handleDragEnd = () => {
-        select.apply(d3Window(this.node))
-            .on('mousemove.axismove', null)
-            .on('mouseup.axismove', null);
+    handleRangeSelectEnd = () => {
+        const e = d3Event;
+        const mouseY = this.getMouseY();
 
-        
+        if (Math.abs(mouseY - this.state.startY) < 1e-6) {
+            this.setState({startY: null, endY: null});
+            if (this.props.onRangeSelectCancle)
+                this.props.onRangeSelectCancle(e);            
+        } else {
+            this.setState({endY: mouseY});
+            if (this.props.onRangeSelect)
+                this.props.onRangeSelectEnd(this.state.startY, mouseY, e);
+        }
 
-        this.setState({startX: null});
+        select(d3Window(this.node))
+            .on('mousemove', null)
+            .on('mouseup', null);
+
+        this.setState({startY: null});
     }
 
-
     render () {
-        const cursor = this.state.startX
-            ? this.props.moveCursorClassName
+        const cursor = this.state.mouseInside
+            ? 'react-multiview-crosshair-cursor'
             : 'react-multiview-default-cursor'
 
         return <rect 
@@ -83,8 +107,9 @@ class PCPAxisEventHandler extends React.Component {
             y={this.props.y}
             width={this.props.width}
             height={this.props.height}
-            style={{fill: "black", opacity: 0.3}}
-            //onMouseDown={this.handleMouseDown}
+            style={{fill: "black", opacity: 0.0}}
+            onMouseDown={this.handleMouseDown}
+            //onClick={this.handleRangeSelectCancel}
         />
     }
 }

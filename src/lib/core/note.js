@@ -1,106 +1,69 @@
-const {
-    dimName, 
-    dimExtents,
-    dimAccessor,
-    margin, width, height, ratio} = this.props;
-const canvasDim = getCanvasDimension(this.props);
+resetChart = (props = this.props) => {
+    const {
+        dimName,
+        dimExtents,
+        dimAccessor,
+        data,
+        colorAccessor,
+        axisWidth,
+        margin
+    } = props;
 
-const xScale = scalePoint()
-                .domain(dimName)
-                .range([0, canvasDim.width])
-                .padding(0);
-
-const shared = {
-    margin,
-    ratio,
-
-    chartWidth: canvasDim.width,
-    chartHeight: canvasDim.height,
-
-
-    subscribe: this.subscribe,
-    unsubscribe: this.unsubscribe,
-    getCanvasContexts: this.getCanvasContexts
-}
-
-//console.log(this.props.dimension)
-
-
-const yScaleList = {};
-const pcpYAxisList = dimName.map(name => {
-    const axisExtents = dimAccessor(dimExtents, name);            
-    const ordinary = isArrayOfString(axisExtents);
-
-    let yScale, yStep;
-    if (ordinary) {
-        yScale = scalePoint()
-                    .domain(axisExtents)
-                    .range([canvasDim.height, 0])
+    const canvasDim = getCanvasDimension(props);
+    const xScale = scalePoint()
+                    .domain(dimName)
+                    .range([0, canvasDim.width])
                     .padding(0);
+    
+    //console.log(xScale.domain())
+    // getDimConfig
+    const dimConfig = {}; 
+    dimName.forEach(name => {
+        let axisExtents = dimAccessor(dimExtents, name);
+        if (axisExtents == null) {
+            axisExtents = [0, 1];
+        //     accessor = d => null;
+        }
 
-        yStep = yScale.step();//Math.abs(yScale(0) - yScale(1));
-    } else {
-        yScale = scaleLinear()
-                    .domain(axisExtents)
-                    .range([canvasDim.height, 0]);
-        yStep = 0;
+        const ordinary = isArrayOfString(axisExtents);
+
+        const yScale = scaleLinear();
+        const domain = ordinary ? [0, axisExtents.length] : axisExtents;
+        yScale.domain(domain)
+              .range([canvasDim.height, 0]);
+
+        const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
+        dimConfig[name] = {
+            title: name,
+            extents: axisExtents,
+            ordinary,
+            scale: yScale,
+            step: yStep,
+            active: true,
+            flip: false,
+            position: xScale(name),
+            axisWidth,
+            accessor: d => d[name],
+            nullPositionY: canvasDim.height + margin.bottom/2
+        }
+    });
+    // end of getDimConfig
+
+    // calculateDataFromNewDimConfig
+    const plotData = data.map(d => {
+        const flattened = {};
+        dimName.forEach(name => {
+            flattened[name] = dimAccessor(d, name);
+        });
+        flattened.stroke = colorAccessor(d);
+        return flattened;
+    });
+    // end
+
+    //this.fullData = plotData;
+    return {
+        xScale,
+        dimConfig,
+        plotData
     }
-    yScaleList[name] = {yScale, yStep};
-
-
-    return (
-        <PCPYAxis key={`pcp-yaxis-${name}`}
-            title={name}
-            axisLocation={xScale(name)}
-            extents={dimAccessor(dimExtents, name)}
-            axisWidth={25}
-            height={canvasDim.height}
-            orient={'left'}
-            ordinary={isArrayOfString(axisExtents)}
-            shared={shared}
-        />
-    );
-});
-
-//console.log(yScaleList)
-
-//console.log('PCPCanvas: ', this.props);
-return (
-    <div
-        style={divStyle}
-        className={""}
-    >
-        <CanvasContainer
-            ref={node => this.canvasContainerNode = node}
-            ratio={this.props.ratio}
-            width={width}
-            height={height}
-            zIndex={1}
-        />
-        <svg
-            className={""}
-            width={width}
-            height={height}
-            style={svgStyle}
-        >
-            <g transform={`translate(${margin.left},${margin.top})`}>
-                {/* <EventHandler /> */}
-                <g>
-                    {pcpYAxisList}
-                    <PCPPolyLineSeries 
-                        data={this.props.data}
-                        dimName={this.props.dimName}
-                        dimExtents={this.props.dimExtents}
-                        dimAccessor={this.props.dimAccessor}
-                        shared={shared}
-
-                        xScale={xScale}
-                        yScaleList={yScaleList}
-                        yAccessor={this.props.yAccessor}
-                    />
-                </g>
-            </g>
-        </svg>
-    </div>
-);
 }

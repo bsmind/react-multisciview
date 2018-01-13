@@ -6,6 +6,8 @@ import { hexToRGBA } from '../utils';
 
 import { nest as d3Nest } from 'd3-collection';
 
+import forEach from 'lodash.foreach';
+
 class PCPPolyLineSeries extends React.Component {
     draw = (ctx, moreProps) => {
         const { 
@@ -15,69 +17,98 @@ class PCPPolyLineSeries extends React.Component {
         } = moreProps;
         const { opacity, strokeWidth } = this.props;
 
-        //console.log(moreProps)
         const nest = d3Nest()
                         .key(d => d.stroke)
                         .entries(plotData);
 
         const dimOrder = xScale.domain();
-        //console.log(dimOrder)
 
         const yAccessor = (d, config) => {
             const {ordinary, scale, accessor, extents, step, nullPositionY} = config;
-            //console.log(d, accessor)
             const yValue = accessor(d);
-            if (yValue == null) return nullPositionY;
+            if (yValue == null || yValue == undefined) {
+                return nullPositionY;
+            }
             return ordinary
-                ? scale(extents.indexOf(accessor(d))) - step/2
-                : scale(accessor(d));
+                ? scale(extents.indexOf(yValue)) - step/2
+                : scale(yValue);
         };
 
         const xAccessor = (config) => {
             return config.position;
         }
-            //     const y = ordinary
-            //         ? scale(extents.findIndex(v => v === yValue)) - step/2
-            //         : scale(yValue);
 
-        let p1Config, p2Config, p1, p2;
+        // const activeDimOrder = dimOrder.map(key => {
+        //     const config = dimConfig[key];
+        //     if (config.active) {
+        //         return key;
+        //     }
+        // }).filter(each => each != undefined);
 
         ctx.save();
         nest.forEach(groupByStroke => {
             const {key: stroke, values: group} = groupByStroke;
 
+            group.forEach(d => {
+                d.__in = true;
+                for (let i=0; i<dimOrder.length; ++i)
+                {
+                    const config = dimConfig[dimOrder[i]];
+                    if (config.select == null) continue;
+                    
+                    const py = yAccessor(d, config);
+                    const [start, end] = config.select;
+                    if (start <= py && py <= end) continue;
+                    
+                    d.__in = false;
+                    break;    
+                }
+            });
+
             ctx.strokeStyle = hexToRGBA(stroke, opacity);
             ctx.lineWidth = strokeWidth;
-
+            ctx.beginPath()
             group.forEach(d => {
-                ctx.beginPath();
+                if (!d.__in) return;
 
-                p1Config = dimConfig[dimOrder[0]];
-                p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+                const p1Config = dimConfig[dimOrder[0]];
+                const p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+
                 ctx.moveTo(p1[0], p1[1]);
                 for (let i=1; i<dimOrder.length; ++i) {
-                    
-                    p2Config = dimConfig[dimOrder[i]];
-                    p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
-                    //ctx.moveTo(p1[0], p1[1]);
+                    const p2Config = dimConfig[dimOrder[i]];
+                    const p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
                     ctx.lineTo(p2[0], p2[1]);
-
-                    //p1Config = p2Config;
-                    //p1 = p2;
                 }
-                ctx.stroke();
             });
+            ctx.stroke();
+            
+            // ctx.strokeStyle = hexToRGBA(stroke, opacity);
+            // ctx.lineWidth = strokeWidth;
+            // ctx.beginPath()
+            // group.forEach(d => {
+            //     const p1Config = dimConfig[dimOrder[0]];
+            //     const p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+
+            //     ctx.moveTo(p1[0], p1[1]);
+            //     for (let i=1; i<dimOrder.length; ++i) {
+            //         const p2Config = dimConfig[dimOrder[i]];
+            //         const p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
+            //         ctx.lineTo(p2[0], p2[1]);
+            //     }
+            // });
+            // ctx.stroke();
         });
         ctx.restore();
     }
 
     render() {
         return <PCPSubscriberExt
-            canvas={contexts => contexts.axes}
+            canvas={contexts => contexts.pcpOn}
             clip={false}
             edgeClip={false}
             draw={this.draw}
-            drawOn={["moveaxis"]}
+            drawOn={["moveaxis", "selectrange"]}
             shared={this.props.shared}
             dimConfig={this.props.dimConfig}
             useAllDim={true}

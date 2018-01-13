@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-class CanvasContainer extends React.Component {
+class PCPCanvasContainer extends React.Component {
 	constructor() {
 		super();
 		this.canvas = {};
@@ -34,20 +34,21 @@ class CanvasContainer extends React.Component {
 
     	return (
     		<div style={divStyle}>
-    			<canvas id="bg" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
+    			<canvas id="pcpOff" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />            
+    			<canvas id="pcpOn" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			<canvas id="axes" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
-    			<canvas id="mouseCoord" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
+    			{/* <canvas id="mouseCoord" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
                 {/* <canvas id="off" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
     		</div>
     	);
     }
 }
 
-CanvasContainer.propTypes = {
+PCPCanvasContainer.propTypes = {
 	width: PropTypes.number,
 	height: PropTypes.number,
 	zIndex: PropTypes.number,
 	ratio: PropTypes.number
 };
 
-export default CanvasContainer;
+export default PCPCanvasContainer;

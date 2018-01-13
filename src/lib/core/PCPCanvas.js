@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import CanvasContainer from './CanvasContainer';
+import PCPCanvasContainer from './PCPCanvasContainer';
 import PCPEventHandler from './PCPEventHandler';
 import Series from './Series';
 import { PCPYAxis } from '../axes';
@@ -47,16 +47,66 @@ class PCPCanvas extends React.Component {
     	return this.mutableState;
     }
 
-    clearThreeCanvas = () => {
+    clearAxesAndPCPOnCanvas = () => {
     	const canvases = this.getCanvasContexts();
-    	if (canvases && canvases.axes) {
+    	if (canvases && canvases.axes && canvases.pcpOn) {
     		clearCanvas([
-    			canvases.axes,
-    			canvases.mouseCoord,
-    			canvases.bg
+                canvases.axes,
+                canvases.pcpOn,
+    			//canvases.mouseCoord,
+    			//canvases.bg
     		], this.props.ratio);
     	}
     }
+
+    clearAxesAndPCPOnOffCanvas = () => {
+    	const canvases = this.getCanvasContexts();
+    	if (canvases && canvases.axes && canvases.pcpOn && canvases.pcpOff) {
+    		clearCanvas([
+                canvases.axes,
+                canvases.pcpOn,
+                canvases.pcpOff,
+    			//canvases.mouseCoord,
+    			//canvases.bg
+    		], this.props.ratio);
+    	}        
+    }    
+
+    copyChartInColor = () => {
+        const canvases = this.getCanvasContexts();
+        if (canvases && canvases.pcpOn && canvases.pcpOff) {
+            const dstCtx = canvases.pcpOff;
+            //const srcCtx = canvases.pcpOn;
+            dstCtx.drawImage(document.getElementById('pcpOn'), 0, 0);
+        }
+    }
+
+    copyChartInGrey = () => {
+        const canvases = this.getCanvasContexts();
+        if (canvases && canvases.pcpOn && canvases.pcpOff) {
+            const { ratio, width, height } = this.props;
+            //const canvasDim = getCanvasDimension(this.props);
+            const canvasWidth = width * ratio, 
+                 canvasHeight = height * ratio;
+            const idataSrc = canvases.pcpOn.getImageData(0, 0, canvasWidth, canvasHeight),
+                  idataDst = canvases.pcpOff.getImageData(0, 0, canvasWidth, canvasHeight),
+                  dataSrc = idataSrc.data,
+                  dataDst = idataDst.data,
+                  len = dataSrc.length;
+
+            let i=0, luma;
+            for (; i < len; i += 4) {
+                luma = dataSrc[i] * 0.2126 + dataSrc[i+1] * 0.7152 + dataSrc[i+2] * 0.0722;
+                dataDst[i] = dataDst[i+1] = dataDst[i+2] = luma;
+                dataDst[i+3] = dataSrc[i+3] * 0.5;
+            }
+
+            canvases.pcpOff.putImageData(idataDst, 0, 0);
+
+
+        }
+    }
+    
 
     clearBothCanvas = () => {
         const canvases = this.getCanvasContexts();
@@ -93,7 +143,6 @@ class PCPCanvas extends React.Component {
     	this.subscriptions = this.subscriptions.filter(each => each.id !== id);
     }
 
-
     resetChart = (props = this.props) => {
         const {
             dimName,
@@ -124,7 +173,13 @@ class PCPCanvas extends React.Component {
             const ordinary = isArrayOfString(axisExtents);
 
             const yScale = scaleLinear();
-            const domain = ordinary ? [0, axisExtents.length] : axisExtents;
+            const domain = ordinary ? [0, axisExtents.length] : axisExtents.slice();
+            if (domain[1] === domain[0]) {
+                const domainValue = Math.abs(domain[0]);
+                //const sign = domain[0] < 0 ? -1: 1;
+                domain[0] = domainValue === 0 ? -1: -2*domainValue;
+                domain[1] = domainValue === 0 ? 1: 2*domainValue;
+            }
             yScale.domain(domain)
                   .range([canvasDim.height, 0]);
 
@@ -140,7 +195,8 @@ class PCPCanvas extends React.Component {
                 position: xScale(name),
                 axisWidth,
                 accessor: d => d[name],
-                nullPositionY: canvasDim.height + margin.bottom/2
+                nullPositionY: canvasDim.height + margin.bottom/2,
+                select: null
             }
         });
         // end of getDimConfig
@@ -209,7 +265,13 @@ class PCPCanvas extends React.Component {
             const ordinary = isArrayOfString(axisExtents);
             
             const yScale = scaleLinear();
-            const domain = ordinary ? [0, axisExtents.length] : axisExtents;
+            const domain = ordinary ? [0, axisExtents.length] : axisExtents.slice();
+            if (domain[1] === domain[0]) {
+                const domainValue = Math.abs(domain[0]);
+                //const sign = domain[0] < 0 ? -1: 1;
+                domain[0] = domainValue === 0 ? -1: -2*domainValue;
+                domain[1] = domainValue === 0 ? 1: 2*domainValue;
+            }
             yScale.domain(domain)
                     .range([canvasDim.height, 0]);
             
@@ -225,14 +287,15 @@ class PCPCanvas extends React.Component {
                 position: newXScale(name),
                 axisWidth,
                 accessor: d => d[name],
-                nullPositionY: canvasDim.height + margin.bottom/2
+                nullPositionY: canvasDim.height + margin.bottom/2,
+                select: null
             }
         });
 
        // console.log(newDimOrder)
        const plotData = data.map(d => {
             const flattened = {};
-            dimName.forEach(name => {
+            newDimOrder.forEach(name => {
                 flattened[name] = dimAccessor(d, name);
             });
             flattened.stroke = colorAccessor(d);
@@ -256,7 +319,7 @@ class PCPCanvas extends React.Component {
         //const newState = this.resetChart(nextProps);
         const newState = this.updateChart(nextProps);
 
-        this.clearThreeCanvas();
+        this.clearAxesAndPCPOnCanvas();
         this.setState(newState);
     }
 
@@ -333,7 +396,7 @@ class PCPCanvas extends React.Component {
     }
 
     handleAxisMove = (axisTitle, moveDist, e) => {
-        if (!this.waitingForAxisMoveAnimationFrame) {
+        if (!this.waitingForAxisMoveAnimationFrame && !this.axisSelectInProgress) {
             this.waitingForAxisMoveAnimationFrame = true;
             this.__dimConfig = this.__dimConfig || this.state.dimConfig;
             this.__dimOrder = this.__dimOrder || this.state.xScale.domain();
@@ -349,7 +412,7 @@ class PCPCanvas extends React.Component {
             this.triggerEvent('moveaxis', state, e);
             requestAnimationFrame(() => {
                 this.waitingForAxisMoveAnimationFrame = false;
-                this.clearThreeCanvas();
+                this.clearAxesAndPCPOnCanvas();
                 this.draw({trigger: 'moveaxis'});
             });
         }
@@ -370,7 +433,7 @@ class PCPCanvas extends React.Component {
         this.triggerEvent('moveaxis', state, e);
 
         requestAnimationFrame(() => {
-            this.clearThreeCanvas();
+            this.clearAxesAndPCPOnCanvas();
             this.setState({
                 dimConfig,
                 xScale
@@ -378,9 +441,116 @@ class PCPCanvas extends React.Component {
         });
     }
 
+    rangeSelectHelper = (axisTitle, start, end, initDimConfig) => {
+        const { xScale } = this.state;
+        const dimOrder = xScale.domain();
+        const activeAxisIndex = dimOrder.indexOf(axisTitle);
+        let startIndex, numActiveAxis;
+        if (activeAxisIndex === 0) {
+            startIndex = 0;
+            numActiveAxis = 2;
+        } else if (activeAxisIndex === dimOrder.length-1) {
+            startIndex = activeAxisIndex - 1;
+            numActiveAxis = 2;
+        } else {
+            startIndex = activeAxisIndex - 1;
+            numActiveAxis = 3;
+        }
 
+        const activeAxis = dimOrder.slice(startIndex, startIndex + numActiveAxis);
+        //console.log(activeAxis, activeAxisIndex, dimOrder)
+
+        const newDimConfig = {};
+        forEach(initDimConfig, (config, key) => {
+            let select = config.select;
+            if (key === axisTitle)
+                select = [start, end];
+
+            newDimConfig[key] = {
+                ...config,
+                select,
+                active: activeAxis.indexOf(key) > -1
+            };
+        });
+        return {
+            dimConfig: newDimConfig
+        };
+    }
+
+    handleRangeSelect = (axisTitle, start, end, e) => {
+        if (!this.axisMoveInProgress && 
+            !this.waitingForRangeSelectAnimationFrame) {
+
+            if (!this.currChartCopied) {
+                this.copyChartInGrey();
+                this.currChartCopied = true;
+            }
+            
+            this.waitingForRangeSelectAnimationFrame = true;
+            this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+            
+            const state = this.rangeSelectHelper(axisTitle, start, end, this.__dimConfig);
+
+            this.__dimConfig = state.dimConfig;
+
+            this.axisSelectInProgress = true;
+
+            this.triggerEvent('selectrange', state, e);
+            requestAnimationFrame(() => {
+                this.waitingForRangeSelectAnimationFrame = false;
+                this.clearAxesAndPCPOnCanvas();
+                this.draw({trigger: 'selectrange'});
+            });
+        }
+    }
+
+    handleRangeSelectEnd = (axisTitle, start, end, e) => {
+        const state = this.rangeSelectHelper(axisTitle, start, end, this.__dimConfig);
+        this.axisSelectInProgress = false;
+        const {
+            dimConfig
+        } = state;
+
+        this.currChartCopied = false;
+        this.__dimConfig = null;
+        //console.log(dimConfig)
+
+        this.triggerEvent('selectrange', state, e);
+        requestAnimationFrame(() => {
+            this.clearAxesAndPCPOnOffCanvas();
+            this.setState({
+                dimConfig
+            });
+        });
+    }
+
+    handleRangeSelectCancel = (axisTitle, e) => {
+        console.log('handleRangeSelectCancel: ', axisTitle)
+        const {dimConfig: initDimConfig} = this.state;
+        const newDimConfig = {};
+        forEach(initDimConfig, (config, key) => {
+            let select = config.select ? config.select.slice(): null;
+            if (key === axisTitle)
+                select = null;
+
+            newDimConfig[key] = {
+                ...config,
+                select
+            };
+        });
+
+        //this.clearAxesAndPCPOnOffCanvas();
+        this.clearAxesAndPCPOnCanvas();
+        this.setState({
+            dimConfig: newDimConfig
+        });
+    }
 
     render() {
+        //console.log(this.state.dimConfig)
+        //const test = this.state.plotData.filter(d => d.sample === 'L74_speed45');
+        //console.log(test)
+
     	const divStyle = {
     		position: "relative",
     		width: this.props.width,
@@ -420,7 +590,7 @@ class PCPCanvas extends React.Component {
 
         const pcpYAxisList = [];
         forEach(this.state.dimConfig, (config, title) => {
-            if (!config.active) return;
+            //if (!config.active) return;
             pcpYAxisList.push( 
                 <PCPYAxis key={`pcp-yaxis-${title}`}
                     title={title}
@@ -431,8 +601,9 @@ class PCPCanvas extends React.Component {
                     shared={shared}
                     ordinary={config.ordinary}
                     dimConfig={config}
-                    //onAxisMove={this.handleAxisMove}
-                    //onAxisMoveEnd={this.handleAxisMoveEnd}
+                    onRangeSelect={this.handleRangeSelect}
+                    onRangeSelectEnd={this.handleRangeSelectEnd}
+                    onRangeSelectCancel={this.handleRangeSelectCancel}
                 />
             );
         });
@@ -463,7 +634,7 @@ class PCPCanvas extends React.Component {
                 style={divStyle}
                 className={""}
             >
-                <CanvasContainer
+                <PCPCanvasContainer
                     ref={node => this.canvasContainerNode = node}
                     ratio={ratio}
                     width={width}

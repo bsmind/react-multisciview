@@ -7,6 +7,9 @@ import {
     drawTicks,
     drawAxisTitle
 } from "./draw";
+import {
+	hexToRGBA
+} from '../utils';
 import { PCPSubscriberExt } from '../core';
 
 import { scaleLinear } from 'd3-scale';
@@ -89,6 +92,15 @@ class PCPYAxis extends React.Component {
 		ctx.fill();
 	}
 
+	drawSelect = (ctx, start, end) => {
+		const { axisWidth } = this.props;
+		const halfWidth = axisWidth / 2;
+		const halfhalfWidth = axisWidth / 4;
+		ctx.fillStyle = hexToRGBA('#000000', 0.5);
+		ctx.rect(-halfhalfWidth, start, halfWidth, end - start);
+		ctx.fill();
+	}
+
     draw = (ctx, moreProps) => {
         //console.log('moreProps: ', moreProps);
         //console.log('props: ', this.props)
@@ -104,7 +116,8 @@ class PCPYAxis extends React.Component {
             scale: yScale, 
             position: axisLocation,
             title,
-            ordinary 
+			ordinary,
+			select,
         } = moreProps.dimConfig;
 
     	ctx.save();
@@ -137,7 +150,16 @@ class PCPYAxis extends React.Component {
     			this.props.tickStyle,
     			showTickLabel ? { ...labelStyle, textAnchor } : null
     		);
-    	}
+		}
+		
+		if (select) {
+			let [start, end] = select;
+			if (start > end) {
+				start = select[1];
+				end = select[0];
+			}
+			this.drawSelect(ctx, start, end);
+		}		
 
     	ctx.restore();        
     }
@@ -163,16 +185,24 @@ class PCPYAxis extends React.Component {
             //tx 
         }
     }
+	
+	handleRangeSelect = (start, end, e) => {
+		if (this.props.onRangeSelect) {
+			this.props.onRangeSelect(this.props.title, start, end, e);
+		}
+	}
 
-    handleAxisMove = (moveDist, e) => {
-        if (this.props.onAxisMove && this.props.title)
-            this.props.onAxisMove(this.props.title, moveDist, e);
-    }
+	handleRangeSelectEnd = (start, end, e) => {
+		if (this.props.onRangeSelectEnd) {
+			this.props.onRangeSelectEnd(this.props.title, start, end, e);
+		}
+	}
 
-    handleAxisMoveEnd = (moveDist) => {
-        if (this.props.onAxisMoveEnd && this.props.title)
-            this.props.onAxisMoveEnd(this.props.title, moveDist);
-    }
+	handleRangeSelectCancel = (e) => {
+		if (this.props.onRangeSelectCancel) {
+			this.props.onRangeSelectCancel(this.props.title, e);
+		}
+	}
 
     render () {
         const {
@@ -189,7 +219,10 @@ class PCPYAxis extends React.Component {
         return (
             <g transform={`translate(${axisLocation},${0})`}>
                 <PCPAxisEventHandler
-                    {...rect}
+					{...rect}
+					onRangeSelect={this.handleRangeSelect}
+					onRangeSelectEnd={this.handleRangeSelectEnd}
+					onRangeSelectCancle={this.handleRangeSelectCancel}
                     //topHeight={height}
                     //tx={0}
                     //onAxisMove={this.handleAxisMove}
@@ -203,7 +236,7 @@ class PCPYAxis extends React.Component {
                     clip={false}
                     edgeClip={false}
                     draw={this.draw}
-                    drawOn={['moveaxis']}
+                    drawOn={['moveaxis','selectrange']}
                     shared={this.props.shared}
                     dimConfig={this.props.dimConfig}
                 />
