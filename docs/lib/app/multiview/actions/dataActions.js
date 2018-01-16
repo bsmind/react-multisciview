@@ -87,3 +87,48 @@ export function AddData(action, sampleNames) {
         }
     }
 }
+
+export function updateSelectedSamples(selected, colors) {
+
+    //console.log(selected)
+    return (dispatch, getState) => {
+        const dataBySamples = getState().data.dataBySamples;
+        const sampleKinds = getState().data.sampleKinds;
+
+        const sampleNames = selected.map(key => sampleKinds[key]).filter(each => each != null);
+
+        const dataToQuery = [];
+        const dataHave = Object.keys(dataBySamples);
+
+        sampleNames.forEach(name => {
+            if (dataHave.findIndex(d => d === name) === -1)
+                dataToQuery.push(name);
+        });
+
+        if (dataToQuery.length) {
+            for (let i=0; i < dataToQuery.length; i += MAX_NUM_SAMPLE_QUERY) {
+                const sliced = dataToQuery.slice(i, i + MAX_NUM_SAMPLE_QUERY);
+                setTimeout(() => {
+                    dispatch(getDataFromServer(sliced, dataToQuery.length));
+                }, SAMPLE_TIMEOUT);
+            }
+        }    
+
+        dispatch({
+            type: 'UPDATE_SELECTED_SAMPLES',
+            payload: {selected, colors}                
+        });
+    }
+
+    // return {
+    //     type: 'UPDATE_SELECTED_SAMPLES',
+    //     payload: {selected, colors}
+    // }
+}
+
+export function handleColorChange(sampleName) {
+    return {
+        type: 'SAMPLE_COLOR_CHANGE',
+        payload: sampleName
+    };
+}

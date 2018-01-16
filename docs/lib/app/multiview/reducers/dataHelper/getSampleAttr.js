@@ -2,15 +2,26 @@ import forEach from 'lodash.foreach';
 
 import {SHORT_KEY_MAX_LEN} from '../../constants';
 
+const ATTRS_TO_EXCLUDES = [
+    'circular_average.time',
+    'linecut_qr.data.time',
+    'linecut_qr.time',
+    'metadata_extract.data.time',
+    'metadata_extract.time'    
+];
+
 export default function getSampleAttr(state, payload) {
+
     let attrKinds = {}, attrMinMax = {}, attrTypes = {};
 
-    forEach(payload, (value, key) => {
-        const path = key;
-        const {type, minmax} = value;
+    const allAttrs = Object.keys(payload);
+    allAttrs.forEach(attr => {
+        if (ATTRS_TO_EXCLUDES.includes(attr)) return;
 
-        const tokens = path.split('.');
-        let attr = tokens[tokens.length - 1];
+        const { type, minmax } = payload[attr];        
+        const tokens = attr.split('.');
+
+        let attrShort = tokens[tokens.length - 1];
         if (tokens.length > 1) {
             let prefix = '';
             for (let i=0; i<tokens.length-1; ++i) {
@@ -18,13 +29,24 @@ export default function getSampleAttr(state, payload) {
                     ? prefix + '.' + tokens[i].substr(0, SHORT_KEY_MAX_LEN)
                     : tokens[i].substr(0, SHORT_KEY_MAX_LEN);
             }
-            attr = prefix + '.' + attr;
+            attrShort = prefix + '.' + attrShort;
         }
 
-        attrKinds[path] = attr;
-        attrMinMax[path] = minmax;
-        attrTypes[path] = type; 
+        attrKinds[attr] = attrShort;
+        attrMinMax[attr] = minmax;
+        attrTypes[attr] = type;           
     });
 
-    return {...state, attrKinds, attrMinMax, attrTypes}
+   // console.log(attrKinds)
+
+    return {...state, 
+        attrKinds, 
+        attrMinMax, 
+        attrTypes,
+        attrFormat: attrKey => {
+            const tokens = attrKey.split('.');
+            const name = tokens.length > 1 ? tokens[tokens.length-1]: tokens[0];
+            return name;
+        } 
+    };
 }

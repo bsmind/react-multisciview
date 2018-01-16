@@ -1,69 +1,93 @@
-resetChart = (props = this.props) => {
-    const {
-        dimName,
-        dimExtents,
-        dimAccessor,
-        data,
-        colorAccessor,
-        axisWidth,
-        margin
-    } = props;
+handleAxisMove = (axisTitle, moveDist, e) => {
+    if (!this.waitingForAxisMoveAnimationFrame) {
+        this.waitingForAxisMoveAnimationFrame = true;
+        this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+        this.__dimOrder = this.__dimOrder || this.state.xScale.domain();
+        
+        const state = this.axisMoveHelper(moveDist, axisTitle, this.__dimOrder);
 
-    const canvasDim = getCanvasDimension(props);
+        this.__dimConfig = state.dimConfig;
+        this.__dimOrder = state.xScale.domain();
+        //console.log(__dimOrder)
+
+        this.axisMoveInProgress = true;
+
+        this.triggerEvent('moveaxis', state, e);
+        requestAnimationFrame(() => {
+            this.waitingForAxisMoveAnimationFrame = false;
+            this.clearThreeCanvas();
+            this.draw({trigger: 'moveaxis'});
+        });
+    }
+}
+
+axisMoveHelper = (dx, axisToMove, initDimOrder, force = false) => {
+    // as axis is moving...
+    // 1. x position of axis changes, ok
+    // 2. corresponding data changes
+    // 3. if needed, swap location..
+    const { 
+        dimConfig: initDimConfig, 
+    } = this.state;
+
+    const newDimOrder = initDimOrder.map(title => {
+        const { position } = initDimConfig[title];
+        const newPosition = (title === axisToMove)
+            ? position + dx
+            : position;
+
+        return {
+            x: newPosition,
+            id: title
+        }
+    }).sort((a,b) => a.x - b.x);
+
+    const canvasDim = getCanvasDimension(this.props);
     const xScale = scalePoint()
-                    .domain(dimName)
+                    .domain(newDimOrder.map(d => d.id))
                     .range([0, canvasDim.width])
                     .padding(0);
     
-    //console.log(xScale.domain())
-    // getDimConfig
-    const dimConfig = {}; 
-    dimName.forEach(name => {
-        let axisExtents = dimAccessor(dimExtents, name);
-        if (axisExtents == null) {
-            axisExtents = [0, 1];
-        //     accessor = d => null;
-        }
 
-        const ordinary = isArrayOfString(axisExtents);
+    const newDimConfig = {};
+    newDimOrder.forEach( each => {
+        const {x, id} = each;
+        const prevConfig = initDimConfig[id];
+        const { position } = prevConfig;
 
-        const yScale = scaleLinear();
-        const domain = ordinary ? [0, axisExtents.length] : axisExtents;
-        yScale.domain(domain)
-              .range([canvasDim.height, 0]);
+        const newPosition = (id === axisToMove && !force)
+            ? x
+            : xScale(id);
 
-        const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
-        dimConfig[name] = {
-            title: name,
-            extents: axisExtents,
-            ordinary,
-            scale: yScale,
-            step: yStep,
-            active: true,
-            flip: false,
-            position: xScale(name),
-            axisWidth,
-            accessor: d => d[name],
-            nullPositionY: canvasDim.height + margin.bottom/2
+        newDimConfig[id] = {
+            ...prevConfig,
+            position: newPosition
         }
     });
-    // end of getDimConfig
 
-    // calculateDataFromNewDimConfig
-    const plotData = data.map(d => {
-        const flattened = {};
-        dimName.forEach(name => {
-            flattened[name] = dimAccessor(d, name);
-        });
-        flattened.stroke = colorAccessor(d);
-        return flattened;
-    });
-    // end
-
-    //this.fullData = plotData;
     return {
-        xScale,
-        dimConfig,
-        plotData
+        dimConfig: newDimConfig,
+        xScale
     }
 }
+
+
+const state = this.axisMoveHelper(moveDist, axisTitle,this.__dimOrder, true);
+
+        this.__dimConfig = null;
+        this.__dimOrder = null;
+        this.axisMoveInProgress = false;
+
+        const {
+            dimConfig,
+            xScale
+        } = state;
+        this.triggerEvent('moveaxis', state, e);
+
+        requestAnimationFrame(() => {
+            this.clearAxesAndPCPOnCanvas();
+            this.setState({
+                dimConfig,
+                xScale
+            });
+        });

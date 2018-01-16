@@ -6,7 +6,9 @@ import {bindActionCreators} from 'redux';
 import {
     getSampleKinds,
     getAttributes,
-    AddData
+    AddData,
+    handleColorChange,
+    updateSelectedSamples
 } from './actions/dataActions';
 
 import {
@@ -17,13 +19,17 @@ import {
 
 import {Layout, Panel, NavDrawer} from 'react-toolbox/lib/layout';
 import {AppBar} from 'react-toolbox/lib/app_bar';
+import Button from 'react-toolbox/lib/button';
+
 
 import {
     DataBox,
+    DataDialog,
     ToolBox,
     ControlBox,
-    ChartBox
+    ChartBox,
 } from './layout';
+
 
 import theme from './index.css';
 
@@ -35,7 +41,8 @@ class MultiViewApp extends React.Component {
         this.state = {
             toolSelected: 0,
             width: 0,
-            height: 0
+            height: 0,
+            showDataDialog: false
         }
     }
 
@@ -64,8 +71,8 @@ class MultiViewApp extends React.Component {
         let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-        width = width - 200;
-        height = height - 41.6 - 56.81 - 4.15;
+        //width = width - 200;
+        //height = height - 41.6 - 56.81 - 4.15;
 
         this.setState({width, height});
     }
@@ -79,18 +86,40 @@ class MultiViewApp extends React.Component {
 
     handleAttrChange = (dim, value) => {
         if (value.length === 0) return;
-        const {attr} = this.props;
-        const oldAttr = get(attr, dim);
-        if (value !== oldAttr && this.props.setAttr)
-            this.props.setAttr(dim, value);
+        const {
+            attr,
+            attrFormat,
+            attrKinds
+        } = this.props;
+
+        const oldAttr = attrFormat(get(attr, dim));
+        if (value !== oldAttr && this.props.setAttr) {
+            const attrKeys = Object.keys(attrKinds);
+            const index = attrKeys.findIndex(key => key.includes(value));
+            //console.log(attrKinds[attrKeys[index]])
+            this.props.setAttr(dim, attrKeys[index]);
+        }
     }
 
     handleToolChange = (toolid) => {
         this.setState({toolSelected: toolid});
     }
 
+    handleSampleUpdate = (doUpdate, selected, colors) => {
+        if (doUpdate && this.props.updateSelectedSamples) {
+            this.props.updateSelectedSamples(selected, colors);
+        }
+        this.setState({showDataDialog: !this.state.showDataDialog});        
+    }
+
+    onToggleDataDialog = () => {
+        this.setState({showDataDialog: !this.state.showDataDialog});
+    }
+
     render() {
         const {width, height} = this.state;
+
+        //console.log(this.props.attrKinds)
 
         return (
             <Layout>
@@ -98,25 +127,45 @@ class MultiViewApp extends React.Component {
                     settings go here
                 </NavDrawer>
                 <Panel>
-                    <AppBar title='React-MultiView' leftIcon='menu' onLeftIconClick={null} theme={theme} fixed>
-                        <ControlBox className={theme.ctlbox} toolId={this.state.toolSelected} />
+                    <AppBar title='React-MultiView' leftIcon='menu' onLeftIconClick={null} theme={theme} fixed flat>
+                        {/* <ControlBox className={theme.ctlbox} toolId={this.state.toolSelected} /> */}
                     </AppBar>
                 </Panel>
 
-                <DataBox className={theme.databox} width={200} height={height}
+                {/* <DataBox className={theme.databox} width={200} height={height}
                     sampleKinds={this.props.sampleKinds}
                     samples={this.props.sampleSelected}
                     colors={this.props.sampleColors}
                     onSampleChange={this.handleSampleChange}
                     onColorChange={key => this.props.changeSampleColor(key)}
-                />
+                /> */}
 
-                <ToolBox className={theme.toolbox}
+                {/* <ToolBox className={theme.toolbox}
                     toolid={this.state.toolSelected}
                     attrKinds={this.props.attrKinds}
                     attr={this.props.attr}
                     onAttrChange={this.handleAttrChange}
                     onToolChange={this.handleToolChange}
+                /> */}
+                <ToolBox className={theme.toolbox} 
+                    onToggleDataDialog={this.onToggleDataDialog}
+                    attrKinds={this.props.attrKinds}
+                    attrFormat={this.props.attrFormat}
+                    attr={this.props.attr}
+                    onAttrChange={this.handleAttrChange}                    
+                />
+
+
+                <DataDialog 
+                    title='Data Selector'
+                    active={this.state.showDataDialog}
+                    samples={this.props.sampleKinds}
+                    sampleSelected={this.props.sampleSelected}
+                    sampleColors={this.props.sampleColors}
+                    sampleColorOpacity={this.props.sampleColorOpacity}
+                    onColorChange={this.props.handleColorChange}
+                    onSampleUpdate={this.handleSampleUpdate}
+                    onToggleDataDialog={this.onToggleDataDialog}
                 />
 
                 <ChartBox className={theme.chartbox} width={width} height={height} />
@@ -131,10 +180,12 @@ class MultiViewApp extends React.Component {
 function mapStateToProps(state) {
     return {
         sampleKinds: state.data.sampleKinds,
-        sampleSelected: state.vis.samples,
-        sampleColors: state.vis.sampleColors,
-
+        sampleColors: state.data.sampleColors,
+        sampleColorOpacity: state.data.sampleColorOpacity,
+        sampleSelected: state.data.samples,
         attrKinds: state.data.attrKinds,
+        attrFormat: state.data.attrFormat,
+
         attr: {
             x: state.vis.attrx,
             y: state.vis.attry,
@@ -152,7 +203,9 @@ function mapDispatchToProps(dispatch) {
         AddData,
         setAttr,
         AddDelSamples,
-        changeSampleColor
+        //changeSampleColor,
+        handleColorChange,
+        updateSelectedSamples
     }, dispatch);
 }
 

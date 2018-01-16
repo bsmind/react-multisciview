@@ -59,9 +59,9 @@
     background: var(--color-background);
     padding: 0px 1px 0px 1px;
     position: fixed;
-    left: var(--databox-width);
+    left: 0;
     top: var(--appbar-height);
-    width: var(--chartbox-width);
+    width: 100%;
     z-index: var(--z-index-high);
     font-family: var(--preferred-font);
     font-size: var(--font-size);    
@@ -69,12 +69,11 @@
 
 .chartbox {
     background: var(--color-background);
-    padding: 10px 10px 0px 10px;
+    padding: 0px 0px 0px 0px;
     position: fixed;
-    left: var(--databox-width);
+    left: 0;
     top: calc(var(--appbar-height) + var(--toolbox-height));
-    width: var(--chartbox-width);
-    height: calc(var(--content-height) - var(--toolbox-height));
+    width: 100%;
     font-family: var(--preferred-font);
     font-size: var(--font-size);    
 }

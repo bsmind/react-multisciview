@@ -9,6 +9,8 @@ import { scaleLinear } from 'd3-scale';
 
 import get from 'lodash.get';
 
+import { sortAlphaNum } from '../../../utils';
+
 class ParallelCoordinateChart extends React.Component {
     render () {
         const margin= {left: 60, right: 40, top: 20, bottom: 10};
@@ -19,27 +21,20 @@ class ParallelCoordinateChart extends React.Component {
             dimension,
             data,
             colorsByGroup,
-            groupAccessor
+            groupAccessor,
+            titleFormat,
         } = this.props;
 
+        //console.log('pcp char:', dimension)
         if (data == null || data.length === 0)
             return <div/>
 
-        // console.log(dimension)
-        // const dimName = [
-        //     'sample', 
-        //     'metadata_extract.data.annealing_time',
-        //     'metadata_extract.data.annealing_temperature',
-        //     //'linecut_qr.data.fit_peaks_sigma1'
-        // ];
-        const dimName = Object.keys(dimension);
-        //console.log(dimension)
-        //const xExtents = [0, numDim];
-
-        // const yAccessor = dimName.map(name => {
-        //     return d => get(d, name);
-        // });
-        //const yAccessor = (d, name) => get(d, name);
+        const dimName = Object.keys(dimension).sort(sortAlphaNum);
+        const index = dimName.indexOf('sample');
+        if (index !== -1) {
+            dimName.splice(index, 1);
+            dimName.splice(0, 0, 'sample');
+        }
 
         
         return (
@@ -57,6 +52,8 @@ class ParallelCoordinateChart extends React.Component {
 
                 colorAccessor={d => colorsByGroup[groupAccessor(d)]}
                 axisWidth={26}
+
+                titleFormat={titleFormat}
             >
                 <Series>
                     <PCPPolyLineSeries

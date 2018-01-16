@@ -13,6 +13,7 @@ import {
 import { PCPSubscriberExt } from '../core';
 
 import { scaleLinear } from 'd3-scale';
+import { format as d3Format } from 'd3-format';
 
 class PCPYAxis extends React.Component {
     getTicks = (yScale) => {
@@ -96,7 +97,7 @@ class PCPYAxis extends React.Component {
 		const { axisWidth } = this.props;
 		const halfWidth = axisWidth / 2;
 		const halfhalfWidth = axisWidth / 4;
-		ctx.fillStyle = hexToRGBA('#000000', 0.5);
+		ctx.fillStyle = hexToRGBA('#000000', 0.3);
 		ctx.rect(-halfhalfWidth, start, halfWidth, end - start);
 		ctx.fill();
 	}
@@ -323,7 +324,8 @@ PCPYAxis.defaultProps = {
     showTitle: true,
     showDomain: true,
     
-    titleFormat: d => d,
+	titleFormat: d => d,
+	tickFormat: x => d3Format(".3s")(x),
 
 	className: "",
 	domainClassName: "",

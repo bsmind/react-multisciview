@@ -8,6 +8,8 @@ import theme from './index.css';
 
 import get from 'lodash.get';
 
+import { sortAlphaNum } from '../../utils';
+
 
 class ToolBox extends React.Component {
     onAttrChange = (dim, value) => {
@@ -49,47 +51,61 @@ class ToolBox extends React.Component {
         return selectors;
     }
 
+    renderAttrSelector = (axis, attrKinds) => {
+        const {attrFormat} = this.props;
+
+        return (
+            <Autocomplete 
+                direction="down"
+                selectedPosition='none'
+                label={`Select ${axis}-axis`} 
+                hint="Choose one..."
+                multiple={false}                           
+                source={attrKinds}
+                value={ attrFormat(get(this.props.attr, axis)) }
+                showSuggestionsWhenValueIsSet
+                onChange={this.onAttrChange.bind(this, axis)}
+                theme={theme}
+                suggestionMatch='anywhere'
+            />
+        );
+    }
+
     render () {
+        const { 
+            attrKinds: attrKindsProp, 
+            //attr: attrProp,
+            attrFormat 
+        } = this.props;
 
-        let tools = [
-            {primary: true, accent: false},
-            {primary: true, accent: false},
-            {primary: true, accent: false},
-            {primary: true, accent: false}
-        ];
+        const attrKinds = Object.keys(attrKindsProp).map(attrKey => {
+            return attrFormat(attrKindsProp[attrKey]);
+        }).sort(sortAlphaNum);
 
-        const toolid = (this.props.toolid == null) ? 0: this.props.toolid;
-        tools[this.props.toolid] = {primary: false, accent: true}
-        
+
         return (
             <div className={this.props.className}>
-                <div style={{height: '25.83px'}}>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <Button icon='grain' label='SCATTER' {...tools[0]} 
-                                        onClick={() => this.props.onToolChange(0)}
-                                    />
-                                </th>
-                                <th>
-                                    <Button icon='image' label='IMAGE' {...tools[1]} 
-                                        onClick={() => this.props.onToolChange(1)}
-                                    />
-                                </th>
-                                <th>
-                                    <Button icon='poll' label='PROJECTION' {...tools[2]} 
-                                        onClick={() => this.props.onToolChange(2)}
-                                    />
-                                </th>
-                            </tr>
-                        </tbody>                    
-                    </table>
-
-                </div>
-                <div style={{height: '30.99px'}}>
-                    {this.renderAttrSelectors()}
-                </div>
+                <table style={{
+                    width: '100%'
+                }}>
+                    <tbody>
+                        <tr>
+                            <td style={{width: '20px'}}>
+                                <Button label='DATA DIALOG' onClick={this.props.onToggleDataDialog} />   
+                            </td>
+                            <td>
+                                {this.renderAttrSelector('x', attrKinds)}
+                            </td>
+                            <td>
+                                {this.renderAttrSelector('y', attrKinds)}
+                            </td>
+                            <td>
+                                {this.renderAttrSelector('z', attrKinds)}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                    
             </div>
         );
     }

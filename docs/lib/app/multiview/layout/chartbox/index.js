@@ -33,7 +33,7 @@ import {
     getAttrY,
 
     getPCPDimension,
-    getPCPData
+    getPCPData,
 } from './selector';
 
 
@@ -63,7 +63,8 @@ class ChartBox extends React.Component {
             pcpDimension,
             pcpData,
             colorsBySampleNames,
-            sampleAccessor
+            sampleAccessor,
+            attrFormat
         } = this.props;
        //console.log(pcpDimension)
        //console.log(pcpData)
@@ -73,6 +74,7 @@ class ChartBox extends React.Component {
             dimension={pcpDimension}
             colorsByGroup={colorsBySampleNames}
             groupAccessor={sampleAccessor}
+            titleFormat={attrFormat}
         />
     }
 
@@ -82,7 +84,7 @@ class ChartBox extends React.Component {
         const pcpHeight = height - scatterHeight;
         return (
             <div className={this.props.className}>
-                {this.renderScatterChart(scatterHeight)}
+                {/* {this.renderScatterChart(scatterHeight)} */}
                 {this.renderParallelCoordinateChart(pcpHeight)}
             </div>
         );
@@ -96,6 +98,7 @@ ChartBox.defaultProps = {};
 function mapStateToProps(state) {
     const { data, xExtents, yExtents } = getSelectedSortedDataArray(state);
 
+    //test(state)
    // const pcpDimension = getPCPDimension(state);
     
     //console.log(getColorsBySampleNames(state))
@@ -119,7 +122,8 @@ function mapStateToProps(state) {
         xType: getXType(state),
         yType: getYType(state),
         selectedSampleNames: getSelectedSampleNames(state),
-        colorsBySampleNames: getColorsBySampleNames(state),
+        colorsBySampleNames: state.data.sampleColors,//getColorsBySampleNames(state),
+        attrFormat: state.data.attrFormat,
         sampleAccessor: d => d.sample,
 
         pcpDimension: pcpExtents,

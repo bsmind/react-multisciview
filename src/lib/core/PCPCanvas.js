@@ -276,7 +276,12 @@ class PCPCanvas extends React.Component {
                     .range([canvasDim.height, 0]);
             
             const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
+
+            const prevConfig = initialDimConfig[name] ? initialDimConfig[name]: {};
+
             newDimConfig[name] = {
+                select: null,
+                ...prevConfig,
                 title: name,
                 extents: axisExtents,
                 ordinary,
@@ -288,7 +293,7 @@ class PCPCanvas extends React.Component {
                 axisWidth,
                 accessor: d => d[name],
                 nullPositionY: canvasDim.height + margin.bottom/2,
-                select: null
+                //select: null
             }
         });
 
@@ -525,7 +530,6 @@ class PCPCanvas extends React.Component {
     }
 
     handleRangeSelectCancel = (axisTitle, e) => {
-        console.log('handleRangeSelectCancel: ', axisTitle)
         const {dimConfig: initDimConfig} = this.state;
         const newDimConfig = {};
         forEach(initDimConfig, (config, key) => {
@@ -604,6 +608,7 @@ class PCPCanvas extends React.Component {
                     onRangeSelect={this.handleRangeSelect}
                     onRangeSelectEnd={this.handleRangeSelectEnd}
                     onRangeSelectCancel={this.handleRangeSelectCancel}
+                    titleFormat={this.props.titleFormat}
                 />
             );
         });

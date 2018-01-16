@@ -48,6 +48,48 @@ const calculateDataStat = (data, types, attrs) => {
     };
 }
 
+const calculateDataStatAll = (data, types, attrs) => {
+    const indexById = {}, minmax = {};
+
+    data.forEach( (dict, index) => {
+        attrs.forEach( attr => {
+            const type = types[attr];
+            const value = get(dict, attr);
+
+            if (minmax[attr] == null) {
+                if (value != undefined) {
+                    if (type === 'num') {
+                        minmax[attr] = [value, value];
+                    } else if (type === 'str') {
+                        minmax[attr] = [value];
+                    } else {
+                        // ignore unknown type
+                    }                    
+                }
+            } else {
+                const temp = minmax[attr];
+                if (value != undefined) {
+                    if (type === 'num') {
+                        temp[0] = Math.min(temp[0], value);
+                        temp[1] = Math.max(temp[1], value);
+                    } else if (type === 'str') {
+                        if (!temp.includes(value))
+                           temp.push(value);
+                    } else {
+                        // ignore unknown type
+                    }
+                }    
+            }
+        });
+        indexById[dict['_id']] = index;
+    });
+
+    return {
+        indexById,
+        minmax
+    };
+}
+
 export default (state, payload) => {
     const {
         total,
@@ -66,7 +108,7 @@ export default (state, payload) => {
     const dataBySamples = {};
 
     sampleList.forEach( (name, index) => {
-        const {indexById, minmax} = calculateDataStat(sampleData[index], attrTypes, attrKeys);
+        const {indexById, minmax} = calculateDataStatAll(sampleData[index], attrTypes, attrKeys);
         dataBySamples[name] = {
             data: sampleData[index],
             indexById,

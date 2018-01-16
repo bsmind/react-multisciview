@@ -57,7 +57,12 @@ class PCPPolyLineSeries extends React.Component {
                     if (config.select == null) continue;
                     
                     const py = yAccessor(d, config);
-                    const [start, end] = config.select;
+                    let [start, end] = config.select.slice();
+                    if (start > end) {
+                        const temp = start;
+                        start = end;
+                        end = temp;
+                    }
                     if (start <= py && py <= end) continue;
                     
                     d.__in = false;

@@ -3,7 +3,7 @@
 @import 'autocomplete/theme.css';
 
 :root {
-    --dropdown-number: 3;
+    --dropdown-number: 4;
     --dropdown-width: calc(100% / var(--dropdown-number));
     --list-vertical-padding: calc(0.5 * var(--unit));
     --list-item-min-height: calc(1.5 * var(--unit));
@@ -29,3 +29,4 @@
     padding: 0;
     padding-top: 0px;
 }
+

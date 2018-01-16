@@ -7,12 +7,16 @@ import { extent as d3Extent } from 'd3-array';
 
 import { sortAlphaNum } from '../../utils';
 
+import { format as d3Format } from 'd3-format';
+
 const getDataBySamples = state => state.data.dataBySamples;
 const getSampleKinds = state => state.data.sampleKinds;
 const getAttrTypes = state => state.data.attrTypes;
 
-const getSelectedSampleKeys = state => state.vis.samples;
-const getSelectedSampleColors = state => state.vis.sampleColors;
+// const getSelectedSampleKeys = state => state.vis.samples;
+// const getSelectedSampleColors = state => state.vis.sampleColors;
+const getSelectedSampleKeys = state => state.data.samples;
+const getSelectedSampleColors = state => state.data.sampleColors;
 
 export const getAttrX = state => state.vis.attrx;
 export const getAttrY = state => state.vis.attry;
@@ -315,10 +319,25 @@ export const getPCPData = createSelector(
 
 export const test = createSelector(
     [
-        getSelectedDataArray
+        
     ],
-    (output) => {
-        console.log('test selector', output)
+    () => {
+        const formatSi = d3Format(".3s");
+        console.log('0 -> ', formatSi(0));
+        console.log('10 -> ', formatSi(10));
+        console.log('100 -> ', formatSi(100));
+        console.log('1000 -> ', formatSi(1000));
+        console.log('10000 -> ', formatSi(10000));
+        console.log('100000 -> ', formatSi(100000));
+        console.log('1000000 -> ', formatSi(1000000));
+        console.log('0.1 -> ', formatSi(0.1));
+        console.log('0.01 -> ', formatSi(0.01));
+        console.log('0.001 -> ', formatSi(0.001));
+        console.log('0.0001 -> ', formatSi(0.0001));
+        console.log('0.00001 -> ', formatSi(0.00001));
+        console.log('0.000001 -> ', formatSi(0.000001));
+        
+        
     }
 );
 

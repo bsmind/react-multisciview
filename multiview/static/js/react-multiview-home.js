@@ -24494,6 +24494,7 @@ module.exports = sortBy;
   !*** ./node_modules/randomcolor/randomColor.js ***!
   \*************************************************/
 /*! dynamic exports provided */
+/*! exports used: default */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {// randomColor by David Merfield under the CC0 license
@@ -40896,14 +40897,31 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var INITIAL_STATE = {
     sampleKinds: {},
+    samples: [],
+    sampleColors: {},
+    sampleColorOpacity: 0.5,
 
     attrKinds: {},
     attrMinMax: {}, // global min, max
     attrTypes: {},
+    attrFormat: function attrFormat(attrKey) {
+        return attrKey;
+    },
 
     dataBySamples: {},
     numQueried: 0
+
 };
+
+function updateSelectedSamples(state, payload) {
+    var selected = payload.selected,
+        colors = payload.colors;
+
+    return _extends({}, state, {
+        samples: selected,
+        sampleColors: colors
+    });
+}
 
 function dataReducers() {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : INITIAL_STATE;
@@ -40914,11 +40932,16 @@ function dataReducers() {
 
     switch (type) {
         case "GET_SAMPLE_KINDS":
-            return _extends({}, state, { sampleKinds: payload });
+            return Object(__WEBPACK_IMPORTED_MODULE_0__dataHelper__["c" /* getSampleKinds */])(state, payload);
         case "GET_SAMPLE_ATTR":
             return Object(__WEBPACK_IMPORTED_MODULE_0__dataHelper__["b" /* getSampleAttr */])(state, payload);
         case "ADD_DATA_SAMPLES":
             return Object(__WEBPACK_IMPORTED_MODULE_0__dataHelper__["a" /* addDataSamples */])(state, payload);
+
+        case "UPDATE_SELECTED_SAMPLES":
+            return updateSelectedSamples(state, payload);
+        case "SAMPLE_COLOR_CHANGE":
+            return Object(__WEBPACK_IMPORTED_MODULE_0__dataHelper__["d" /* handleSampleColorChange */])(state, payload);
         default:
             return state;
     }
@@ -40929,8 +40952,8 @@ function dataReducers() {
 /*!*************************************************************!*\
   !*** ./docs/lib/app/multiview/reducers/dataHelper/index.js ***!
   \*************************************************************/
-/*! exports provided: getSampleAttr, addDataSamples */
-/*! exports used: addDataSamples, getSampleAttr */
+/*! exports provided: getSampleAttr, addDataSamples, getSampleKinds, handleSampleColorChange */
+/*! exports used: addDataSamples, getSampleAttr, getSampleKinds, handleSampleColorChange */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -40938,6 +40961,10 @@ function dataReducers() {
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__getSampleAttr__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__addDataSamples__ = __webpack_require__(/*! ./addDataSamples */ 485);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__addDataSamples__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__getSampleKinds__ = __webpack_require__(/*! ./getSampleKinds */ 694);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_2__getSampleKinds__["b"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_2__getSampleKinds__["c"]; });
+
 
 
 
@@ -40961,33 +40988,50 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 
+var ATTRS_TO_EXCLUDES = ['circular_average.time', 'linecut_qr.data.time', 'linecut_qr.time', 'metadata_extract.data.time', 'metadata_extract.time'];
+
 function getSampleAttr(state, payload) {
+
     var attrKinds = {},
         attrMinMax = {},
         attrTypes = {};
 
-    __WEBPACK_IMPORTED_MODULE_0_lodash_foreach___default()(payload, function (value, key) {
-        var path = key;
-        var type = value.type,
-            minmax = value.minmax;
+    var allAttrs = Object.keys(payload);
+    allAttrs.forEach(function (attr) {
+        if (ATTRS_TO_EXCLUDES.includes(attr)) return;
 
+        var _payload$attr = payload[attr],
+            type = _payload$attr.type,
+            minmax = _payload$attr.minmax;
 
-        var tokens = path.split('.');
-        var attr = tokens[tokens.length - 1];
+        var tokens = attr.split('.');
+
+        var attrShort = tokens[tokens.length - 1];
         if (tokens.length > 1) {
             var prefix = '';
             for (var i = 0; i < tokens.length - 1; ++i) {
                 prefix = prefix.length ? prefix + '.' + tokens[i].substr(0, __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* SHORT_KEY_MAX_LEN */]) : tokens[i].substr(0, __WEBPACK_IMPORTED_MODULE_1__constants__["a" /* SHORT_KEY_MAX_LEN */]);
             }
-            attr = prefix + '.' + attr;
+            attrShort = prefix + '.' + attrShort;
         }
 
-        attrKinds[path] = attr;
-        attrMinMax[path] = minmax;
-        attrTypes[path] = type;
+        attrKinds[attr] = attrShort;
+        attrMinMax[attr] = minmax;
+        attrTypes[attr] = type;
     });
 
-    return _extends({}, state, { attrKinds: attrKinds, attrMinMax: attrMinMax, attrTypes: attrTypes });
+    // console.log(attrKinds)
+
+    return _extends({}, state, {
+        attrKinds: attrKinds,
+        attrMinMax: attrMinMax,
+        attrTypes: attrTypes,
+        attrFormat: function attrFormat(attrKey) {
+            var tokens = attrKey.split('.');
+            var name = tokens.length > 1 ? tokens[tokens.length - 1] : tokens[0];
+            return name;
+        }
+    });
 }
 
 /***/ }),
@@ -41080,6 +41124,48 @@ var calculateDataStat = function calculateDataStat(data, types, attrs) {
     };
 };
 
+var calculateDataStatAll = function calculateDataStatAll(data, types, attrs) {
+    var indexById = {},
+        minmax = {};
+
+    data.forEach(function (dict, index) {
+        attrs.forEach(function (attr) {
+            var type = types[attr];
+            var value = __WEBPACK_IMPORTED_MODULE_0_lodash_get___default()(dict, attr);
+
+            if (minmax[attr] == null) {
+                if (value != undefined) {
+                    if (type === 'num') {
+                        minmax[attr] = [value, value];
+                    } else if (type === 'str') {
+                        minmax[attr] = [value];
+                    } else {
+                        // ignore unknown type
+                    }
+                }
+            } else {
+                var temp = minmax[attr];
+                if (value != undefined) {
+                    if (type === 'num') {
+                        temp[0] = Math.min(temp[0], value);
+                        temp[1] = Math.max(temp[1], value);
+                    } else if (type === 'str') {
+                        if (!temp.includes(value)) temp.push(value);
+                    } else {
+                        // ignore unknown type
+                    }
+                }
+            }
+        });
+        indexById[dict['_id']] = index;
+    });
+
+    return {
+        indexById: indexById,
+        minmax: minmax
+    };
+};
+
 /* harmony default export */ __webpack_exports__["a"] = (function (state, payload) {
     var total = payload.total,
         sampleData = payload.sampleData,
@@ -41094,9 +41180,9 @@ var calculateDataStat = function calculateDataStat(data, types, attrs) {
     var dataBySamples = {};
 
     sampleList.forEach(function (name, index) {
-        var _calculateDataStat = calculateDataStat(sampleData[index], attrTypes, attrKeys),
-            indexById = _calculateDataStat.indexById,
-            minmax = _calculateDataStat.minmax;
+        var _calculateDataStatAll = calculateDataStatAll(sampleData[index], attrTypes, attrKeys),
+            indexById = _calculateDataStatAll.indexById,
+            minmax = _calculateDataStatAll.minmax;
 
         dataBySamples[name] = {
             data: sampleData[index],
@@ -42367,11 +42453,13 @@ function setAttr(state, payload) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__ = __webpack_require__(/*! react-toolbox/lib/app_bar */ 91);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__layout__ = __webpack_require__(/*! ./layout */ 515);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css__ = __webpack_require__(/*! ./index.css */ 681);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__index_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_button__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__layout__ = __webpack_require__(/*! ./layout */ 515);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__index_css__ = __webpack_require__(/*! ./index.css */ 681);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__index_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_lodash_get__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -42379,6 +42467,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -42410,8 +42499,8 @@ var MultiViewApp = function (_React$Component) {
             var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
             var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-            width = width - 200;
-            height = height - 41.6 - 56.81 - 4.15;
+            //width = width - 200;
+            //height = height - 41.6 - 56.81 - 4.15;
 
             _this.setState({ width: width, height: height });
         };
@@ -42427,20 +42516,43 @@ var MultiViewApp = function (_React$Component) {
 
         _this.handleAttrChange = function (dim, value) {
             if (value.length === 0) return;
-            var attr = _this.props.attr;
+            var _this$props = _this.props,
+                attr = _this$props.attr,
+                attrFormat = _this$props.attrFormat,
+                attrKinds = _this$props.attrKinds;
 
-            var oldAttr = __WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(attr, dim);
-            if (value !== oldAttr && _this.props.setAttr) _this.props.setAttr(dim, value);
+
+            var oldAttr = attrFormat(__WEBPACK_IMPORTED_MODULE_11_lodash_get___default()(attr, dim));
+            if (value !== oldAttr && _this.props.setAttr) {
+                var attrKeys = Object.keys(attrKinds);
+                var index = attrKeys.findIndex(function (key) {
+                    return key.includes(value);
+                });
+                //console.log(attrKinds[attrKeys[index]])
+                _this.props.setAttr(dim, attrKeys[index]);
+            }
         };
 
         _this.handleToolChange = function (toolid) {
             _this.setState({ toolSelected: toolid });
         };
 
+        _this.handleSampleUpdate = function (doUpdate, selected, colors) {
+            if (doUpdate && _this.props.updateSelectedSamples) {
+                _this.props.updateSelectedSamples(selected, colors);
+            }
+            _this.setState({ showDataDialog: !_this.state.showDataDialog });
+        };
+
+        _this.onToggleDataDialog = function () {
+            _this.setState({ showDataDialog: !_this.state.showDataDialog });
+        };
+
         _this.state = {
             toolSelected: 0,
             width: 0,
-            height: 0
+            height: 0,
+            showDataDialog: false
         };
         return _this;
     }
@@ -42480,12 +42592,11 @@ var MultiViewApp = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
-
             var _state = this.state,
                 width = _state.width,
                 height = _state.height;
 
+            //console.log(this.props.attrKinds)
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Layout"],
@@ -42498,30 +42609,28 @@ var MultiViewApp = function (_React$Component) {
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Panel"],
                     null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"],
-                        { title: 'React-MultiView', leftIcon: 'menu', onLeftIconClick: null, theme: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a, fixed: true },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["b" /* ControlBox */], { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.ctlbox, toolId: this.state.toolSelected })
-                    )
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"], { title: 'React-MultiView', leftIcon: 'menu', onLeftIconClick: null, theme: __WEBPACK_IMPORTED_MODULE_10__index_css___default.a, fixed: true, flat: true })
                 ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["c" /* DataBox */], { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.databox, width: 200, height: height,
-                    sampleKinds: this.props.sampleKinds,
-                    samples: this.props.sampleSelected,
-                    colors: this.props.sampleColors,
-                    onSampleChange: this.handleSampleChange,
-                    onColorChange: function onColorChange(key) {
-                        return _this4.props.changeSampleColor(key);
-                    }
-                }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["d" /* ToolBox */], { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.toolbox,
-                    toolid: this.state.toolSelected,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["c" /* ToolBox */], { className: __WEBPACK_IMPORTED_MODULE_10__index_css___default.a.toolbox,
+                    onToggleDataDialog: this.onToggleDataDialog,
                     attrKinds: this.props.attrKinds,
+                    attrFormat: this.props.attrFormat,
                     attr: this.props.attr,
-                    onAttrChange: this.handleAttrChange,
-                    onToolChange: this.handleToolChange
+                    onAttrChange: this.handleAttrChange
                 }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["a" /* ChartBox */], { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.chartbox, width: width, height: height }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.footer })
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["b" /* DataDialog */], {
+                    title: 'Data Selector',
+                    active: this.state.showDataDialog,
+                    samples: this.props.sampleKinds,
+                    sampleSelected: this.props.sampleSelected,
+                    sampleColors: this.props.sampleColors,
+                    sampleColorOpacity: this.props.sampleColorOpacity,
+                    onColorChange: this.props.handleColorChange,
+                    onSampleUpdate: this.handleSampleUpdate,
+                    onToggleDataDialog: this.onToggleDataDialog
+                }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["a" /* ChartBox */], { className: __WEBPACK_IMPORTED_MODULE_10__index_css___default.a.chartbox, width: width, height: height }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', { className: __WEBPACK_IMPORTED_MODULE_10__index_css___default.a.footer })
             );
         }
     }]);
@@ -42532,10 +42641,12 @@ var MultiViewApp = function (_React$Component) {
 function mapStateToProps(state) {
     return {
         sampleKinds: state.data.sampleKinds,
-        sampleSelected: state.vis.samples,
-        sampleColors: state.vis.sampleColors,
-
+        sampleColors: state.data.sampleColors,
+        sampleColorOpacity: state.data.sampleColorOpacity,
+        sampleSelected: state.data.samples,
         attrKinds: state.data.attrKinds,
+        attrFormat: state.data.attrFormat,
+
         attr: {
             x: state.vis.attrx,
             y: state.vis.attry,
@@ -42551,9 +42662,11 @@ function mapDispatchToProps(dispatch) {
         getSampleKinds: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["c" /* getSampleKinds */],
         getAttributes: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["b" /* getAttributes */],
         AddData: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["a" /* AddData */],
-        setAttr: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["c" /* setAttr */],
+        setAttr: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["b" /* setAttr */],
         AddDelSamples: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["a" /* AddDelSamples */],
-        changeSampleColor: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["b" /* changeSampleColor */]
+        //changeSampleColor,
+        handleColorChange: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["d" /* handleColorChange */],
+        updateSelectedSamples: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["e" /* updateSelectedSamples */]
     }, dispatch);
 }
 
@@ -42564,14 +42677,16 @@ function mapDispatchToProps(dispatch) {
 /*!*******************************************************!*\
   !*** ./docs/lib/app/multiview/actions/dataActions.js ***!
   \*******************************************************/
-/*! exports provided: getSampleKinds, getAttributes, AddData */
-/*! exports used: AddData, getAttributes, getSampleKinds */
+/*! exports provided: getSampleKinds, getAttributes, AddData, updateSelectedSamples, handleColorChange */
+/*! exports used: AddData, getAttributes, getSampleKinds, handleColorChange, updateSelectedSamples */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["c"] = getSampleKinds;
 /* harmony export (immutable) */ __webpack_exports__["b"] = getAttributes;
 /* harmony export (immutable) */ __webpack_exports__["a"] = AddData;
+/* harmony export (immutable) */ __webpack_exports__["e"] = updateSelectedSamples;
+/* harmony export (immutable) */ __webpack_exports__["d"] = handleColorChange;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(/*! axios */ 495);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
 
@@ -42662,6 +42777,60 @@ function AddData(action, sampleNames) {
                 }
             })();
         }
+    };
+}
+
+function updateSelectedSamples(selected, colors) {
+
+    //console.log(selected)
+    return function (dispatch, getState) {
+        var dataBySamples = getState().data.dataBySamples;
+        var sampleKinds = getState().data.sampleKinds;
+
+        var sampleNames = selected.map(function (key) {
+            return sampleKinds[key];
+        }).filter(function (each) {
+            return each != null;
+        });
+
+        var dataToQuery = [];
+        var dataHave = Object.keys(dataBySamples);
+
+        sampleNames.forEach(function (name) {
+            if (dataHave.findIndex(function (d) {
+                return d === name;
+            }) === -1) dataToQuery.push(name);
+        });
+
+        if (dataToQuery.length) {
+            var _loop2 = function _loop2(i) {
+                var sliced = dataToQuery.slice(i, i + MAX_NUM_SAMPLE_QUERY);
+                setTimeout(function () {
+                    dispatch(getDataFromServer(sliced, dataToQuery.length));
+                }, SAMPLE_TIMEOUT);
+            };
+
+            for (var i = 0; i < dataToQuery.length; i += MAX_NUM_SAMPLE_QUERY) {
+                _loop2(i);
+            }
+        }
+
+        dispatch({
+            type: 'UPDATE_SELECTED_SAMPLES',
+            payload: { selected: selected, colors: colors }
+        });
+    };
+
+    // return {
+    //     type: 'UPDATE_SELECTED_SAMPLES',
+    //     payload: {selected, colors}
+    // }
+}
+
+function handleColorChange(sampleName) {
+    return {
+        type: 'SAMPLE_COLOR_CHANGE',
+        payload: sampleName
     };
 }
 
@@ -43656,13 +43825,13 @@ module.exports = function spread(callback) {
   !*** ./docs/lib/app/multiview/actions/visActions.js ***!
   \******************************************************/
 /*! exports provided: AddDelSamples, changeSampleColor, setAttr */
-/*! exports used: AddDelSamples, changeSampleColor, setAttr */
+/*! exports used: AddDelSamples, setAttr */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = AddDelSamples;
-/* harmony export (immutable) */ __webpack_exports__["b"] = changeSampleColor;
-/* harmony export (immutable) */ __webpack_exports__["c"] = setAttr;
+/* unused harmony export changeSampleColor */
+/* harmony export (immutable) */ __webpack_exports__["b"] = setAttr;
 function AddDelSamples(action, keys) {
     return {
         type: 'ADD_DEL_SAMPLES',
@@ -43689,19 +43858,23 @@ function setAttr(dim, value) {
 /*!************************************************!*\
   !*** ./docs/lib/app/multiview/layout/index.js ***!
   \************************************************/
-/*! exports provided: DataBox, ToolBox, ControlBox, ChartBox */
-/*! exports used: ChartBox, ControlBox, DataBox, ToolBox */
+/*! exports provided: DataBox, ToolBox, ControlBox, ChartBox, DataDialog */
+/*! exports used: ChartBox, DataDialog, ToolBox */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__databox__ = __webpack_require__(/*! ./databox */ 516);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_0__databox__["a"]; });
+/* unused harmony reexport DataBox */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__toolbox__ = __webpack_require__(/*! ./toolbox */ 520);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_1__toolbox__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_1__toolbox__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__controlbox__ = __webpack_require__(/*! ./controlbox */ 523);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__controlbox__["a"]; });
+/* unused harmony reexport ControlBox */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__chartbox__ = __webpack_require__(/*! ./chartbox */ 526);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__chartbox__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__dataDialog__ = __webpack_require__(/*! ./dataDialog */ 691);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_4__dataDialog__["a"]; });
+
+
 
 
 
@@ -43713,7 +43886,6 @@ function setAttr(dim, value) {
   !*** ./docs/lib/app/multiview/layout/databox/index.js ***!
   \********************************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43908,7 +44080,7 @@ DataBox.defaultProps = {
     className: ''
 };
 
-/* harmony default export */ __webpack_exports__["a"] = (DataBox);
+/* unused harmony default export */ var _unused_webpack_default_export = (DataBox);
 
 /***/ }),
 /* 517 */
@@ -44431,8 +44603,7 @@ module.exports = keys;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__index_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_lodash_get__);
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../../utils */ 680);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -44440,6 +44611,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
 
 
 
@@ -44495,69 +44668,74 @@ var ToolBox = function (_React$Component) {
             }
 
             return selectors;
+        }, _this.renderAttrSelector = function (axis, attrKinds) {
+            var attrFormat = _this.props.attrFormat;
+
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete___default.a, {
+                direction: 'down',
+                selectedPosition: 'none',
+                label: 'Select ' + axis + '-axis',
+                hint: 'Choose one...',
+                multiple: false,
+                source: attrKinds,
+                value: attrFormat(__WEBPACK_IMPORTED_MODULE_5_lodash_get___default()(_this.props.attr, axis)),
+                showSuggestionsWhenValueIsSet: true,
+                onChange: _this.onAttrChange.bind(_this, axis),
+                theme: __WEBPACK_IMPORTED_MODULE_4__index_css___default.a,
+                suggestionMatch: 'anywhere'
+            });
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
     _createClass(ToolBox, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
+            var _props = this.props,
+                attrKindsProp = _props.attrKinds,
+                attrFormat = _props.attrFormat;
 
-            var tools = [{ primary: true, accent: false }, { primary: true, accent: false }, { primary: true, accent: false }, { primary: true, accent: false }];
 
-            var toolid = this.props.toolid == null ? 0 : this.props.toolid;
-            tools[this.props.toolid] = { primary: false, accent: true };
+            var attrKinds = Object.keys(attrKindsProp).map(function (attrKey) {
+                return attrFormat(attrKindsProp[attrKey]);
+            }).sort(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sortAlphaNum */]);
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
                 { className: this.props.className },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'div',
-                    { style: { height: '25.83px' } },
+                    'table',
+                    { style: {
+                            width: '100%'
+                        } },
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'table',
+                        'tbody',
                         null,
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'tbody',
+                            'tr',
                             null,
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                'tr',
+                                'td',
+                                { style: { width: '20px' } },
+                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default.a, { label: 'DATA DIALOG', onClick: this.props.onToggleDataDialog })
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'td',
                                 null,
-                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                    'th',
-                                    null,
-                                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default.a, _extends({ icon: 'grain', label: 'SCATTER' }, tools[0], {
-                                        onClick: function onClick() {
-                                            return _this2.props.onToolChange(0);
-                                        }
-                                    }))
-                                ),
-                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                    'th',
-                                    null,
-                                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default.a, _extends({ icon: 'image', label: 'IMAGE' }, tools[1], {
-                                        onClick: function onClick() {
-                                            return _this2.props.onToolChange(1);
-                                        }
-                                    }))
-                                ),
-                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                    'th',
-                                    null,
-                                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default.a, _extends({ icon: 'poll', label: 'PROJECTION' }, tools[2], {
-                                        onClick: function onClick() {
-                                            return _this2.props.onToolChange(2);
-                                        }
-                                    }))
-                                )
+                                this.renderAttrSelector('x', attrKinds)
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'td',
+                                null,
+                                this.renderAttrSelector('y', attrKinds)
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'td',
+                                null,
+                                this.renderAttrSelector('z', attrKinds)
                             )
                         )
                     )
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'div',
-                    { style: { height: '30.99px' } },
-                    this.renderAttrSelectors()
                 )
             );
         }
@@ -44618,7 +44796,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../../node_module
 
 
 // module
-exports.push([module.i, ".naa0QkVR-UK__imWZo0Su {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.naa0QkVR-UK__imWZo0Su *,\n    .naa0QkVR-UK__imWZo0Su *::after,\n    .naa0QkVR-UK__imWZo0Su *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.naa0QkVR-UK__imWZo0Su._3jRBBRl6TEUvcf4yiI4nwf .jwsvFcWu4JtfuKYRHj5Yr {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n._2JjkIQCvNcRf9ZQ3-3lvZu {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n._39cRg17feIzjCJGXVBQQqk {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.jwsvFcWu4JtfuKYRHj5Yr {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.jwsvFcWu4JtfuKYRHj5Yr:not(._3FcvwMcUfkh1yhVFa8n1Tt) {\n  margin-top: -13px;\n}\n.jwsvFcWu4JtfuKYRHj5Yr._3FcvwMcUfkh1yhVFa8n1Tt {\n  bottom: 0;\n}\n.jwsvFcWu4JtfuKYRHj5Yr::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.FRYUUyhdGNXwp7bxKRUyX {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.FRYUUyhdGNXwp7bxKRUyX._1pi4pqXdJbbFnVtgUp6u1p {\n  background-color: rgb(238, 238, 238);\n}\n._1Yj8dlnhN78K_U9PMNyiHt {\n  position: relative\n}\n._1Yj8dlnhN78K_U9PMNyiHt::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.WrdlYodl1-Mj0MpEQj4X9 {\n    display: inline-block;\n    width: 33.33333%;\n}\n.X1uOafg-3DT7NR8dIbNi_ {\n    display: inline-block;\n    width: 7.69231%;\n    max-width: 7.69231%;\n    min-width: 7.69231%;\n    padding: 0;\n}\n.naa0QkVR-UK__imWZo0Su {\n    padding: 0;\n    padding-top: 0px;\n}\n", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/layout/toolbox/index.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,+BAA+B;UACvB,uBAAuB;EAC/B,wDAAwD;EACxD,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,sBAAsB;CAC/B;AACD;;;EAGE,+BAA+B;UACvB,uBAAuB;EAC/B,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,uBAAuB;EAC/B,4BAA4B;CAC7B;AACD;EACE,+EAA+E;UACvE,uEAAuE;EAC/E,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,+BAA+B;EAC/B,8BAA8B;MAC1B,wBAAwB;UACpB,oBAAoB;EAC5B,oBAAoB;MAChB,gBAAgB;EACpB,iBAAiB;EACjB,UAAU;EACV,sBAAsB;CACvB;AACD;EACE,iCAAiC;CAClC;AACD;EACE,qCAAqC;EACrC,iBAAiB;EACjB,cAAc;EACd,mBAAmB;EACnB,iBAAiB;EACjB,WAAW;EACX,mBAAmB;EACnB,mCAAmC;UAC3B,2BAA2B;EACnC,4DAA4D;EAC5D,oDAAoD;EACpD,4CAA4C;EAC5C,gEAAgE;EAChE,iEAAiE;UACzD,yDAAyD;EACjE,mBAAmB;EACnB,YAAY;EACZ,YAAY;CACb;AACD;EACE,kBAAkB;CACnB;AACD;EACE,UAAU;CACX;AACD;EACE,UAAU;EACV,SAAS;CACV;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,cAAc;CACf;AACD;EACE,qCAAqC;CACtC;AACD;EACE,kBAAkB;CACnB;AACD;EACE,yCAAyC;EACzC,0CAA0C;EAC1C,gDAAgD;EAChD,YAAY;EACZ,UAAU;EACV,qBAAqB;EACrB,mBAAmB;EACnB,aAAa;EACb,SAAS;EACT,yEAAyE;EACzE,iEAAiE;EACjE,yDAAyD;EACzD,+GAA+G;EAC/G,SAAS;CACV;AACD;IACI,sBAAsB;IACtB,iBAAiB;CACpB;AACD;IACI,sBAAsB;IACtB,gBAAgB;IAChB,oBAAoB;IACpB,oBAAoB;IACpB,WAAW;CACd;AACD;IACI,WAAW;IACX,iBAAiB;CACpB","file":"index.css","sourcesContent":[".autocomplete {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.autocomplete *,\n    .autocomplete *::after,\n    .autocomplete *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.autocomplete.focus .suggestions {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.values {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.value {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.suggestions {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.suggestions:not(.up) {\n  margin-top: -13px;\n}\n.suggestions.up {\n  bottom: 0;\n}\n.suggestions::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.suggestion {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.suggestion.active {\n  background-color: rgb(238, 238, 238);\n}\n.input {\n  position: relative\n}\n.input::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.dropdownbox {\n    display: inline-block;\n    width: 33.33333%;\n}\n.optionbox {\n    display: inline-block;\n    width: 7.69231%;\n    max-width: 7.69231%;\n    min-width: 7.69231%;\n    padding: 0;\n}\n.autocomplete {\n    padding: 0;\n    padding-top: 0px;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".naa0QkVR-UK__imWZo0Su {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.naa0QkVR-UK__imWZo0Su *,\n    .naa0QkVR-UK__imWZo0Su *::after,\n    .naa0QkVR-UK__imWZo0Su *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.naa0QkVR-UK__imWZo0Su._3jRBBRl6TEUvcf4yiI4nwf .jwsvFcWu4JtfuKYRHj5Yr {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n._2JjkIQCvNcRf9ZQ3-3lvZu {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n._39cRg17feIzjCJGXVBQQqk {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.jwsvFcWu4JtfuKYRHj5Yr {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.jwsvFcWu4JtfuKYRHj5Yr:not(._3FcvwMcUfkh1yhVFa8n1Tt) {\n  margin-top: -13px;\n}\n.jwsvFcWu4JtfuKYRHj5Yr._3FcvwMcUfkh1yhVFa8n1Tt {\n  bottom: 0;\n}\n.jwsvFcWu4JtfuKYRHj5Yr::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.FRYUUyhdGNXwp7bxKRUyX {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.FRYUUyhdGNXwp7bxKRUyX._1pi4pqXdJbbFnVtgUp6u1p {\n  background-color: rgb(238, 238, 238);\n}\n._1Yj8dlnhN78K_U9PMNyiHt {\n  position: relative\n}\n._1Yj8dlnhN78K_U9PMNyiHt::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.WrdlYodl1-Mj0MpEQj4X9 {\n    display: inline-block;\n    width: 25%;\n}\n.X1uOafg-3DT7NR8dIbNi_ {\n    display: inline-block;\n    width: 7.69231%;\n    max-width: 7.69231%;\n    min-width: 7.69231%;\n    padding: 0;\n}\n.naa0QkVR-UK__imWZo0Su {\n    padding: 0;\n    padding-top: 0px;\n}\n\n", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/layout/toolbox/index.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,+BAA+B;UACvB,uBAAuB;EAC/B,wDAAwD;EACxD,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,sBAAsB;CAC/B;AACD;;;EAGE,+BAA+B;UACvB,uBAAuB;EAC/B,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,uBAAuB;EAC/B,4BAA4B;CAC7B;AACD;EACE,+EAA+E;UACvE,uEAAuE;EAC/E,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,+BAA+B;EAC/B,8BAA8B;MAC1B,wBAAwB;UACpB,oBAAoB;EAC5B,oBAAoB;MAChB,gBAAgB;EACpB,iBAAiB;EACjB,UAAU;EACV,sBAAsB;CACvB;AACD;EACE,iCAAiC;CAClC;AACD;EACE,qCAAqC;EACrC,iBAAiB;EACjB,cAAc;EACd,mBAAmB;EACnB,iBAAiB;EACjB,WAAW;EACX,mBAAmB;EACnB,mCAAmC;UAC3B,2BAA2B;EACnC,4DAA4D;EAC5D,oDAAoD;EACpD,4CAA4C;EAC5C,gEAAgE;EAChE,iEAAiE;UACzD,yDAAyD;EACjE,mBAAmB;EACnB,YAAY;EACZ,YAAY;CACb;AACD;EACE,kBAAkB;CACnB;AACD;EACE,UAAU;CACX;AACD;EACE,UAAU;EACV,SAAS;CACV;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,cAAc;CACf;AACD;EACE,qCAAqC;CACtC;AACD;EACE,kBAAkB;CACnB;AACD;EACE,yCAAyC;EACzC,0CAA0C;EAC1C,gDAAgD;EAChD,YAAY;EACZ,UAAU;EACV,qBAAqB;EACrB,mBAAmB;EACnB,aAAa;EACb,SAAS;EACT,yEAAyE;EACzE,iEAAiE;EACjE,yDAAyD;EACzD,+GAA+G;EAC/G,SAAS;CACV;AACD;IACI,sBAAsB;IACtB,WAAW;CACd;AACD;IACI,sBAAsB;IACtB,gBAAgB;IAChB,oBAAoB;IACpB,oBAAoB;IACpB,WAAW;CACd;AACD;IACI,WAAW;IACX,iBAAiB;CACpB","file":"index.css","sourcesContent":[".autocomplete {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.autocomplete *,\n    .autocomplete *::after,\n    .autocomplete *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.autocomplete.focus .suggestions {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.values {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.value {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.suggestions {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.suggestions:not(.up) {\n  margin-top: -13px;\n}\n.suggestions.up {\n  bottom: 0;\n}\n.suggestions::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.suggestion {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.suggestion.active {\n  background-color: rgb(238, 238, 238);\n}\n.input {\n  position: relative\n}\n.input::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.dropdownbox {\n    display: inline-block;\n    width: 25%;\n}\n.optionbox {\n    display: inline-block;\n    width: 7.69231%;\n    max-width: 7.69231%;\n    min-width: 7.69231%;\n    padding: 0;\n}\n.autocomplete {\n    padding: 0;\n    padding-top: 0px;\n}\n\n"],"sourceRoot":""}]);
 
 // exports
 exports.locals = {
@@ -44641,7 +44819,6 @@ exports.locals = {
   !*** ./docs/lib/app/multiview/layout/controlbox/index.js ***!
   \***********************************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -44892,7 +45069,7 @@ function mapDispatchToProps(dispatch) {
     return Object(__WEBPACK_IMPORTED_MODULE_3_redux__["b" /* bindActionCreators */])({}, dispatch);
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps)(ControlBox));
+/* unused harmony default export */ var _unused_webpack_default_export = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps)(ControlBox));
 
 /***/ }),
 /* 524 */
@@ -45036,7 +45213,8 @@ var ChartBox = function (_React$Component) {
                 pcpDimension = _this$props2.pcpDimension,
                 pcpData = _this$props2.pcpData,
                 colorsBySampleNames = _this$props2.colorsBySampleNames,
-                sampleAccessor = _this$props2.sampleAccessor;
+                sampleAccessor = _this$props2.sampleAccessor,
+                attrFormat = _this$props2.attrFormat;
             //console.log(pcpDimension)
             //console.log(pcpData)
 
@@ -45045,7 +45223,8 @@ var ChartBox = function (_React$Component) {
                 data: pcpData,
                 dimension: pcpDimension,
                 colorsByGroup: colorsBySampleNames,
-                groupAccessor: sampleAccessor
+                groupAccessor: sampleAccessor,
+                titleFormat: attrFormat
             });
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
@@ -45060,7 +45239,6 @@ var ChartBox = function (_React$Component) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
                 { className: this.props.className },
-                this.renderScatterChart(scatterHeight),
                 this.renderParallelCoordinateChart(pcpHeight)
             );
         }
@@ -45073,18 +45251,19 @@ ChartBox.propTypes = {};
 ChartBox.defaultProps = {};
 
 function mapStateToProps(state) {
-    var _getSelectedSortedDat = Object(__WEBPACK_IMPORTED_MODULE_8__selector__["f" /* getSelectedSortedDataArray */])(state),
+    var _getSelectedSortedDat = Object(__WEBPACK_IMPORTED_MODULE_8__selector__["e" /* getSelectedSortedDataArray */])(state),
         data = _getSelectedSortedDat.data,
         xExtents = _getSelectedSortedDat.xExtents,
         yExtents = _getSelectedSortedDat.yExtents;
 
+    //test(state)
     // const pcpDimension = getPCPDimension(state);
 
     //console.log(getColorsBySampleNames(state))
     //const pcpData = getPCPData(state);
 
 
-    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_8__selector__["d" /* getSelectedDataArray */])(state),
+    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_8__selector__["c" /* getSelectedDataArray */])(state),
         pcpData = _getSelectedDataArray.data,
         pcpExtents = _getSelectedDataArray.extents;
 
@@ -45094,15 +45273,16 @@ function mapStateToProps(state) {
         yExtents: yExtents,
         xAttr: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["a" /* getAttrX */])(state),
         yAttr: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["b" /* getAttrY */])(state),
-        xAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["g" /* getXAccessor */])(state),
-        yAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["j" /* getYAccessor */])(state),
-        zAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["m" /* getZAccessor */])(state),
-        xScale: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["h" /* getXScale */])(state),
-        yScale: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["k" /* getYScale */])(state),
-        xType: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["i" /* getXType */])(state),
-        yType: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["l" /* getYType */])(state),
-        selectedSampleNames: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["e" /* getSelectedSampleNames */])(state),
-        colorsBySampleNames: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["c" /* getColorsBySampleNames */])(state),
+        xAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["f" /* getXAccessor */])(state),
+        yAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["i" /* getYAccessor */])(state),
+        zAccessor: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["l" /* getZAccessor */])(state),
+        xScale: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["g" /* getXScale */])(state),
+        yScale: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["j" /* getYScale */])(state),
+        xType: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["h" /* getXType */])(state),
+        yType: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["k" /* getYType */])(state),
+        selectedSampleNames: Object(__WEBPACK_IMPORTED_MODULE_8__selector__["d" /* getSelectedSampleNames */])(state),
+        colorsBySampleNames: state.data.sampleColors, //getColorsBySampleNames(state),
+        attrFormat: state.data.attrFormat,
         sampleAccessor: function sampleAccessor(d) {
             return d.sample;
         },
@@ -51546,6 +51726,7 @@ YAxis.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils__ = __webpack_require__(/*! ../utils */ 10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__core__ = __webpack_require__(/*! ../core */ 32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_d3_scale__ = __webpack_require__(/*! d3-scale */ 26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_d3_format__ = __webpack_require__(/*! d3-format */ 246);
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -51557,6 +51738,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -51676,7 +51858,7 @@ var PCPYAxis = function (_React$Component) {
 
 			var halfWidth = axisWidth / 2;
 			var halfhalfWidth = axisWidth / 4;
-			ctx.fillStyle = Object(__WEBPACK_IMPORTED_MODULE_4__utils__["j" /* hexToRGBA */])('#000000', 0.5);
+			ctx.fillStyle = Object(__WEBPACK_IMPORTED_MODULE_4__utils__["j" /* hexToRGBA */])('#000000', 0.3);
 			ctx.rect(-halfhalfWidth, start, halfWidth, end - start);
 			ctx.fill();
 		}, _this.draw = function (ctx, moreProps) {
@@ -51908,6 +52090,9 @@ PCPYAxis.defaultProps = {
 
 	titleFormat: function titleFormat(d) {
 		return d;
+	},
+	tickFormat: function tickFormat(x) {
+		return Object(__WEBPACK_IMPORTED_MODULE_7_d3_format__["a" /* format */])(".3s")(x);
 	},
 
 	className: "",
@@ -53784,7 +53969,12 @@ var PCPCanvas = function (_React$Component) {
                 yScale.domain(domain).range([canvasDim.height, 0]);
 
                 var yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
-                newDimConfig[name] = {
+
+                var prevConfig = initialDimConfig[name] ? initialDimConfig[name] : {};
+
+                newDimConfig[name] = _extends({
+                    select: null
+                }, prevConfig, {
                     title: name,
                     extents: axisExtents,
                     ordinary: ordinary,
@@ -53797,9 +53987,9 @@ var PCPCanvas = function (_React$Component) {
                     accessor: function accessor(d) {
                         return d[name];
                     },
-                    nullPositionY: canvasDim.height + margin.bottom / 2,
-                    select: null
-                };
+                    nullPositionY: canvasDim.height + margin.bottom / 2
+                    //select: null
+                });
             });
 
             // console.log(newDimOrder)
@@ -54013,7 +54203,6 @@ var PCPCanvas = function (_React$Component) {
         };
 
         _this.handleRangeSelectCancel = function (axisTitle, e) {
-            console.log('handleRangeSelectCancel: ', axisTitle);
             var initDimConfig = _this.state.dimConfig;
 
             var newDimConfig = {};
@@ -54124,7 +54313,8 @@ var PCPCanvas = function (_React$Component) {
                     dimConfig: config,
                     onRangeSelect: _this2.handleRangeSelect,
                     onRangeSelectEnd: _this2.handleRangeSelectEnd,
-                    onRangeSelectCancel: _this2.handleRangeSelectCancel
+                    onRangeSelectCancel: _this2.handleRangeSelectCancel,
+                    titleFormat: _this2.props.titleFormat
                 }));
             });
 
@@ -54685,10 +54875,16 @@ var PCPPolyLineSeries = function (_React$Component) {
 
                         var py = yAccessor(d, config);
 
-                        var _config$select = _slicedToArray(config.select, 2),
-                            start = _config$select[0],
-                            end = _config$select[1];
+                        var _config$select$slice = config.select.slice(),
+                            _config$select$slice2 = _slicedToArray(_config$select$slice, 2),
+                            start = _config$select$slice2[0],
+                            end = _config$select$slice2[1];
 
+                        if (start > end) {
+                            var temp = start;
+                            start = end;
+                            end = temp;
+                        }
                         if (start <= py && py <= end) continue;
 
                         d.__in = false;
@@ -55099,6 +55295,7 @@ providerProto.drawAt = function (dctx, dx, dy, markerID) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_scale__ = __webpack_require__(/*! d3-scale */ 26);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ../../../utils */ 680);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -55106,6 +55303,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
 
 
 
@@ -55138,27 +55337,19 @@ var ParallelCoordinateChart = function (_React$Component) {
                 dimension = _props.dimension,
                 data = _props.data,
                 colorsByGroup = _props.colorsByGroup,
-                groupAccessor = _props.groupAccessor;
+                groupAccessor = _props.groupAccessor,
+                titleFormat = _props.titleFormat;
 
+            //console.log('pcp char:', dimension)
 
             if (data == null || data.length === 0) return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null);
 
-            // console.log(dimension)
-            // const dimName = [
-            //     'sample', 
-            //     'metadata_extract.data.annealing_time',
-            //     'metadata_extract.data.annealing_temperature',
-            //     //'linecut_qr.data.fit_peaks_sigma1'
-            // ];
-            var dimName = Object.keys(dimension);
-            //console.log(dimension)
-            //const xExtents = [0, numDim];
-
-            // const yAccessor = dimName.map(name => {
-            //     return d => get(d, name);
-            // });
-            //const yAccessor = (d, name) => get(d, name);
-
+            var dimName = Object.keys(dimension).sort(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* sortAlphaNum */]);
+            var index = dimName.indexOf('sample');
+            if (index !== -1) {
+                dimName.splice(index, 1);
+                dimName.splice(0, 0, 'sample');
+            }
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */],
@@ -55179,7 +55370,9 @@ var ParallelCoordinateChart = function (_React$Component) {
                     colorAccessor: function colorAccessor(d) {
                         return colorsByGroup[groupAccessor(d)];
                     },
-                    axisWidth: 26
+                    axisWidth: 26,
+
+                    titleFormat: titleFormat
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["e" /* Series */],
@@ -55615,26 +55808,26 @@ ScatterMarkerProviderTest = Object(__WEBPACK_IMPORTED_MODULE_1_react_multiview_l
   !*** ./docs/lib/app/multiview/layout/chartbox/selector.js ***!
   \************************************************************/
 /*! exports provided: getAttrX, getAttrY, getAttrZ, getXAccessor, getXType, getXScale, getYAccessor, getYType, getYScale, getZAccessor, getColorAccessorBySample, getColorsBySampleNames, getSelectedSampleNames, getSelectedDataArray, getSelectedDataObject, getSelectedSortedDataArray, getPCPDimension, getPCPData, test */
-/*! exports used: getAttrX, getAttrY, getColorsBySampleNames, getSelectedDataArray, getSelectedSampleNames, getSelectedSortedDataArray, getXAccessor, getXScale, getXType, getYAccessor, getYScale, getYType, getZAccessor */
+/*! exports used: getAttrX, getAttrY, getSelectedDataArray, getSelectedSampleNames, getSelectedSortedDataArray, getXAccessor, getXScale, getXType, getYAccessor, getYScale, getYType, getZAccessor */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getAttrX; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAttrY; });
 /* unused harmony export getAttrZ */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getXAccessor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getXType; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getXScale; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getYAccessor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getYType; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getYScale; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return getZAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getXAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getXType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getXScale; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getYAccessor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getYType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getYScale; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getZAccessor; });
 /* unused harmony export getColorAccessorBySample */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getColorsBySampleNames; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getSelectedSampleNames; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getSelectedDataArray; });
+/* unused harmony export getColorsBySampleNames */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getSelectedSampleNames; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getSelectedDataArray; });
 /* unused harmony export getSelectedDataObject */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getSelectedSortedDataArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getSelectedSortedDataArray; });
 /* unused harmony export getPCPDimension */
 /* unused harmony export getPCPData */
 /* unused harmony export test */
@@ -55649,6 +55842,9 @@ ScatterMarkerProviderTest = Object(__WEBPACK_IMPORTED_MODULE_1_react_multiview_l
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_scale__ = __webpack_require__(/*! d3-scale */ 26);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_array__ = __webpack_require__(/*! d3-array */ 8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../../utils */ 680);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_d3_format__ = __webpack_require__(/*! d3-format */ 246);
+
+
 
 
 
@@ -55668,11 +55864,13 @@ var getAttrTypes = function getAttrTypes(state) {
     return state.data.attrTypes;
 };
 
+// const getSelectedSampleKeys = state => state.vis.samples;
+// const getSelectedSampleColors = state => state.vis.sampleColors;
 var getSelectedSampleKeys = function getSelectedSampleKeys(state) {
-    return state.vis.samples;
+    return state.data.samples;
 };
 var getSelectedSampleColors = function getSelectedSampleColors(state) {
-    return state.vis.sampleColors;
+    return state.data.sampleColors;
 };
 
 var getAttrX = function getAttrX(state) {
@@ -55895,8 +56093,21 @@ var getPCPData = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"]
 // end pcp
 
 
-var test = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"])([getSelectedDataArray], function (output) {
-    console.log('test selector', output);
+var test = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"])([], function () {
+    var formatSi = Object(__WEBPACK_IMPORTED_MODULE_7_d3_format__["a" /* format */])(".3s");
+    console.log('0 -> ', formatSi(0));
+    console.log('10 -> ', formatSi(10));
+    console.log('100 -> ', formatSi(100));
+    console.log('1000 -> ', formatSi(1000));
+    console.log('10000 -> ', formatSi(10000));
+    console.log('100000 -> ', formatSi(100000));
+    console.log('1000000 -> ', formatSi(1000000));
+    console.log('0.1 -> ', formatSi(0.1));
+    console.log('0.01 -> ', formatSi(0.01));
+    console.log('0.001 -> ', formatSi(0.001));
+    console.log('0.0001 -> ', formatSi(0.0001));
+    console.log('0.00001 -> ', formatSi(0.00001));
+    console.log('0.000001 -> ', formatSi(0.000001));
 });
 
 /***/ }),
@@ -56102,7 +56313,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 200px;\n    top: 41.6px;\n    width: calc(100% - 200px);\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 10px 10px 0px 10px;\n    position: fixed;\n    left: 200px;\n    top: 98.41px;\n    width: calc(100% - 200px);\n    height: calc(100% - 102.57px);\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,YAAY;IACZ,YAAY;IACZ,0BAA0B;IAC1B,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,4BAA4B;IAC5B,gBAAgB;IAChB,YAAY;IACZ,aAAa;IACb,0BAA0B;IAC1B,8BAA8B;IAC9B,wDAAwD;IACxD,kBAAkB;CACrB","file":"index.css","sourcesContent":[".appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 200px;\n    top: 41.6px;\n    width: calc(100% - 200px);\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 10px 10px 0px 10px;\n    position: fixed;\n    left: 200px;\n    top: 98.41px;\n    width: calc(100% - 200px);\n    height: calc(100% - 102.57px);\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}"],"sourceRoot":""}]);
+exports.push([module.i, "._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: fixed;\n    left: 0;\n    top: 98.41px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,aAAa;IACb,YAAY;IACZ,wDAAwD;IACxD,kBAAkB;CACrB","file":"index.css","sourcesContent":[".appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: fixed;\n    left: 0;\n    top: 98.41px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}"],"sourceRoot":""}]);
 
 // exports
 exports.locals = {
@@ -56307,6 +56518,618 @@ PCPCanvasContainer.propTypes = {
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (PCPCanvasContainer);
+
+/***/ }),
+/* 691 */
+/*!***********************************************************!*\
+  !*** ./docs/lib/app/multiview/layout/dataDialog/index.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_dialog__ = __webpack_require__(/*! react-toolbox/lib/dialog */ 100);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_dialog___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_dialog__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__ = __webpack_require__(/*! react-toolbox/lib/autocomplete */ 93);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list__ = __webpack_require__(/*! react-toolbox/lib/list */ 173);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../../utils */ 680);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_utils__ = __webpack_require__(/*! react-multiview/lib/utils */ 10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__reducers_dataHelper_getSampleKinds__ = __webpack_require__(/*! ../../reducers/dataHelper/getSampleKinds */ 694);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css__ = __webpack_require__(/*! ./index.css */ 692);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__index_css__);
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var DataListItem = function (_React$Component) {
+    _inherits(DataListItem, _React$Component);
+
+    function DataListItem() {
+        _classCallCheck(this, DataListItem);
+
+        return _possibleConstructorReturn(this, (DataListItem.__proto__ || Object.getPrototypeOf(DataListItem)).apply(this, arguments));
+    }
+
+    _createClass(DataListItem, [{
+        key: 'render',
+        value: function render() {
+            var _props = this.props,
+                id = _props.id,
+                name = _props.name,
+                color = _props.color,
+                onColorChange = _props.onColorChange,
+                onItemDelete = _props.onItemDelete;
+
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list__["ListItem"], {
+                theme: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a,
+                caption: name,
+                leftActions: [__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button___default.a, {
+                    raised: true,
+                    style: {
+                        minWidth: '10px',
+                        maxHeight: '10px',
+                        backgroundColor: color ? color : 'black'
+                    },
+                    onClick: function onClick() {
+                        return onColorChange(name);
+                    }
+                })],
+                rightActions: [__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button___default.a, {
+                    icon: 'delete',
+                    style: {
+                        minWidth: '10px'
+                    },
+                    onClick: function onClick() {
+                        return onItemDelete(id);
+                    }
+                })]
+            });
+        }
+    }]);
+
+    return DataListItem;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+var DataList = function (_React$Component2) {
+    _inherits(DataList, _React$Component2);
+
+    function DataList(props) {
+        _classCallCheck(this, DataList);
+
+        var _this2 = _possibleConstructorReturn(this, (DataList.__proto__ || Object.getPrototypeOf(DataList)).call(this, props));
+
+        _this2.source = function () {
+            var items = _this2.props.items;
+
+            return new Map(Object.keys(items).map(function (key) {
+                return ['' + key, items[key]];
+            }));
+        };
+
+        _this2.getQueriedList = function () {
+            if (_this2.query == null || _this2.query.length === 0) {
+                return _extends({}, _this2.props.items);
+            }
+
+            var src = _this2.source();
+            var query = _this2.query.toUpperCase().trim();
+            var list = {};
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = src[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var _ref = _step.value;
+
+                    var _ref2 = _slicedToArray(_ref, 2);
+
+                    var key = _ref2[0];
+                    var value = _ref2[1];
+
+                    if (value.toUpperCase().trim().includes(query)) list[key] = value;
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return list;
+        };
+
+        _this2.addItems = function (keyArray) {
+            var prev = _this2.state.selectedItems.slice();
+            keyArray.forEach(function (key) {
+                var value = _this2.props.items[key];
+                if (value != null && prev.indexOf(key) === -1) prev.push(key);
+            });
+
+            if (_this2.props.onSampleChange) _this2.props.onSampleChange(prev);
+            _this2.setState({ selectedItems: prev });
+        };
+
+        _this2.handleChange = function (selectedItemKeys, event) {
+            var targetID = event.target.id;
+            var enterKey = event.which != undefined && event.which === 13;
+            if (targetID != null && targetID.length) {
+                _this2.addItems([targetID]);
+            } else if (enterKey) {
+                var filteredSrc = _this2.getQueriedList();
+                _this2.addItems(Object.keys(filteredSrc));
+            }
+            _this2.query = null;
+        };
+
+        _this2.handleQueryChange = function (queryString) {
+            _this2.query = queryString;
+        };
+
+        _this2.handleItemDelete = function (key) {
+            var selectedItems = _this2.state.selectedItems.slice();
+            var index = selectedItems.indexOf(key);
+
+            if (index > -1) {
+                selectedItems.splice(index, 1);
+                if (_this2.props.onSampleChange) _this2.props.onSampleChange(selectedItems);
+                _this2.setState({
+                    selectedItems: selectedItems
+                });
+            }
+        };
+
+        _this2.handleColorChange = function (itemName) {
+            var colors = _extends({}, _this2.state.selectedItemColors);
+            var prev = colors[itemName];
+            var newColor = void 0;
+            do {
+                newColor = Object(__WEBPACK_IMPORTED_MODULE_8__reducers_dataHelper_getSampleKinds__["a" /* getRandomColor */])();
+            } while (newColor === prev);
+
+            colors[itemName] = newColor;
+            _this2.setState({
+                selectedItemColors: colors
+            });
+
+            if (_this2.props.onColorChange) _this2.props.onColorChange(colors);
+        };
+
+        _this2.renderListItems = function () {
+            var _this2$state = _this2.state,
+                itemKeys = _this2$state.selectedItems,
+                colors = _this2$state.selectedItemColors,
+                opacity = _this2$state.opacity;
+            //const { onColorChange } = this.props;
+
+            var itemList = itemKeys.map(function (key) {
+                return {
+                    key: key,
+                    value: _this2.props.items[key]
+                };
+            }).sort(function (a, b) {
+                return Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sortAlphaNum */])(a.value, b.value);
+            });
+
+            // const itemValues = itemKeys.map(key => this.props.items[key])
+            //                             .sort(sortAlphaNum);
+
+            return itemList.map(function (d) {
+                var key = d.key,
+                    value = d.value;
+
+                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DataListItem, { key: 'item-' + value,
+                    id: key,
+                    name: value,
+                    color: Object(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_utils__["j" /* hexToRGBA */])(colors[value], opacity),
+                    onColorChange: _this2.handleColorChange,
+                    onItemDelete: _this2.handleItemDelete
+                });
+            });
+        };
+
+        _this2.addAll = function () {
+            var selected = Object.keys(_this2.props.items);
+            if (_this2.props.onSampleChange) _this2.props.onSampleChange(selected);
+            _this2.setState({
+                selectedItems: selected
+            });
+        };
+
+        _this2.delAll = function () {
+            if (_this2.props.onSampleChange) _this2.props.onSampleChange([]);
+            _this2.setState({
+                selectedItems: []
+            });
+        };
+
+        _this2.renderTwoButtons = function () {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'table',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'tbody',
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'tr',
+                        null,
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'th',
+                            null,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button___default.a, { icon: 'select_all', label: 'ADD ALL', flat: true, primary: true,
+                                onClick: _this2.addAll
+                            })
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'th',
+                            null,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_button___default.a, { icon: 'clear', label: 'DEL ALL', flat: true, primary: true,
+                                onClick: _this2.delAll
+                            })
+                        )
+                    )
+                )
+            );
+        };
+
+        _this2.state = {
+            selectedItems: props.selected,
+            selectedItemColors: props.colors,
+            opacity: props.opacity
+        };
+        _this2.query = null;
+        return _this2;
+    }
+
+    _createClass(DataList, [{
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            this.setState({
+                selectedItems: nextProps.selected,
+                selectedItemColors: nextProps.colors,
+                opacity: nextProps.opacity
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                null,
+                this.renderTwoButtons(),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default.a, {
+                    direction: 'down',
+                    selectedPosition: 'none',
+                    label: 'Choose samples',
+                    source: this.props.items,
+                    value: this.state.selectedItems,
+                    suggestionMatch: 'anywhere',
+                    onQueryChange: this.handleQueryChange,
+                    onBlur: this.handleBlur,
+                    onChange: this.handleChange,
+                    theme: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a
+                }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list__["List"],
+                    { selectable: true },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_list__["ListSubHeader"], { caption: this.props.title }),
+                    this.renderListItems()
+                )
+            );
+        }
+    }]);
+
+    return DataList;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+var DataDialog = function (_React$Component3) {
+    _inherits(DataDialog, _React$Component3);
+
+    function DataDialog() {
+        _classCallCheck(this, DataDialog);
+
+        var _this3 = _possibleConstructorReturn(this, (DataDialog.__proto__ || Object.getPrototypeOf(DataDialog)).call(this));
+
+        _this3.updateSeleted = function () {
+            var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
+
+            _this3.selected = props.sampleSelected.slice();
+        };
+
+        _this3.updateColors = function () {
+            var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
+
+            _this3.colors = _extends({}, props.sampleColors);
+        };
+
+        _this3.handleSampleChange = function (selected) {
+            _this3.selected = selected.slice();
+        };
+
+        _this3.handleColorChange = function (colors) {
+            _this3.colors = _extends({}, colors);
+        };
+
+        _this3.handleUpdateChange = function () {
+            var colorChanged = false;
+            var colorKeys = Object.keys(_this3.colors).forEach(function (key) {
+                if (_this3.colors[key] !== _this3.props.sampleColors[key]) colorChanged = true;
+            });
+
+            var sampleChanged = _this3.selected.length !== _this3.props.sampleSelected.length;
+            if (!sampleChanged) {
+                var sortedNew = _this3.selected.sort(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sortAlphaNum */]);
+                var sortedOld = _this3.props.sampleSelected.sort(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sortAlphaNum */]);
+                sampleChanged = !sortedNew.every(function (key, index) {
+                    return key === sortedOld[index];
+                });
+            }
+
+            _this3.props.onSampleUpdate(colorChanged || sampleChanged, _this3.selected, _this3.colors);
+        };
+
+        _this3.selected = [];
+        _this3.colors = {};
+        return _this3;
+    }
+
+    _createClass(DataDialog, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.updateSeleted();
+            this.updateColors();
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            this.updateSeleted(nextProps);
+            this.updateColors(nextProps);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this4 = this;
+
+            var actions = [{
+                label: "Cancel",
+                onClick: function onClick() {
+                    return _this4.props.onSampleUpdate(false);
+                }
+            }, {
+                label: "Save",
+                onClick: this.handleUpdateChange
+            }];
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_dialog___default.a,
+                {
+                    actions: actions,
+                    active: this.props.active,
+                    onEscKeyDown: this.props.onToggleDataDialog,
+                    onOverlayClick: this.props.onToggleDataDialog,
+                    title: this.props.title
+                },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { style: {
+                            height: '300px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflowY: 'scroll'
+                            //border: 'solid black 1px',
+                            //borderRadius: '5px'
+                        }
+                    },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(DataList, {
+                        title: 'Selected samples',
+                        items: this.props.samples,
+                        selected: this.props.sampleSelected,
+                        colors: this.props.sampleColors,
+                        opacity: this.props.sampleColorOpacity,
+                        onColorChange: this.handleColorChange,
+                        onSampleChange: this.handleSampleChange
+                    })
+                )
+            );
+        }
+    }]);
+
+    return DataDialog;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (DataDialog);
+
+/***/ }),
+/* 692 */
+/*!************************************************************!*\
+  !*** ./docs/lib/app/multiview/layout/dataDialog/index.css ***!
+  \************************************************************/
+/*! dynamic exports provided */
+/*! exports used: default */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !../../../../../../node_modules/css-loader??ref--5-1!../../../../../../node_modules/postcss-loader/lib!./index.css */ 693);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {"hmr":true}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(/*! ../../../../../../node_modules/style-loader/lib/addStyles.js */ 6)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../../../../node_modules/css-loader/index.js??ref--5-1!../../../../../../node_modules/postcss-loader/lib/index.js!./index.css", function() {
+			var newContent = require("!!../../../../../../node_modules/css-loader/index.js??ref--5-1!../../../../../../node_modules/postcss-loader/lib/index.js!./index.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 693 */
+/*!*********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader?{"modules":true,"sourceMap":true,"importLoaders":1,"localIndentName":"[name]--[local]--[hash:base64:8]"}!./node_modules/postcss-loader/lib!./docs/lib/app/multiview/layout/dataDialog/index.css ***!
+  \*********************************************************************************************************************************************************************************************************************************/
+/*! dynamic exports provided */
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../../../node_modules/css-loader/lib/css-base.js */ 5)(true);
+// imports
+
+
+// module
+exports.push([module.i, "._139-9iOkMpiWC_aUnptEI8 {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n._139-9iOkMpiWC_aUnptEI8 *,\n    ._139-9iOkMpiWC_aUnptEI8 *::after,\n    ._139-9iOkMpiWC_aUnptEI8 *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n._139-9iOkMpiWC_aUnptEI8._1RHMNmNRU_ACLjYlGU3PHR ._2NlYGCt1_5uIdKeOB9wkzT {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n._1vv8hYWhvCNCGml-yi49GQ {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.wJ4NuyEw1woe2RJ5oQ1hX {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n._2NlYGCt1_5uIdKeOB9wkzT {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n._2NlYGCt1_5uIdKeOB9wkzT:not(._3XtsnWp8BUP046_OSeEV27) {\n  margin-top: -13px;\n}\n._2NlYGCt1_5uIdKeOB9wkzT._3XtsnWp8BUP046_OSeEV27 {\n  bottom: 0;\n}\n._2NlYGCt1_5uIdKeOB9wkzT::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n._3XWYKx1qtjkHWu-Ya-St00 {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n._3XWYKx1qtjkHWu-Ya-St00._3dv0dgLG65AykIUP5BeBNv {\n  background-color: rgb(238, 238, 238);\n}\n.o1Fx63duyd3PgzjZmSMUr {\n  position: relative\n}\n.o1Fx63duyd3PgzjZmSMUr::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n._3HJWQl9hKxmyUaj4i3nPeP {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n._3HJWQl9hKxmyUaj4i3nPeP *,\n    ._3HJWQl9hKxmyUaj4i3nPeP *::after,\n    ._3HJWQl9hKxmyUaj4i3nPeP *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n._3HJWQl9hKxmyUaj4i3nPeP + ._3MkZ-T8b3WPJWNINNCHZzM {\n  margin-top: -3.25px;\n}\n._3v_wVPaGFhvkiJmf1t2D_F {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n._3MkZ-T8b3WPJWNINNCHZzM {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n._3MkZ-T8b3WPJWNINNCHZzM._3bVguqRP0z4GYlGzhp6joO {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n._1fVgMo0XS7kba5fJXBJ_yn {\n  position: relative\n}\n._1fVgMo0XS7kba5fJXBJ_yn > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n._1fVgMo0XS7kba5fJXBJ_yn ._38Jn-bkW_oL-edMTE87al9 {\n  color: rgb(117, 117, 117);\n}\n._1fVgMo0XS7kba5fJXBJ_yn ~ ._3MkZ-T8b3WPJWNINNCHZzM {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n._2z99ERYPEC9QeUZwjNniN1 {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n._2z99ERYPEC9QeUZwjNniN1._301-Sy0X6KQgoUfC7kDUoe:not(._2WpPn9xJnSd6lcd9BJeHPX):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n._2z99ERYPEC9QeUZwjNniN1._2WpPn9xJnSd6lcd9BJeHPX {\n  pointer-events: none;\n}\n._2z99ERYPEC9QeUZwjNniN1._2WpPn9xJnSd6lcd9BJeHPX:not(._2kJLMOh_A5wKxUurBocqXd) {\n  opacity: 0.5;\n}\n._2z99ERYPEC9QeUZwjNniN1._2WpPn9xJnSd6lcd9BJeHPX > .NMJBOXlCacTYrtBb5ejiE > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n._8uXIqWPHrsCYAuuYlzR4O [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n._8uXIqWPHrsCYAuuYlzR4O :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n._27gYGbo-9H1XsMRQZTF0T5 > :last-child {\n  margin-right: 0;\n}\n._27gYGbo-9H1XsMRQZTF0T5 > :first-child {\n  margin-left: 10.4px;\n}\n._8uXIqWPHrsCYAuuYlzR4O,\n._27gYGbo-9H1XsMRQZTF0T5 {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n._1JOrGUDoz1Dn4FG7ffKYtZ {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n._1JOrGUDoz1Dn4FG7ffKYtZ > * {\n  padding: 0;\n}\n._1JOrGUDoz1Dn4FG7ffKYtZ > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n._33HUeZIA1gAChn9nJvt1SW {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n._33HUeZIA1gAChn9nJvt1SW._25fbW0pMNF8F1LRsA6gX0U {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n.NMJBOXlCacTYrtBb5ejiE {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n.NMJBOXlCacTYrtBb5ejiE > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n.NMJBOXlCacTYrtBb5ejiE > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n._3HNSv7wrPAJRVistJl8U0L {\n  display: block\n}\n._3HNSv7wrPAJRVistJl8U0L:not(._287QGJlFXtCuTNEr1NfafM) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n._3HNSv7wrPAJRVistJl8U0L._287QGJlFXtCuTNEr1NfafM {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n._139-9iOkMpiWC_aUnptEI8 {\n    padding: 0;\n    padding-top: 0px;\n}\n._2z99ERYPEC9QeUZwjNniN1 {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n._33HUeZIA1gAChn9nJvt1SW {\n    min-width: 0;\n}\n._3HNSv7wrPAJRVistJl8U0L {\n    max-width: 100%;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n._1o55shPCeHMGOrLNq1aaVS {\n    height: 25.83px; \n}\n._3QWNLtBBws9GXlCeN7bVNq {\n    height: 30.99px;\n}\n._3hDIzyu4fGdTglhg4jxAkJ {\n    height: calc(65% - 36.933px);\n    overflow-y: scroll;\n}\n._2-dEiXASd-hivY-3nO5Dw_ {\n    height: calc(35% - 19.887px);\n    padding: 5px;\n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/layout/dataDialog/index.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,+BAA+B;UACvB,uBAAuB;EAC/B,wDAAwD;EACxD,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,sBAAsB;CAC/B;AACD;;;EAGE,+BAA+B;UACvB,uBAAuB;EAC/B,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,uBAAuB;EAC/B,4BAA4B;CAC7B;AACD;EACE,+EAA+E;UACvE,uEAAuE;EAC/E,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,+BAA+B;EAC/B,8BAA8B;MAC1B,wBAAwB;UACpB,oBAAoB;EAC5B,oBAAoB;MAChB,gBAAgB;EACpB,iBAAiB;EACjB,UAAU;EACV,sBAAsB;CACvB;AACD;EACE,iCAAiC;CAClC;AACD;EACE,qCAAqC;EACrC,iBAAiB;EACjB,cAAc;EACd,mBAAmB;EACnB,iBAAiB;EACjB,WAAW;EACX,mBAAmB;EACnB,mCAAmC;UAC3B,2BAA2B;EACnC,4DAA4D;EAC5D,oDAAoD;EACpD,4CAA4C;EAC5C,gEAAgE;EAChE,iEAAiE;UACzD,yDAAyD;EACjE,mBAAmB;EACnB,YAAY;EACZ,YAAY;CACb;AACD;EACE,kBAAkB;CACnB;AACD;EACE,UAAU;CACX;AACD;EACE,UAAU;EACV,SAAS;CACV;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,cAAc;CACf;AACD;EACE,qCAAqC;CACtC;AACD;EACE,kBAAkB;CACnB;AACD;EACE,yCAAyC;EACzC,0CAA0C;EAC1C,gDAAgD;EAChD,YAAY;EACZ,UAAU;EACV,qBAAqB;EACrB,mBAAmB;EACnB,aAAa;EACb,SAAS;EACT,yEAAyE;EACzE,iEAAiE;EACjE,yDAAyD;EACzD,+GAA+G;EAC/G,SAAS;CACV;AACD;EACE,sBAAsB;EACtB,iBAAiB;EACjB,UAAU;EACV,kBAAkB;EAClB,mBAAmB;EACnB,iBAAiB;EACjB,oBAAoB;EACpB,YAAY;EACZ,+BAA+B;UACvB,uBAAuB;EAC/B,wDAAwD;EACxD,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,sBAAsB;CAC/B;AACD;;;EAGE,+BAA+B;UACvB,uBAAuB;EAC/B,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,uBAAuB;EAC/B,4BAA4B;CAC7B;AACD;EACE,oBAAoB;CACrB;AACD;EACE,0BAA0B;EAC1B,iBAAiB;EACjB,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,qCAAqC;EACrC,UAAU;EACV,eAAe;EACf,mBAAmB;CACpB;AACD;EACE,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,sBAAsB;EACtB,mBAAmB;CACpB;AACD;EACE,0BAA0B;MACtB,uBAAuB;UACnB,oBAAoB;EAC5B,uBAAuB;EACvB,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,mBAAmB;EACnB,kBAAkB;EAClB,kBAAkB;CACnB;AACD;EACE,qCAAqC;EACrC,gBAAgB;CACjB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,aAAa;CACd;AACD;EACE,aAAa;CACd;AACD;EACE,cAAc;CACf;AACD;EACE,qBAAqB;CACtB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,oBAAoB;CACrB;AACD;;EAEE,0BAA0B;MACtB,uBAAuB;UACnB,oBAAoB;EAC5B,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,oBAAoB;MAChB,mBAAmB;UACf,eAAe;CACxB;AACD;EACE,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,4BAA4B;CAC7B;AACD;EACE,WAAW;CACZ;AACD;EACE,0BAA0B;EAC1B,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,oBAAoB;MAChB,qBAAqB;UACjB,YAAY;CACrB;AACD;EACE,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,6BAA6B;EAC7B,8BAA8B;MAC1B,2BAA2B;UACvB,uBAAuB;EAC/B,eAAe;EACf,yBAAyB;MACrB,sBAAsB;UAClB,wBAAwB;CACjC;AACD;EACE,0BAA0B;MACtB,uBAAuB;UACnB,oBAAoB;EAC5B,gBAAgB;EAChB,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,aAAa;EACb,UAAU;EACV,mBAAmB;EACnB,WAAW;CACZ;AACD;EACE,qBAAqB;CACtB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;CACrB;AACD;EACE,uBAAuB;EACvB,kBAAkB;CACnB;AACD;IACI,WAAW;IACX,iBAAiB;CACpB;AACD;IACI,gBAAgB;IAChB,mBAAmB;IACnB,mBAAmB;CACtB;AACD;IACI,aAAa;CAChB;AACD;IACI,gBAAgB;IAChB,iBAAiB;IACjB,wBAAwB;CAC3B;AACD;IACI,gBAAgB;CACnB;AACD;IACI,gBAAgB;CACnB;AACD;IACI,6BAA6B;IAC7B,mBAAmB;CACtB;AACD;IACI,6BAA6B;IAC7B,aAAa;CAChB","file":"index.css","sourcesContent":[".autocomplete {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.autocomplete *,\n    .autocomplete *::after,\n    .autocomplete *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.autocomplete.focus .suggestions {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.values {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.value {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.suggestions {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.suggestions:not(.up) {\n  margin-top: -13px;\n}\n.suggestions.up {\n  bottom: 0;\n}\n.suggestions::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.suggestion {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.suggestion.active {\n  background-color: rgb(238, 238, 238);\n}\n.input {\n  position: relative\n}\n.input::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.list {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.list *,\n    .list *::after,\n    .list *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.list + .divider {\n  margin-top: -3.25px;\n}\n.subheader {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n.divider {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n.divider.inset {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n.listItem {\n  position: relative\n}\n.listItem > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n.listItem .ripple {\n  color: rgb(117, 117, 117);\n}\n.listItem ~ .divider {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n.item {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n.item.selectable:not(.disabled):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n.item.disabled {\n  pointer-events: none;\n}\n.item.disabled:not(.checkboxItem) {\n  opacity: 0.5;\n}\n.item.disabled > .checkbox > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n.left [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n.left :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n.right > :last-child {\n  margin-right: 0;\n}\n.right > :first-child {\n  margin-left: 10.4px;\n}\n.left,\n.right {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n.itemAction {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n.itemAction > * {\n  padding: 0;\n}\n.itemAction > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n.itemContentRoot {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n.itemContentRoot.large {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n.checkbox {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n.checkbox > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n.checkbox > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n.itemText {\n  display: block\n}\n.itemText:not(.primary) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n.itemText.primary {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n.autocomplete {\n    padding: 0;\n    padding-top: 0px;\n}\n.item {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n.itemContentRoot {\n    min-width: 0;\n}\n.itemText {\n    max-width: 100%;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n.btndiv {\n    height: 25.83px; \n}\n.seldiv {\n    height: 30.99px;\n}\n.listdiv {\n    height: calc(65% - 36.933px);\n    overflow-y: scroll;\n}\n.infodiv {\n    height: calc(35% - 19.887px);\n    padding: 5px;\n}"],"sourceRoot":""}]);
+
+// exports
+exports.locals = {
+	"autocomplete": "_139-9iOkMpiWC_aUnptEI8",
+	"focus": "_1RHMNmNRU_ACLjYlGU3PHR",
+	"suggestions": "_2NlYGCt1_5uIdKeOB9wkzT",
+	"values": "_1vv8hYWhvCNCGml-yi49GQ",
+	"value": "wJ4NuyEw1woe2RJ5oQ1hX",
+	"up": "_3XtsnWp8BUP046_OSeEV27",
+	"suggestion": "_3XWYKx1qtjkHWu-Ya-St00",
+	"active": "_3dv0dgLG65AykIUP5BeBNv",
+	"input": "o1Fx63duyd3PgzjZmSMUr",
+	"list": "_3HJWQl9hKxmyUaj4i3nPeP",
+	"divider": "_3MkZ-T8b3WPJWNINNCHZzM",
+	"subheader": "_3v_wVPaGFhvkiJmf1t2D_F",
+	"inset": "_3bVguqRP0z4GYlGzhp6joO",
+	"listItem": "_1fVgMo0XS7kba5fJXBJ_yn",
+	"ripple": "_38Jn-bkW_oL-edMTE87al9",
+	"item": "_2z99ERYPEC9QeUZwjNniN1",
+	"selectable": "_301-Sy0X6KQgoUfC7kDUoe",
+	"disabled": "_2WpPn9xJnSd6lcd9BJeHPX",
+	"checkboxItem": "_2kJLMOh_A5wKxUurBocqXd",
+	"checkbox": "NMJBOXlCacTYrtBb5ejiE",
+	"left": "_8uXIqWPHrsCYAuuYlzR4O",
+	"right": "_27gYGbo-9H1XsMRQZTF0T5",
+	"itemAction": "_1JOrGUDoz1Dn4FG7ffKYtZ",
+	"itemContentRoot": "_33HUeZIA1gAChn9nJvt1SW",
+	"large": "_25fbW0pMNF8F1LRsA6gX0U",
+	"itemText": "_3HNSv7wrPAJRVistJl8U0L",
+	"primary": "_287QGJlFXtCuTNEr1NfafM",
+	"btndiv": "_1o55shPCeHMGOrLNq1aaVS",
+	"seldiv": "_3QWNLtBBws9GXlCeN7bVNq",
+	"listdiv": "_3hDIzyu4fGdTglhg4jxAkJ",
+	"infodiv": "_2-dEiXASd-hivY-3nO5Dw_"
+};
+
+/***/ }),
+/* 694 */
+/*!**********************************************************************!*\
+  !*** ./docs/lib/app/multiview/reducers/dataHelper/getSampleKinds.js ***!
+  \**********************************************************************/
+/*! exports provided: getRandomColor, getSampleKinds, handleSampleColorChange */
+/*! exports used: getRandomColor, getSampleKinds, handleSampleColorChange */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getRandomColor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getSampleKinds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return handleSampleColorChange; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_randomcolor__ = __webpack_require__(/*! randomcolor */ 266);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_randomcolor__);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+
+
+var colorOptions = {
+    luminosity: 'dark',
+    hue: 'random'
+};
+
+var getRandomColor = function getRandomColor() {
+    return __WEBPACK_IMPORTED_MODULE_0_randomcolor___default()(colorOptions);
+};
+
+var getSampleKinds = function getSampleKinds(state, sampleKinds) {
+    var sampleColors = {};
+    var sampleNames = Object.keys(sampleKinds).map(function (key) {
+        return sampleKinds[key];
+    });
+
+    var colors = __WEBPACK_IMPORTED_MODULE_0_randomcolor___default()(_extends({}, colorOptions, {
+        count: sampleNames.length
+    }));
+
+    sampleNames.forEach(function (name, index) {
+        sampleColors[name] = colors[index];
+    });
+
+    return _extends({}, state, {
+        sampleKinds: sampleKinds,
+        sampleColors: sampleColors
+    });
+};
+
+var handleSampleColorChange = function handleSampleColorChange(state, sampleName) {
+    var sampleColors = _extends({}, state.sampleColors);
+
+    var prev = sampleColors[sampleName];
+    var newColor = void 0;
+    do {
+        newColor = __WEBPACK_IMPORTED_MODULE_0_randomcolor___default()(colorOptions);
+    } while (newColor === prev);
+
+    sampleColors[sampleName] = newColor;
+
+    return _extends({}, state, {
+        sampleColors: sampleColors
+    });
+};
 
 /***/ })
 /******/ ]);
