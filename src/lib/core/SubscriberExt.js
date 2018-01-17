@@ -108,7 +108,7 @@ class SubscriberExt extends React.Component {
         ctx.save();
 
         const { edgeClip, clip } = this.props;
-        const { margin, ratio, width, height } = this.props.shared;
+        const { margin, ratio, canvasDim:{width, height} } = this.props.shared;
 
         const canvasOriginX = margin.left;
         const canvasOriginY = margin.top;

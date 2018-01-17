@@ -12,6 +12,10 @@ import get from 'lodash.get';
 import { sortAlphaNum } from '../../../utils';
 
 class ParallelCoordinateChart extends React.Component {
+    getPCPCanvasNode = () => {
+        if (this.PCPCanvasNode) return this.PCPCanvasNode;
+    }
+
     render () {
         const margin= {left: 60, right: 40, top: 20, bottom: 10};
         const {
@@ -36,6 +40,7 @@ class ParallelCoordinateChart extends React.Component {
 
         return (
             <PCPCanvas
+                ref={node => this.PCPCanvasNode = node}
                 width={width}
                 height={height}
                 ratio={ratio}

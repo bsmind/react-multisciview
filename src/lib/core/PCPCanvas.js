@@ -459,6 +459,71 @@ class PCPCanvas extends React.Component {
             );
     }
 
+    rangeSelectHelperByOther = (dimSelects, initDimConfig) => {
+        const newDimConfig = {};
+        forEach(initDimConfig, (config, key) => {
+            if (dimSelects[key] == null || dimSelects[key].length === 0) {
+                newDimConfig[key] = {...config};
+            } else {
+                const [minv, maxv] = dimSelects[key];
+                const { scale } = config;
+                const newSelect = [scale(minv), scale(maxv)];
+                newDimConfig[key] = {
+                    ...config,
+                    select: newSelect
+                }
+            }
+        });
+        return {
+            dimConfig: newDimConfig
+        };
+    }
+    
+    handleByOther = ({what, data, inProgress}) => {
+        // must what: extents
+        if (what !== 'extents') return;
+        if (this.axisMoveInProgress || this.axisSelectInProgress) return;
+
+        if (inProgress) {
+            if (!this.waitingForAnimationFrame) {
+                this.waitingForAxisMoveAnimationFrame = true;
+
+                if (!this.currChartCopied) {
+                    this.copyChartInGrey();
+                    this.currChartCopied = true;
+                }
+                    
+                this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+                
+                const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+    
+                this.__dimConfig = state.dimConfig;
+
+                this.triggerEvent('selectrange', state, null);
+                requestAnimationFrame(() => {
+                    this.waitingForAnimationFrame = false;
+                    this.clearAxesAndPCPOnCanvas();
+                    this.draw({trigger: 'selectrange'})
+                });
+            }
+        } else {
+            this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+            
+            const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+
+            this.__dimConfig = null;//state.dimConfig;
+            this.currChartCopied = false;
+            
+            this.triggerEvent('selectrange', state, null);
+            requestAnimationFrame(() => {
+                this.clearAxesAndPCPOnOffCanvas();
+                this.setState({
+                    dimConfig: state.dimConfig
+                });                    
+            });            
+        }
+    }
+
     render() {
     	const divStyle = {
     		position: "relative",

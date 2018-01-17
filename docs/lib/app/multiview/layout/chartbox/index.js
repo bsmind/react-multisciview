@@ -49,6 +49,14 @@ class ChartBox extends React.Component {
         }
     }
 
+    getPCPCanvasNode = () => {
+        if (this.PCPNode &&
+            this.PCPNode.node
+        ) {
+            return this.PCPNode.node.getPCPCanvasNode();
+        }
+    }
+
     handlePCPAxisSelect = (who, axisTitle, select, scale, inProgress) => {
         let start, end, temp;
         if (select) {
@@ -73,6 +81,22 @@ class ChartBox extends React.Component {
         });
     }
 
+    handleScatterPanZoom = (attrList, domainList, inProgress) => {
+        const {pcpDimension} = this.props;
+        attrList.forEach((attr, index) => {
+            const refDomain = pcpDimension[attr];
+            const domain = domainList[index];
+            const isEqual = refDomain.every( (d,index) => Math.abs(domain[index] - d) < 1e-12);
+            this.attrExtents[attr] = isEqual ? []: domain;
+        });
+        const targetCanvas = this.getPCPCanvasNode();
+        targetCanvas.handleByOther({
+            what: 'extents',
+            data: this.attrExtents,
+            inProgress
+        });
+    }
+
     renderScatterChart = (h) => {
         const {
             pcpDimension,
@@ -90,6 +114,7 @@ class ChartBox extends React.Component {
             yAttr={yAttr}
             zAttr={zAttr}
             colorsByGroup={colorsBySampleNames}
+            onScatterPanZoom={this.handleScatterPanZoom}
         />
 
     }
@@ -121,6 +146,7 @@ class ChartBox extends React.Component {
             };
 
         return <ParallelCoordinateChart
+            ref={node => this.PCPNode = node}
             height={h}
             data={pcpData}
             dimension={pcpDimension}

@@ -93,6 +93,7 @@ class ScatterChart extends React.Component {
             data, dimension,
             xAttr, yAttr,
             xAccessor, yAccessor, zAccessor,
+            onScatterPanZoom
         } = this.props;
 
         const { markerGen } = this.state;
@@ -111,6 +112,7 @@ class ScatterChart extends React.Component {
                 dataAccessor={(d, name) => get(d, name)}
                 xAttr={xAttr}
                 yAttr={yAttr}
+                onScatterPanZoom={onScatterPanZoom}
             >
                 <XAxis 
                     axisAt='bottom' 

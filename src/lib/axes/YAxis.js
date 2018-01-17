@@ -142,21 +142,26 @@ class YAxis extends React.Component {
 
     onDomainChange = (newDomain) => {
     	const { handleYAxisZoom } = this.props.shared;
-    	const { id } = this.props.chartConfig;
 
     	if (handleYAxisZoom)
-    	 	handleYAxisZoom(id, newDomain);
+    	 	handleYAxisZoom(newDomain);
     }
 
     render() {
     	const
     		rect = this.getDrawRegion(),
-    		axisLocation = this.getAxisLocation();
+			axisLocation = this.getAxisLocation(),
+			{ yAttr: {scale: yScale} } = this.props.shared;
 
     	return (
     		<g transform={`translate(${axisLocation},${0})`}>
     			<AxisEventHandler
 					{...rect}
+					scale={yScale}
+					getMouseDelta={this.props.getMouseDelta}
+					getInverted={this.props.getInverted}
+					onDomainChange={this.onDomainChange}
+					zoomCursorClassName={"react-multiview-ns-resize-cursor"}
 				/>
     			<SubscriberExt
     				ref={node => this.node = node}

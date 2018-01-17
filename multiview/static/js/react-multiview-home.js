@@ -21908,30 +21908,23 @@ var AxisEventHandler = function (_React$Component) {
     _this.handleDragStartMouse = function (e) {
       e.preventDefault();
 
-      _this.mouseInteraction = true;
       var scale = _this.props.scale;
 
       var startScale = scale.copy();
-      _this.dragHappened = false;
+      Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(d3Window(_this.node)).on(MOUSEMOVE, _this.handleDrag, false).on(MOUSEUP, _this.handleDragEnd, false);
 
-      if (startScale.invert) {
-        Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(d3Window(_this.node)).on(MOUSEMOVE, _this.handleDrag, false).on(MOUSEUP, _this.handleDragEnd, false);
-
-        var startXY = mousePosition(e);
-        // console.log(startScale.invert(startXY[0]))
-        _this.setState({
-          startPos: {
-            startXY: startXY,
-            startScale: startScale
-          }
-        });
-      }
-      // console.log('handleDragStartMouse')
+      var startXY = mousePosition(e);
+      _this.setState({
+        startPos: {
+          startXY: startXY,
+          startScale: startScale
+        }
+      });
     };
 
     _this.handleDrag = function () {
       var startPos = _this.state.startPos;
-      // console.log(e)
+
 
       _this.dragHappened = true;
       if (startPos) {
@@ -21942,7 +21935,7 @@ var AxisEventHandler = function (_React$Component) {
             getInverted = _this$props.getInverted,
             scale = _this$props.scale;
 
-        var mouseXY = _this.mouseInteraction ? Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node) : null;
+        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node);
         var diff = getMouseDelta(startXY, mouseXY);
 
         var SCALE_FACTOR = 0.005;
@@ -21952,8 +21945,6 @@ var AxisEventHandler = function (_React$Component) {
             end = startScale.domain()[1];
 
         var newDomain = [center - (center - begin) * zoomFactor, center + (end - center) * zoomFactor];
-
-        //console.log(zoomFactor, diff)
 
         if (_this.props.onDomainChange) {
           _this.props.onDomainChange(newDomain);
@@ -21982,7 +21973,6 @@ var AxisEventHandler = function (_React$Component) {
     _this.state = {
       startPos: null
     };
-    _this.mouseInteraction = false;
     return _this;
   }
 
@@ -22002,8 +21992,8 @@ var AxisEventHandler = function (_React$Component) {
         y: this.props.y,
         width: this.props.width,
         height: this.props.height,
-        style: { fill: "green", opacity: 0.3 }
-        //onMouseDown={this.handleDragStartMouse}
+        style: { fill: "green", opacity: 0. },
+        onMouseDown: this.handleDragStartMouse
       });
     }
   }]);
@@ -45089,6 +45079,12 @@ var ChartBox = function (_React$Component) {
             }
         };
 
+        _this.getPCPCanvasNode = function () {
+            if (_this.PCPNode && _this.PCPNode.node) {
+                return _this.PCPNode.node.getPCPCanvasNode();
+            }
+        };
+
         _this.handlePCPAxisSelect = function (who, axisTitle, select, scale, inProgress) {
             var start = void 0,
                 end = void 0,
@@ -45116,6 +45112,25 @@ var ChartBox = function (_React$Component) {
             });
         };
 
+        _this.handleScatterPanZoom = function (attrList, domainList, inProgress) {
+            var pcpDimension = _this.props.pcpDimension;
+
+            attrList.forEach(function (attr, index) {
+                var refDomain = pcpDimension[attr];
+                var domain = domainList[index];
+                var isEqual = refDomain.every(function (d, index) {
+                    return Math.abs(domain[index] - d) < 1e-12;
+                });
+                _this.attrExtents[attr] = isEqual ? [] : domain;
+            });
+            var targetCanvas = _this.getPCPCanvasNode();
+            targetCanvas.handleByOther({
+                what: 'extents',
+                data: _this.attrExtents,
+                inProgress: inProgress
+            });
+        };
+
         _this.renderScatterChart = function (h) {
             var _this$props = _this.props,
                 pcpDimension = _this$props.pcpDimension,
@@ -45136,7 +45151,8 @@ var ChartBox = function (_React$Component) {
                 xAttr: xAttr,
                 yAttr: yAttr,
                 zAttr: zAttr,
-                colorsByGroup: colorsBySampleNames
+                colorsByGroup: colorsBySampleNames,
+                onScatterPanZoom: _this.handleScatterPanZoom
             });
         };
 
@@ -45167,6 +45183,9 @@ var ChartBox = function (_React$Component) {
             };
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__charts__["a" /* ParallelCoordinateChart */], {
+                ref: function ref(node) {
+                    return _this.PCPNode = node;
+                },
                 height: h,
                 data: pcpData,
                 dimension: pcpDimension,
@@ -45426,7 +45445,8 @@ var ScatterChart = function (_React$Component) {
                 yAttr = _props.yAttr,
                 xAccessor = _props.xAccessor,
                 yAccessor = _props.yAccessor,
-                zAccessor = _props.zAccessor;
+                zAccessor = _props.zAccessor,
+                onScatterPanZoom = _props.onScatterPanZoom;
             var markerGen = this.state.markerGen;
 
             markerGen.calculateMarkers(data);
@@ -45448,7 +45468,8 @@ var ScatterChart = function (_React$Component) {
                         return __WEBPACK_IMPORTED_MODULE_9_lodash_get___default()(d, name);
                     },
                     xAttr: xAttr,
-                    yAttr: yAttr
+                    yAttr: yAttr,
+                    onScatterPanZoom: onScatterPanZoom
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__["b" /* XAxis */], {
                     axisAt: 'bottom',
@@ -46033,7 +46054,9 @@ var ChartCanvas = function (_React$Component) {
 				ratio: this.props.ratio,
 				subscribe: this.subscribe,
 				unsubscribe: this.unsubscribe,
-				getCanvasContexts: this.getCanvasContexts
+				getCanvasContexts: this.getCanvasContexts,
+				handleXAxisZoom: this.handleXAxisZoom,
+				handleYAxisZoom: this.handleYAxisZoom
 			}, this.state);
 
 			var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["c" /* cursorStyle */])(true);
@@ -46077,7 +46100,9 @@ var ChartCanvas = function (_React$Component) {
 							},
 							width: canvasDim.width,
 							height: canvasDim.height,
-							onZoom: this.handleZoom
+							onZoom: this.handleZoom,
+							onPan: this.handlePan,
+							onPanEnd: this.handlePanEnd
 						}),
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
@@ -46164,18 +46189,29 @@ var _initialiseProps = function _initialiseProps() {
 	this.updateChart = function () {
 		var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
 		var data = props.data,
-		    dataExtents = props.dataExtents,
+		    dataExtentsProp = props.dataExtents,
 		    dataAccessor = props.dataAccessor,
 		    xAttrProp = props.xAttr,
 		    yAttrProp = props.yAttr;
 
 		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
 
+		var _state = _this3.state,
+		    initialDataExtents = _state.dataExtents,
+		    initialXAttr = _state.xAttr,
+		    initialYAttr = _state.yAttr;
+
+
+		var dataExtents = _extends({}, dataExtentsProp);
+		Object.keys(initialDataExtents).forEach(function (key) {
+			dataExtents[key] = initialDataExtents[key].slice();
+		});
+
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: xAttrProp }, [0, canvasDim.width]);
+		var xAttr = initialXAttr.name === xAttrProp ? initialXAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: xAttrProp }, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: yAttrProp }, [canvasDim.height, 0]);
+		var yAttr = initialYAttr.name === yAttrProp ? initialYAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: yAttrProp }, [canvasDim.height, 0]);
 
 		// flatten data to plot
 		var dimName = Object.keys(dataExtents);
@@ -46218,9 +46254,183 @@ var _initialiseProps = function _initialiseProps() {
 		});
 	};
 
+	this.handleXAxisZoom = function (newDomain) {
+		var initialXAttr = _this3.state.xAttr;
+		var scale = initialXAttr.scale,
+		    extents = initialXAttr.extents,
+		    name = initialXAttr.name;
+
+
+		newDomain[0] = Math.max(extents[0], newDomain[0]);
+		newDomain[1] = Math.min(extents[1], newDomain[1]);
+
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState(_extends({}, _this3.state, {
+			xAttr: _extends({}, _this3.state.xAttr, {
+				scale: scale.copy().domain(newDomain)
+			})
+		}));
+		if (_this3.props.onScatterPanZoom) {
+			_this3.props.onScatterPanZoom([name], [newDomain], false);
+		}
+	};
+
+	this.handleYAxisZoom = function (newDomain) {
+		var initialYAttr = _this3.state.yAttr;
+		var scale = initialYAttr.scale,
+		    extents = initialYAttr.extents,
+		    name = initialYAttr.name;
+
+
+		newDomain[0] = Math.max(extents[0], newDomain[0]);
+		newDomain[1] = Math.min(extents[1], newDomain[1]);
+
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState(_extends({}, _this3.state, {
+			yAttr: _extends({}, _this3.state.yAttr, {
+				scale: scale.copy().domain(newDomain)
+			})
+		}));
+		if (_this3.props.onScatterPanZoom) {
+			_this3.props.onScatterPanZoom([name], [newDomain], false);
+		}
+	};
+
 	this.handleZoom = function (mouseXY, e) {
 		if (_this3.panInProgress) return;
-		console.log('handleZoom');
+
+		var _state2 = _this3.state,
+		    _state2$xAttr = _state2.xAttr,
+		    initialXScale = _state2$xAttr.scale,
+		    xExtents = _state2$xAttr.extents,
+		    xName = _state2$xAttr.name,
+		    _state2$yAttr = _state2.yAttr,
+		    initialYScale = _state2$yAttr.scale,
+		    yExtents = _state2$yAttr.extents,
+		    yName = _state2$yAttr.name;
+
+
+		var SCALE_FACTOR = 0.001;
+		var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+		var centerX = initialXScale.invert(mouseXY[0]),
+		    beginX = initialXScale.domain()[0],
+		    endX = initialXScale.domain()[1];
+		var centerY = initialYScale.invert(mouseXY[1]),
+		    beginY = initialYScale.domain()[0],
+		    endY = initialYScale.domain()[1];
+
+		var newDomainX = [Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]), Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])];
+
+		var newDomainY = [Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]), Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])];
+
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState(_extends({}, _this3.state, {
+			xAttr: _extends({}, _this3.state.xAttr, {
+				scale: initialXScale.copy().domain(newDomainX)
+			}),
+			yAttr: _extends({}, _this3.state.yAttr, {
+				scale: initialYScale.copy().domain(newDomainY)
+			})
+		}));
+		if (_this3.props.onScatterPanZoom) {
+			_this3.props.onScatterPanZoom([xName, yName], [newDomainX, newDomainY], false);
+		}
+	};
+
+	this.panHelper = function (mouseXY, initialXAttr, initialYAttr, _ref) {
+		var dx = _ref.dx,
+		    dy = _ref.dy;
+		var initialXScale = initialXAttr.scale,
+		    xExtents = initialXAttr.extents;
+		var initialYScale = initialYAttr.scale,
+		    yExtents = initialYAttr.extents;
+
+
+		var newDomainX = initialXScale.range().map(function (x) {
+			return x - dx;
+		}).map(initialXScale.invert);
+		newDomainX[0] = Math.max(xExtents[0], newDomainX[0]);
+		newDomainX[1] = Math.min(xExtents[1], newDomainX[1]);
+
+		var newDomainY = initialYScale.range().map(function (y) {
+			return y - dy;
+		}).map(initialYScale.invert);
+		newDomainY[0] = Math.max(yExtents[0], newDomainY[0]);
+		newDomainY[1] = Math.min(yExtents[1], newDomainY[1]);
+
+		var updatedScaleX = initialXScale.copy().domain(newDomainX);
+		var updatedScaleY = initialYScale.copy().domain(newDomainY);
+
+		return {
+			xAttr: _extends({}, initialXAttr, {
+				scale: updatedScaleX
+			}),
+			yAttr: _extends({}, initialYAttr, {
+				scale: updatedScaleY
+			})
+		};
+	};
+
+	this.handlePan = function (mouseXY, dxdy, e) {
+		if (!_this3.waitingForPanAnimationFrame) {
+			_this3.waitingForPanAnimationFrame = true;
+
+			var _state3 = _this3.state,
+			    xAttr = _state3.xAttr,
+			    yAttr = _state3.yAttr;
+
+			var state = _this3.panHelper(mouseXY, xAttr, yAttr, dxdy);
+			var newXAttr = state.xAttr,
+			    newYAttr = state.yAttr;
+
+
+			_this3.panInProgress = true;
+
+			_this3.triggerEvent('pan', state, e);
+
+			requestAnimationFrame(function () {
+				_this3.waitingForPanAnimationFrame = false;
+				_this3.clearAxisAndChartOnCanvas();
+				_this3.draw({ trigger: 'pan' });
+				if (_this3.props.onScatterPanZoom) {
+					var xName = newXAttr.name;
+					var yName = newYAttr.name;
+					var domainX = newXAttr.scale.domain();
+					var domainY = newYAttr.scale.domain();
+					_this3.props.onScatterPanZoom([xName, yName], [domainX, domainY], true);
+				}
+			});
+		}
+	};
+
+	this.handlePanEnd = function (mouseXY, dxdy, e) {
+		var _state4 = _this3.state,
+		    xAttr = _state4.xAttr,
+		    yAttr = _state4.yAttr;
+
+		var state = _this3.panHelper(mouseXY, xAttr, yAttr, dxdy);
+		_this3.panInProgress = false;
+
+		var newXAttr = state.xAttr,
+		    newYAttr = state.yAttr;
+
+
+		_this3.triggerEvent('panend', state, e);
+
+		requestAnimationFrame(function () {
+			_this3.clearAxisAndChartOnCanvas();
+			_this3.setState(_extends({}, _this3.state, {
+				xAttr: newXAttr,
+				yAttr: newYAttr
+			}));
+			if (_this3.props.onScatterPanZoom) {
+				var xName = newXAttr.name;
+				var yName = newYAttr.name;
+				var domainX = newXAttr.scale.domain();
+				var domainY = newYAttr.scale.domain();
+				_this3.props.onScatterPanZoom([xName, yName], [domainX, domainY], false);
+			}
+		});
 	};
 
 	this.updateAttr = function (attr, initialAttr, dataExtents) {
@@ -46241,10 +46451,10 @@ var _initialiseProps = function _initialiseProps() {
 		return initialExtents;
 	};
 
-	this.handleByOther = function (_ref) {
-		var what = _ref.what,
-		    data = _ref.data,
-		    inProgress = _ref.inProgress;
+	this.handleByOther = function (_ref2) {
+		var what = _ref2.what,
+		    data = _ref2.data,
+		    inProgress = _ref2.inProgress;
 
 		// must what: extents
 		if (what !== 'extents') return;
@@ -49133,6 +49343,8 @@ function sequential(interpolator) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__AxisEventHandler__ = __webpack_require__(/*! ./AxisEventHandler */ 260);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__draw__ = __webpack_require__(/*! ./draw */ 142);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__core__ = __webpack_require__(/*! ../core */ 32);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -49331,24 +49543,20 @@ var XAxis = function (_React$Component) {
       var _this2 = this;
 
       var rect = this.getDrawRegion(),
-          axisLocation = this.getAxisLocation();
-      // { xScale } = this.props.shared;
+          axisLocation = this.getAxisLocation(),
+          xScale = this.props.shared.xAttr.scale;
 
-      // const handler = this.props.zoomEnabled
-      // 	? <AxisEventHandler
-      // 		{...rect}
-      // 		scale={xScale}
-      // 		getMouseDelta={this.props.getMouseDelta}
-      // 		getInverted={this.props.getInverted}
-      //         onDomainChange={this.onDomainChange}
-      //         zoomCursorClassName={'react-multiview-ew-resize-cursor'}
-      // 	/>
-      // 	: null;
 
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         "g",
         { transform: "translate(" + 0 + "," + axisLocation + ")" },
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__AxisEventHandler__["a" /* default */], rect),
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__AxisEventHandler__["a" /* default */], _extends({}, rect, {
+          scale: xScale,
+          getMouseDelta: this.props.getMouseDelta,
+          getInverted: this.props.getInverted,
+          onDomainChange: this.onDomainChange,
+          zoomCursorClassName: 'react-multiview-ew-resize-cursor'
+        })),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__core__["f" /* SubscriberExt */], {
           ref: function ref(node) {
             return _this2.node = node;
@@ -51009,10 +51217,9 @@ var YAxis = function (_React$Component) {
 			};
 		}, _this.onDomainChange = function (newDomain) {
 			var handleYAxisZoom = _this.props.shared.handleYAxisZoom;
-			var id = _this.props.chartConfig.id;
 
 
-			if (handleYAxisZoom) handleYAxisZoom(id, newDomain);
+			if (handleYAxisZoom) handleYAxisZoom(newDomain);
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
@@ -51022,12 +51229,20 @@ var YAxis = function (_React$Component) {
 			var _this2 = this;
 
 			var rect = this.getDrawRegion(),
-			    axisLocation = this.getAxisLocation();
+			    axisLocation = this.getAxisLocation(),
+			    yScale = this.props.shared.yAttr.scale;
+
 
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 				"g",
 				{ transform: "translate(" + axisLocation + "," + 0 + ")" },
-				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__AxisEventHandler__["a" /* default */], rect),
+				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__AxisEventHandler__["a" /* default */], _extends({}, rect, {
+					scale: yScale,
+					getMouseDelta: this.props.getMouseDelta,
+					getInverted: this.props.getInverted,
+					onDomainChange: this.onDomainChange,
+					zoomCursorClassName: "react-multiview-ns-resize-cursor"
+				})),
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__core__["f" /* SubscriberExt */], {
 					ref: function ref(node) {
 						return _this2.node = node;
@@ -51801,7 +52016,6 @@ CanvasContainer.propTypes = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_selection__ = __webpack_require__(/*! d3-selection */ 85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__core_utils__ = __webpack_require__(/*! ../core/utils */ 87);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -51817,252 +52031,212 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-
-
 var EventHandler = function (_React$Component) {
-  _inherits(EventHandler, _React$Component);
+    _inherits(EventHandler, _React$Component);
 
-  function EventHandler() {
-    _classCallCheck(this, EventHandler);
+    function EventHandler() {
+        _classCallCheck(this, EventHandler);
 
-    var _this = _possibleConstructorReturn(this, (EventHandler.__proto__ || Object.getPrototypeOf(EventHandler)).call(this));
+        var _this = _possibleConstructorReturn(this, (EventHandler.__proto__ || Object.getPrototypeOf(EventHandler)).call(this));
 
-    _this.onListener = function () {
-      if (_this.node) {
-        Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(_this.node).on(__WEBPACK_IMPORTED_MODULE_3__utils__["a" /* MOUSEENTER */], _this.handleEnter).on(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* MOUSELEAVE */], _this.handleLeave);
-      }
-    };
+        _this.onListener = function () {
+            if (_this.node) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(_this.node).on(__WEBPACK_IMPORTED_MODULE_3__utils__["a" /* MOUSEENTER */], _this.handleEnter).on(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* MOUSELEAVE */], _this.handleLeave);
+            }
+        };
 
-    _this.offListener = function () {
-      if (_this.node) {
-        Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(_this.node).on(__WEBPACK_IMPORTED_MODULE_3__utils__["a" /* MOUSEENTER */], null).on(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* MOUSELEAVE */], null);
-      }
-    };
+        _this.offListener = function () {
+            if (_this.node) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(_this.node).on(__WEBPACK_IMPORTED_MODULE_3__utils__["a" /* MOUSEENTER */], null).on(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* MOUSELEAVE */], null);
+            }
+        };
 
-    _this.handleEnter = function () {
-      var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
-      _this.mouseInside = true;
-      if (_this.props.onMouseEnter) _this.props.onMouseEnter(e);
-    };
+        _this.handleEnter = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+            _this.mouseInside = true;
+            if (_this.props.onMouseEnter) _this.props.onMouseEnter(e);
+        };
 
-    _this.handleLeave = function (e) {
-      _this.mouseInside = false;
-      if (_this.props.onMouseLeave) _this.props.onMouseLeave(e);
-    };
+        _this.handleLeave = function (e) {
+            _this.mouseInside = false;
+            if (_this.props.onMouseLeave) _this.props.onMouseLeave(e);
+        };
 
-    _this.handleWheel = function (e) {
-      e.preventDefault();
-      var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["k" /* mousePosition */])(e);
-      if (_this.props.onZoom && !_this.state.panInProgress) {
-        _this.props.onZoom(mouseXY, e);
-      }
-    };
+        _this.handleWheel = function (e) {
+            e.preventDefault();
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["k" /* mousePosition */])(e);
+            if (_this.props.onZoom && !_this.state.panInProgress) {
+                _this.props.onZoom(mouseXY, e);
+            }
+        };
 
-    _this.mouseInside = false;
-    _this.state = {
-      panInProgress: false,
-      panStart: {
-        panStartXScale: null,
-        panOrigin: null,
-        chartsToPan: null
-      }
-    };
-    return _this;
-  }
+        _this.handleMouseDown = function (e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
 
-  _createClass(EventHandler, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.onListener();
+            _this.panHappened = false;
+            if (!_this.state.panInProgress) {
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["k" /* mousePosition */])(e);
+
+                _this.setState({
+                    panInProgress: true,
+                    panStart: {
+                        panOrigin: mouseXY
+                    }
+                });
+
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove.pan', _this.handlePan).on('mouseup.pan', _this.handlePanEnd);
+            }
+        };
+
+        _this.handlePan = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+
+            if (_this.props.onPan && _this.state.panStart) {
+                _this.panHappened = true;
+                var panOrigin = _this.state.panStart.panOrigin;
+
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node);
+
+                _this.lastNewPos = mouseXY;
+                var dx = mouseXY[0] - panOrigin[0];
+                var dy = mouseXY[1] - panOrigin[1];
+
+                _this.dx = dx;
+                _this.dy = dy;
+
+                _this.props.onPan(mouseXY, { dx: dx, dy: dy }, e);
+            }
+        };
+
+        _this.handlePanEnd = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+
+            if (_this.state.panStart) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove.pan', null).on('mouseup.pan', null);
+
+                if (_this.panHappened && _this.props.onPanEnd) {
+                    var dx = _this.dx,
+                        dy = _this.dy;
+
+                    delete _this.dx;
+                    delete _this.dy;
+                    _this.props.onPanEnd(_this.lastNewPos, { dx: dx, dy: dy }, e);
+                }
+
+                _this.setState({
+                    panInProgress: false,
+                    panStart: null
+                });
+            }
+        };
+
+        _this.mouseInside = false;
+        _this.state = {
+            panInProgress: false,
+            panStart: {
+                panStartXScale: null,
+                panOrigin: null,
+                chartsToPan: null
+            }
+        };
+        return _this;
     }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      this.offListener();
-    }
 
-    // handleMouseMove = () => {
-    // 	const e = d3Event;
-    // 	if (this.mouseInteraction
-    //         && this.props.mouseMove
-    //         && !this.state.panInProgress
-    // 	) {
-    // 		const newPos = mouse(this.node);
-    // 		if (this.props.onMouseMove)
-    // 			this.props.onMouseMove(newPos, "mouse", e);
-    // 	}
-    // }
+    _createClass(EventHandler, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.onListener();
+        }
+    }, {
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+            this.offListener();
+        }
 
-  }, {
-    key: "render",
+        // handleMouseMove = () => {
+        // 	const e = d3Event;
+        // 	if (this.mouseInteraction
+        //         && this.props.mouseMove
+        //         && !this.state.panInProgress
+        // 	) {
+        // 		const newPos = mouse(this.node);
+        // 		if (this.props.onMouseMove)
+        // 			this.props.onMouseMove(newPos, "mouse", e);
+        // 	}
+        // }
 
+        // canPan = () => {
+        //     const { pan: initialPanEnabled } = this.props;
 
-    // canPan = () => {
-    //     const { pan: initialPanEnabled } = this.props;
+        //     const {
+        //         panEnabled,
+        //         draggable: somethingSelected
+        //     } = this.props.getAllPanConditions()
+        //             .reduce((obj, a) => {
+        //                 return {
+        //                     draggable: obj.draggable || a.draggable,
+        //                     panEnabled: obj.panEnabled && a.panEnabled
+        //                 };
+        //             }, {
+        //                 draggable: false,
+        //                 panEnabled: initialPanEnabled
+        //             });
 
-    //     const {
-    //         panEnabled,
-    //         draggable: somethingSelected
-    //     } = this.props.getAllPanConditions()
-    //             .reduce((obj, a) => {
-    //                 return {
-    //                     draggable: obj.draggable || a.draggable,
-    //                     panEnabled: obj.panEnabled && a.panEnabled
-    //                 };
-    //             }, {
-    //                 draggable: false,
-    //                 panEnabled: initialPanEnabled
-    //             });
+        //     return {
+        //         panEnabled,
+        //         somethingSelected
+        //     }
+        // }
 
-    //     return {
-    //         panEnabled,
-    //         somethingSelected
-    //     }
-    // }
+        // shouldPan = () => {
+        //     return this.props.pan && this.props.onPan && this.state.panStart;
+        // }
 
-    // handleMouseDown = (e) => {
-    //     if (e.button !== 0) return;
-    //     e.preventDefault();
+    }, {
+        key: "render",
+        value: function render() {
+            var _this2 = this;
 
-    //     this.panHappened = false;
-    //     this.dragHappeded = false;
-    //     this.focus = true;
-    //     if (!this.state.panInProgress && this.mouseInteraction) {
-    //         const mouseXY = mousePosition(e);
-    //         const currentCharts = getCurrentCharts(this.props.chartConfig, mouseXY);
+            var className = this.state.panInProgress ? 'react-multiview-grabbing-cursor' : 'react-multiview-crosshair-cursor';
 
-    //         //console.log(currentCharts, this.props.chartConfig, mouseXY)
-    //         const {panEnabled, somethingSelected} = this.canPan();
-    //         const pan = panEnabled && !somethingSelected;
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
+                ref: function ref(node) {
+                    return _this2.node = node;
+                },
+                className: className,
+                width: this.props.width,
+                height: this.props.height,
+                style: { fill: "red", opacity: 0. },
+                onWheel: this.handleWheel,
+                onMouseDown: this.handleMouseDown
+            });
+        }
+    }]);
 
-    //         if (pan) {
-    //             this.setState({
-    //                 panInProgress: pan,
-    //                 panStart: {
-    //                     panStartXScale: this.props.xScale,
-    //                     panOrigin: mouseXY,
-    //                     chartsToPan: currentCharts
-    //                 }
-    //             });
-
-    //             select(d3Window(this.node))
-    //                 .on(MOUSEMOVE, this.handlePan)
-    //                 .on(MOUSEUP, this.handlePanEnd);
-
-    //         } else if (somethingSelected) {
-    //             // something selected.. dragging
-    //             console.log('EventHandler::handleMouseDown::Drag')
-    //         }
-
-    //         if (this.props.onMouseDown)
-    //             this.props.onMouseDown(mouseXY, currentCharts, e);
-    //     }
-    // }
-
-    // shouldPan = () => {
-    //     return this.props.pan && this.props.onPan && this.state.panStart;
-    // }
-
-    // handlePan = () =>{
-    //     const e = d3Event;
-
-    //     if (this.shouldPan()) {
-    //         this.panHappened = true;
-    //         const { panStartXScale, panOrigin, chartsToPan } = this.state.panStart;
-    //         const mouseXY = this.mouseInteraction
-    //             ? mouse(this.node)
-    //             : touch(this.node)[0];
-
-    //         this.lastNewPos = mouseXY;
-    //         const dx = mouseXY[0] - panOrigin[0];
-    //         const dy = mouseXY[1] - panOrigin[1];
-
-    //         this.dx = dx;
-    //         this.dy = dy;
-
-    //         this.props.onPan(
-    //             mouseXY,
-    //             panStartXScale,
-    //             { dx, dy },
-    //             chartsToPan,
-    //             e
-    //         );
-    //     }
-    // }
-
-    // handlePanEnd = () => {
-    //     const e = d3Event;
-
-    //     if (this.state.panStart) {
-    //         select(d3Window(this.node))
-    //             .on(MOUSEMOVE, this.mouseInside ? this.handleMouseMove: null)
-    //             .on(MOUSEUP, null);
-    //             //.on(TOUCHMOVE, null)
-    //             //.on(TOUCHEND, null);
-
-    //         if (this.panHappened && this.props.pan) {
-    //             const { dx, dy } = this;
-    //             delete this.dx;
-    //             delete this.dy;
-    //             if (this.props.onPanEnd)
-    //                 this.props.onPanEnd(
-    //                     this.lastNewPos,
-    //                     this.state.panStart.panStartXScale,
-    //                     {dx, dy},
-    //                     this.state.panStart.chartsToPan,
-    //                     e
-    //                 );
-    //         }
-
-    //         this.setState({
-    //             panInProgress: false,
-    //             panStart: null
-    //         });
-    //     }
-    // }
-
-    value: function render() {
-      var _this2 = this;
-
-      var className = this.state.panInProgress ? 'react-multiview-grabbing-cursor' : 'react-multiview-crosshair-cursor';
-
-      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
-        ref: function ref(node) {
-          return _this2.node = node;
-        },
-        className: className,
-        width: this.props.width,
-        height: this.props.height,
-        style: { fill: "red", opacity: 0. },
-        onWheel: this.handleWheel
-        //onMouseDown={this.handleMouseDown}
-      });
-    }
-  }]);
-
-  return EventHandler;
+    return EventHandler;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 EventHandler.propTypes = {
-  width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
 
-  mouseMove: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  zoom: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  pan: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  panSpeedMultiplier: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  focus: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    mouseMove: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    zoom: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    pan: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+    panSpeedMultiplier: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+    focus: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
 
-  onDragComplete: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
+    onDragComplete: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
 };
 
 EventHandler.defaultProps = {
-  mouseMove: false,
-  zoom: false,
-  pan: false,
-  panSpeedMultiplier: 1,
-  focus: false,
-  onDragComplete: function onDragComplete() {}
+    mouseMove: false,
+    zoom: false,
+    pan: false,
+    panSpeedMultiplier: 1,
+    focus: false,
+    onDragComplete: function onDragComplete() {}
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (EventHandler);
@@ -52999,8 +53173,9 @@ var SubscriberExt = function (_React$Component) {
             var _this$props$shared = _this.props.shared,
                 margin = _this$props$shared.margin,
                 ratio = _this$props$shared.ratio,
-                width = _this$props$shared.width,
-                height = _this$props$shared.height;
+                _this$props$shared$ca = _this$props$shared.canvasDim,
+                width = _this$props$shared$ca.width,
+                height = _this$props$shared$ca.height;
 
 
             var canvasOriginX = margin.left;
@@ -53133,6 +53308,8 @@ SubscriberExt.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_uniqueid__ = __webpack_require__(/*! lodash.uniqueid */ 143);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_uniqueid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12_lodash_uniqueid__);
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -53532,6 +53709,78 @@ var PCPCanvas = function (_React$Component) {
                 dimConfig: newDimConfig
             });
             if (_this.props.onPCPAxisSelect) _this.props.onPCPAxisSelect(_this.state.id, axisTitle, null, null, false);
+        };
+
+        _this.rangeSelectHelperByOther = function (dimSelects, initDimConfig) {
+            var newDimConfig = {};
+            __WEBPACK_IMPORTED_MODULE_10_lodash_foreach___default()(initDimConfig, function (config, key) {
+                if (dimSelects[key] == null || dimSelects[key].length === 0) {
+                    newDimConfig[key] = _extends({}, config);
+                } else {
+                    var _dimSelects$key = _slicedToArray(dimSelects[key], 2),
+                        minv = _dimSelects$key[0],
+                        maxv = _dimSelects$key[1];
+
+                    var scale = config.scale;
+
+                    var newSelect = [scale(minv), scale(maxv)];
+                    newDimConfig[key] = _extends({}, config, {
+                        select: newSelect
+                    });
+                }
+            });
+            return {
+                dimConfig: newDimConfig
+            };
+        };
+
+        _this.handleByOther = function (_ref) {
+            var what = _ref.what,
+                data = _ref.data,
+                inProgress = _ref.inProgress;
+
+            // must what: extents
+            if (what !== 'extents') return;
+            if (_this.axisMoveInProgress || _this.axisSelectInProgress) return;
+
+            if (inProgress) {
+                if (!_this.waitingForAnimationFrame) {
+                    _this.waitingForAxisMoveAnimationFrame = true;
+
+                    if (!_this.currChartCopied) {
+                        _this.copyChartInGrey();
+                        _this.currChartCopied = true;
+                    }
+
+                    _this.__dimConfig = _this.__dimConfig || _this.state.dimConfig;
+
+                    var state = _this.rangeSelectHelperByOther(data, _this.__dimConfig);
+
+                    _this.__dimConfig = state.dimConfig;
+
+                    _this.triggerEvent('selectrange', state, null);
+                    requestAnimationFrame(function () {
+                        _this.waitingForAnimationFrame = false;
+                        _this.clearAxesAndPCPOnCanvas();
+                        _this.draw({ trigger: 'selectrange' });
+                    });
+                }
+            } else {
+                _this.__dimConfig = _this.__dimConfig || _this.state.dimConfig;
+
+                var _state = _this.rangeSelectHelperByOther(data, _this.__dimConfig);
+
+                _this.__dimConfig = null; //state.dimConfig;
+                _this.currChartCopied = false;
+
+                _this.triggerEvent('selectrange', _state, null);
+                requestAnimationFrame(function () {
+                    _this.clearAxesAndPCPOnOffCanvas();
+                    _this.setState({
+                        dimConfig: _state.dimConfig
+                    });
+                });
+            }
         };
 
         _this.mutableState = {};
@@ -54903,14 +55152,26 @@ var ParallelCoordinateChart = function (_React$Component) {
     _inherits(ParallelCoordinateChart, _React$Component);
 
     function ParallelCoordinateChart() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
         _classCallCheck(this, ParallelCoordinateChart);
 
-        return _possibleConstructorReturn(this, (ParallelCoordinateChart.__proto__ || Object.getPrototypeOf(ParallelCoordinateChart)).apply(this, arguments));
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ParallelCoordinateChart.__proto__ || Object.getPrototypeOf(ParallelCoordinateChart)).call.apply(_ref, [this].concat(args))), _this), _this.getPCPCanvasNode = function () {
+            if (_this.PCPCanvasNode) return _this.PCPCanvasNode;
+        }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
     _createClass(ParallelCoordinateChart, [{
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             var margin = { left: 60, right: 40, top: 20, bottom: 10 };
             var _props = this.props,
                 width = _props.width,
@@ -54933,6 +55194,9 @@ var ParallelCoordinateChart = function (_React$Component) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */],
                 {
+                    ref: function ref(node) {
+                        return _this2.PCPCanvasNode = node;
+                    },
                     width: width,
                     height: height,
                     ratio: ratio,
@@ -56383,13 +56647,14 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
     var dataExtents = _ref.dataExtents,
         attribute = _ref.attribute;
 
+    var name = dataExtents[attribute] ? attribute : 'unknown';
     var extents = dataExtents[attribute] ? dataExtents[attribute] : [0, 1];
     var ordinary = Object(__WEBPACK_IMPORTED_MODULE_1__utils__["i" /* isArrayOfString */])(extents);
     var domain = ordinary ? [0, extents.length] : extents;
     var scale = Object(__WEBPACK_IMPORTED_MODULE_0_d3_scale__["b" /* scaleLinear */])().domain(domain).range(range);
     var step = ordinary ? Math.abs(scale(0) - scale(1)) : 0;
     return {
-        name: attribute,
+        name: name,
         extents: extents,
         ordinary: ordinary,
         scale: scale,

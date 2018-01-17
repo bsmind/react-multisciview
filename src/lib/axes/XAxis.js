@@ -172,24 +172,18 @@ class XAxis extends React.Component {
     render() {
     	const
     		rect = this.getDrawRegion(),
-            axisLocation = this.getAxisLocation();
-            // { xScale } = this.props.shared;
-
-    	// const handler = this.props.zoomEnabled
-    	// 	? <AxisEventHandler
-    	// 		{...rect}
-    	// 		scale={xScale}
-    	// 		getMouseDelta={this.props.getMouseDelta}
-    	// 		getInverted={this.props.getInverted}
-        //         onDomainChange={this.onDomainChange}
-        //         zoomCursorClassName={'react-multiview-ew-resize-cursor'}
-    	// 	/>
-    	// 	: null;
+            axisLocation = this.getAxisLocation(),
+            { xAttr:{scale:xScale} } = this.props.shared;
 
     	return (
     		<g transform={`translate(${0},${axisLocation})`}>
 				<AxisEventHandler
 					{...rect}
+					scale={xScale}
+					getMouseDelta={this.props.getMouseDelta}
+					getInverted={this.props.getInverted}
+					onDomainChange={this.onDomainChange}
+					zoomCursorClassName={'react-multiview-ew-resize-cursor'}						
 				/>
     			<SubscriberExt
     				ref={node => this.node = node}

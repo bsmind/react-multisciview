@@ -32,43 +32,34 @@ class AxisEventHandler extends React.Component {
 		this.state = {
 			startPos: null
 		};
-		this.mouseInteraction = false;
 	}
 
     handleDragStartMouse = (e) => {
     	e.preventDefault();
 
-    	this.mouseInteraction = true;
     	const { scale } = this.props;
     	const startScale = scale.copy();
-    	this.dragHappened = false;
+		select(d3Window(this.node))
+			.on(MOUSEMOVE, this.handleDrag, false)
+			.on(MOUSEUP, this.handleDragEnd, false);
 
-    	if (startScale.invert) {
-    		select(d3Window(this.node))
-    			.on(MOUSEMOVE, this.handleDrag, false)
-    			.on(MOUSEUP, this.handleDragEnd, false);
-
-    		const startXY = mousePosition(e);
-    		// console.log(startScale.invert(startXY[0]))
-    		this.setState({
-    			startPos: {
-    				startXY,
-    				startScale
-    			}
-    		});
-    	}
-    	// console.log('handleDragStartMouse')
+		const startXY = mousePosition(e);
+		this.setState({
+			startPos: {
+				startXY,
+				startScale
+			}
+		});
     }
 
     handleDrag = () => {
     	const { startPos } = this.state;
-    	// console.log(e)
 
     	this.dragHappened = true;
     	if (startPos) {
     		const { startScale, startXY } = startPos;
     		const { getMouseDelta, getInverted, scale } = this.props;
-    		const mouseXY = this.mouseInteraction ? mouse(this.node) : null;
+			const mouseXY = mouse(this.node);
     		const diff = getMouseDelta(startXY, mouseXY);
 
             const SCALE_FACTOR = 0.005;
@@ -81,8 +72,6 @@ class AxisEventHandler extends React.Component {
                 center - (center - begin)*zoomFactor,
                 center + (end - center)*zoomFactor
             ];
-
-            //console.log(zoomFactor, diff)
 
     		if (this.props.onDomainChange) {
     			this.props.onDomainChange(newDomain);
@@ -125,8 +114,8 @@ class AxisEventHandler extends React.Component {
     		y={this.props.y}
     		width={this.props.width}
     		height={this.props.height}
-    		style={{ fill: "green", opacity: 0.3 }}
-    		//onMouseDown={this.handleDragStartMouse}
+    		style={{ fill: "green", opacity: 0. }}
+    		onMouseDown={this.handleDragStartMouse}
     	/>;
     }
 }
