@@ -55,23 +55,25 @@ class ChartBox extends React.Component {
         const targetCanvas = this.getScatterChartCanvasNode();
         targetCanvas.handleByOther({
             what: 'extents',
-            data: this.attrExtents,
+            data: {[axisTitle]: domain.slice()},
             inProgress
         });
     }
 
     handleScatterPanZoom = (attrList, domainList, inProgress) => {
         const {pcpDimension} = this.props;
+        const attrExtents = {};
         attrList.forEach((attr, index) => {
             const refDomain = pcpDimension[attr];
             const domain = domainList[index];
             const isEqual = refDomain.every( (d,index) => Math.abs(domain[index] - d) < 1e-12);
-            this.attrExtents[attr] = isEqual ? []: domain;
+            //this.attrExtents[attr] = isEqual ? []: domain;
+            attrExtents[attr] = isEqual ? []: domain;
         });
         const targetCanvas = this.getPCPCanvasNode();
         targetCanvas.handleByOther({
             what: 'extents',
-            data: this.attrExtents,
+            data: attrExtents,
             inProgress
         });
     }

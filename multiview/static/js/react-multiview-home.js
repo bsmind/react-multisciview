@@ -45042,6 +45042,8 @@ exports.locals = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -45090,7 +45092,7 @@ var ChartBox = function (_React$Component) {
             var targetCanvas = _this.getScatterChartCanvasNode();
             targetCanvas.handleByOther({
                 what: 'extents',
-                data: _this.attrExtents,
+                data: _defineProperty({}, axisTitle, domain.slice()),
                 inProgress: inProgress
             });
         };
@@ -45098,18 +45100,20 @@ var ChartBox = function (_React$Component) {
         _this.handleScatterPanZoom = function (attrList, domainList, inProgress) {
             var pcpDimension = _this.props.pcpDimension;
 
+            var attrExtents = {};
             attrList.forEach(function (attr, index) {
                 var refDomain = pcpDimension[attr];
                 var domain = domainList[index];
                 var isEqual = refDomain.every(function (d, index) {
                     return Math.abs(domain[index] - d) < 1e-12;
                 });
-                _this.attrExtents[attr] = isEqual ? [] : domain;
+                //this.attrExtents[attr] = isEqual ? []: domain;
+                attrExtents[attr] = isEqual ? [] : domain;
             });
             var targetCanvas = _this.getPCPCanvasNode();
             targetCanvas.handleByOther({
                 what: 'extents',
-                data: _this.attrExtents,
+                data: attrExtents,
                 inProgress: inProgress
             });
         };
