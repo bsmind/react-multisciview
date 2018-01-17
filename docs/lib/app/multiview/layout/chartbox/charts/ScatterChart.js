@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 
 import { fitWidth } from 'react-multiview/lib/helper';
 import { markerProvider } from 'react-multiview/lib/series';
-import { ChartCanvas, Chart, Series } from 'react-multiview/lib/core';
+import { 
+    ChartCanvas, Chart, Series 
+} from 'react-multiview/lib/core';
 import { XAxis, YAxis } from 'react-multiview/lib/axes';
 import { ScatterSeries, CircleMarker } from 'react-multiview/lib/series';
 
@@ -18,6 +20,7 @@ import {
 } from 'd3-scale';
 
 import uniqBy from 'lodash.uniqby';
+import get from 'lodash.get';
 
 import randomColor from 'randomcolor';
 
@@ -37,47 +40,29 @@ import randomColor from 'randomcolor';
 // }
 
 class ScatterChart extends React.Component {
-
-    componentDidMount() {
-
+    constructor(props) {
+        super(props);
+        
+        this.state = {
+            markerGen: this.getMarkerProvider(props)
+        };
     }
 
-    componentWillReceiveProps(nextProps) {
-
+    componentWillReceiveProps(nextProp) {
+        this.setState({
+            markerGen: this.getMarkerProvider(nextProp)
+        });
     }
 
-    shouldComponentUpdate(nextProps) {
-        return true;        
-    }
-
-    render() {
-        const margin= {left: 60, right: 40, top: 10, bottom: 60};
-        const {
-            width,
-            height,
-            ratio,
-            data,
-            xAttr,
-            yAttr,
-            xExtents,
-            yExtents,
-            xAccessor: xAccessorProp,
-            yAccessor: yAccessorProp,
-            zAccessor,
-            xScale,
-            yScale,
-            xType,
-            yType,
-            groups,
+    getMarkerProvider = (props = this.props) => {
+        const { 
+            zAttr,
             colorsByGroup,
-            groupAccessor
-        } = this.props;
+            ratio 
+        } = props;
 
-        if (data == null)
-            return <div/>
-
-        let mProvider = markerProvider(
-            zAccessor == null ? groupAccessor: zAccessor,
+        let  mProvider = markerProvider(
+            d => get(d, zAttr),
             {
                 type: 'square',
                 width: 6,
@@ -85,45 +70,99 @@ class ScatterChart extends React.Component {
                 defaultColor: '#FF0000',
                 style: {
                     strokeWidth: 1,
-                    opacity: 0.5
+                    opacity: 0.3
                 }
             },
             ratio 
         );
-        if (zAccessor == null)
+
+        if (zAttr === 'sample')
             mProvider = mProvider.colorSet(colorsByGroup);
-        mProvider.calculateMarkers(data);
 
-        let yAccessor;
-        if (yType === 'str') {
-            yAccessor =  d => {
-                const index = yExtents.findIndex(each => each === yAccessorProp(d));
-                return yExtents.length - index - 1;
-            }
-        } else {
-            yAccessor = yAccessorProp;
-        }
+        return mProvider;
+    }
 
-        let xAccessor;
-        if (xType === 'str') {
-            xAccessor = d => {
-                const index = xExtents.findIndex(each => each === xAccessorProp(d));
-                return index;
-            }
-        } else {
-            xAccessor = xAccessorProp;
-        }
+    getScatterChartCanvasNode = () => {
+    	if (this.ScatterChartCanvasNode) return this.ScatterChartCanvasNode;
+    }
+
+    render() {
+        const margin= {left: 60, right: 40, top: 10, bottom: 60};
+        const {
+            width, height, ratio,
+            data, dimension,
+            xAttr, yAttr,
+            xAccessor, yAccessor, zAccessor,
+        } = this.props;
+
+        const { markerGen } = this.state;
+        markerGen.calculateMarkers(data);
+
+        return (
+            <ChartCanvas
+                ref={node => this.ScatterChartCanvasNode = node}
+                width={width}
+                height={height}
+                ratio={ratio}
+                margin={margin}
+                zIndex={1}
+                data={data}
+                dataExtents={dimension}
+                dataAccessor={(d, name) => get(d, name)}
+                xAttr={xAttr}
+                yAttr={yAttr}
+            >
+                <XAxis 
+                    axisAt='bottom' 
+                    orient='bottom' 
+                    axisHeight={25} 
+                />     
+                <YAxis 
+                    axisAt='left' 
+                    orient='left' 
+                    axisWidth={40} 
+                />
+                <Series>
+                    <ScatterSeries
+                        markerProvider={markerGen}
+                    />
+                </Series>                       
+            </ChartCanvas>
+        );
+
+
+        // let yAccessor;
+        // if (yType === 'str') {
+        //     yAccessor =  d => {
+        //         const index = yExtents.findIndex(each => each === yAccessorProp(d));
+        //         return yExtents.length - index - 1;
+        //     }
+        // } else {
+        //     yAccessor = yAccessorProp;
+        // }
+
+        // let xAccessor;
+        // if (xType === 'str') {
+        //     xAccessor = d => {
+        //         const index = xExtents.findIndex(each => each === xAccessorProp(d));
+        //         return index;
+        //     }
+        // } else {
+        //     xAccessor = xAccessorProp;
+        // }
         
-        const markerProps = {
-            r: 3,
-            stroke: d => colorsByGroup[groupAccessor(d) || d],
-            fill: d => colorsByGroup[groupAccessor(d) || d],
-            opacity: 0.5,
-            strokeWidth: 1
-        }
+        // const markerProps = {
+        //     r: 3,
+        //     stroke: d => colorsByGroup[groupAccessor(d) || d],
+        //     fill: d => colorsByGroup[groupAccessor(d) || d],
+        //     opacity: 0.5,
+        //     strokeWidth: 1
+        // }
 
         //console.log('ScatterChart: ', xExtents)
         //console.log(yExtents)
+        console.log(data)
+        return <div />;
 
         return (
             <ChartCanvas

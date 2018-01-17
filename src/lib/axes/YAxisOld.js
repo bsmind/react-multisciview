@@ -42,17 +42,23 @@ class YAxis extends React.Component {
     	});
 	}
 	
-    getTicksOrdinary = (yScale, yExtents, yStep) => {
+    getTicksOrdinary = (yScale) => {
 		const { ticks, tickFormat, innerTickSize, orient } = this.props;
-		const { canvasDim:{height} } = this.props.shared;
+		const { yExtents, height, yStep } = this.props.chartConfig;
     	const { fontSize } = this.props.labelStyle;
+		//const { yScale } = this.props.chartConfig;
     	const sign = orient === "left" || orient === "top" ? -1 : 1;
     	const dx = fontSize * 0.35;
 
+		
+		//console.log(yScale.domain(), yScale.range())
 		const yLabels = yExtents.slice();
 		yLabels.reverse();
 		const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
+
+		//const yStep = Math.abs(yScale(0) - yScale(1));
+		//console.log('YAxis', yStep)
 
 		const tickArray = [];
 		for (let i=minval; i<maxval; ++i) {
@@ -77,14 +83,8 @@ class YAxis extends React.Component {
     }	
 
     draw = (ctx, moreProps) => {
-		const { showDomain, showTicks, showTickLabel } = this.props;
-		const { yAttr } = moreProps;
-		const {
-			scale,
-			extents,
-			step,
-			ordinary
-		} = yAttr;
+    	const { showDomain, showTicks, showTickLabel, ordinary } = this.props;
+    	const { chartConfig: { yScale } } = moreProps;
 
     	const axisLocation = this.getAxisLocation();
 
@@ -92,14 +92,14 @@ class YAxis extends React.Component {
     	ctx.translate(axisLocation, 0);
 
     	if (showDomain) {
-    		drawAxisLine(ctx, this.props, scale.range());
+    		drawAxisLine(ctx, this.props, yScale.range());
     	}
 
     	if (showTicks) {
     		const { orient, labelStyle } = this.props;
 			const textAnchor = orient === "left" ? "end" : "start";
 			drawTicks(ctx, 
-				ordinary ? this.getTicksOrdinary(scale, extents, step): this.getTicks(scale),
+				ordinary ? this.getTicksOrdinary(yScale): this.getTicks(yScale),
     			this.props.tickStyle,
     			showTickLabel ? { ...labelStyle, textAnchor } : null
     		);
@@ -110,7 +110,7 @@ class YAxis extends React.Component {
 
     getAxisLocation = () => {
         const { axisAt } = this.props;
-        const { canvasDim:{width} } = this.props.shared;
+        const { width } = this.props.chartConfig;
 
     	let axisLocation;
     	switch (axisAt) {
@@ -124,7 +124,7 @@ class YAxis extends React.Component {
 
     getDrawRegion = () => {
         const { axisWidth, orient } = this.props;
-        const { canvasDim:{height} } = this.props.shared;
+        const { height } = this.props.chartConfig;
 
     	const
     		x = (orient === "left") ? -axisWidth : 0,
@@ -151,13 +151,24 @@ class YAxis extends React.Component {
     render() {
     	const
     		rect = this.getDrawRegion(),
-    		axisLocation = this.getAxisLocation();
+    		axisLocation = this.getAxisLocation(),
+    		zoomEnabled = true, //this.props.zoomEnabled && config.yPan,
+    		{ yScale } = this.props.chartConfig;
+
+    	const handler = zoomEnabled
+    		? <AxisEventHandler
+    			{...rect}
+    			scale={yScale}
+    			getMouseDelta={this.props.getMouseDelta}
+    			getInverted={this.props.getInverted}
+                onDomainChange={this.onDomainChange}
+                zoomCursorClassName={"react-multiview-ns-resize-cursor"}
+    		/>
+    		: null;
 
     	return (
     		<g transform={`translate(${axisLocation},${0})`}>
-    			<AxisEventHandler
-					{...rect}
-				/>
+    			{handler}
     			<SubscriberExt
     				ref={node => this.node = node}
     				canvas={contexts => contexts.axes}
@@ -166,6 +177,7 @@ class YAxis extends React.Component {
                     draw={this.draw}
                     drawOn={['pan']}
                     shared={this.props.shared}
+    				chartConfig={this.props.chartConfig}
     			/>
     		</g>
     	);

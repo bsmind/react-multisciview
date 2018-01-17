@@ -20,14 +20,10 @@ class ParallelCoordinateChart extends React.Component {
             ratio,
             dimension,
             data,
-            colorsByGroup,
-            groupAccessor,
+            colorAccessor,
             titleFormat,
+            onPCPAxisSelect,
         } = this.props;
-
-        //console.log('pcp char:', dimension)
-        if (data == null || data.length === 0)
-            return <div/>
 
         const dimName = Object.keys(dimension).sort(sortAlphaNum);
         const index = dimName.indexOf('sample');
@@ -35,8 +31,9 @@ class ParallelCoordinateChart extends React.Component {
             dimName.splice(index, 1);
             dimName.splice(0, 0, 'sample');
         }
-
         
+
+
         return (
             <PCPCanvas
                 width={width}
@@ -50,15 +47,15 @@ class ParallelCoordinateChart extends React.Component {
                 dimAccessor={(d, name) => get(d, name)}
                 data={data}
 
-                colorAccessor={d => colorsByGroup[groupAccessor(d)]}
+                colorAccessor={colorAccessor}
                 axisWidth={26}
 
                 titleFormat={titleFormat}
+
+                onPCPAxisSelect={onPCPAxisSelect}
             >
                 <Series>
                     <PCPPolyLineSeries
-                        //colorAccessor={d => colorsByGroup[groupAccessor(d)]} 
-                        //groupAccessor={groupAccessor}
                         opacity={0.3}
                         strokeWidth={1}
                     />

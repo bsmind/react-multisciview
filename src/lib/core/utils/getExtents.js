@@ -12,7 +12,10 @@ export default (
     inputExtents
 ) => {
     let extents, stepEnabled = false;
-    if (typeof inputExtents === 'function')
+    if (inputExtents == null) {
+        extents = [0, 1];
+    }
+    else if (typeof inputExtents === 'function')
         extents = inputExtents(data);
     else if (isArrayOfString(inputExtents)) {
         extents = [0, inputExtents.length];

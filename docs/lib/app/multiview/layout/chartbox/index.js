@@ -16,44 +16,80 @@ import {
 import Test from './charts/ScatterMarkerProvider';
 
 import {
-    test,
     getSelectedDataArray,
-    getSelectedSortedDataArray,
-    getSelectedDataObject,
-    getXAccessor,
-    getYAccessor,
-    getZAccessor,
     getSelectedSampleNames,
-    getColorsBySampleNames,
-    getXScale,
-    getYScale,
-    getXType,
-    getYType,
     getAttrX,
     getAttrY,
-
-    getPCPDimension,
-    getPCPData,
+    getAttrZ
 } from './selector';
 
+import {
+    scaleSequential,
+    interpolateViridis
+} from 'd3-scale';
 
 class ChartBox extends React.Component {
+    constructor(props) {
+        super(props);
+        this.attrExtents = {};
+    }
+
+    componentDidMount() {
+        //console.log(this.ScatterChartNode);
+        //this.ScatterChartCanvasNode = this.ScatterChartNode.node.getScatterChartCanvasNode();
+        //console.log(this.ScatterChartCanvasNode)
+        //this.ScatterChartCanvasNode = this.ScatterChartNode.node
+    }
+
+    getScatterChartCanvasNode = () => {
+        if (this.ScatterChartNode &&
+            this.ScatterChartNode.node 
+        ) {
+            return this.ScatterChartNode.node.getScatterChartCanvasNode();
+        }
+    }
+
+    handlePCPAxisSelect = (who, axisTitle, select, scale, inProgress) => {
+        let start, end, temp;
+        if (select) {
+            start = scale.invert(select[0]);
+            end = scale.invert(select[1]);
+            if (start > end) {
+                temp = start;
+                start = end;
+                end = temp;
+            }
+            this.attrExtents[axisTitle] = [start, end];
+        } else {
+            const {pcpDimension} = this.props;
+            this.attrExtents[axisTitle] = pcpDimension[axisTitle];
+        }
+
+        const targetCanvas = this.getScatterChartCanvasNode();
+        targetCanvas.handleByOther({
+            what: 'extents',
+            data: this.attrExtents,
+            inProgress
+        });
+    }
 
     renderScatterChart = (h) => {
         const {
-            children, height,
-            selectedSampleNames, 
-            sampleAccessor,
-            colorsBySampleNames,
-            ...rest
+            pcpDimension,
+            pcpData,
+            xAttr, yAttr, zAttr,
+            colorsBySampleNames
         } = this.props;
-
+        
         return <ScatterChart
+            ref={node => this.ScatterChartNode = node}
             height={h}
-            groups={selectedSampleNames}
-            groupAccessor={sampleAccessor}
+            data={pcpData}
+            dimension={pcpDimension}
+            xAttr={xAttr}
+            yAttr={yAttr}
+            zAttr={zAttr}
             colorsByGroup={colorsBySampleNames}
-            {...rest}
         />
 
     }
@@ -64,17 +100,33 @@ class ChartBox extends React.Component {
             pcpData,
             colorsBySampleNames,
             sampleAccessor,
-            attrFormat
+            attrFormat,
+            zAttr
         } = this.props;
-       //console.log(pcpDimension)
-       //console.log(pcpData)
+
+        const colorExtents = pcpDimension[zAttr];
+
+        const colorScale = zAttr === 'sample' || colorExtents == null
+            ? d => colorsBySampleNames[get(d,zAttr)]
+            : scaleSequential(interpolateViridis).domain(colorExtents);
+
+        const colorAccessor = zAttr === 'sample' || colorExtents == null
+            ? d => colorScale(d)
+            : d => {
+                const value = get(d, zAttr);
+                if (value == null) {
+                    return '#FF0000';
+                }
+                return colorScale(value);
+            };
+
         return <ParallelCoordinateChart
             height={h}
             data={pcpData}
             dimension={pcpDimension}
-            colorsByGroup={colorsBySampleNames}
-            groupAccessor={sampleAccessor}
+            colorAccessor={colorAccessor}
             titleFormat={attrFormat}
+            onPCPAxisSelect={this.handlePCPAxisSelect}
         />
     }
 
@@ -82,10 +134,13 @@ class ChartBox extends React.Component {
         const { height } = this.props;
         const scatterHeight = height / 2;
         const pcpHeight = height - scatterHeight;
+
+        //console.log('chartbox height: ', height)
+
         return (
             <div className={this.props.className}>
-                {/* {this.renderScatterChart(scatterHeight)} */}
                 {this.renderParallelCoordinateChart(pcpHeight)}
+                {this.renderScatterChart(scatterHeight)}                
             </div>
         );
     }
@@ -96,31 +151,15 @@ ChartBox.defaultProps = {};
 
 
 function mapStateToProps(state) {
-    const { data, xExtents, yExtents } = getSelectedSortedDataArray(state);
-
-    //test(state)
-   // const pcpDimension = getPCPDimension(state);
-    
-    //console.log(getColorsBySampleNames(state))
-    //const pcpData = getPCPData(state);
     const {
         data: pcpData,
         extents: pcpExtents
     } = getSelectedDataArray(state);
 
     return {
-        data,
-        xExtents,
-        yExtents,
         xAttr: getAttrX(state),
         yAttr: getAttrY(state),
-        xAccessor: getXAccessor(state),
-        yAccessor: getYAccessor(state),
-        zAccessor: getZAccessor(state),
-        xScale: getXScale(state),
-        yScale: getYScale(state),
-        xType: getXType(state),
-        yType: getYType(state),
+        zAttr: getAttrZ(state),
         selectedSampleNames: getSelectedSampleNames(state),
         colorsBySampleNames: state.data.sampleColors,//getColorsBySampleNames(state),
         attrFormat: state.data.attrFormat,

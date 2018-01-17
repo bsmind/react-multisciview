@@ -325,7 +325,8 @@ PCPYAxis.defaultProps = {
     showDomain: true,
     
 	titleFormat: d => d,
-	tickFormat: x => d3Format(".3s")(x),
+	tickFormat: x => d3Format('.3s')(x),
+	//tickFormat: x => x,
 
 	className: "",
 	domainClassName: "",

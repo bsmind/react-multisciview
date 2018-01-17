@@ -10,6 +10,13 @@ function dataFilterWrapper(clamp, stepEnabled) {
 		inputDamain,
 		xAccessor
 	) {
+		if (data.length === 0) {
+			return {
+				plotData: [],
+				domain: inputDamain
+			}
+		}
+
 		let left = stepEnabled ? Math.floor( inputDamain[0] ) : inputDamain[0],
 			right = stepEnabled ? Math.ceil( inputDamain[1] ) : inputDamain[1];
 

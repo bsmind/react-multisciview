@@ -29,28 +29,17 @@ class EventHandler extends React.Component {
 	constructor() {
 		super();
 		this.mouseInside = false;
-        this.mouseInteraction = true;
 		this.state = {
             panInProgress: false,
             panStart: {
                 panStartXScale: null,
                 panOrigin: null,
                 chartsToPan: null,
-            },
-
-			dragInProgress: false,
+            }
 		};
 	}
 
-	componentWillMount() {
-		this.focus = this.props.focus;
-	}
-
 	componentDidMount() {
-		this.onListener();
-	}
-
-	componentDidUpdate() {
 		this.onListener();
 	}
 
@@ -71,177 +60,165 @@ class EventHandler extends React.Component {
     		select(this.node)
     			.on(MOUSEENTER, null)
     			.on(MOUSELEAVE, null);
-
-    		select(d3Window(this.node))
-    			.on(MOUSEMOVE, null);
     	}
     }
 
     handleEnter = () => {
     	const e = d3Event;
     	this.mouseInside = true;
-    	if (!this.state.panInProgress && !this.state.dragInProgress) {
-    		select(d3Window(this.node))
-    			.on(MOUSEMOVE, this.handleMouseMove);
-    	}
     	if (this.props.onMouseEnter)
     		this.props.onMouseEnter(e);
     }
 
     handleLeave = (e) => {
     	this.mouseInside = false;
-    	if (!this.state.panInProgress && !this.state.dragInProgress) {
-    		select(d3Window(this.node))
-    			.on(MOUSEMOVE, null);
-    	}
     	if (this.props.onMouseLeave)
     		this.props.onMouseLeave(e);
     }
 
-    handleMouseMove = () => {
-    	const e = d3Event;
-    	if (this.mouseInteraction
-            && this.props.mouseMove
-            && !this.state.panInProgress
-    	) {
-    		const newPos = mouse(this.node);
-    		if (this.props.onMouseMove)
-    			this.props.onMouseMove(newPos, "mouse", e);
-    	}
-    }
+    // handleMouseMove = () => {
+    // 	const e = d3Event;
+    // 	if (this.mouseInteraction
+    //         && this.props.mouseMove
+    //         && !this.state.panInProgress
+    // 	) {
+    // 		const newPos = mouse(this.node);
+    // 		if (this.props.onMouseMove)
+    // 			this.props.onMouseMove(newPos, "mouse", e);
+    // 	}
+    // }
 
     handleWheel = (e) => {
-    	e.preventDefault();
+        e.preventDefault();
         const mouseXY = mousePosition(e);
-    	if (this.props.zoom && this.props.onZoom &&
-             !this.state.panInProgress) {
+    	if (this.props.onZoom && !this.state.panInProgress) {
     	 	this.props.onZoom(mouseXY, e);
     	}
     }
 
-    canPan = () => {
-        const { pan: initialPanEnabled } = this.props;
+    // canPan = () => {
+    //     const { pan: initialPanEnabled } = this.props;
 
-        const {
-            panEnabled,
-            draggable: somethingSelected
-        } = this.props.getAllPanConditions()
-                .reduce((obj, a) => {
-                    return {
-                        draggable: obj.draggable || a.draggable,
-                        panEnabled: obj.panEnabled && a.panEnabled
-                    };
-                }, {
-                    draggable: false,
-                    panEnabled: initialPanEnabled
-                });
+    //     const {
+    //         panEnabled,
+    //         draggable: somethingSelected
+    //     } = this.props.getAllPanConditions()
+    //             .reduce((obj, a) => {
+    //                 return {
+    //                     draggable: obj.draggable || a.draggable,
+    //                     panEnabled: obj.panEnabled && a.panEnabled
+    //                 };
+    //             }, {
+    //                 draggable: false,
+    //                 panEnabled: initialPanEnabled
+    //             });
 
-        return {
-            panEnabled,
-            somethingSelected
-        }
-    }
+    //     return {
+    //         panEnabled,
+    //         somethingSelected
+    //     }
+    // }
 
-    handleMouseDown = (e) => {
-        if (e.button !== 0) return;
-        e.preventDefault();
+    // handleMouseDown = (e) => {
+    //     if (e.button !== 0) return;
+    //     e.preventDefault();
 
-        this.panHappened = false;
-        this.dragHappeded = false;
-        this.focus = true;
-        if (!this.state.panInProgress && this.mouseInteraction) {
-            const mouseXY = mousePosition(e);
-            const currentCharts = getCurrentCharts(this.props.chartConfig, mouseXY);
+    //     this.panHappened = false;
+    //     this.dragHappeded = false;
+    //     this.focus = true;
+    //     if (!this.state.panInProgress && this.mouseInteraction) {
+    //         const mouseXY = mousePosition(e);
+    //         const currentCharts = getCurrentCharts(this.props.chartConfig, mouseXY);
 
-            //console.log(currentCharts, this.props.chartConfig, mouseXY)
-            const {panEnabled, somethingSelected} = this.canPan();
-            const pan = panEnabled && !somethingSelected;
+    //         //console.log(currentCharts, this.props.chartConfig, mouseXY)
+    //         const {panEnabled, somethingSelected} = this.canPan();
+    //         const pan = panEnabled && !somethingSelected;
 
-            if (pan) {
-                this.setState({
-                    panInProgress: pan,
-                    panStart: {
-                        panStartXScale: this.props.xScale,
-                        panOrigin: mouseXY,
-                        chartsToPan: currentCharts
-                    }
-                });
+    //         if (pan) {
+    //             this.setState({
+    //                 panInProgress: pan,
+    //                 panStart: {
+    //                     panStartXScale: this.props.xScale,
+    //                     panOrigin: mouseXY,
+    //                     chartsToPan: currentCharts
+    //                 }
+    //             });
 
-                select(d3Window(this.node))
-                    .on(MOUSEMOVE, this.handlePan)
-                    .on(MOUSEUP, this.handlePanEnd);
+    //             select(d3Window(this.node))
+    //                 .on(MOUSEMOVE, this.handlePan)
+    //                 .on(MOUSEUP, this.handlePanEnd);
 
-            } else if (somethingSelected) {
-                // something selected.. dragging
-                console.log('EventHandler::handleMouseDown::Drag')
-            }
+    //         } else if (somethingSelected) {
+    //             // something selected.. dragging
+    //             console.log('EventHandler::handleMouseDown::Drag')
+    //         }
 
-            if (this.props.onMouseDown)
-                this.props.onMouseDown(mouseXY, currentCharts, e);
-        }
-    }
+    //         if (this.props.onMouseDown)
+    //             this.props.onMouseDown(mouseXY, currentCharts, e);
+    //     }
+    // }
 
-    shouldPan = () => {
-        return this.props.pan && this.props.onPan && this.state.panStart;
-    }
+    // shouldPan = () => {
+    //     return this.props.pan && this.props.onPan && this.state.panStart;
+    // }
 
-    handlePan = () =>{
-        const e = d3Event;
+    // handlePan = () =>{
+    //     const e = d3Event;
 
-        if (this.shouldPan()) {
-            this.panHappened = true;
-            const { panStartXScale, panOrigin, chartsToPan } = this.state.panStart;
-            const mouseXY = this.mouseInteraction
-                ? mouse(this.node)
-                : touch(this.node)[0];
+    //     if (this.shouldPan()) {
+    //         this.panHappened = true;
+    //         const { panStartXScale, panOrigin, chartsToPan } = this.state.panStart;
+    //         const mouseXY = this.mouseInteraction
+    //             ? mouse(this.node)
+    //             : touch(this.node)[0];
 
-            this.lastNewPos = mouseXY;
-            const dx = mouseXY[0] - panOrigin[0];
-            const dy = mouseXY[1] - panOrigin[1];
+    //         this.lastNewPos = mouseXY;
+    //         const dx = mouseXY[0] - panOrigin[0];
+    //         const dy = mouseXY[1] - panOrigin[1];
 
-            this.dx = dx;
-            this.dy = dy;
+    //         this.dx = dx;
+    //         this.dy = dy;
 
-            this.props.onPan(
-                mouseXY,
-                panStartXScale,
-                { dx, dy },
-                chartsToPan,
-                e
-            );
-        }
-    }
+    //         this.props.onPan(
+    //             mouseXY,
+    //             panStartXScale,
+    //             { dx, dy },
+    //             chartsToPan,
+    //             e
+    //         );
+    //     }
+    // }
 
-    handlePanEnd = () => {
-        const e = d3Event;
+    // handlePanEnd = () => {
+    //     const e = d3Event;
 
-        if (this.state.panStart) {
-            select(d3Window(this.node))
-                .on(MOUSEMOVE, this.mouseInside ? this.handleMouseMove: null)
-                .on(MOUSEUP, null);
-                //.on(TOUCHMOVE, null)
-                //.on(TOUCHEND, null);
+    //     if (this.state.panStart) {
+    //         select(d3Window(this.node))
+    //             .on(MOUSEMOVE, this.mouseInside ? this.handleMouseMove: null)
+    //             .on(MOUSEUP, null);
+    //             //.on(TOUCHMOVE, null)
+    //             //.on(TOUCHEND, null);
 
-            if (this.panHappened && this.props.pan) {
-                const { dx, dy } = this;
-                delete this.dx;
-                delete this.dy;
-                if (this.props.onPanEnd)
-                    this.props.onPanEnd(
-                        this.lastNewPos,
-                        this.state.panStart.panStartXScale,
-                        {dx, dy},
-                        this.state.panStart.chartsToPan,
-                        e
-                    );
-            }
+    //         if (this.panHappened && this.props.pan) {
+    //             const { dx, dy } = this;
+    //             delete this.dx;
+    //             delete this.dy;
+    //             if (this.props.onPanEnd)
+    //                 this.props.onPanEnd(
+    //                     this.lastNewPos,
+    //                     this.state.panStart.panStartXScale,
+    //                     {dx, dy},
+    //                     this.state.panStart.chartsToPan,
+    //                     e
+    //                 );
+    //         }
 
-            this.setState({
-                panInProgress: false,
-                panStart: null
-            });
-        }
-    }
+    //         this.setState({
+    //             panInProgress: false,
+    //             panStart: null
+    //         });
+    //     }
+    // }
 
     render() {
         const className = this.state.panInProgress
@@ -255,7 +232,7 @@ class EventHandler extends React.Component {
     		height={this.props.height}
     		style={{ fill: "red", opacity: 0. }}
             onWheel={this.handleWheel}
-            onMouseDown={this.handleMouseDown}
+            //onMouseDown={this.handleMouseDown}
     	/>;
     }
 }

@@ -19,11 +19,18 @@ import {
     cursorStyle
 } from '../utils';
 
+import {
+    getNewDimComfig,
+    getPlotData,
+    getXScale,
+    getNewDimOrder
+} from './pcpUtils';
+
 import forEach from 'lodash.foreach';
 
 
-
 import { scalePoint, scaleLinear } from 'd3-scale';
+import uniqueId from 'lodash.uniqueid';
 
 class PCPCanvas extends React.Component {
     constructor() {
@@ -32,11 +39,13 @@ class PCPCanvas extends React.Component {
         this.mutableState = {};
         this.subscriptions = [];
         this.state = {
+            id: uniqueId('pcp_'),
             xScale: null,
             dimConfig: {},
             plotData: []
         };
         this.axisMoveInProgress = false;
+        this.axisSelectInProgress = false;
     }
     getCanvasContexts = () => {
     	if (this.canvasContainerNode)
@@ -106,22 +115,6 @@ class PCPCanvas extends React.Component {
 
         }
     }
-    
-
-    clearBothCanvas = () => {
-        const canvases = this.getCanvasContexts();
-        if (canvases && canvases.axes) {
-            clearCanvas([
-                canvases.axes,
-                canvases.mouseCoord
-            ], this.props.ratio);
-        }
-    }
-
-    generateSubscriptionId = () => {
-    	this.lastSubscriptionId++;
-    	return this.lastSubscriptionId;
-    }
 
     subscribe = (id, rest) => {
         // getPanConditions
@@ -135,8 +128,6 @@ class PCPCanvas extends React.Component {
     		...rest,
     		getPanConditions
     	});
-        //console.log('subscribe: ', this.subscriptions)
-        //console.log(getPanConditions())
     }
 
     unsubscribe = (id) => {
@@ -144,75 +135,23 @@ class PCPCanvas extends React.Component {
     }
 
     resetChart = (props = this.props) => {
-        const {
-            dimName,
-            dimExtents,
-            dimAccessor,
-            data,
-            colorAccessor,
-            axisWidth,
-            margin
-        } = props;
-
+        const { margin, anotherData } = props;
         const canvasDim = getCanvasDimension(props);
-        const xScale = scalePoint()
-                        .domain(dimName)
-                        .range([0, canvasDim.width])
-                        .padding(0);
-        
-        //console.log(xScale.domain())
-        // getDimConfig
-        const dimConfig = {}; 
-        dimName.forEach(name => {
-            let axisExtents = dimAccessor(dimExtents, name);
-            if (axisExtents == null) {
-                axisExtents = [0, 1];
-            //     accessor = d => null;
+        const xScale = getXScale(props, canvasDim.width);
+        const dimConfig = getNewDimComfig(props,
+            xScale,
+            canvasDim.height,
+            canvasDim.height + margin.bottom / 2
+        );
+        const plotData = getPlotData(props);
+
+        if (anotherData) {
+            const {who, what, data} = anotherData;
+            if (who !== this.state.id) {
+                // do somthing according to what & data
             }
+        }
 
-            const ordinary = isArrayOfString(axisExtents);
-
-            const yScale = scaleLinear();
-            const domain = ordinary ? [0, axisExtents.length] : axisExtents.slice();
-            if (domain[1] === domain[0]) {
-                const domainValue = Math.abs(domain[0]);
-                //const sign = domain[0] < 0 ? -1: 1;
-                domain[0] = domainValue === 0 ? -1: -2*domainValue;
-                domain[1] = domainValue === 0 ? 1: 2*domainValue;
-            }
-            yScale.domain(domain)
-                  .range([canvasDim.height, 0]);
-
-            const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
-            dimConfig[name] = {
-                title: name,
-                extents: axisExtents,
-                ordinary,
-                scale: yScale,
-                step: yStep,
-                active: true,
-                flip: false,
-                position: xScale(name),
-                axisWidth,
-                accessor: d => d[name],
-                nullPositionY: canvasDim.height + margin.bottom/2,
-                select: null
-            }
-        });
-        // end of getDimConfig
-
-        // calculateDataFromNewDimConfig
-        const plotData = data.map(d => {
-            const flattened = {};
-            dimName.forEach(name => {
-                flattened[name] = dimAccessor(d, name);
-            });
-            flattened.stroke = colorAccessor(d);
-            return flattened;
-        });
-        // end
-
-        //this.fullData = plotData;
         return {
             xScale,
             dimConfig,
@@ -228,91 +167,59 @@ class PCPCanvas extends React.Component {
             data,
             colorAccessor,
             axisWidth,
-            margin
+            margin,
+            anotherData
         } = props;
 
-        const canvasDim = getCanvasDimension(props);
-
-        // updateDimConfig
         const { 
             xScale: initialXScale,
             dimConfig: initialDimConfig 
         } = this.state;
-        const initialDimOrder = initialXScale.domain();
 
-        dimName.forEach(name => {
-            if ( initialDimOrder.indexOf(name) === -1) 
-                initialDimOrder.push(name);                
-        });
+        const canvasDim = getCanvasDimension(props);
 
-        const newDimOrder = [];
-        initialDimOrder.forEach(name => {
-            if ( dimName.indexOf(name) >= 0)
-                newDimOrder.push(name);
-        });
+        const newDimOrder = getNewDimOrder(
+            dimName,
+            initialXScale.domain()
+        );
 
-        const newXScale = scalePoint()
-                            .domain(newDimOrder)
-                            .range([0, canvasDim.width])
-                            .padding(0);
+        const newXScale = getXScale({
+            dimName: newDimOrder
+        }, canvasDim.width);
 
-        const newDimConfig = {};
-        newDimOrder.forEach(name => {
-            let axisExtents = dimAccessor(dimExtents, name);
-            if (axisExtents == null)
-                axisExtents = [0, 1];
+        const newDimConfig = getNewDimComfig(
+            {
+                dimName: newDimOrder,
+                dimExtents,
+                dimAccessor,
+                axisWidth
+            }, 
+            newXScale, 
+            canvasDim.height,
+            canvasDim.height + margin.bottom / 2,
+            initialDimConfig
+        );
 
-            const ordinary = isArrayOfString(axisExtents);
-            
-            const yScale = scaleLinear();
-            const domain = ordinary ? [0, axisExtents.length] : axisExtents.slice();
-            if (domain[1] === domain[0]) {
-                const domainValue = Math.abs(domain[0]);
-                //const sign = domain[0] < 0 ? -1: 1;
-                domain[0] = domainValue === 0 ? -1: -2*domainValue;
-                domain[1] = domainValue === 0 ? 1: 2*domainValue;
+       const plotData = getPlotData({
+            data,
+            dimName: newDimOrder,
+            dimAccessor,
+            colorAccessor
+       });
+
+       if (anotherData) {
+            const {who, what, data} = anotherData;
+            //console.log(anotherData)
+            if (who !== this.state.id) {
+                // do somthing according to what & data
             }
-            yScale.domain(domain)
-                    .range([canvasDim.height, 0]);
-            
-            const yStep = ordinary ? Math.abs(yScale(0) - yScale(1)) : 0;
-
-            const prevConfig = initialDimConfig[name] ? initialDimConfig[name]: {};
-
-            newDimConfig[name] = {
-                select: null,
-                ...prevConfig,
-                title: name,
-                extents: axisExtents,
-                ordinary,
-                scale: yScale,
-                step: yStep,
-                active: true,
-                flip: false,
-                position: newXScale(name),
-                axisWidth,
-                accessor: d => d[name],
-                nullPositionY: canvasDim.height + margin.bottom/2,
-                //select: null
-            }
-        });
-
-       // console.log(newDimOrder)
-       const plotData = data.map(d => {
-            const flattened = {};
-            newDimOrder.forEach(name => {
-                flattened[name] = dimAccessor(d, name);
-            });
-            flattened.stroke = colorAccessor(d);
-            return flattened;
-        });
-
+        }
+   
         return {
             xScale: newXScale,
             dimConfig: newDimConfig,
             plotData
         }
-        // end updateDimConfig
     }
 
     componentWillMount() {
@@ -321,7 +228,6 @@ class PCPCanvas extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        //const newState = this.resetChart(nextProps);
         const newState = this.updateChart(nextProps);
 
         this.clearAxesAndPCPOnCanvas();
@@ -329,7 +235,8 @@ class PCPCanvas extends React.Component {
     }
 
     shouldComponentUpdate() {
-        return !this.axisMoveInProgress;
+        return !this.axisMoveInProgress && 
+               !this.axisSelectInProgress;
     }
 
     triggerEvent = (type, props, e) => {
@@ -351,10 +258,6 @@ class PCPCanvas extends React.Component {
     }
 
     axisMoveHelper = (dx, axisToMove, initDimOrder, force = false) => {
-        // as axis is moving...
-        // 1. x position of axis changes, ok
-        // 2. corresponding data changes
-        // 3. if needed, swap location..
         const { 
             dimConfig: initDimConfig, 
         } = this.state;
@@ -372,11 +275,9 @@ class PCPCanvas extends React.Component {
         }).sort((a,b) => a.x - b.x);
 
         const canvasDim = getCanvasDimension(this.props);
-        const xScale = scalePoint()
-                        .domain(newDimOrder.map(d => d.id))
-                        .range([0, canvasDim.width])
-                        .padding(0);
-        
+        const xScale = getXScale({
+            dimName: newDimOrder.map(d => d.id)
+        }, canvasDim.width);        
 
         const newDimConfig = {};
         newDimOrder.forEach( each => {
@@ -410,7 +311,6 @@ class PCPCanvas extends React.Component {
 
             this.__dimConfig = state.dimConfig;
             this.__dimOrder = state.xScale.domain();
-            //console.log(__dimOrder)
 
             this.axisMoveInProgress = true;
 
@@ -447,38 +347,24 @@ class PCPCanvas extends React.Component {
     }
 
     rangeSelectHelper = (axisTitle, start, end, initDimConfig) => {
-        const { xScale } = this.state;
-        const dimOrder = xScale.domain();
-        const activeAxisIndex = dimOrder.indexOf(axisTitle);
-        let startIndex, numActiveAxis;
-        if (activeAxisIndex === 0) {
-            startIndex = 0;
-            numActiveAxis = 2;
-        } else if (activeAxisIndex === dimOrder.length-1) {
-            startIndex = activeAxisIndex - 1;
-            numActiveAxis = 2;
-        } else {
-            startIndex = activeAxisIndex - 1;
-            numActiveAxis = 3;
-        }
-
-        const activeAxis = dimOrder.slice(startIndex, startIndex + numActiveAxis);
-        //console.log(activeAxis, activeAxisIndex, dimOrder)
-
+        let axisScale;
         const newDimConfig = {};
         forEach(initDimConfig, (config, key) => {
             let select = config.select;
-            if (key === axisTitle)
+            if (key === axisTitle) {
                 select = [start, end];
+                axisScale = config.scale.copy();
+            }
 
             newDimConfig[key] = {
                 ...config,
                 select,
-                active: activeAxis.indexOf(key) > -1
             };
         });
+
         return {
-            dimConfig: newDimConfig
+            dimConfig: newDimConfig,
+            axisScale
         };
     }
 
@@ -494,7 +380,7 @@ class PCPCanvas extends React.Component {
             this.waitingForRangeSelectAnimationFrame = true;
             this.__dimConfig = this.__dimConfig || this.state.dimConfig;
             
-            const state = this.rangeSelectHelper(axisTitle, start, end, this.__dimConfig);
+            const {axisScale, ...state} = this.rangeSelectHelper(axisTitle, start, end, this.__dimConfig);
 
             this.__dimConfig = state.dimConfig;
 
@@ -505,6 +391,14 @@ class PCPCanvas extends React.Component {
                 this.waitingForRangeSelectAnimationFrame = false;
                 this.clearAxesAndPCPOnCanvas();
                 this.draw({trigger: 'selectrange'});
+                if (this.props.onPCPAxisSelect)
+                    this.props.onPCPAxisSelect(
+                        this.state.id,
+                        axisTitle, 
+                        [start, end], 
+                        axisScale,
+                        true
+                    );
             });
         }
     }
@@ -513,12 +407,12 @@ class PCPCanvas extends React.Component {
         const state = this.rangeSelectHelper(axisTitle, start, end, this.__dimConfig);
         this.axisSelectInProgress = false;
         const {
+            axisScale,
             dimConfig
         } = state;
 
         this.currChartCopied = false;
         this.__dimConfig = null;
-        //console.log(dimConfig)
 
         this.triggerEvent('selectrange', state, e);
         requestAnimationFrame(() => {
@@ -526,6 +420,14 @@ class PCPCanvas extends React.Component {
             this.setState({
                 dimConfig
             });
+            if (this.props.onPCPAxisSelect)
+                this.props.onPCPAxisSelect(
+                    this.state.id,
+                    axisTitle,
+                    [start, end],
+                    axisScale,
+                    false
+                );
         });
     }
 
@@ -543,18 +445,21 @@ class PCPCanvas extends React.Component {
             };
         });
 
-        //this.clearAxesAndPCPOnOffCanvas();
         this.clearAxesAndPCPOnCanvas();
         this.setState({
             dimConfig: newDimConfig
         });
+        if (this.props.onPCPAxisSelect)
+            this.props.onPCPAxisSelect(
+                this.state.id,
+                axisTitle,
+                null,
+                null,
+                false
+            );
     }
 
     render() {
-        //console.log(this.state.dimConfig)
-        //const test = this.state.plotData.filter(d => d.sample === 'L74_speed45');
-        //console.log(test)
-
     	const divStyle = {
     		position: "relative",
     		width: this.props.width,

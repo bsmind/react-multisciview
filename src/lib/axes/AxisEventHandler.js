@@ -125,8 +125,8 @@ class AxisEventHandler extends React.Component {
     		y={this.props.y}
     		width={this.props.width}
     		height={this.props.height}
-    		style={{ fill: "green", opacity: 0. }}
-    		onMouseDown={this.handleDragStartMouse}
+    		style={{ fill: "green", opacity: 0.3 }}
+    		//onMouseDown={this.handleDragStartMouse}
     	/>;
     }
 }

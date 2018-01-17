@@ -72,7 +72,7 @@ class MultiViewApp extends React.Component {
         let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
         //width = width - 200;
-        //height = height - 41.6 - 56.81 - 4.15;
+        height = height - 41.6 - 56.81 - 4.15;
 
         this.setState({width, height});
     }

@@ -34,9 +34,10 @@ class CanvasContainer extends React.Component {
 
     	return (
     		<div style={divStyle}>
-    			<canvas id="chartOn" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
+    			<canvas id="bg" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			<canvas id="axes" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			<canvas id="mouseCoord" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
+                {/* <canvas id="off" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
     		</div>
     	);
     }

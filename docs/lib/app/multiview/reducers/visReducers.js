@@ -8,9 +8,9 @@ const INITIAL_STATE = {
     samples: [],
     sampleColors: {},
 
-    attrx: '',
-    attry: '',
-    attrz: ''
+    attrx: 'metadata_extract.data.sequence_ID',
+    attry: 'metadata_extract.data.annealing_temperature',
+    attrz: 'sample'
 }
 
 
