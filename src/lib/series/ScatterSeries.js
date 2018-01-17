@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 //import { SubscriberExtend } from "../core";
 import { SubscriberExt } from '../core';
-import { functor, hexToRGBA } from "../utils";
+import { functor, hexToRGBA, isArrayOfString } from "../utils";
 
 import { nest as d3Nest } from "d3-collection";
 
@@ -20,6 +20,7 @@ class ScatterSeries extends React.Component {
         const {
             xAttr,
             yAttr,
+            zAttr,
             plotData,
             dataExtents
         } = moreProps;
@@ -41,6 +42,12 @@ class ScatterSeries extends React.Component {
             //extents: yExtents,
             origExtents: yExtents
         } = yAttr;
+
+        const {
+            name: zName,
+            selectDomain: zSelectDomain,
+            extents: zExtents
+        } = zAttr;
         
         const nest = d3Nest()
             .key(d => d.markerID)
@@ -73,7 +80,7 @@ class ScatterSeries extends React.Component {
                 if (x == null || y == null)
                     return;
 
-                const inDomain = dataKeys.map(key => {
+                let inDomain = dataKeys.map(key => {
                     //if (key === xName || key === yName) return true;
                     const extents = dataExtents[key];
                     //if (extents == null) return true;
@@ -88,6 +95,7 @@ class ScatterSeries extends React.Component {
                     return extents[0] <= value && value <= extents[1];
                 }).every(each => each);
                 if (!inDomain) return;
+
 
                 markerProvider.drawAt(ctx, x, y, markerKey);
             });

@@ -31,6 +31,7 @@ class ChartCanvas extends React.Component {
 		}
 		this.subscriptions = [];
 		this.panInProgress = false;
+		this.axisSelectInProgress = false;
 	}
 
     getCanvasContexts = () => {
@@ -84,6 +85,7 @@ class ChartCanvas extends React.Component {
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
+			zAttr: zAttrProp
 		} = props;
 		const canvasDim = getCanvasDimension(props);
 
@@ -98,6 +100,14 @@ class ChartCanvas extends React.Component {
 			dataExtents: dataExtentsProp, 
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
+
+		// zScale: only domain...
+		const zAttr = {
+			name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
+			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): null,
+			select: null,
+			selectDomain: null,
+		}
 		
 		// flatten data to plot
 		const dimName = Object.keys(dataExtentsProp);
@@ -123,6 +133,7 @@ class ChartCanvas extends React.Component {
 			dataExtents,
 			xAttr,
 			yAttr,
+			zAttr,
 			xAccessor: d => d[xAttr],
 			yAccessor: d => d[yAttr]
 		}
@@ -135,13 +146,15 @@ class ChartCanvas extends React.Component {
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
+			zAttr: zAttrProp
 		} = props;
 		const canvasDim = getCanvasDimension(props);
 
 		const {
 			dataExtents: dataExtentsState,
 			xAttr: initialXAttr,
-			yAttr: initialYAttr
+			yAttr: initialYAttr,
+			zAttr: initialZAttr,
 		} = this.state;
 
 		// const dataExtents = {...dataExtentsProp};
@@ -177,6 +190,21 @@ class ChartCanvas extends React.Component {
 				attribute: yAttrProp,
 				dataExtentsPrev: dataExtentsState
 			}, [canvasDim.height, 0]);
+
+		const zAttr = (initialZAttr.name === zAttrProp)
+			? initialZAttr
+			: {
+				name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
+				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): null,
+				select: null,
+				selectDomain: (dataExtentsProp[zAttrProp] && isArrayOfString(dataExtentsProp[zAttrProp])) 
+					? null
+					: dataExtentsState[zAttrProp] 
+						? dataExtentsState[zAttrProp].slice()
+						: null
+			}
+
+		//console.log(dataExtentsProp)
 		
 		// flatten data to plot
 		const plotData = data.map(d => {
@@ -194,6 +222,7 @@ class ChartCanvas extends React.Component {
 			dataExtents: {...dataExtentsState},
 			xAttr,
 			yAttr,
+			zAttr,
 			xAccessor: d => d[xAttr],
 			yAccessor: d => d[yAttr]
 		}		
@@ -371,7 +400,7 @@ class ChartCanvas extends React.Component {
     }
 
     handlePan = (mouseXY, dxdy, e) => {
-        if (!this.waitingForPanAnimationFrame) {
+        if (!this.waitingForPanAnimationFrame && !this.axisSelectInProgress) {
             this.waitingForPanAnimationFrame = true;
 
 			const {xAttr, yAttr} = this.state;
@@ -435,18 +464,124 @@ class ChartCanvas extends React.Component {
 				);
 			}								
         });
-    }
+	}
+	
+	zAxisSelectHelper = (selectDomain, selectRange, initialZAttr, initialDataExtents) => {
+		const {
+			name,
+			extents
+		} = initialZAttr;
+
+		const newZAttr = {
+			...initialZAttr,
+			select: selectRange.slice(),
+			selectDomain: selectDomain.slice()
+		};
+
+		if (!isArrayOfString(extents) && initialDataExtents[name]) {
+			return {
+				zAttr: newZAttr,
+				dataExtents: {
+					...initialDataExtents,
+					[name]: selectDomain.slice()
+				}
+			};
+		}
+		return {
+			zAttr: newZAttr,
+			dataExtents: initialDataExtents
+		}
+	}
+
+	handleZAxisSelect = (selectDomain, selectRange, e) => {
+		if (!this.panInProgress &&
+			!this.waitingForPanAnimationFrame &&
+			!this.waitingForAnimationFrame) 
+		{
+			this.waitingForAnimationFrame = true;
+			this.__zAttr = this.__zAttr || this.state.zAttr;
+			this.__dataExtents = this.__dataExtents || this.state.dataExtents;
+
+			const {zAttr, dataExtents} = this.zAxisSelectHelper(
+				selectDomain, selectRange,
+				this.__zAttr, this.__dataExtents);
+
+			this.__zAttr = zAttr;
+			this.__dataExtents = dataExtents;
+			this.axisSelectInProgress = true;
+			this.triggerEvent('pan', {zAttr, dataExtents}, e);
+			requestAnimationFrame(() => {
+				this.waitingForAnimationFrame = false;
+				this.clearAxisAndChartOnCanvas();
+				this.draw({trigger: 'pan'});
+				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					this.props.onScatterPanZoom(
+						[zAttr.name],
+						[selectDomain.slice()],
+						true
+					);
+				}													
+			});
+		}
+	}
+
+	handleZAxisSelectEnd = (selectDomain, selectRange, e) => {
+		const {zAttr, dataExtents} = this.zAxisSelectHelper(
+			selectDomain, selectRange,
+			this.__zAttr, this.__dataExtents
+		);
+		this.__zAttr = null;
+		this.__dataExtents = null;
+		this.axisSelectInProgress = false;
+		this.triggerEvent('pan', {zAttr, dataExtents}, e);
+		requestAnimationFrame(() => {
+			this.clearAxisAndChartOnCanvas();
+			this.setState({
+				zAttr,
+				dataExtents
+			});
+			// connect to pcp
+			if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				this.props.onScatterPanZoom(
+					[zAttr.name],
+					[selectDomain.slice()],
+					false
+				);
+			}															
+		});
+	}
+
+	handleZAxisSelectCancel = (e) => {
+		const {name, extents} = this.state.zAttr;
+		const newZAttr = {
+			...this.state.zAttr,
+			select: null,
+			selectDomain: null
+		};
+
+		this.clearAxisAndChartOnCanvas();		
+		if (this.state.dataExtents[name] && !isArrayOfString(extents)) {
+			const newDataExtents = {
+				...this.state.dataExtents,
+				[name]: extents.slice()
+			};	
+			this.setState({zAttr: newZAttr, dataExtents: newDataExtents});		
+			// connect to pcp
+			if (this.props.onScatterPanZoom) {
+				this.props.onScatterPanZoom(
+					[name],
+					[newZAttr.extents.slice()],
+					false
+				);
+			}															
+				
+		} else {
+			this.setState({zAttr: newZAttr});
+		}	
+	}
 	
 
 	updateAttr = (attr, initialAttr, dataExtents) => {
-		// const range = initialAttr.scale.range();
-		// if (dataExtents[attr]) {
-		// 	return getScale({
-		// 		dataExtents,
-		// 		attribute: attr
-		// 	}, range);
-		// }
-		// return initialAttr;
 		const domain = dataExtents[attr];
 		if (domain == null) return initialAttr;
 
@@ -457,6 +592,16 @@ class ChartCanvas extends React.Component {
 			...initialAttr,
 			scale: newScale,
 			step
+		};
+	}
+	updateZAttr = (initialZAttr, dataExtents) => {
+		const { name, extents } = initialZAttr;
+		if (isArrayOfString(extents) || dataExtents[name] == null)
+			return initialZAttr;
+		
+		return {
+			...initialZAttr,
+			selectDomain: dataExtents[name].slice()
 		};
 	}
 	updateExtents = (initialExtents, newExtents) => {
@@ -484,20 +629,24 @@ class ChartCanvas extends React.Component {
 				this.__dataExtents = this.__dataExtents || this.state.dataExtents;
 				this.__xAttr = this.__xAttr || this.state.xAttr;
 				this.__yAttr = this.__yAttr || this.state.yAttr;
+				this.__zAttr = this.__zAttr || this.state.zAttr;
 
 				const newDataExtents = this.updateExtents(this.__dataExtents, data);				
 				const newXAttr = this.updateAttr(this.props.xAttr, this.__xAttr, data);
 				const newYAttr = this.updateAttr(this.props.yAttr, this.__yAttr, data);
+				const newZAttr = this.updateZAttr(this.__zAttr, data);
 
 				this.__dataExtents = newDataExtents;
 				this.__xAttr = newXAttr;
 				this.__yAttr = newYAttr;
+				this.__zAttr = newZAttr;
 
 				this.otherInProgress = true;
 
 				this.triggerEvent('pan', {
 					xAttr: newXAttr, 
 					yAttr: newYAttr, 
+					zAttr: newZAttr,
 					dataExtents: newDataExtents
 				});
 				requestAnimationFrame(() => {
@@ -510,19 +659,23 @@ class ChartCanvas extends React.Component {
 			this.__dataExtents = this.__dataExtents || this.state.dataExtents;
 			this.__xAttr = this.__xAttr || this.state.xAttr;
 			this.__yAttr = this.__yAttr || this.state.yAttr;
+			this.__zAttr = this.__zAttr || this.state.zAttr;
 		
 			const newXAttr = this.updateAttr(this.props.xAttr, this.__xAttr, data);
 			const newYAttr = this.updateAttr(this.props.yAttr, this.__yAttr, data);
+			const newZAttr = this.updateZAttr(this.__zAttr, data);
 			const newDataExtents = this.updateExtents(this.__dataExtents, data);				
 			
 			this.__xAttr = null;
 			this.__yAttr = null;
+			this.__zAttr = null;
 			this.__dataExtents = null;
 			
 			this.otherInProgress = false;
 			this.triggerEvent('pan', {
 				xAttr: newXAttr, 
 				yAttr: newYAttr, 
+				zAttr: newZAttr,
 				dataExtents: newDataExtents
 			});
 			requestAnimationFrame(() => {
@@ -530,6 +683,7 @@ class ChartCanvas extends React.Component {
 				this.setState({...this.state,
 					xAttr: newXAttr,
 					yAttr: newYAttr,
+					zAttr: newZAttr,
 					dataExtents: newDataExtents
 				});
 			});		
@@ -561,6 +715,9 @@ class ChartCanvas extends React.Component {
 			getCanvasContexts: this.getCanvasContexts,
 			handleXAxisZoom: this.handleXAxisZoom,
 			handleYAxisZoom: this.handleYAxisZoom,
+			handleZAxisSelect: this.handleZAxisSelect,
+			handleZAxisSelectEnd: this.handleZAxisSelectEnd,
+			handleZAxisSelectCancel: this.handleZAxisSelectCancel,
 			...this.state
 		};
 

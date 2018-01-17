@@ -385,9 +385,6 @@ class PCPCanvas extends React.Component {
                     startDomain = endDomain;
                     endDomain = temp;
                 }
-                //startDomain = Math.max(0, startDomain);
-                //endDomain = Math.min(extents.length);
-                //console.log(startDomain, endDomain);               
                 this.props.onPCPAxisSelect(
                     axisTitle, 
                     [startDomain, endDomain], 

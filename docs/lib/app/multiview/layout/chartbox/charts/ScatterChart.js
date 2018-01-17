@@ -6,6 +6,9 @@ import { markerProvider } from 'react-multiview/lib/series';
 import { 
     ChartCanvas, Chart, Series 
 } from 'react-multiview/lib/core';
+import {
+    ColorLegend
+} from 'react-multiview/lib/legends';
 import { XAxis, YAxis } from 'react-multiview/lib/axes';
 import { ScatterSeries, CircleMarker } from 'react-multiview/lib/series';
 
@@ -92,7 +95,7 @@ class ScatterChart extends React.Component {
         const {
             width, height, ratio,
             data, dimension,
-            xAttr, yAttr,
+            xAttr, yAttr, zAttr,
             xAccessor, yAccessor, zAccessor,
             onScatterPanZoom
         } = this.props;
@@ -113,6 +116,7 @@ class ScatterChart extends React.Component {
                 dataAccessor={(d, name) => get(d, name)}
                 xAttr={xAttr}
                 yAttr={yAttr}
+                zAttr={zAttr}
                 onScatterPanZoom={onScatterPanZoom}
             >
                 <XAxis 
@@ -129,7 +133,15 @@ class ScatterChart extends React.Component {
                     <ScatterSeries
                         markerProvider={markerGen}
                     />
-                </Series>                       
+                </Series>        
+                <ColorLegend 
+                    legendOrigin={{
+                        x: Math.round((width - margin.left - margin.right)/6) * 4, 
+                        y: Math.round((height - margin.top - margin.bottom)/10) * 0
+                    }}
+                    legendWidth={200}
+                    legendHeight={35}
+                />               
             </ChartCanvas>
         );
     }

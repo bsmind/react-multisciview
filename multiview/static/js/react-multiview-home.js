@@ -45107,7 +45107,6 @@ var ChartBox = function (_React$Component) {
                 var isEqual = refDomain.every(function (d, index) {
                     return Math.abs(domain[index] - d) < 1e-12;
                 });
-                //this.attrExtents[attr] = isEqual ? []: domain;
                 attrExtents[attr] = isEqual ? [] : domain;
             });
             var targetCanvas = _this.getPCPCanvasNode();
@@ -45333,15 +45332,16 @@ exports.locals = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_helper__ = __webpack_require__(/*! react-multiview/lib/helper */ 78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__ = __webpack_require__(/*! react-multiview/lib/series */ 45);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__ = __webpack_require__(/*! react-multiview/lib/core */ 32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__ = __webpack_require__(/*! react-multiview/lib/axes */ 84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_d3_array__ = __webpack_require__(/*! d3-array */ 9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_lodash_uniqby__ = __webpack_require__(/*! lodash.uniqby */ 88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_lodash_uniqby___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_lodash_uniqby__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_lodash_get__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_randomcolor__ = __webpack_require__(/*! randomcolor */ 120);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_randomcolor__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_legends__ = __webpack_require__(/*! react-multiview/lib/legends */ 702);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__ = __webpack_require__(/*! react-multiview/lib/axes */ 84);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_d3_array__ = __webpack_require__(/*! d3-array */ 9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_uniqby__ = __webpack_require__(/*! lodash.uniqby */ 88);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_uniqby___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_lodash_uniqby__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_randomcolor__ = __webpack_require__(/*! randomcolor */ 120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_randomcolor__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -45349,6 +45349,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -45420,6 +45421,7 @@ var ScatterChart = function (_React$Component) {
                 dimension = _props.dimension,
                 xAttr = _props.xAttr,
                 yAttr = _props.yAttr,
+                zAttr = _props.zAttr,
                 xAccessor = _props.xAccessor,
                 yAccessor = _props.yAccessor,
                 zAccessor = _props.zAccessor,
@@ -45442,18 +45444,19 @@ var ScatterChart = function (_React$Component) {
                     data: data,
                     dataExtents: dimension,
                     dataAccessor: function dataAccessor(d, name) {
-                        return __WEBPACK_IMPORTED_MODULE_9_lodash_get___default()(d, name);
+                        return __WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(d, name);
                     },
                     xAttr: xAttr,
                     yAttr: yAttr,
+                    zAttr: zAttr,
                     onScatterPanZoom: onScatterPanZoom
                 },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__["b" /* XAxis */], {
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__["b" /* XAxis */], {
                     axisAt: 'bottom',
                     orient: 'bottom',
                     axisHeight: 25
                 }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__["c" /* YAxis */], {
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__["c" /* YAxis */], {
                     axisAt: 'left',
                     orient: 'left',
                     axisWidth: 40
@@ -45464,7 +45467,15 @@ var ScatterChart = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* ScatterSeries */], {
                         markerProvider: markerGen
                     })
-                )
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_legends__["a" /* ColorLegend */], {
+                    legendOrigin: {
+                        x: Math.round((width - margin.left - margin.right) / 6) * 4,
+                        y: Math.round((height - margin.top - margin.bottom) / 10) * 0
+                    },
+                    legendWidth: 200,
+                    legendHeight: 35
+                })
             );
         }
     }]);
@@ -45483,7 +45494,7 @@ var _initialiseProps = function _initialiseProps() {
 
 
         var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["d" /* markerProvider */])(function (d) {
-            return __WEBPACK_IMPORTED_MODULE_9_lodash_get___default()(d, zAttr);
+            return __WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(d, zAttr);
         }, {
             type: 'square',
             width: 6,
@@ -45742,6 +45753,7 @@ var ScatterSeries = function (_React$Component) {
                 origDataExtents = _this$props.shared.origDataExtents;
             var xAttr = moreProps.xAttr,
                 yAttr = moreProps.yAttr,
+                zAttr = moreProps.zAttr,
                 plotData = moreProps.plotData,
                 dataExtents = moreProps.dataExtents;
             var xName = xAttr.name,
@@ -45754,6 +45766,9 @@ var ScatterSeries = function (_React$Component) {
                 yStep = yAttr.step,
                 yOrdinary = yAttr.ordinary,
                 yExtents = yAttr.origExtents;
+            var zName = zAttr.name,
+                zSelectDomain = zAttr.selectDomain,
+                zExtents = zAttr.extents;
 
 
             var nest = Object(__WEBPACK_IMPORTED_MODULE_4_d3_collection__["b" /* nest */])().key(function (d) {
@@ -45877,6 +45892,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -45914,6 +45931,7 @@ var ChartCanvas = function (_React$Component) {
 		}, initialState);
 		_this.subscriptions = [];
 		_this.panInProgress = false;
+		_this.axisSelectInProgress = false;
 		return _this;
 	}
 
@@ -45959,7 +45977,10 @@ var ChartCanvas = function (_React$Component) {
 				unsubscribe: this.unsubscribe,
 				getCanvasContexts: this.getCanvasContexts,
 				handleXAxisZoom: this.handleXAxisZoom,
-				handleYAxisZoom: this.handleYAxisZoom
+				handleYAxisZoom: this.handleYAxisZoom,
+				handleZAxisSelect: this.handleZAxisSelect,
+				handleZAxisSelectEnd: this.handleZAxisSelectEnd,
+				handleZAxisSelectCancel: this.handleZAxisSelectCancel
 			}, this.state);
 
 			var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["c" /* cursorStyle */])(true);
@@ -46053,7 +46074,8 @@ var _initialiseProps = function _initialiseProps() {
 		    dataExtentsProp = props.dataExtents,
 		    dataAccessor = props.dataAccessor,
 		    xAttrProp = props.xAttr,
-		    yAttrProp = props.yAttr;
+		    yAttrProp = props.yAttr,
+		    zAttrProp = props.zAttr;
 
 		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
 
@@ -46069,8 +46091,15 @@ var _initialiseProps = function _initialiseProps() {
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
 
-		// flatten data to plot
-		var dimName = Object.keys(dataExtentsProp);
+		// zScale: only domain...
+		var zAttr = {
+			name: dataExtentsProp[zAttrProp] ? zAttrProp : 'unknown',
+			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : null,
+			select: null,
+			selectDomain: null
+
+			// flatten data to plot
+		};var dimName = Object.keys(dataExtentsProp);
 		var plotData = data.map(function (d) {
 			var flattened = {};
 			dimName.forEach(function (name) {
@@ -46091,6 +46120,7 @@ var _initialiseProps = function _initialiseProps() {
 			dataExtents: dataExtents,
 			xAttr: xAttr,
 			yAttr: yAttr,
+			zAttr: zAttr,
 			xAccessor: function xAccessor(d) {
 				return d[xAttr];
 			},
@@ -46106,14 +46136,16 @@ var _initialiseProps = function _initialiseProps() {
 		    dataExtentsProp = props.dataExtents,
 		    dataAccessor = props.dataAccessor,
 		    xAttrProp = props.xAttr,
-		    yAttrProp = props.yAttr;
+		    yAttrProp = props.yAttr,
+		    zAttrProp = props.zAttr;
 
 		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
 
 		var _state = _this3.state,
 		    dataExtentsState = _state.dataExtents,
 		    initialXAttr = _state.xAttr,
-		    initialYAttr = _state.yAttr;
+		    initialYAttr = _state.yAttr,
+		    initialZAttr = _state.zAttr;
 
 		// const dataExtents = {...dataExtentsProp};
 		// Object.keys(initialDataExtents).forEach(key => {
@@ -46142,8 +46174,16 @@ var _initialiseProps = function _initialiseProps() {
 			dataExtentsPrev: dataExtentsState
 		}, [canvasDim.height, 0]);
 
-		// flatten data to plot
-		var plotData = data.map(function (d) {
+		var zAttr = initialZAttr.name === zAttrProp ? initialZAttr : {
+			name: dataExtentsProp[zAttrProp] ? zAttrProp : 'unknown',
+			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : null,
+			select: null,
+			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
+
+			//console.log(dataExtentsProp)
+
+			// flatten data to plot
+		};var plotData = data.map(function (d) {
 			var flattened = {};
 			dimName.forEach(function (name) {
 				flattened[name] = dataAccessor(d, name);
@@ -46158,6 +46198,7 @@ var _initialiseProps = function _initialiseProps() {
 			dataExtents: _extends({}, dataExtentsState),
 			xAttr: xAttr,
 			yAttr: yAttr,
+			zAttr: zAttr,
 			xAccessor: function xAccessor(d) {
 				return d[xAttr];
 			},
@@ -46315,7 +46356,7 @@ var _initialiseProps = function _initialiseProps() {
 	};
 
 	this.handlePan = function (mouseXY, dxdy, e) {
-		if (!_this3.waitingForPanAnimationFrame) {
+		if (!_this3.waitingForPanAnimationFrame && !_this3.axisSelectInProgress) {
 			_this3.waitingForPanAnimationFrame = true;
 
 			var _state3 = _this3.state,
@@ -46376,15 +46417,99 @@ var _initialiseProps = function _initialiseProps() {
 		});
 	};
 
+	this.zAxisSelectHelper = function (selectDomain, selectRange, initialZAttr, initialDataExtents) {
+		var name = initialZAttr.name,
+		    extents = initialZAttr.extents;
+
+
+		var newZAttr = _extends({}, initialZAttr, {
+			select: selectRange.slice(),
+			selectDomain: selectDomain.slice()
+		});
+
+		if (!Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
+			return {
+				zAttr: newZAttr,
+				dataExtents: _extends({}, initialDataExtents, _defineProperty({}, name, selectDomain.slice()))
+			};
+		}
+		return {
+			zAttr: newZAttr,
+			dataExtents: initialDataExtents
+		};
+	};
+
+	this.handleZAxisSelect = function (selectDomain, selectRange, e) {
+		if (!_this3.panInProgress && !_this3.waitingForPanAnimationFrame && !_this3.waitingForAnimationFrame) {
+			_this3.waitingForAnimationFrame = true;
+			_this3.__zAttr = _this3.__zAttr || _this3.state.zAttr;
+			_this3.__dataExtents = _this3.__dataExtents || _this3.state.dataExtents;
+
+			var _zAxisSelectHelper = _this3.zAxisSelectHelper(selectDomain, selectRange, _this3.__zAttr, _this3.__dataExtents),
+			    zAttr = _zAxisSelectHelper.zAttr,
+			    dataExtents = _zAxisSelectHelper.dataExtents;
+
+			_this3.__zAttr = zAttr;
+			_this3.__dataExtents = dataExtents;
+			_this3.axisSelectInProgress = true;
+			_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
+			requestAnimationFrame(function () {
+				_this3.waitingForAnimationFrame = false;
+				_this3.clearAxisAndChartOnCanvas();
+				_this3.draw({ trigger: 'pan' });
+				if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					_this3.props.onScatterPanZoom([zAttr.name], [selectDomain.slice()], true);
+				}
+			});
+		}
+	};
+
+	this.handleZAxisSelectEnd = function (selectDomain, selectRange, e) {
+		var _zAxisSelectHelper2 = _this3.zAxisSelectHelper(selectDomain, selectRange, _this3.__zAttr, _this3.__dataExtents),
+		    zAttr = _zAxisSelectHelper2.zAttr,
+		    dataExtents = _zAxisSelectHelper2.dataExtents;
+
+		_this3.__zAttr = null;
+		_this3.__dataExtents = null;
+		_this3.axisSelectInProgress = false;
+		_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
+		requestAnimationFrame(function () {
+			_this3.clearAxisAndChartOnCanvas();
+			_this3.setState({
+				zAttr: zAttr,
+				dataExtents: dataExtents
+			});
+			// connect to pcp
+			if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				_this3.props.onScatterPanZoom([zAttr.name], [selectDomain.slice()], false);
+			}
+		});
+	};
+
+	this.handleZAxisSelectCancel = function (e) {
+		var _state$zAttr = _this3.state.zAttr,
+		    name = _state$zAttr.name,
+		    extents = _state$zAttr.extents;
+
+		var newZAttr = _extends({}, _this3.state.zAttr, {
+			select: null,
+			selectDomain: null
+		});
+
+		_this3.clearAxisAndChartOnCanvas();
+		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents)) {
+			var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, extents.slice()));
+			_this3.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
+			// connect to pcp
+			if (_this3.props.onScatterPanZoom) {
+				_this3.props.onScatterPanZoom([name], [newZAttr.extents.slice()], false);
+			}
+		} else {
+			_this3.setState({ zAttr: newZAttr });
+		}
+	};
+
 	this.updateAttr = function (attr, initialAttr, dataExtents) {
-		// const range = initialAttr.scale.range();
-		// if (dataExtents[attr]) {
-		// 	return getScale({
-		// 		dataExtents,
-		// 		attribute: attr
-		// 	}, range);
-		// }
-		// return initialAttr;
 		var domain = dataExtents[attr];
 		if (domain == null) return initialAttr;
 
@@ -46396,6 +46521,17 @@ var _initialiseProps = function _initialiseProps() {
 		return _extends({}, initialAttr, {
 			scale: newScale,
 			step: step
+		});
+	};
+
+	this.updateZAttr = function (initialZAttr, dataExtents) {
+		var name = initialZAttr.name,
+		    extents = initialZAttr.extents;
+
+		if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
+
+		return _extends({}, initialZAttr, {
+			selectDomain: dataExtents[name].slice()
 		});
 	};
 
@@ -46426,20 +46562,24 @@ var _initialiseProps = function _initialiseProps() {
 				_this3.__dataExtents = _this3.__dataExtents || _this3.state.dataExtents;
 				_this3.__xAttr = _this3.__xAttr || _this3.state.xAttr;
 				_this3.__yAttr = _this3.__yAttr || _this3.state.yAttr;
+				_this3.__zAttr = _this3.__zAttr || _this3.state.zAttr;
 
 				var newDataExtents = _this3.updateExtents(_this3.__dataExtents, data);
 				var newXAttr = _this3.updateAttr(_this3.props.xAttr, _this3.__xAttr, data);
 				var newYAttr = _this3.updateAttr(_this3.props.yAttr, _this3.__yAttr, data);
+				var newZAttr = _this3.updateZAttr(_this3.__zAttr, data);
 
 				_this3.__dataExtents = newDataExtents;
 				_this3.__xAttr = newXAttr;
 				_this3.__yAttr = newYAttr;
+				_this3.__zAttr = newZAttr;
 
 				_this3.otherInProgress = true;
 
 				_this3.triggerEvent('pan', {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
+					zAttr: newZAttr,
 					dataExtents: newDataExtents
 				});
 				requestAnimationFrame(function () {
@@ -46452,19 +46592,23 @@ var _initialiseProps = function _initialiseProps() {
 			_this3.__dataExtents = _this3.__dataExtents || _this3.state.dataExtents;
 			_this3.__xAttr = _this3.__xAttr || _this3.state.xAttr;
 			_this3.__yAttr = _this3.__yAttr || _this3.state.yAttr;
+			_this3.__zAttr = _this3.__zAttr || _this3.state.zAttr;
 
 			var _newXAttr = _this3.updateAttr(_this3.props.xAttr, _this3.__xAttr, data);
 			var _newYAttr = _this3.updateAttr(_this3.props.yAttr, _this3.__yAttr, data);
+			var _newZAttr = _this3.updateZAttr(_this3.__zAttr, data);
 			var _newDataExtents = _this3.updateExtents(_this3.__dataExtents, data);
 
 			_this3.__xAttr = null;
 			_this3.__yAttr = null;
+			_this3.__zAttr = null;
 			_this3.__dataExtents = null;
 
 			_this3.otherInProgress = false;
 			_this3.triggerEvent('pan', {
 				xAttr: _newXAttr,
 				yAttr: _newYAttr,
+				zAttr: _newZAttr,
 				dataExtents: _newDataExtents
 			});
 			requestAnimationFrame(function () {
@@ -46472,6 +46616,7 @@ var _initialiseProps = function _initialiseProps() {
 				_this3.setState(_extends({}, _this3.state, {
 					xAttr: _newXAttr,
 					yAttr: _newYAttr,
+					zAttr: _newZAttr,
 					dataExtents: _newDataExtents
 				}));
 			});
@@ -53098,6 +53243,7 @@ var SubscriberExt = function (_React$Component) {
             var shared = _this.props.shared;
             var xAttr = shared.xAttr,
                 yAttr = shared.yAttr,
+                zAttr = shared.zAttr,
                 plotData = shared.plotData,
                 dataExtents = shared.dataExtents;
 
@@ -53105,6 +53251,7 @@ var SubscriberExt = function (_React$Component) {
             return _extends({
                 xAttr: xAttr,
                 yAttr: yAttr,
+                zAttr: zAttr,
                 plotData: plotData,
                 dataExtents: dataExtents
             }, _this.moreProps);
@@ -53204,12 +53351,14 @@ var SubscriberExt = function (_React$Component) {
                 plotData = _nextProps$shared.plotData,
                 xAttr = _nextProps$shared.xAttr,
                 yAttr = _nextProps$shared.yAttr,
+                zAttr = _nextProps$shared.zAttr,
                 dataExtents = _nextProps$shared.dataExtents;
 
 
             this.moreProps = _extends({}, this.moreProps, {
                 xAttr: xAttr,
                 yAttr: yAttr,
+                zAttr: zAttr,
                 plotData: plotData,
                 dataExtents: dataExtents
             });
@@ -53623,9 +53772,6 @@ var PCPCanvas = function (_React$Component) {
                         startDomain = endDomain;
                         endDomain = temp;
                     }
-                    //startDomain = Math.max(0, startDomain);
-                    //endDomain = Math.min(extents.length);
-                    //console.log(startDomain, endDomain);               
                     _this.props.onPCPAxisSelect(axisTitle, [startDomain, endDomain], inProgress);
                 }
             } else {
@@ -56698,6 +56844,420 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
         origExtents: tempExtents == null ? [0, 1] : tempExtents.slice()
     };
 });
+
+/***/ }),
+/* 702 */
+/*!**********************************!*\
+  !*** ./src/lib/legends/index.js ***!
+  \**********************************/
+/*! exports provided: ColorLegend */
+/*! exports used: ColorLegend */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ColorLegend__ = __webpack_require__(/*! ./ColorLegend */ 703);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__ColorLegend__["a"]; });
+
+
+/***/ }),
+/* 703 */
+/*!****************************************!*\
+  !*** ./src/lib/legends/ColorLegend.js ***!
+  \****************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__LegendEventHandler__ = __webpack_require__(/*! ./LegendEventHandler */ 704);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__core__ = __webpack_require__(/*! ../core */ 32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_format__ = __webpack_require__(/*! d3-format */ 82);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+
+
+
+
+var ColorLegend = function (_React$Component) {
+    _inherits(ColorLegend, _React$Component);
+
+    function ColorLegend(props) {
+        _classCallCheck(this, ColorLegend);
+
+        var _this = _possibleConstructorReturn(this, (ColorLegend.__proto__ || Object.getPrototypeOf(ColorLegend)).call(this, props));
+
+        _initialiseProps.call(_this);
+
+        _this.scale = _this.getScale(props);
+        return _this;
+    }
+
+    _createClass(ColorLegend, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.scale = this.getScale();
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            this.scale = this.getScale(nextProps);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var _props = this.props,
+                legendWidth = _props.legendWidth,
+                legendHeight = _props.legendHeight,
+                legendOrigin = _props.legendOrigin,
+                _props$shared = _props.shared,
+                handleZAxisSelect = _props$shared.handleZAxisSelect,
+                handleZAxisSelectEnd = _props$shared.handleZAxisSelectEnd,
+                handleZAxisSelectCancel = _props$shared.handleZAxisSelectCancel;
+
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'g',
+                { transform: 'translate(' + legendOrigin.x + ',' + legendOrigin.y + ')' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__LegendEventHandler__["a" /* default */], {
+                    x: 0,
+                    y: 0,
+                    width: legendWidth,
+                    height: legendHeight,
+                    onRangeSelect: this.handleRangeSelect,
+                    onRangeSelectEnd: this.handleRangeSelectEnd,
+                    onRangeSelectCancel: handleZAxisSelectCancel
+                }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__core__["f" /* SubscriberExt */], {
+                    ref: function ref(node) {
+                        return _this2.node = node;
+                    },
+                    canvas: function canvas(contexts) {
+                        return contexts.axes;
+                    },
+                    clip: false,
+                    edgeClip: false,
+                    draw: this.draw,
+                    drawOn: ["pan"],
+                    shared: this.props.shared
+                })
+            );
+        }
+    }]);
+
+    return ColorLegend;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+var _initialiseProps = function _initialiseProps() {
+    var _this3 = this;
+
+    this.draw = function (ctx, moreProps) {
+        var _props2 = _this3.props,
+            legendOrigin = _props2.legendOrigin,
+            legendWidth = _props2.legendWidth,
+            legendHeight = _props2.legendHeight;
+        var zAttr = moreProps.zAttr;
+
+        var legendScale = Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["d" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["a" /* interpolateViridis */]).domain([0, legendWidth]);
+
+        ctx.save();
+        ctx.translate(legendOrigin.x, legendOrigin.y);
+
+        // draw bar
+        var gradient = ctx.createLinearGradient(0, 0, legendWidth, 0);
+        var barHeight = Math.round(legendHeight / 3);
+        for (var i = 0; i < legendWidth; ++i) {
+            gradient.addColorStop(i / legendWidth, legendScale(i));
+        }
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, legendWidth, barHeight);
+        // end draw bar
+
+        // draw domain line
+        var outerTickSize = 7;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, barHeight + outerTickSize);
+        ctx.lineTo(0, barHeight);
+        ctx.lineTo(legendWidth, barHeight);
+        ctx.lineTo(legendWidth, barHeight + outerTickSize);
+        ctx.stroke();
+        // end draw domain line
+
+        // draw ticks and labels
+        var extentsProp = zAttr.extents,
+            select = zAttr.select,
+            selectDomain = zAttr.selectDomain;
+
+        var extents = [0, legendWidth];
+        if (extentsProp) {
+            if (typeof extentsProp[0] === 'string') extents = [0, extentsProp.length];else extents = extentsProp.slice();
+        }
+
+        var getValue = function getValue(i) {
+            return (extents[1] - extents[0]) * i + extents[0];
+        };
+
+        var formatSI = Object(__WEBPACK_IMPORTED_MODULE_5_d3_format__["a" /* format */])('.3s');
+
+        var fontSize = 6;
+        var fontFamily = 'Roboto, sans-serif';
+        var textAnchor = 'center';
+        var tickLabelFill = '#000000';
+        var innerTickSize = 4;
+        var numTicks = 3;
+        var tickStep = legendWidth / (numTicks + 2);
+        var ticks = [];
+        for (var _i = 0; _i * tickStep <= legendWidth; ++_i) {
+            var value = getValue(_i * tickStep / legendWidth);
+            ticks.push({
+                x1: _i * tickStep,
+                y1: barHeight,
+                x2: _i * tickStep,
+                y2: barHeight + innerTickSize,
+                label: formatSI(value),
+                labelX: _i * tickStep,
+                labelY: barHeight + Math.max(outerTickSize, innerTickSize) + fontSize
+            });
+        }
+
+        ctx.lineWidth = 1;
+        ticks.forEach(function (tick) {
+            ctx.beginPath();
+            ctx.moveTo(tick.x1, tick.y1);
+            ctx.lineTo(tick.x2, tick.y2);
+            ctx.stroke();
+        });
+
+        ctx.font = fontSize + 'px ' + fontFamily;
+        ctx.fillStyle = tickLabelFill;
+        ctx.textAlign = textAnchor;
+        ticks.forEach(function (tick) {
+            ctx.beginPath();
+            ctx.fillText(tick.label, tick.labelX, tick.labelY);
+        });
+        // end
+
+        // draw select range
+        //if (select) {
+        if (selectDomain && _this3.scale) {
+            //console.log('draw select range')
+            var start = _this3.scale(selectDomain[0]);
+            var end = _this3.scale(selectDomain[1]);
+            if (Math.abs(end - start - legendWidth) > 1) {
+                ctx.fillStyle = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["h" /* hexToRGBA */])('#000000', 0.3);
+                ctx.rect(start, barHeight, end - start, outerTickSize);
+                ctx.fill();
+            }
+        }
+        // end 
+
+        ctx.restore();
+    };
+
+    this.getScale = function () {
+        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
+        var legendWidth = props.legendWidth,
+            zAttr = props.shared.zAttr;
+        var extents = zAttr.extents;
+
+
+        var domain = extents == null || Object(__WEBPACK_IMPORTED_MODULE_3__utils__["i" /* isArrayOfString */])(extents) ? [0, legendWidth] : extents.slice();
+
+        return Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["b" /* scaleLinear */])().domain(domain).range([0, legendWidth]);
+    };
+
+    this.handleRangeSelect = function (start, end, e) {
+        var legendWidth = _this3.props.legendWidth;
+
+        var temp = void 0,
+            startRange = start,
+            endRange = end;
+        if (startRange > endRange) {
+            temp = startRange;
+            startRange = endRange;
+            endRange = temp;
+        }
+
+        startRange = Math.max(0, startRange);
+        endRange = Math.min(legendWidth, endRange);
+
+        var scale = _this3.scale;
+        var startDomain = scale.invert(startRange);
+        var endDomain = scale.invert(endRange);
+
+        if (_this3.props.shared.handleZAxisSelect) _this3.props.shared.handleZAxisSelect([startDomain, endDomain], [startRange, endRange], e);
+    };
+
+    this.handleRangeSelectEnd = function (start, end, e) {
+        var legendWidth = _this3.props.legendWidth;
+
+        var temp = void 0,
+            startRange = start,
+            endRange = end;
+        if (startRange > endRange) {
+            temp = startRange;
+            startRange = endRange;
+            endRange = temp;
+        }
+
+        startRange = Math.max(0, startRange);
+        endRange = Math.min(legendWidth, endRange);
+
+        var scale = _this3.scale;
+        var startDomain = scale.invert(startRange);
+        var endDomain = scale.invert(endRange);
+
+        if (_this3.props.shared.handleZAxisSelect) _this3.props.shared.handleZAxisSelectEnd([startDomain, endDomain], [startRange, endRange], e);
+    };
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (ColorLegend);
+
+/***/ }),
+/* 704 */
+/*!***********************************************!*\
+  !*** ./src/lib/legends/LegendEventHandler.js ***!
+  \***********************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_selection__ = __webpack_require__(/*! d3-selection */ 85);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+var LegendEventHandler = function (_React$Component) {
+    _inherits(LegendEventHandler, _React$Component);
+
+    function LegendEventHandler() {
+        _classCallCheck(this, LegendEventHandler);
+
+        var _this = _possibleConstructorReturn(this, (LegendEventHandler.__proto__ || Object.getPrototypeOf(LegendEventHandler)).call(this));
+
+        _this.handleEnter = function () {
+            _this.setState({ mouseInside: true });
+        };
+
+        _this.handleLeave = function () {
+            _this.setState({ mouseInside: false });
+        };
+
+        _this.handleMouseDown = function (e) {
+            if (e.button !== 0) return;
+            if (!_this.state.mouseInside) return;
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_1__utils__["k" /* mousePosition */])(e);
+            Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_1__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.handleRangeSelect).on('mouseup', _this.handleRangeSelectEnd);
+
+            _this.setState({ startX: mouseXY[0] });
+            e.preventDefault();
+        };
+
+        _this.handleRangeSelect = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node);
+            if (_this.props.onRangeSelect) {
+                _this.props.onRangeSelect(_this.state.startX, mouseXY[0], e);
+            }
+        };
+
+        _this.handleRangeSelectEnd = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node); //this.getMouseY();
+
+            if (Math.abs(mouseXY[0] - _this.state.startX) < 1e-3) {
+                _this.setState({ startX: null });
+                if (_this.props.onRangeSelectCancel) _this.props.onRangeSelectCancel(e);
+            } else {
+                //this.setState({endX: mouseXY[0]});
+                if (_this.props.onRangeSelect) _this.props.onRangeSelectEnd(_this.state.startX, mouseXY[0], e);
+            }
+
+            Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_1__utils__["d" /* d3Window */])(_this.node)).on('mousemove', null).on('mouseup', null);
+
+            _this.setState({ startX: null });
+        };
+
+        _this.state = {
+            mouseInside: false,
+            startX: null
+        };
+        return _this;
+    }
+
+    _createClass(LegendEventHandler, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            if (this.node) Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(this.node).on('mouseenter', this.handleEnter).on('mouseleave', this.handleLeave);
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            if (this.node) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(this.node).on('mouseenter', null).on('mouseleave', null);
+            }
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var cursor = this.state.mouseInside ? 'react-multiview-ew-resize-cursor' : 'react-multiview-default-cursor';
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
+                ref: function ref(node) {
+                    return _this2.node = node;
+                },
+                className: 'react-multiview-enable-interaction ' + cursor,
+                x: this.props.x,
+                y: this.props.y,
+                width: this.props.width,
+                height: this.props.height,
+                style: { fill: "green", opacity: 0. },
+                onMouseDown: this.handleMouseDown
+            });
+        }
+    }]);
+
+    return LegendEventHandler;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (LegendEventHandler);
 
 /***/ })
 /******/ ]);

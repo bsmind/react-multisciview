@@ -39,12 +39,13 @@ class SubscriberExt extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        const { plotData, xAttr, yAttr, dataExtents } = nextProps.shared;
+        const { plotData, xAttr, yAttr, zAttr, dataExtents } = nextProps.shared;
 
         this.moreProps = {
             ...this.moreProps,
             xAttr,
             yAttr,
+            zAttr,
             plotData,
             dataExtents
         }
@@ -80,6 +81,7 @@ class SubscriberExt extends React.Component {
         const {
             xAttr,
             yAttr,
+            zAttr,
             plotData,
             dataExtents
         } = shared;
@@ -87,6 +89,7 @@ class SubscriberExt extends React.Component {
         return {
             xAttr,
             yAttr,
+            zAttr,
             plotData,
             dataExtents,
             ...this.moreProps

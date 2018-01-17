@@ -67,7 +67,6 @@ class ChartBox extends React.Component {
             const refDomain = pcpDimension[attr];
             const domain = domainList[index];
             const isEqual = refDomain.every( (d,index) => Math.abs(domain[index] - d) < 1e-12);
-            //this.attrExtents[attr] = isEqual ? []: domain;
             attrExtents[attr] = isEqual ? []: domain;
         });
         const targetCanvas = this.getPCPCanvasNode();
