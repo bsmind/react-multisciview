@@ -76,8 +76,9 @@ class ScatterChart extends React.Component {
             ratio 
         );
 
-        if (zAttr === 'sample')
+        if (zAttr === 'sample') {
             mProvider = mProvider.colorSet(colorsByGroup);
+        }
 
         return mProvider;
     }
@@ -129,90 +130,6 @@ class ScatterChart extends React.Component {
                         markerProvider={markerGen}
                     />
                 </Series>                       
-            </ChartCanvas>
-        );
-
-
-        // let yAccessor;
-        // if (yType === 'str') {
-        //     yAccessor =  d => {
-        //         const index = yExtents.findIndex(each => each === yAccessorProp(d));
-        //         return yExtents.length - index - 1;
-        //     }
-        // } else {
-        //     yAccessor = yAccessorProp;
-        // }
-
-        // let xAccessor;
-        // if (xType === 'str') {
-        //     xAccessor = d => {
-        //         const index = xExtents.findIndex(each => each === xAccessorProp(d));
-        //         return index;
-        //     }
-        // } else {
-        //     xAccessor = xAccessorProp;
-        // }
-        
-        // const markerProps = {
-        //     r: 3,
-        //     stroke: d => colorsByGroup[groupAccessor(d) || d],
-        //     fill: d => colorsByGroup[groupAccessor(d) || d],
-        //     opacity: 0.5,
-        //     strokeWidth: 1
-        // }
-
-        //console.log('ScatterChart: ', xExtents)
-        //console.log(yExtents)
-        console.log(data)
-        return <div />;
-
-        return (
-            <ChartCanvas
-                width={width}
-                height={height}
-                ratio={ratio}
-                margin={margin}
-                data={data}
-                xAttr={xAttr}
-                xAccessor={xAccessor}
-                xExtents={xExtents}
-                xScale={scaleLinear()}
-                xFlip={false}
-                xPadding={0}
-                clamp={true}
-            >
-                <Chart
-                    id={1}
-                    //height={height}
-                    yAttr={yAttr}
-                    yExtents={yExtents}
-                    yScale={scaleLinear()}
-                    yFlip={false}
-                    yPadding={0}
-                >
-                    <XAxis 
-                        axisAt='bottom' 
-                        orient='bottom' 
-                        axisHeight={25} 
-                        ordinary={xType === 'str'}
-                    />
-                    <YAxis 
-                        axisAt='left' 
-                        orient='left' 
-                        axisWidth={40} 
-                        ordinary={yType === 'str'}
-                    />
-                    <Series>
-                        <ScatterSeries
-                            yAccessor={yAccessor}
-                            marker={CircleMarker}
-                            markerProps={markerProps}
-                            markerProvider={mProvider}
-                            drawOrder={groups}
-                            orderAccessor={groupAccessor}
-                        />
-                    </Series>
-                </Chart>
             </ChartCanvas>
         );
     }

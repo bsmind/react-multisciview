@@ -45085,25 +45085,8 @@ var ChartBox = function (_React$Component) {
             }
         };
 
-        _this.handlePCPAxisSelect = function (who, axisTitle, select, scale, inProgress) {
-            var start = void 0,
-                end = void 0,
-                temp = void 0;
-            if (select) {
-                start = scale.invert(select[0]);
-                end = scale.invert(select[1]);
-                if (start > end) {
-                    temp = start;
-                    start = end;
-                    end = temp;
-                }
-                _this.attrExtents[axisTitle] = [start, end];
-            } else {
-                var pcpDimension = _this.props.pcpDimension;
-
-                _this.attrExtents[axisTitle] = pcpDimension[axisTitle];
-            }
-
+        _this.handlePCPAxisSelect = function (axisTitle, domain, inProgress) {
+            _this.attrExtents[axisTitle] = domain.slice();
             var targetCanvas = _this.getScatterChartCanvasNode();
             targetCanvas.handleByOther({
                 what: 'extents',
@@ -45200,22 +45183,12 @@ var ChartBox = function (_React$Component) {
     }
 
     _createClass(ChartBox, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            //console.log(this.ScatterChartNode);
-            //this.ScatterChartCanvasNode = this.ScatterChartNode.node.getScatterChartCanvasNode();
-            //console.log(this.ScatterChartCanvasNode)
-            //this.ScatterChartCanvasNode = this.ScatterChartNode.node
-        }
-    }, {
         key: 'render',
         value: function render() {
             var height = this.props.height;
 
             var scatterHeight = height / 2;
             var pcpHeight = height - scatterHeight;
-
-            //console.log('chartbox height: ', height)
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
@@ -45489,93 +45462,6 @@ var ScatterChart = function (_React$Component) {
                     })
                 )
             );
-
-            // let yAccessor;
-            // if (yType === 'str') {
-            //     yAccessor =  d => {
-            //         const index = yExtents.findIndex(each => each === yAccessorProp(d));
-            //         return yExtents.length - index - 1;
-            //     }
-            // } else {
-            //     yAccessor = yAccessorProp;
-            // }
-
-            // let xAccessor;
-            // if (xType === 'str') {
-            //     xAccessor = d => {
-            //         const index = xExtents.findIndex(each => each === xAccessorProp(d));
-            //         return index;
-            //     }
-            // } else {
-            //     xAccessor = xAccessorProp;
-            // }
-
-            // const markerProps = {
-            //     r: 3,
-            //     stroke: d => colorsByGroup[groupAccessor(d) || d],
-            //     fill: d => colorsByGroup[groupAccessor(d) || d],
-            //     opacity: 0.5,
-            //     strokeWidth: 1
-            // }
-
-            //console.log('ScatterChart: ', xExtents)
-            //console.log(yExtents)
-            console.log(data);
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null);
-
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["b" /* ChartCanvas */],
-                {
-                    width: width,
-                    height: height,
-                    ratio: ratio,
-                    margin: margin,
-                    data: data,
-                    xAttr: xAttr,
-                    xAccessor: xAccessor,
-                    xExtents: xExtents,
-                    xScale: Object(__WEBPACK_IMPORTED_MODULE_7_d3_scale__["b" /* scaleLinear */])(),
-                    xFlip: false,
-                    xPadding: 0,
-                    clamp: true
-                },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["a" /* Chart */],
-                    {
-                        id: 1
-                        //height={height}
-                        , yAttr: yAttr,
-                        yExtents: yExtents,
-                        yScale: Object(__WEBPACK_IMPORTED_MODULE_7_d3_scale__["b" /* scaleLinear */])(),
-                        yFlip: false,
-                        yPadding: 0
-                    },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__["b" /* XAxis */], {
-                        axisAt: 'bottom',
-                        orient: 'bottom',
-                        axisHeight: 25,
-                        ordinary: xType === 'str'
-                    }),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_axes__["c" /* YAxis */], {
-                        axisAt: 'left',
-                        orient: 'left',
-                        axisWidth: 40,
-                        ordinary: yType === 'str'
-                    }),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["e" /* Series */],
-                        null,
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* ScatterSeries */], {
-                            yAccessor: yAccessor,
-                            marker: __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["a" /* CircleMarker */],
-                            markerProps: markerProps,
-                            markerProvider: mProvider,
-                            drawOrder: groups,
-                            orderAccessor: groupAccessor
-                        })
-                    )
-                )
-            );
         }
     }]);
 
@@ -45605,7 +45491,9 @@ var _initialiseProps = function _initialiseProps() {
             }
         }, ratio);
 
-        if (zAttr === 'sample') mProvider = mProvider.colorSet(colorsByGroup);
+        if (zAttr === 'sample') {
+            mProvider = mProvider.colorSet(colorsByGroup);
+        }
 
         return mProvider;
     };
@@ -45845,7 +45733,9 @@ var ScatterSeries = function (_React$Component) {
         }
 
         return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ScatterSeries.__proto__ || Object.getPrototypeOf(ScatterSeries)).call.apply(_ref, [this].concat(args))), _this), _this.drawMarkersWithProvider = function (ctx, moreProps) {
-            var markerProvider = _this.props.markerProvider;
+            var _this$props = _this.props,
+                markerProvider = _this$props.markerProvider,
+                origDataExtents = _this$props.shared.origDataExtents;
             var xAttr = moreProps.xAttr,
                 yAttr = moreProps.yAttr,
                 plotData = moreProps.plotData,
@@ -45854,12 +45744,12 @@ var ScatterSeries = function (_React$Component) {
                 xScale = xAttr.scale,
                 xStep = xAttr.step,
                 xOrdinary = xAttr.ordinary,
-                xExtents = xAttr.extents;
+                xExtents = xAttr.origExtents;
             var yName = yAttr.name,
                 yScale = yAttr.scale,
                 yStep = yAttr.step,
                 yOrdinary = yAttr.ordinary,
-                yExtents = yAttr.extents;
+                yExtents = yAttr.origExtents;
 
 
             var nest = Object(__WEBPACK_IMPORTED_MODULE_4_d3_collection__["b" /* nest */])().key(function (d) {
@@ -45867,14 +45757,18 @@ var ScatterSeries = function (_React$Component) {
             }).entries(plotData);
 
             var xAccessor = function xAccessor(d) {
-                return !xOrdinary ? xScale(d[xName]) : xScale(xExtents.indexOf(d[xName])) - xStep / 2;
+                return !xOrdinary ? xScale(d[xName]) : xScale(xExtents.length - xExtents.indexOf(d[xName]) - 1) + xStep / 2;
             };
 
             var yAccessor = function yAccessor(d) {
-                return !yOrdinary ? yScale(d[yName]) : yScale(yExtents.indexOf(d[yName])) - yStep / 2;
+                return !yOrdinary ? yScale(d[yName]) : yScale(yExtents.length - yExtents.indexOf(d[yName]) - 1) - yStep / 2;
             };
 
+            //const accessor = (d, key)
+
             var dataKeys = Object.keys(dataExtents);
+            //const { dataExtents } = this.props.shared;
+            //console.log(origDataExtents)
 
             nest.forEach(function (group) {
                 var markerKey = group.key,
@@ -45887,12 +45781,16 @@ var ScatterSeries = function (_React$Component) {
                     if (x == null || y == null) return;
 
                     var inDomain = dataKeys.map(function (key) {
-                        if (key === xName || key === yName) return true;
+                        //if (key === xName || key === yName) return true;
                         var extents = dataExtents[key];
-                        var value = d[key];
+                        //if (extents == null) return true;
 
+                        var value = d[key];
                         if (value == null) return true;
-                        if (typeof value === 'string') return extents.indexOf(value) >= 0;
+                        if (typeof value === 'string') {
+                            var tempExtents = origDataExtents[key];
+                            value = tempExtents.length - tempExtents.indexOf(value) - 1 + 0.5;
+                        }
 
                         return extents[0] <= value && value <= extents[1];
                     }).every(function (each) {
@@ -46052,6 +45950,7 @@ var ChartCanvas = function (_React$Component) {
 				width: this.props.width,
 				height: this.props.height,
 				ratio: this.props.ratio,
+				origDataExtents: this.props.dataExtents,
 				subscribe: this.subscribe,
 				unsubscribe: this.unsubscribe,
 				getCanvasContexts: this.getCanvasContexts,
@@ -46147,7 +46046,7 @@ var _initialiseProps = function _initialiseProps() {
 	this.resetChart = function () {
 		var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
 		var data = props.data,
-		    dataExtents = props.dataExtents,
+		    dataExtentsProp = props.dataExtents,
 		    dataAccessor = props.dataAccessor,
 		    xAttrProp = props.xAttr,
 		    yAttrProp = props.yAttr;
@@ -46155,13 +46054,19 @@ var _initialiseProps = function _initialiseProps() {
 		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: xAttrProp }, [0, canvasDim.width]);
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+			dataExtents: dataExtentsProp,
+			attribute: xAttrProp
+		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: yAttrProp }, [canvasDim.height, 0]);
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+			dataExtents: dataExtentsProp,
+			attribute: yAttrProp
+		}, [canvasDim.height, 0]);
 
 		// flatten data to plot
-		var dimName = Object.keys(dataExtents);
+		var dimName = Object.keys(dataExtentsProp);
 		var plotData = data.map(function (d) {
 			var flattened = {};
 			dimName.forEach(function (name) {
@@ -46172,9 +46077,14 @@ var _initialiseProps = function _initialiseProps() {
 			return flattened;
 		});
 
+		var dataExtents = {};
+		dimName.forEach(function (name) {
+			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[name]) ? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
+		});
+
 		return {
 			plotData: plotData,
-			dataExtents: _extends({}, dataExtents),
+			dataExtents: dataExtents,
 			xAttr: xAttr,
 			yAttr: yAttr,
 			xAccessor: function xAccessor(d) {
@@ -46197,24 +46107,38 @@ var _initialiseProps = function _initialiseProps() {
 		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
 
 		var _state = _this3.state,
-		    initialDataExtents = _state.dataExtents,
+		    dataExtentsState = _state.dataExtents,
 		    initialXAttr = _state.xAttr,
 		    initialYAttr = _state.yAttr;
 
+		// const dataExtents = {...dataExtentsProp};
+		// Object.keys(initialDataExtents).forEach(key => {
+		// 	dataExtents[key] = initialDataExtents[key].slice();
+		// });
 
-		var dataExtents = _extends({}, dataExtentsProp);
-		Object.keys(initialDataExtents).forEach(function (key) {
-			dataExtents[key] = initialDataExtents[key].slice();
+		var dimName = Object.keys(dataExtentsProp);
+		dimName.forEach(function (name) {
+			var extentsProps = dataExtentsProp[name];
+			if (dataExtentsState[name] == null) {
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
+			}
 		});
 
 		// xScale
-		var xAttr = initialXAttr.name === xAttrProp ? initialXAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: xAttrProp }, [0, canvasDim.width]);
+		var xAttr = initialXAttr.name === xAttrProp ? initialXAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+			dataExtents: dataExtentsProp,
+			attribute: xAttrProp,
+			dataExtentsPrev: dataExtentsState
+		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = initialYAttr.name === yAttrProp ? initialYAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({ dataExtents: dataExtents, attribute: yAttrProp }, [canvasDim.height, 0]);
+		var yAttr = initialYAttr.name === yAttrProp ? initialYAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+			dataExtents: dataExtentsProp,
+			attribute: yAttrProp,
+			dataExtentsPrev: dataExtentsState
+		}, [canvasDim.height, 0]);
 
 		// flatten data to plot
-		var dimName = Object.keys(dataExtents);
 		var plotData = data.map(function (d) {
 			var flattened = {};
 			dimName.forEach(function (name) {
@@ -46227,7 +46151,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		return {
 			plotData: plotData,
-			dataExtents: _extends({}, dataExtents),
+			dataExtents: _extends({}, dataExtentsState),
 			xAttr: xAttr,
 			yAttr: yAttr,
 			xAccessor: function xAccessor(d) {
@@ -46304,10 +46228,12 @@ var _initialiseProps = function _initialiseProps() {
 		    initialXScale = _state2$xAttr.scale,
 		    xExtents = _state2$xAttr.extents,
 		    xName = _state2$xAttr.name,
+		    xOrdinary = _state2$xAttr.ordinary,
 		    _state2$yAttr = _state2.yAttr,
 		    initialYScale = _state2$yAttr.scale,
 		    yExtents = _state2$yAttr.extents,
-		    yName = _state2$yAttr.name;
+		    yName = _state2$yAttr.name,
+		    yOrdinary = _state2$yAttr.ordinary;
 
 
 		var SCALE_FACTOR = 0.001;
@@ -46320,16 +46246,22 @@ var _initialiseProps = function _initialiseProps() {
 		    endY = initialYScale.domain()[1];
 
 		var newDomainX = [Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]), Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])];
+		var newScaleX = initialXScale.copy().domain(newDomainX);
+		var stepX = !xOrdinary ? 0 : Math.abs(newScaleX(0) - newScaleX(1));
 
 		var newDomainY = [Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]), Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])];
+		var newScaleY = initialYScale.copy().domain(newDomainY);
+		var stepY = !yOrdinary ? 0 : Math.abs(newScaleY(0) - newScaleY(1));
 
 		_this3.clearAxisAndChartOnCanvas();
 		_this3.setState(_extends({}, _this3.state, {
 			xAttr: _extends({}, _this3.state.xAttr, {
-				scale: initialXScale.copy().domain(newDomainX)
+				scale: newScaleX,
+				step: stepX
 			}),
 			yAttr: _extends({}, _this3.state.yAttr, {
-				scale: initialYScale.copy().domain(newDomainY)
+				scale: newScaleY,
+				step: stepY
 			})
 		}));
 		if (_this3.props.onScatterPanZoom) {
@@ -46341,9 +46273,11 @@ var _initialiseProps = function _initialiseProps() {
 		var dx = _ref.dx,
 		    dy = _ref.dy;
 		var initialXScale = initialXAttr.scale,
-		    xExtents = initialXAttr.extents;
+		    xExtents = initialXAttr.extents,
+		    xOrdinary = initialXAttr.ordinary;
 		var initialYScale = initialYAttr.scale,
-		    yExtents = initialYAttr.extents;
+		    yExtents = initialYAttr.extents,
+		    yOrdinary = initialYAttr.ordinary;
 
 
 		var newDomainX = initialXScale.range().map(function (x) {
@@ -46361,12 +46295,17 @@ var _initialiseProps = function _initialiseProps() {
 		var updatedScaleX = initialXScale.copy().domain(newDomainX);
 		var updatedScaleY = initialYScale.copy().domain(newDomainY);
 
+		var stepX = !xOrdinary ? 0 : Math.abs(updatedScaleX(0) - updatedScaleX(1));
+		var stepY = !yOrdinary ? 0 : Math.abs(updatedScaleY(0) - updatedScaleY(1));
+
 		return {
 			xAttr: _extends({}, initialXAttr, {
-				scale: updatedScaleX
+				scale: updatedScaleX,
+				step: stepX
 			}),
 			yAttr: _extends({}, initialYAttr, {
-				scale: updatedScaleY
+				scale: updatedScaleY,
+				step: stepY
 			})
 		};
 	};
@@ -46434,18 +46373,32 @@ var _initialiseProps = function _initialiseProps() {
 	};
 
 	this.updateAttr = function (attr, initialAttr, dataExtents) {
-		var range = initialAttr.scale.range();
-		if (dataExtents[attr]) {
-			return Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
-				dataExtents: dataExtents,
-				attribute: attr
-			}, range);
-		}
-		return initialAttr;
+		// const range = initialAttr.scale.range();
+		// if (dataExtents[attr]) {
+		// 	return getScale({
+		// 		dataExtents,
+		// 		attribute: attr
+		// 	}, range);
+		// }
+		// return initialAttr;
+		var domain = dataExtents[attr];
+		if (domain == null) return initialAttr;
+
+		var initialScale = initialAttr.scale,
+		    ordinary = initialAttr.ordinary;
+
+		var newScale = initialScale.copy().domain(domain);
+		var step = !ordinary ? 0 : Math.abs(newScale(0) - newScale(1));
+		return _extends({}, initialAttr, {
+			scale: newScale,
+			step: step
+		});
 	};
 
 	this.updateExtents = function (initialExtents, newExtents) {
 		Object.keys(newExtents).map(function (key) {
+			var extents = newExtents[key].length ? newExtents[key].slice() : _this3.state.dataExtents[key].slice();
+
 			initialExtents[key] = newExtents[key];
 		});
 		return initialExtents;
@@ -46460,6 +46413,7 @@ var _initialiseProps = function _initialiseProps() {
 		if (what !== 'extents') return;
 		if (_this3.panInProgress) return;
 
+		//console.log(data, inProgress)
 		if (inProgress) {
 			if (!_this3.waitingForAnimationFrame) {
 				_this3.waitingForAnimationFrame = true;
@@ -49415,6 +49369,7 @@ var XAxis = function (_React$Component) {
           tickFormat = _this$props2.tickFormat,
           innerTickSize = _this$props2.innerTickSize,
           orient = _this$props2.orient;
+      var width = _this.props.shared.canvasDim.width;
       var fontSize = _this.props.labelStyle.fontSize;
 
 
@@ -49422,6 +49377,7 @@ var XAxis = function (_React$Component) {
       var dy = fontSize * 0.71;
 
       var xLabels = xExtents.slice();
+      xLabels.reverse();
       var minval = Math.max(Math.floor(xScale.invert(xScale.range()[0])), 0);
       var maxval = Math.min(Math.ceil(xScale.invert(xScale.range()[1])), xLabels.length);
 
@@ -49429,18 +49385,18 @@ var XAxis = function (_React$Component) {
 
       var tickArray = [];
       for (var i = minval; i < maxval; ++i) {
-        var x = xScale(i);
+        var x = xScale(i) + xStep / 2;
 
-        if (x < 0) continue;
+        if (x < 0 || x > width) continue;
 
         tickArray.push({
           value: i,
           label: xLabels[i].length < maxLabelLength ? xLabels[i] : xLabels[i].substring(0, maxLabelLength) + '...',
-          x1: x + xStep / 2,
+          x1: x,
           y1: 0,
-          x2: x + xStep / 2,
+          x2: x,
           y2: sign * innerTickSize,
-          labelX: x + xStep / 2,
+          labelX: x,
           labelY: sign * 2 * innerTickSize + dy
         });
       }
@@ -49479,9 +49435,9 @@ var XAxis = function (_React$Component) {
       var axisLocation = _this.getAxisLocation();
 
       var scale = xAttr.scale,
-          extents = xAttr.extents,
           step = xAttr.step,
-          ordinary = xAttr.ordinary;
+          ordinary = xAttr.ordinary,
+          extents = xAttr.origExtents;
 
 
       ctx.save();
@@ -51132,7 +51088,7 @@ var YAxis = function (_React$Component) {
 
 			var tickArray = [];
 			for (var i = minval; i < maxval; ++i) {
-				var y = yScale(i);
+				var y = yScale(i) - yStep / 2;
 
 				if (y < 0 || y > height) {
 					continue;
@@ -51142,11 +51098,11 @@ var YAxis = function (_React$Component) {
 					value: i,
 					label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...' : yLabels[i],
 					x1: 0,
-					y1: y - yStep / 2,
+					y1: y,
 					x2: sign * innerTickSize,
-					y2: y - yStep / 2,
+					y2: y,
 					labelX: sign * (1.2 * innerTickSize + dx),
-					labelY: y + dx - yStep / 2
+					labelY: y + dx
 				});
 			}
 			return tickArray;
@@ -51157,9 +51113,9 @@ var YAxis = function (_React$Component) {
 			    showTickLabel = _this$props3.showTickLabel;
 			var yAttr = moreProps.yAttr;
 			var scale = yAttr.scale,
-			    extents = yAttr.extents,
 			    step = yAttr.step,
-			    ordinary = yAttr.ordinary;
+			    ordinary = yAttr.ordinary,
+			    extents = yAttr.origExtents;
 
 
 			var axisLocation = _this.getAxisLocation();
@@ -53642,6 +53598,48 @@ var PCPCanvas = function (_React$Component) {
             };
         };
 
+        _this.onPCPAxisSelect = function (axisTitle, start, end, inProgress, dimConfig) {
+            if (!_this.props.onPCPAxisSelect) return;
+
+            var config = dimConfig[axisTitle];
+            var ordinary = config.ordinary,
+                scale = config.scale,
+                extents = config.extents,
+                step = config.step;
+
+            if (ordinary) {
+                // send domain in percentage, [0, 1]
+                if (start == null || end == null) {
+                    _this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+                } else {
+                    var startDomain = scale.invert(start);
+                    var endDomain = scale.invert(end);
+                    if (startDomain > endDomain) {
+                        var temp = startDomain;
+                        startDomain = endDomain;
+                        endDomain = temp;
+                    }
+                    //startDomain = Math.max(0, startDomain);
+                    //endDomain = Math.min(extents.length);
+                    //console.log(startDomain, endDomain);               
+                    _this.props.onPCPAxisSelect(axisTitle, [startDomain, endDomain], inProgress);
+                }
+            } else {
+                if (start == null || end == null) {
+                    _this.props.onPCPAxisSelect(axisTitle, extents, inProgress);
+                } else {
+                    var _startDomain = scale.invert(start);
+                    var _endDomain = scale.invert(end);
+                    if (_startDomain > _endDomain) {
+                        var _temp = _startDomain;
+                        _startDomain = _endDomain;
+                        _endDomain = _temp;
+                    }
+                    _this.props.onPCPAxisSelect(axisTitle, [_startDomain, _endDomain], inProgress);
+                }
+            }
+        };
+
         _this.handleRangeSelect = function (axisTitle, start, end, e) {
             if (!_this.axisMoveInProgress && !_this.waitingForRangeSelectAnimationFrame) {
 
@@ -53666,7 +53664,15 @@ var PCPCanvas = function (_React$Component) {
                     _this.waitingForRangeSelectAnimationFrame = false;
                     _this.clearAxesAndPCPOnCanvas();
                     _this.draw({ trigger: 'selectrange' });
-                    if (_this.props.onPCPAxisSelect) _this.props.onPCPAxisSelect(_this.state.id, axisTitle, [start, end], axisScale, true);
+                    _this.onPCPAxisSelect(axisTitle, start, end, true, _this.__dimConfig);
+                    // if (this.props.onPCPAxisSelect)
+                    //     this.props.onPCPAxisSelect(
+                    //         this.state.id,
+                    //         axisTitle, 
+                    //         [start, end], 
+                    //         axisScale,
+                    //         true
+                    //     );
                 });
             }
         };
@@ -53687,7 +53693,15 @@ var PCPCanvas = function (_React$Component) {
                 _this.setState({
                     dimConfig: dimConfig
                 });
-                if (_this.props.onPCPAxisSelect) _this.props.onPCPAxisSelect(_this.state.id, axisTitle, [start, end], axisScale, false);
+                _this.onPCPAxisSelect(axisTitle, start, end, false, state.dimConfig);
+                // if (this.props.onPCPAxisSelect)
+                //     this.props.onPCPAxisSelect(
+                //         this.state.id,
+                //         axisTitle,
+                //         [start, end],
+                //         axisScale,
+                //         false
+                //     );
             });
         };
 
@@ -53708,7 +53722,15 @@ var PCPCanvas = function (_React$Component) {
             _this.setState({
                 dimConfig: newDimConfig
             });
-            if (_this.props.onPCPAxisSelect) _this.props.onPCPAxisSelect(_this.state.id, axisTitle, null, null, false);
+            _this.onPCPAxisSelect(axisTitle, null, null, false, newDimConfig);
+            // if (this.props.onPCPAxisSelect)
+            //     this.props.onPCPAxisSelect(
+            //         this.state.id,
+            //         axisTitle,
+            //         null,
+            //         null,
+            //         false
+            //     );
         };
 
         _this.rangeSelectHelperByOther = function (dimSelects, initDimConfig) {
@@ -54678,7 +54700,7 @@ var PCPPolyLineSeries = function (_React$Component) {
                 if (yValue == null || yValue == undefined) {
                     return nullPositionY;
                 }
-                return ordinary ? scale(extents.indexOf(yValue)) - step / 2 : scale(yValue);
+                return ordinary ? scale(extents.length - extents.indexOf(yValue) - 1) - step / 2 : scale(yValue);
             };
 
             var xAccessor = function xAccessor(config) {
@@ -56645,20 +56667,31 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
 
 /* harmony default export */ __webpack_exports__["a"] = (function (_ref, range) {
     var dataExtents = _ref.dataExtents,
-        attribute = _ref.attribute;
+        attribute = _ref.attribute,
+        _ref$dataExtentsPrev = _ref.dataExtentsPrev,
+        dataExtentsPrev = _ref$dataExtentsPrev === undefined ? {} : _ref$dataExtentsPrev;
 
-    var name = dataExtents[attribute] ? attribute : 'unknown';
-    var extents = dataExtents[attribute] ? dataExtents[attribute] : [0, 1];
-    var ordinary = Object(__WEBPACK_IMPORTED_MODULE_1__utils__["i" /* isArrayOfString */])(extents);
-    var domain = ordinary ? [0, extents.length] : extents;
-    var scale = Object(__WEBPACK_IMPORTED_MODULE_0_d3_scale__["b" /* scaleLinear */])().domain(domain).range(range);
+    var tempExtents = dataExtents[attribute];
+    var name = tempExtents != null ? attribute : 'unknown';
+    var ordinary = tempExtents != null ? Object(__WEBPACK_IMPORTED_MODULE_1__utils__["i" /* isArrayOfString */])(tempExtents) : false;
+
+    var extents = tempExtents == null ? [0, 1] : ordinary ? [0, tempExtents.length] : tempExtents.slice();
+
+    if (dataExtentsPrev && dataExtentsPrev[attribute]) {
+        extents = dataExtentsPrev[attribute].slice();
+    }
+
+    var scale = Object(__WEBPACK_IMPORTED_MODULE_0_d3_scale__["b" /* scaleLinear */])().domain(extents).range(range);
+
     var step = ordinary ? Math.abs(scale(0) - scale(1)) : 0;
+
     return {
         name: name,
         extents: extents,
         ordinary: ordinary,
         scale: scale,
-        step: step
+        step: step,
+        origExtents: tempExtents == null ? [0, 1] : tempExtents.slice()
     };
 });
 

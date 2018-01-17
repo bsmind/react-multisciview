@@ -6,23 +6,39 @@ import {
 export default (
     {
         dataExtents,
-        attribute
+        attribute,
+        dataExtentsPrev = {},
     },
     range
 ) => {
-    const name = dataExtents[attribute] ? attribute: 'unknown';
-    const extents = dataExtents[attribute] ? dataExtents[attribute]: [0, 1];
-    const ordinary = isArrayOfString(extents);
-    const domain = ordinary ? [0, extents.length]: extents;
+    const tempExtents = dataExtents[attribute];
+    const name = tempExtents != null ? attribute: 'unknown';
+    const ordinary = tempExtents != null
+        ? isArrayOfString(tempExtents)
+        : false;
+
+    let extents = tempExtents == null
+        ? [0, 1] 
+        : ordinary 
+            ?  [0, tempExtents.length]
+            : tempExtents.slice();
+    
+    if (dataExtentsPrev && dataExtentsPrev[attribute]) {
+        extents = dataExtentsPrev[attribute].slice();
+    }
+
     const scale = scaleLinear()
-                    .domain(domain)
+                    .domain(extents)
                     .range(range);
+
     const step = ordinary ? Math.abs(scale(0) - scale(1)): 0;
+
     return {
         name,
         extents,
         ordinary,
         scale,
-        step
+        step,
+        origExtents: tempExtents == null ? [0, 1]: tempExtents.slice()
     }
 }

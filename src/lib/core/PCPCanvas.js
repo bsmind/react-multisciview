@@ -368,6 +368,47 @@ class PCPCanvas extends React.Component {
         };
     }
 
+    onPCPAxisSelect = (axisTitle, start, end, inProgress, dimConfig) => {
+        if (!this.props.onPCPAxisSelect) return;
+        
+        const config = dimConfig[axisTitle];
+        const { ordinary, scale, extents, step } = config;
+        if (ordinary) {
+            // send domain in percentage, [0, 1]
+            if (start == null || end == null) {
+               this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+            } else {
+                let startDomain = scale.invert(start);
+                let endDomain = scale.invert(end);
+                if (startDomain > endDomain) {
+                    const temp = startDomain;
+                    startDomain = endDomain;
+                    endDomain = temp;
+                }
+                //startDomain = Math.max(0, startDomain);
+                //endDomain = Math.min(extents.length);
+                //console.log(startDomain, endDomain);               
+                this.props.onPCPAxisSelect(
+                    axisTitle, 
+                    [startDomain, endDomain], 
+                    inProgress);    
+            }
+        } else {
+            if (start == null || end == null) {
+                this.props.onPCPAxisSelect(axisTitle, extents, inProgress);
+            } else {
+                let startDomain = scale.invert(start);
+                let endDomain = scale.invert(end);
+                if (startDomain > endDomain) {
+                    const temp = startDomain;
+                    startDomain = endDomain;
+                    endDomain = temp;
+                }
+                this.props.onPCPAxisSelect(axisTitle, [startDomain, endDomain], inProgress);    
+            }
+        }
+    }
+    
     handleRangeSelect = (axisTitle, start, end, e) => {
         if (!this.axisMoveInProgress && 
             !this.waitingForRangeSelectAnimationFrame) {
@@ -391,14 +432,15 @@ class PCPCanvas extends React.Component {
                 this.waitingForRangeSelectAnimationFrame = false;
                 this.clearAxesAndPCPOnCanvas();
                 this.draw({trigger: 'selectrange'});
-                if (this.props.onPCPAxisSelect)
-                    this.props.onPCPAxisSelect(
-                        this.state.id,
-                        axisTitle, 
-                        [start, end], 
-                        axisScale,
-                        true
-                    );
+                this.onPCPAxisSelect(axisTitle, start, end, true, this.__dimConfig);
+                // if (this.props.onPCPAxisSelect)
+                //     this.props.onPCPAxisSelect(
+                //         this.state.id,
+                //         axisTitle, 
+                //         [start, end], 
+                //         axisScale,
+                //         true
+                //     );
             });
         }
     }
@@ -420,14 +462,15 @@ class PCPCanvas extends React.Component {
             this.setState({
                 dimConfig
             });
-            if (this.props.onPCPAxisSelect)
-                this.props.onPCPAxisSelect(
-                    this.state.id,
-                    axisTitle,
-                    [start, end],
-                    axisScale,
-                    false
-                );
+            this.onPCPAxisSelect(axisTitle, start, end, false, state.dimConfig);
+            // if (this.props.onPCPAxisSelect)
+            //     this.props.onPCPAxisSelect(
+            //         this.state.id,
+            //         axisTitle,
+            //         [start, end],
+            //         axisScale,
+            //         false
+            //     );
         });
     }
 
@@ -449,14 +492,15 @@ class PCPCanvas extends React.Component {
         this.setState({
             dimConfig: newDimConfig
         });
-        if (this.props.onPCPAxisSelect)
-            this.props.onPCPAxisSelect(
-                this.state.id,
-                axisTitle,
-                null,
-                null,
-                false
-            );
+        this.onPCPAxisSelect(axisTitle, null, null, false, newDimConfig);
+        // if (this.props.onPCPAxisSelect)
+        //     this.props.onPCPAxisSelect(
+        //         this.state.id,
+        //         axisTitle,
+        //         null,
+        //         null,
+        //         false
+        //     );
     }
 
     rangeSelectHelperByOther = (dimSelects, initDimConfig) => {

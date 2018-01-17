@@ -30,7 +30,7 @@ class PCPPolyLineSeries extends React.Component {
                 return nullPositionY;
             }
             return ordinary
-                ? scale(extents.indexOf(yValue)) - step/2
+                ? scale(extents.length - extents.indexOf(yValue) - 1) - step/2
                 : scale(yValue);
         };
 

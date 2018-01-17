@@ -34,13 +34,6 @@ class ChartBox extends React.Component {
         this.attrExtents = {};
     }
 
-    componentDidMount() {
-        //console.log(this.ScatterChartNode);
-        //this.ScatterChartCanvasNode = this.ScatterChartNode.node.getScatterChartCanvasNode();
-        //console.log(this.ScatterChartCanvasNode)
-        //this.ScatterChartCanvasNode = this.ScatterChartNode.node
-    }
-
     getScatterChartCanvasNode = () => {
         if (this.ScatterChartNode &&
             this.ScatterChartNode.node 
@@ -57,22 +50,8 @@ class ChartBox extends React.Component {
         }
     }
 
-    handlePCPAxisSelect = (who, axisTitle, select, scale, inProgress) => {
-        let start, end, temp;
-        if (select) {
-            start = scale.invert(select[0]);
-            end = scale.invert(select[1]);
-            if (start > end) {
-                temp = start;
-                start = end;
-                end = temp;
-            }
-            this.attrExtents[axisTitle] = [start, end];
-        } else {
-            const {pcpDimension} = this.props;
-            this.attrExtents[axisTitle] = pcpDimension[axisTitle];
-        }
-
+    handlePCPAxisSelect = (axisTitle, domain, inProgress) => {
+        this.attrExtents[axisTitle] = domain.slice();
         const targetCanvas = this.getScatterChartCanvasNode();
         targetCanvas.handleByOther({
             what: 'extents',
@@ -160,8 +139,6 @@ class ChartBox extends React.Component {
         const { height } = this.props;
         const scatterHeight = height / 2;
         const pcpHeight = height - scatterHeight;
-
-        //console.log('chartbox height: ', height)
 
         return (
             <div className={this.props.className}>

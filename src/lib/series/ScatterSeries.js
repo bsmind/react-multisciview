@@ -13,7 +13,8 @@ class ScatterSeries extends React.Component {
 
     drawMarkersWithProvider = (ctx, moreProps) => {
     	const { 
-            markerProvider 
+            markerProvider, 
+            shared: {origDataExtents}
         } = this.props;
 
         const {
@@ -28,7 +29,8 @@ class ScatterSeries extends React.Component {
             scale: xScale,
             step: xStep,
             ordinary: xOrdinary,
-            extents: xExtents
+            //extents: xExtents
+            origExtents: xExtents
         } = xAttr;
 
         const {
@@ -36,7 +38,8 @@ class ScatterSeries extends React.Component {
             scale: yScale,
             step: yStep,
             ordinary: yOrdinary,
-            extents: yExtents
+            //extents: yExtents,
+            origExtents: yExtents
         } = yAttr;
         
         const nest = d3Nest()
@@ -46,16 +49,20 @@ class ScatterSeries extends React.Component {
         const xAccessor = d => {
             return !xOrdinary 
                 ? xScale(d[xName])
-                : xScale(xExtents.indexOf(d[xName])) - xStep/2
+                : xScale(xExtents.length - xExtents.indexOf(d[xName]) - 1) + xStep/2
         };
 
         const yAccessor = d => {
             return !yOrdinary 
                 ? yScale(d[yName])
-                : yScale(yExtents.indexOf(d[yName])) - yStep/2
+                : yScale(yExtents.length - yExtents.indexOf(d[yName]) - 1) - yStep/2
         };
 
+        //const accessor = (d, key)
+
         const dataKeys = Object.keys(dataExtents);
+        //const { dataExtents } = this.props.shared;
+        //console.log(origDataExtents)
         
         nest.forEach(group => {
             const {key: markerKey, values} = group;
@@ -67,13 +74,16 @@ class ScatterSeries extends React.Component {
                     return;
 
                 const inDomain = dataKeys.map(key => {
-                    if (key === xName || key === yName) return true;
+                    //if (key === xName || key === yName) return true;
                     const extents = dataExtents[key];
-                    const value = d[key];
+                    //if (extents == null) return true;
 
+                    let value = d[key];
                     if (value == null) return true;
-                    if (typeof value === 'string') 
-                        return extents.indexOf(value) >= 0;
+                    if (typeof value === 'string') {
+                        const tempExtents = origDataExtents[key];
+                        value = tempExtents.length - tempExtents.indexOf(value) - 1 + 0.5;
+                    }
 
                     return extents[0] <= value && value <= extents[1];
                 }).every(each => each);

@@ -17,7 +17,8 @@ import {
 } from './scatterUtils';
 
 import {
-	cursorStyle
+	cursorStyle,
+	isArrayOfString
 } from '../utils';
 
 class ChartCanvas extends React.Component {
@@ -79,7 +80,7 @@ class ChartCanvas extends React.Component {
 	resetChart = (props = this.props) => {
 		const {
 			data,
-			dataExtents,
+			dataExtents: dataExtentsProp,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
@@ -87,13 +88,19 @@ class ChartCanvas extends React.Component {
 		const canvasDim = getCanvasDimension(props);
 
 		// xScale
-		const xAttr = getScale({dataExtents, attribute: xAttrProp}, [0, canvasDim.width]);
+		const xAttr = getScale({
+			dataExtents: dataExtentsProp, 
+			attribute: xAttrProp
+		}, [0, canvasDim.width]);
 
 		// yScale
-		const yAttr = getScale({dataExtents, attribute: yAttrProp}, [canvasDim.height, 0]);
+		const yAttr = getScale({
+			dataExtents: dataExtentsProp, 
+			attribute: yAttrProp
+		}, [canvasDim.height, 0]);
 		
 		// flatten data to plot
-		const dimName = Object.keys(dataExtents);
+		const dimName = Object.keys(dataExtentsProp);
 		const plotData = data.map(d => {
 			const flattened = {};
 			dimName.forEach(name => {
@@ -104,9 +111,16 @@ class ChartCanvas extends React.Component {
 			return flattened;
 		});
 
+		const dataExtents = {};
+		dimName.forEach(name => {
+			dataExtents[name] = isArrayOfString(dataExtentsProp[name])
+				? [0, dataExtentsProp[name].length]
+				: dataExtentsProp[name].slice();
+		});
+
 		return {
 			plotData,
-			dataExtents: {...dataExtents},
+			dataExtents,
 			xAttr,
 			yAttr,
 			xAccessor: d => d[xAttr],
@@ -125,29 +139,46 @@ class ChartCanvas extends React.Component {
 		const canvasDim = getCanvasDimension(props);
 
 		const {
-			dataExtents: initialDataExtents,
+			dataExtents: dataExtentsState,
 			xAttr: initialXAttr,
 			yAttr: initialYAttr
 		} = this.state;
 
-		const dataExtents = {...dataExtentsProp};
-		Object.keys(initialDataExtents).forEach(key => {
-			dataExtents[key] = initialDataExtents[key].slice();
+		// const dataExtents = {...dataExtentsProp};
+		// Object.keys(initialDataExtents).forEach(key => {
+		// 	dataExtents[key] = initialDataExtents[key].slice();
+		// });
+		const dimName = Object.keys(dataExtentsProp);
+		dimName.forEach(name => {
+			const extentsProps = dataExtentsProp[name];
+			if (dataExtentsState[name] == null) {
+				dataExtentsState[name] = isArrayOfString(extentsProps)
+					? [0, extentsProps.length]
+					: extentsProps.slice();
+			}
 		});
+
 
 		// xScale
 		const xAttr = (initialXAttr.name === xAttrProp)
 			? initialXAttr
-			: getScale({dataExtents, attribute: xAttrProp}, [0, canvasDim.width]);
+			: getScale({
+				dataExtents: dataExtentsProp, 
+				attribute: xAttrProp,
+				dataExtentsPrev: dataExtentsState
+			}, [0, canvasDim.width]);
 
 
 		// yScale
 		const yAttr = (initialYAttr.name === yAttrProp)
 			? initialYAttr
-			: getScale({dataExtents, attribute: yAttrProp}, [canvasDim.height, 0]);
+			: getScale({
+				dataExtents: dataExtentsProp, 
+				attribute: yAttrProp,
+				dataExtentsPrev: dataExtentsState
+			}, [canvasDim.height, 0]);
 		
 		// flatten data to plot
-		const dimName = Object.keys(dataExtents);
 		const plotData = data.map(d => {
 			const flattened = {};
 			dimName.forEach(name => {
@@ -160,7 +191,7 @@ class ChartCanvas extends React.Component {
 
 		return {
 			plotData,
-			dataExtents: {...dataExtents},
+			dataExtents: {...dataExtentsState},
 			xAttr,
 			yAttr,
 			xAccessor: d => d[xAttr],
@@ -239,8 +270,8 @@ class ChartCanvas extends React.Component {
 		if (this.panInProgress) return;
 
 		const {
-			xAttr: {scale: initialXScale, extents: xExtents, name: xName},
-			yAttr: {scale: initialYScale, extents: yExtents, name: yName}
+			xAttr: {scale: initialXScale, extents: xExtents, name: xName, ordinary: xOrdinary},
+			yAttr: {scale: initialYScale, extents: yExtents, name: yName, ordinary: yOrdinary}
 		} = this.state;
 
         const SCALE_FACTOR = 0.001;
@@ -256,22 +287,33 @@ class ChartCanvas extends React.Component {
             Math.max(centerX - (centerX - beginX)*zoomFactor, xExtents[0]),
             Math.min(centerX + (endX - centerX)*zoomFactor, xExtents[1])
 		];
+		const newScaleX = initialXScale.copy().domain(newDomainX);
+		const stepX = !xOrdinary
+			? 0
+			: Math.abs(newScaleX(0) - newScaleX(1));
 
         const newDomainY = [
             Math.max(centerY - (centerY - beginY)*zoomFactor, yExtents[0]),
             Math.min(centerY + (endY - centerY)*zoomFactor, yExtents[1])
 		];
+		const newScaleY = initialYScale.copy().domain(newDomainY);
+		const stepY = !yOrdinary
+			? 0
+			: Math.abs(newScaleY(0) - newScaleY(1));
+
 		
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
 			...this.state,
 			xAttr: {
 				...this.state.xAttr,
-				scale: initialXScale.copy().domain(newDomainX)
+				scale: newScaleX,
+				step: stepX
 			},
 			yAttr: {
 				...this.state.yAttr,
-				scale: initialYScale.copy().domain(newDomainY)
+				scale: newScaleY,
+				step: stepY
 			}
 		});
 		if (this.props.onScatterPanZoom) {
@@ -286,12 +328,14 @@ class ChartCanvas extends React.Component {
     panHelper = (mouseXY, initialXAttr, initialYAttr, {dx, dy}) => {
 		const {
 			scale: initialXScale,
-			extents: xExtents
+			extents: xExtents,
+			ordinary: xOrdinary
 		} = initialXAttr;
 
 		const {
 			scale: initialYScale,
-			extents: yExtents
+			extents: yExtents,
+			ordinary: yOrdinary
 		} = initialYAttr;
 
         const newDomainX = initialXScale.range()
@@ -308,15 +352,20 @@ class ChartCanvas extends React.Component {
 					
 		const updatedScaleX = initialXScale.copy().domain(newDomainX);
 		const updatedScaleY = initialYScale.copy().domain(newDomainY);
+
+		const stepX = !xOrdinary ? 0: Math.abs(updatedScaleX(0) - updatedScaleX(1));
+		const stepY = !yOrdinary ? 0: Math.abs(updatedScaleY(0) - updatedScaleY(1));
 		
         return {
 			xAttr: {
 				...initialXAttr,
-				scale: updatedScaleX
+				scale: updatedScaleX,
+				step: stepX
 			},
 			yAttr: {
 				...initialYAttr,
-				scale: updatedScaleY
+				scale: updatedScaleY,
+				step: stepY
 			}
         }
     }
@@ -390,17 +439,32 @@ class ChartCanvas extends React.Component {
 	
 
 	updateAttr = (attr, initialAttr, dataExtents) => {
-		const range = initialAttr.scale.range();
-		if (dataExtents[attr]) {
-			return getScale({
-				dataExtents,
-				attribute: attr
-			}, range);
-		}
-		return initialAttr;
+		// const range = initialAttr.scale.range();
+		// if (dataExtents[attr]) {
+		// 	return getScale({
+		// 		dataExtents,
+		// 		attribute: attr
+		// 	}, range);
+		// }
+		// return initialAttr;
+		const domain = dataExtents[attr];
+		if (domain == null) return initialAttr;
+
+		const {scale: initialScale, ordinary} = initialAttr;
+		const newScale = initialScale.copy().domain(domain);
+		const step = !ordinary ? 0: Math.abs(newScale(0) - newScale(1));
+		return {
+			...initialAttr,
+			scale: newScale,
+			step
+		};
 	}
 	updateExtents = (initialExtents, newExtents) => {
 		Object.keys(newExtents).map(key => {
+			const extents = newExtents[key].length 
+				? newExtents[key].slice()
+				: this.state.dataExtents[key].slice();
+			
 			initialExtents[key] = newExtents[key];
 		});
 		return initialExtents;
@@ -411,6 +475,7 @@ class ChartCanvas extends React.Component {
 		if (what !== 'extents') return;
 		if (this.panInProgress) return;
 
+		//console.log(data, inProgress)
 		if (inProgress) {
 			if (!this.waitingForAnimationFrame) {
 				this.waitingForAnimationFrame = true;
@@ -490,6 +555,7 @@ class ChartCanvas extends React.Component {
 			width: this.props.width,
 			height: this.props.height,
 			ratio: this.props.ratio,
+			origDataExtents: this.props.dataExtents,
 			subscribe: this.subscribe,
 			unsubscribe: this.unsubscribe,
 			getCanvasContexts: this.getCanvasContexts,

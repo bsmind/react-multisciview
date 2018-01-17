@@ -56,7 +56,7 @@ class YAxis extends React.Component {
 
 		const tickArray = [];
 		for (let i=minval; i<maxval; ++i) {
-			const y = yScale(i);
+			const y = yScale(i) - yStep/2;
 
 			if (y < 0 || y > height) {
 				continue;
@@ -66,11 +66,11 @@ class YAxis extends React.Component {
 				value: i,
 				label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...': yLabels[i],
 				x1: 0,
-				y1: y - yStep/2,
+				y1: y,
 				x2: sign * innerTickSize,
-				y2: y - yStep/2,
+				y2: y,
 				labelX: sign * ( 1.2 * innerTickSize + dx),
-				labelY: y + dx - yStep/2
+				labelY: y + dx
 			});
 		}
 		return tickArray;
@@ -81,9 +81,9 @@ class YAxis extends React.Component {
 		const { yAttr } = moreProps;
 		const {
 			scale,
-			extents,
 			step,
-			ordinary
+			ordinary,
+			origExtents: extents
 		} = yAttr;
 
     	const axisLocation = this.getAxisLocation();

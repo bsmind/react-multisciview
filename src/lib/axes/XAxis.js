@@ -44,13 +44,15 @@ class XAxis extends React.Component {
 	}
 	
 	getTicksOrdinary = (xScale, xExtents, xStep) => {
-    	const { ticks, tickFormat, innerTickSize, orient } = this.props;
+		const { ticks, tickFormat, innerTickSize, orient } = this.props;
+		const { canvasDim: {width}} = this.props.shared;
     	const { fontSize } = this.props.labelStyle;
 		
     	const sign = orient === "top" || orient === "left" ? -1 : 1;
     	const dy = fontSize * 0.71;
 
 		const xLabels = xExtents.slice();
+		xLabels.reverse();
 		const minval = Math.max(Math.floor(xScale.invert(xScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(xScale.invert(xScale.range()[1])), xLabels.length);
 
@@ -58,18 +60,18 @@ class XAxis extends React.Component {
 
 		const tickArray = [];
 		for (let i=minval; i<maxval; ++i) {
-			const x = xScale(i);
+			const x = xScale(i) + xStep/2;
 
-			if (x < 0) continue;
+			if (x < 0 || x > width) continue;
 
 			tickArray.push({
 				value: i,
 				label: xLabels[i].length < maxLabelLength ? xLabels[i] : xLabels[i].substring(0, maxLabelLength) + '...',
-    			x1: x + xStep/2,
+    			x1: x,
     			y1: 0,
-    			x2: x + xStep/2,
+    			x2: x,
     			y2: sign * innerTickSize,
-    			labelX: x + xStep/2,
+    			labelX: x,
     			labelY: sign * 2 * innerTickSize + dy				
 			});
 		}
@@ -108,9 +110,10 @@ class XAxis extends React.Component {
 
 		const {
 			scale,
-			extents,
+			//extents,
 			step,
-			ordinary
+			ordinary,
+			origExtents: extents
 		} = xAttr;
 
     	ctx.save();
