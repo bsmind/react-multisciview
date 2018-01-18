@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { csvParse } from 'd3-dsv';
 import { 
     PRIORITY, 
     PriorityQueue
@@ -188,4 +189,30 @@ export function getTiffWithPriority(id, priority = PRIORITY.LOW_MID) {
             dispatch(getTiff(pended.data))
         }, TIFF_TIMEOUT * tiffRequest.length / pended.priority);
     }
+}
+
+export function getColorMap() {
+    return dispatch => {
+        axios.get('/static/resources/data/cm/Cool.csv')
+            .then(response => response.data)
+            .then(data => csvParse(data, d => {
+                return {
+                    r: +d.Red,
+                    g: +d.Green,
+                    b: +d.Blue
+                }
+            }))
+            .then(data => {
+                dispatch({
+                    type: 'GET_COLORMAP',
+                    payload: data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: 'GET_COLORMAP_REJECTED',
+                    payload: e
+                });
+            });
+    };    
 }

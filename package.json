@@ -34,13 +34,14 @@
     "server": "cd build && python3 -m http.server 8090",
     "appclean": "rimraf -rf ./multiview/static/js/* && rimraf -rf ./multiview/templates/*",
     "appmodernizr": "modernizr -c config/modernizr-config.json -d ./multiview/static/js/modernizr.js",
-    "appwatch": "cross-env BABEL_ENV=es webpack --config config/app.config.js --env watch && ncp docs/data/ multiview/static/resources/data",
+    "appwatch": "cross-env BABEL_ENV=es webpack --config config/app.config.js --env watch && ncp docs/data/ multiview/static/resources/data && ncp docs/data/cm/ multiview/static/resources/data/cm",
     "apptest": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && npm run appwatch"
   },
   "dependencies": {
     "axios": "^0.17.1",
     "d3-array": "^1.2.1",
     "d3-collection": "^1.0.4",
+    "d3-color": "^1.0.3",
     "d3-force": "^1.1.0",
     "d3-format": "^1.2.1",
     "d3-interpolate": "^1.1.6",

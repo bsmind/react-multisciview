@@ -4,11 +4,12 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import {
+    getColorMap,
     getSampleKinds,
     getAttributes,
     AddData,
     handleColorChange,
-    updateSelectedSamples
+    updateSelectedSamples,
 } from './actions/dataActions';
 
 import {
@@ -53,6 +54,7 @@ class MultiViewApp extends React.Component {
     componentDidMount() {
         this.props.getSampleKinds();
         this.props.getAttributes();
+        this.props.getColorMap();
 
         window.addEventListener("resize", () => this.handleResize());
     }
@@ -205,7 +207,8 @@ function mapDispatchToProps(dispatch) {
         AddDelSamples,
         //changeSampleColor,
         handleColorChange,
-        updateSelectedSamples
+        updateSelectedSamples,
+        getColorMap
     }, dispatch);
 }
 

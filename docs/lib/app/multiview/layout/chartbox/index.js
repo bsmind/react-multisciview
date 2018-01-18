@@ -82,7 +82,8 @@ class ChartBox extends React.Component {
     }
 
     handleDataImageRequest = (dataID, priority = 3) => {
-        if (this.props.getTiffWithPriority)
+        const {imgPool} = this.props;
+        if (this.props.getTiffWithPriority && imgPool[dataID] == null)
             this.props.getTiffWithPriority(dataID, priority);
     }
 

@@ -3,7 +3,8 @@ import {
     getSampleKinds,
     addDataSamples,
     handleSampleColorChange,
-    getTiff
+    getTiff,
+    getColorMap
 } from './dataHelper';
 
 const INITIAL_STATE = {
@@ -21,6 +22,7 @@ const INITIAL_STATE = {
     numQueried: 0,
 
     imgPool: {},
+    imgColorMap: null
 }
 
 function updateSelectedSamples(state, payload) {
@@ -31,6 +33,7 @@ function updateSelectedSamples(state, payload) {
         sampleColors: colors
     }
 }
+
 
 export function dataReducers (state=INITIAL_STATE, action) {
     const {type, payload} = action;
@@ -44,6 +47,7 @@ export function dataReducers (state=INITIAL_STATE, action) {
         case "SAMPLE_COLOR_CHANGE": return handleSampleColorChange(state, payload);
 
         case "GET_TIFF": return getTiff(state, payload);
+        case "GET_COLORMAP": return getColorMap(state, payload);
         default: return state;
     }
 }
