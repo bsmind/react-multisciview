@@ -52,34 +52,32 @@ class EventHandler extends React.Component {
     	if (this.node) {
     		select(this.node)
     			.on(MOUSEENTER, null)
-    			.on(MOUSELEAVE, null);
+                .on(MOUSELEAVE, null);
+            select(d3Window(this.node))
+                .on('mousemove', null);
     	}
     }
 
     handleEnter = () => {
     	const e = d3Event;
-    	this.mouseInside = true;
+        this.mouseInside = true;
+        if (!this.state.panInProgress) {
+            select(d3Window(this.node))
+                .on('mousemove', this.handleMouseMove);
+        }
     	if (this.props.onMouseEnter)
     		this.props.onMouseEnter(e);
     }
 
     handleLeave = (e) => {
-    	this.mouseInside = false;
+        this.mouseInside = false;
+        if (!this.state.panInProgress) {
+            select(d3Window(this.node))
+                .on('mousemove', null);
+        }
     	if (this.props.onMouseLeave)
     		this.props.onMouseLeave(e);
     }
-
-    // handleMouseMove = () => {
-    // 	const e = d3Event;
-    // 	if (this.mouseInteraction
-    //         && this.props.mouseMove
-    //         && !this.state.panInProgress
-    // 	) {
-    // 		const newPos = mouse(this.node);
-    // 		if (this.props.onMouseMove)
-    // 			this.props.onMouseMove(newPos, "mouse", e);
-    // 	}
-    // }
 
     handleWheel = (e) => {
         e.preventDefault();
@@ -89,35 +87,20 @@ class EventHandler extends React.Component {
     	}
     }
 
-    // canPan = () => {
-    //     const { pan: initialPanEnabled } = this.props;
-
-    //     const {
-    //         panEnabled,
-    //         draggable: somethingSelected
-    //     } = this.props.getAllPanConditions()
-    //             .reduce((obj, a) => {
-    //                 return {
-    //                     draggable: obj.draggable || a.draggable,
-    //                     panEnabled: obj.panEnabled && a.panEnabled
-    //                 };
-    //             }, {
-    //                 draggable: false,
-    //                 panEnabled: initialPanEnabled
-    //             });
-
-    //     return {
-    //         panEnabled,
-    //         somethingSelected
-    //     }
-    // }
+    handleMouseMove = () => {
+        const e = d3Event;
+        if (!this.state.panInProgress && this.props.onMouseMove) {
+            const mouseXY = mouse(this.node);
+            this.props.onMouseMove(mouseXY, e);
+        }
+    }
 
     handleMouseDown = (e) => {
         if (e.button !== 0) return;
         e.preventDefault();
 
         this.panHappened = false;
-        if (!this.state.panInProgress) {
+        if (!this.state.panInProgress && this.props.panEnabled) {
             const mouseXY = mousePosition(e);
 
             this.setState({
@@ -128,14 +111,33 @@ class EventHandler extends React.Component {
             });
 
             select(d3Window(this.node))
-                .on('mousemove.pan', this.handlePan)
-                .on('mouseup.pan', this.handlePanEnd);
+                .on('mousemove', this.handlePan)
+                .on('mouseup', this.handlePanEnd);
+        } else {
+            select(d3Window(this.node))
+                .on('mousemove', this.handleTrackMouse)
+                .on('mouseup', this.handleTrackMouseEnd);
         }
     }
 
-    // shouldPan = () => {
-    //     return this.props.pan && this.props.onPan && this.state.panStart;
-    // }
+    handleTrackMouse = () => {
+        const e = d3Event;
+
+        const mouseXY = mouse(this.node);
+        if (this.props.onMouseTrack)
+            this.props.onMouseTrack(mouseXY, e);
+    }
+
+    handleTrackMouseEnd = () => {
+        const e = d3Event;
+
+        select(d3Window(this.node))
+            .on('mousemove', this.mouseInside ? this.handleMouseMove: null)
+            .on('mouseup', null);
+
+        if (this.props.onMouseTrackEnd)
+            this.props.onMouseTrackEnd(e);
+    }
 
     handlePan = () =>{
         const e = d3Event;
@@ -165,8 +167,8 @@ class EventHandler extends React.Component {
 
         if (this.state.panStart) {
             select(d3Window(this.node))
-                .on('mousemove.pan', null)
-                .on('mouseup.pan', null);
+                .on('mousemove', this.mouseInside ? this.handleMouseMove: null)
+                .on('mouseup', null);
 
             if (this.panHappened && this.props.onPanEnd) {
                 const { dx, dy } = this;

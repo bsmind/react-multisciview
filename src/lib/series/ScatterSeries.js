@@ -10,11 +10,10 @@ import { nest as d3Nest } from "d3-collection";
 import { clearCanvas } from '../core/utils';
 
 class ScatterSeries extends React.Component {
-
     drawMarkersWithProvider = (ctx, moreProps) => {
     	const { 
             markerProvider, 
-            shared: {origDataExtents}
+            shared: {origDataExtents, ratio}
         } = this.props;
 
         const {
@@ -65,12 +64,8 @@ class ScatterSeries extends React.Component {
                 : yScale(yExtents.length - yExtents.indexOf(d[yName]) - 1) - yStep/2
         };
 
-        //const accessor = (d, key)
-
         const dataKeys = Object.keys(dataExtents);
-        //const { dataExtents } = this.props.shared;
-        //console.log(origDataExtents)
-        
+        let updateHitTest = false;
         nest.forEach(group => {
             const {key: markerKey, values} = group;
             values.forEach(d => {
@@ -81,9 +76,7 @@ class ScatterSeries extends React.Component {
                     return;
 
                 let inDomain = dataKeys.map(key => {
-                    //if (key === xName || key === yName) return true;
                     const extents = dataExtents[key];
-                    //if (extents == null) return true;
 
                     let value = d[key];
                     if (value == null) return true;
@@ -96,14 +89,69 @@ class ScatterSeries extends React.Component {
                 }).every(each => each);
                 if (!inDomain) return;
 
-
                 markerProvider.drawAt(ctx, x, y, markerKey);
+                if (this.__pixelData && d.colorID) {
+                    updateHitTest = true;
+                    const colorID = d.colorID;
+                    const rgbDigits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(colorID);
+                    const R = parseInt(rgbDigits[2]);
+                    const G = parseInt(rgbDigits[3]);
+                    const B = parseInt(rgbDigits[4]);
+                    const px = Math.floor( (x) * ratio );
+                    const py = Math.floor( (y) * ratio );
+    
+                    for (let ppx=px-2; ppx<=px+2; ++ppx) {
+                        for (let ppy=py-2; ppy<=py+2; ++ppy) {
+                            const pIndex = 4*(this.__canvasWidth*ppy + ppx);
+                            this.__pixelData[pIndex] = R;
+                            this.__pixelData[pIndex+1] = G;
+                            this.__pixelData[pIndex+2] = B;
+                            this.__pixelData[pIndex+3] = 255;        
+                        }
+                    }                        
+                }
             });
         });
+        return updateHitTest;
     }
 
     draw = (ctx, moreProps) => {
-        this.drawMarkersWithProvider(ctx, moreProps);
+        const { hitTest } = moreProps;
+        const { width, height, ratio, margin } = this.props.shared;
+        const hitCanvas = (hitTest.canvas) ? hitTest.canvas : null;
+        const hitCtx = (hitTest.ctx) ? hitTest.ctx : null;
+
+        this.__pixelData = null; 
+        this.__pixel = null;
+        this.__canvasWidth = 0;
+        if (hitCanvas && hitCtx) {
+            const canvasWidth = Math.floor( width*ratio );
+            const canvasHeight = Math.floor( height*ratio );
+
+            hitCtx.save();
+            hitCtx.setTransform(1, 0, 0, 1, 0, 0);
+            hitCtx.scale(ratio, ratio);
+            hitCtx.translate(margin.left, margin.top);
+            this.__pixel = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+            this.__pixelData = this.__pixel.data;            
+            this.__canvasWidth = canvasWidth;
+        }
+
+        const update = this.drawMarkersWithProvider(ctx, moreProps);
+
+        if (hitCanvas && hitCtx && this.__pixelData && this.__pixel && update) {
+            hitCtx.putImageData(this.__pixel, margin.left * ratio, margin.top * ratio);            
+            this.__pixelData = null;  
+            this.__pixel = null;          
+            this.__canvasWidth = 0;
+            hitCtx.restore();
+
+            // ctx.save();
+            // ctx.setTransform(1,0,0,1,0,0);
+            //hitCtx.drawImage(hitCanvas, 0, 0);
+            // ctx.drawImage(hitCanvas, 0, 0);
+            // ctx.restore();
+        }
     }
 
     render() {

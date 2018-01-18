@@ -39,7 +39,7 @@ class SubscriberExt extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        const { plotData, xAttr, yAttr, zAttr, dataExtents } = nextProps.shared;
+        const { plotData, xAttr, yAttr, zAttr, dataExtents, hitTest } = nextProps.shared;
 
         this.moreProps = {
             ...this.moreProps,
@@ -47,7 +47,8 @@ class SubscriberExt extends React.Component {
             yAttr,
             zAttr,
             plotData,
-            dataExtents
+            dataExtents,
+            hitTest
         }
     }
 
@@ -69,6 +70,7 @@ class SubscriberExt extends React.Component {
     draw = ({trigger, force} = {force: false}) => {
         const type = trigger;
         const proceed = this.props.drawOn.indexOf(type) > -1;
+        //console.log(this.props.drawOn, proceed)
 
         if (proceed || force) {
             this.handleDraw();
@@ -83,7 +85,8 @@ class SubscriberExt extends React.Component {
             yAttr,
             zAttr,
             plotData,
-            dataExtents
+            dataExtents,
+            hitTest
         } = shared;
 
         return {
@@ -92,6 +95,7 @@ class SubscriberExt extends React.Component {
             zAttr,
             plotData,
             dataExtents,
+            hitTest,
             ...this.moreProps
         }
     }

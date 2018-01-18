@@ -6,6 +6,7 @@ import uniqueId from 'lodash.uniqueid';
 import CanvasContainer from './CanvasContainer';
 import EventHandler from './EventHandler';
 import {XAxis, YAxis} from '../axes';
+import MousePathTracker from './MousePathTracker';
 
 import {
 	dimension as getCanvasDimension,
@@ -21,6 +22,12 @@ import {
 	isArrayOfString
 } from '../utils';
 
+import randomColor from 'randomcolor';
+
+import {
+	format as d3Format
+} from 'd3-format';
+
 class ChartCanvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -32,6 +39,19 @@ class ChartCanvas extends React.Component {
 		this.subscriptions = [];
 		this.panInProgress = false;
 		this.axisSelectInProgress = false;
+		this.trackInProgress = false;
+		this.otherInProgress = false;
+
+		this.R = 0;
+		this.G = 0;
+		this.B = 0;
+		this.dataHashIDByColor = {};
+		this.dataHashColorByID = {};
+		this.dataHashIndexByID = {};
+
+		// off-canvas for hit test
+		this.hitCanvas = null;
+		this.hitCtx = null;
 	}
 
     getCanvasContexts = () => {
@@ -58,15 +78,37 @@ class ChartCanvas extends React.Component {
 				canvases.chartOn
 			], this.props.ratio);
 		}
+		if (this.hitCtx) {
+			clearCanvas([this.hitCtx], this.props.ratio);
+		}
+	}
+
+	clearMouseCoordCanvas = () => {
+		const canvases = this.getCanvasContexts();
+		if (canvases && canvases.mouseCoord) {
+			clearCanvas([
+				canvases.mouseCoord
+			], this.props.ratio);
+		}		
+	}
+
+	updateHitTestCanvas = (prop = this.props) => {
+		const { ratio, width, height } = prop;
+		this.hitCanvas = document.createElement('canvas');
+		this.hitCanvas.width = Math.floor(width * ratio);
+		this.hitCanvas.height = Math.floor(height * ratio);
+		this.hitCanvas.style.width = width;
+		this.hitCanvas.style.height = height;
+		this.hitCtx = this.hitCanvas.getContext('2d');
 	}
 
 	componentDidMount() {
 		const state = this.resetChart();
-		//console.log('compoenetDidMount', state)
 		this.setState({
 			...this.state,
 			...state
 		});
+		this.updateHitTestCanvas();
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -76,6 +118,53 @@ class ChartCanvas extends React.Component {
 			...this.state,
 			...state
 		});
+		const {
+			width: widthPrev,
+			height: heightPrev,
+			ratio: ratioPrev
+		} = this.props;
+		const { width, height, ratio} = nextProps;
+
+		if (widthPrev !== width ||
+			heightPrev !== height ||
+			ratio !== ratio) {
+			this.updateHitTestCanvas(nextProps);
+		}
+	}
+
+	shouldComponentUpdate(){
+		const inProgress = this.panInProgress ||
+						   this.otherInProgress ||
+						   this.axisSelectInProgress ||
+						   this.trackInProgress;
+		return !inProgress;
+	}
+
+	getColorID = () => {
+		this.R += 1;
+		this.G += Math.floor(this.R / 255);
+		this.B += Math.floor(this.G / 255);
+
+		this.R = this.R % 255;
+		this.G = this.G % 255;
+		this.B = this.B % 255;
+
+		//return {R: this.R, G: this.G, B: this.B};
+		return `rgb(${this.R}, ${this.G}, ${this.B})`;
+	}
+
+	hashingData = (DataId, index) => {
+		if (this.dataHashColorByID[DataId]) {
+			this.dataHashIndexByID[DataId] = index;
+			return this.dataHashColorByID[DataId];
+		}
+
+		// R, G, B
+		const color = this.getColorID();
+		this.dataHashIDByColor[color] = DataId;
+		this.dataHashColorByID[DataId] = color;
+		this.dataHashIndexByID[DataId] = index;
+		return color;
 	}
 
 	resetChart = (props = this.props) => {
@@ -111,13 +200,19 @@ class ChartCanvas extends React.Component {
 		
 		// flatten data to plot
 		const dimName = Object.keys(dataExtentsProp);
-		const plotData = data.map(d => {
+		const plotData = data.map((d, index) => {
 			const flattened = {};
 			dimName.forEach(name => {
 				flattened[name] = dataAccessor(d, name);
 			});
 			flattened['_id'] = d._id;
 			flattened['markerID']=d.markerID;
+			flattened['item'] = d.item;
+
+			// dataHash
+			const colorID = this.hashingData(d._id, index);
+			flattened['colorID']=colorID;
+
 			return flattened;
 		});
 
@@ -207,13 +302,19 @@ class ChartCanvas extends React.Component {
 		//console.log(dataExtentsProp)
 		
 		// flatten data to plot
-		const plotData = data.map(d => {
+		const plotData = data.map((d,index) => {
 			const flattened = {};
 			dimName.forEach(name => {
 				flattened[name] = dataAccessor(d, name);
 			});
 			flattened['_id'] = d._id;
 			flattened['markerID']=d.markerID;
+			flattened['item']=d.item;
+
+			// dataHash
+			const colorID = this.hashingData(d._id, index);
+			flattened['colorID']=colorID;
+			
 			return flattened;
 		});
 
@@ -232,7 +333,11 @@ class ChartCanvas extends React.Component {
     	this.subscriptions.forEach(each => {
     		const state = {
     			...this.state,
-    			subscriptions: this.subscriptions
+				subscriptions: this.subscriptions,
+				hitTest: {
+					canvas: this.hitCanvas,
+					ctx: this.hitCtx
+				}
     		};
     		each.listener(type, props, state, e);
     	});
@@ -690,6 +795,115 @@ class ChartCanvas extends React.Component {
 		}
 	}
 
+	pickColor = (mouseXY, layerXY) => {
+		//const canvas = contexts => contexts.chartOn;
+		const ctx = this.hitCtx;//canvas(this.getCanvasContexts());
+		const { margin, ratio } = this.props;
+		
+		// ctx.save()
+		// ctx.setTransform(1, 0, 0, 1, 0, 0);
+		// ctx.scale(ratio, ratio);
+		const x = Math.round(mouseXY[0]);// * ratio + margin.left;
+		const y = Math.round(mouseXY[1]);// * ratio + margin.top;
+
+		const lx = layerXY[0];
+		const ly = layerXY[1];
+		
+		const pixx = (x + margin.left) * ratio;
+		const pixy = (y + margin.top) * ratio;
+		const pixel = ctx.getImageData( pixx, pixy, 1, 1);
+		const data = pixel.data;
+		const rgba = 'rgba(' + data[0] + ', ' + data[1] + ', ' + data[2] + ', ' +
+					(data[3]/255) + ')';
+
+		// ctx.restore();
+		return {
+			x, y,
+			data,
+			rgba
+		};
+	}
+
+	getHoveredDataItem = (mouseXY) => {
+		const x = Math.round(mouseXY[0]);
+		const y = Math.round(mouseXY[1]);
+		if (this.hitCtx == null)
+			return {x, y, info: null};
+
+		const ctx = this.hitCtx;
+		const { margin, ratio } = this.props;
+		const pixx = (x + margin.left) * ratio;
+		const pixy = (y + margin.top) * ratio;
+		const pixel = ctx.getImageData(pixx, pixy, 1, 1);
+		const data = pixel.data;
+		const colorID = `rgb(${data[0].toString()}, ${data[1].toString()}, ${data[2].toString()})`;
+
+		const dataID = this.dataHashIDByColor[colorID];
+		if (dataID) {
+			const formatSI = d3Format('.3s');
+			const dataIndex = this.dataHashIndexByID[dataID];
+			const data = this.state.plotData[dataIndex];
+			const info = [];
+			Object.keys(data).forEach(key => {
+				if (key === '_id' || key === 'colorID' || key === 'markerID') return;
+
+				const value = data[key];
+				if (value == null) return;
+
+				const keyTokens = key.split('.');
+				const shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1]: keyTokens[0];
+				const formattedValue = typeof value === 'string' ? value: formatSI(value);
+
+				info.push({
+					key: shortKey,
+					value: formattedValue
+				});
+			});
+			return {x, y, info};
+		}
+		return {x, y, info: null};
+	}
+
+	handleMouseMove = (mouseXY, e) => {
+		if (!this.waitingForAnimationFrame) {
+			this.waitingForAnimationFrame = true;
+			const state = this.getHoveredDataItem(mouseXY);
+			this.triggerEvent("mousemove", {
+				mouseXY: state
+			}, e);
+			requestAnimationFrame(() => {
+				this.clearMouseCoordCanvas();
+				this.draw({trigger: "mousemove"});
+				this.waitingForAnimationFrame = false;
+			});
+		}
+	}
+
+	handleMouseTrack = (mouseXY, e) => {
+		if (!this.waitingForAnimationFrame && !this.axisSelectInProgress && !this.panInProgress) {
+			this.waitingForAnimationFrame = true;
+			this.trackInProgress = true;
+
+			//console.log(e.layerX, e.layerY)
+			const state = this.pickColor(mouseXY, [e.layerX, e.layerY]);
+
+			this.triggerEvent('track', {mouseXY: state}, e);
+			requestAnimationFrame(() => {
+				this.waitingForAnimationFrame = false;
+				// i don't clear
+				this.draw({trigger: 'track'});
+
+			});
+		}
+	}
+
+	handleMouseTrackEnd = (e) => {
+		this.trackInProgress = false;
+		this.triggerEvent('track', {mouseXY: null}, e);
+		requestAnimationFrame(() => {
+			this.clearMouseCoordCanvas();
+		});
+	}
 
     render() {
 		const { margin } = this.props;
@@ -718,6 +932,10 @@ class ChartCanvas extends React.Component {
 			handleZAxisSelect: this.handleZAxisSelect,
 			handleZAxisSelectEnd: this.handleZAxisSelectEnd,
 			handleZAxisSelectCancel: this.handleZAxisSelectCancel,
+			hitTest: {
+				canvas: this.hitCanvas,
+				ctx: this.hitCtx
+			},		
 			...this.state
 		};
 
@@ -754,11 +972,18 @@ class ChartCanvas extends React.Component {
 							width={canvasDim.width}
 							height={canvasDim.height}
 							onZoom={this.handleZoom}
+							panEnabled={false}
+							onMouseMove={this.handleMouseMove}
 							onPan={this.handlePan}
 							onPanEnd={this.handlePanEnd}
+							//onMouseTrack={this.handleMouseTrack}
+							//onMouseTrackEnd={this.handleMouseTrackEnd}
 						/>
 						<g>
 							{children}
+							<MousePathTracker 
+								shared={shared}
+							/>
 						</g>						
 					</g>
 				</svg>

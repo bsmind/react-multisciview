@@ -45750,7 +45750,9 @@ var ScatterSeries = function (_React$Component) {
         return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ScatterSeries.__proto__ || Object.getPrototypeOf(ScatterSeries)).call.apply(_ref, [this].concat(args))), _this), _this.drawMarkersWithProvider = function (ctx, moreProps) {
             var _this$props = _this.props,
                 markerProvider = _this$props.markerProvider,
-                origDataExtents = _this$props.shared.origDataExtents;
+                _this$props$shared = _this$props.shared,
+                origDataExtents = _this$props$shared.origDataExtents,
+                ratio = _this$props$shared.ratio;
             var xAttr = moreProps.xAttr,
                 yAttr = moreProps.yAttr,
                 zAttr = moreProps.zAttr,
@@ -45783,12 +45785,8 @@ var ScatterSeries = function (_React$Component) {
                 return !yOrdinary ? yScale(d[yName]) : yScale(yExtents.length - yExtents.indexOf(d[yName]) - 1) - yStep / 2;
             };
 
-            //const accessor = (d, key)
-
             var dataKeys = Object.keys(dataExtents);
-            //const { dataExtents } = this.props.shared;
-            //console.log(origDataExtents)
-
+            var updateHitTest = false;
             nest.forEach(function (group) {
                 var markerKey = group.key,
                     values = group.values;
@@ -45800,9 +45798,7 @@ var ScatterSeries = function (_React$Component) {
                     if (x == null || y == null) return;
 
                     var inDomain = dataKeys.map(function (key) {
-                        //if (key === xName || key === yName) return true;
                         var extents = dataExtents[key];
-                        //if (extents == null) return true;
 
                         var value = d[key];
                         if (value == null) return true;
@@ -45818,10 +45814,71 @@ var ScatterSeries = function (_React$Component) {
                     if (!inDomain) return;
 
                     markerProvider.drawAt(ctx, x, y, markerKey);
+                    if (_this.__pixelData && d.colorID) {
+                        updateHitTest = true;
+                        var colorID = d.colorID;
+                        var rgbDigits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(colorID);
+                        var R = parseInt(rgbDigits[2]);
+                        var G = parseInt(rgbDigits[3]);
+                        var B = parseInt(rgbDigits[4]);
+                        var px = Math.floor(x * ratio);
+                        var py = Math.floor(y * ratio);
+
+                        for (var ppx = px - 2; ppx <= px + 2; ++ppx) {
+                            for (var ppy = py - 2; ppy <= py + 2; ++ppy) {
+                                var pIndex = 4 * (_this.__canvasWidth * ppy + ppx);
+                                _this.__pixelData[pIndex] = R;
+                                _this.__pixelData[pIndex + 1] = G;
+                                _this.__pixelData[pIndex + 2] = B;
+                                _this.__pixelData[pIndex + 3] = 255;
+                            }
+                        }
+                    }
                 });
             });
+            return updateHitTest;
         }, _this.draw = function (ctx, moreProps) {
-            _this.drawMarkersWithProvider(ctx, moreProps);
+            var hitTest = moreProps.hitTest;
+            var _this$props$shared2 = _this.props.shared,
+                width = _this$props$shared2.width,
+                height = _this$props$shared2.height,
+                ratio = _this$props$shared2.ratio,
+                margin = _this$props$shared2.margin;
+
+            var hitCanvas = hitTest.canvas ? hitTest.canvas : null;
+            var hitCtx = hitTest.ctx ? hitTest.ctx : null;
+
+            _this.__pixelData = null;
+            _this.__pixel = null;
+            _this.__canvasWidth = 0;
+            if (hitCanvas && hitCtx) {
+                var canvasWidth = Math.floor(width * ratio);
+                var canvasHeight = Math.floor(height * ratio);
+
+                hitCtx.save();
+                hitCtx.setTransform(1, 0, 0, 1, 0, 0);
+                hitCtx.scale(ratio, ratio);
+                hitCtx.translate(margin.left, margin.top);
+                _this.__pixel = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+                _this.__pixelData = _this.__pixel.data;
+                _this.__canvasWidth = canvasWidth;
+            }
+
+            var update = _this.drawMarkersWithProvider(ctx, moreProps);
+
+            if (hitCanvas && hitCtx && _this.__pixelData && _this.__pixel && update) {
+                hitCtx.putImageData(_this.__pixel, margin.left * ratio, margin.top * ratio);
+                _this.__pixelData = null;
+                _this.__pixel = null;
+                _this.__canvasWidth = 0;
+                hitCtx.restore();
+
+                // ctx.save();
+                // ctx.setTransform(1,0,0,1,0,0);
+                //hitCtx.drawImage(hitCanvas, 0, 0);
+                // ctx.drawImage(hitCanvas, 0, 0);
+                // ctx.restore();
+            }
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
@@ -45885,9 +45942,13 @@ ScatterSeries.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__CanvasContainer__ = __webpack_require__(/*! ./CanvasContainer */ 657);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__EventHandler__ = __webpack_require__(/*! ./EventHandler */ 658);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__axes__ = __webpack_require__(/*! ../axes */ 84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ./utils */ 87);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 700);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__MousePathTracker__ = __webpack_require__(/*! ./MousePathTracker */ 705);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ./utils */ 87);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 700);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_randomcolor__ = __webpack_require__(/*! randomcolor */ 120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_randomcolor__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_d3_format__ = __webpack_require__(/*! d3-format */ 82);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45899,6 +45960,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
 
 
 
@@ -45932,6 +45998,19 @@ var ChartCanvas = function (_React$Component) {
 		_this.subscriptions = [];
 		_this.panInProgress = false;
 		_this.axisSelectInProgress = false;
+		_this.trackInProgress = false;
+		_this.otherInProgress = false;
+
+		_this.R = 0;
+		_this.G = 0;
+		_this.B = 0;
+		_this.dataHashIDByColor = {};
+		_this.dataHashColorByID = {};
+		_this.dataHashIndexByID = {};
+
+		// off-canvas for hit test
+		_this.hitCanvas = null;
+		_this.hitCtx = null;
 		return _this;
 	}
 
@@ -45939,8 +46018,8 @@ var ChartCanvas = function (_React$Component) {
 		key: "componentDidMount",
 		value: function componentDidMount() {
 			var state = this.resetChart();
-			//console.log('compoenetDidMount', state)
 			this.setState(_extends({}, this.state, state));
+			this.updateHitTestCanvas();
 		}
 	}, {
 		key: "componentWillReceiveProps",
@@ -45948,6 +46027,24 @@ var ChartCanvas = function (_React$Component) {
 			var state = this.updateChart(nextProps);
 			this.clearAxisAndChartOnCanvas();
 			this.setState(_extends({}, this.state, state));
+			var _props = this.props,
+			    widthPrev = _props.width,
+			    heightPrev = _props.height,
+			    ratioPrev = _props.ratio;
+			var width = nextProps.width,
+			    height = nextProps.height,
+			    ratio = nextProps.ratio;
+
+
+			if (widthPrev !== width || heightPrev !== height || ratio !== ratio) {
+				this.updateHitTestCanvas(nextProps);
+			}
+		}
+	}, {
+		key: "shouldComponentUpdate",
+		value: function shouldComponentUpdate() {
+			var inProgress = this.panInProgress || this.otherInProgress || this.axisSelectInProgress || this.trackInProgress;
+			return !inProgress;
 		}
 	}, {
 		key: "render",
@@ -45965,7 +46062,7 @@ var ChartCanvas = function (_React$Component) {
 				position: "absolute",
 				zIndex: this.props.zIndex + 5
 			};
-			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(this.props);
+			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(this.props);
 			var shared = _extends({
 				canvasDim: canvasDim,
 				margin: margin,
@@ -45980,10 +46077,14 @@ var ChartCanvas = function (_React$Component) {
 				handleYAxisZoom: this.handleYAxisZoom,
 				handleZAxisSelect: this.handleZAxisSelect,
 				handleZAxisSelectEnd: this.handleZAxisSelectEnd,
-				handleZAxisSelectCancel: this.handleZAxisSelectCancel
+				handleZAxisSelectCancel: this.handleZAxisSelectCancel,
+				hitTest: {
+					canvas: this.hitCanvas,
+					ctx: this.hitCtx
+				}
 			}, this.state);
 
-			var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["c" /* cursorStyle */])(true);
+			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["c" /* cursorStyle */])(true);
 
 			var children = [];
 			__WEBPACK_IMPORTED_MODULE_0_react___default.a.Children.forEach(this.props.children, function (child) {
@@ -46025,13 +46126,20 @@ var ChartCanvas = function (_React$Component) {
 							width: canvasDim.width,
 							height: canvasDim.height,
 							onZoom: this.handleZoom,
+							panEnabled: false,
+							onMouseMove: this.handleMouseMove,
 							onPan: this.handlePan,
 							onPanEnd: this.handlePanEnd
+							//onMouseTrack={this.handleMouseTrack}
+							//onMouseTrackEnd={this.handleMouseTrackEnd}
 						}),
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
-							children
+							children,
+							__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__MousePathTracker__["a" /* default */], {
+								shared: shared
+							})
 						)
 					)
 				)
@@ -46064,8 +46172,59 @@ var _initialiseProps = function _initialiseProps() {
 	this.clearAxisAndChartOnCanvas = function () {
 		var canvases = _this3.getCanvasContexts();
 		if (canvases && canvases.axes && canvases.chartOn) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
 		}
+		if (_this3.hitCtx) {
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([_this3.hitCtx], _this3.props.ratio);
+		}
+	};
+
+	this.clearMouseCoordCanvas = function () {
+		var canvases = _this3.getCanvasContexts();
+		if (canvases && canvases.mouseCoord) {
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.mouseCoord], _this3.props.ratio);
+		}
+	};
+
+	this.updateHitTestCanvas = function () {
+		var prop = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
+		var ratio = prop.ratio,
+		    width = prop.width,
+		    height = prop.height;
+
+		_this3.hitCanvas = document.createElement('canvas');
+		_this3.hitCanvas.width = Math.floor(width * ratio);
+		_this3.hitCanvas.height = Math.floor(height * ratio);
+		_this3.hitCanvas.style.width = width;
+		_this3.hitCanvas.style.height = height;
+		_this3.hitCtx = _this3.hitCanvas.getContext('2d');
+	};
+
+	this.getColorID = function () {
+		_this3.R += 1;
+		_this3.G += Math.floor(_this3.R / 255);
+		_this3.B += Math.floor(_this3.G / 255);
+
+		_this3.R = _this3.R % 255;
+		_this3.G = _this3.G % 255;
+		_this3.B = _this3.B % 255;
+
+		//return {R: this.R, G: this.G, B: this.B};
+		return "rgb(" + _this3.R + ", " + _this3.G + ", " + _this3.B + ")";
+	};
+
+	this.hashingData = function (DataId, index) {
+		if (_this3.dataHashColorByID[DataId]) {
+			_this3.dataHashIndexByID[DataId] = index;
+			return _this3.dataHashColorByID[DataId];
+		}
+
+		// R, G, B
+		var color = _this3.getColorID();
+		_this3.dataHashIDByColor[color] = DataId;
+		_this3.dataHashColorByID[DataId] = color;
+		_this3.dataHashIndexByID[DataId] = index;
+		return color;
 	};
 
 	this.resetChart = function () {
@@ -46077,16 +46236,16 @@ var _initialiseProps = function _initialiseProps() {
 		    yAttrProp = props.yAttr,
 		    zAttrProp = props.zAttr;
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
@@ -46100,19 +46259,25 @@ var _initialiseProps = function _initialiseProps() {
 
 			// flatten data to plot
 		};var dimName = Object.keys(dataExtentsProp);
-		var plotData = data.map(function (d) {
+		var plotData = data.map(function (d, index) {
 			var flattened = {};
 			dimName.forEach(function (name) {
 				flattened[name] = dataAccessor(d, name);
 			});
 			flattened['_id'] = d._id;
 			flattened['markerID'] = d.markerID;
+			flattened['item'] = d.item;
+
+			// dataHash
+			var colorID = _this3.hashingData(d._id, index);
+			flattened['colorID'] = colorID;
+
 			return flattened;
 		});
 
 		var dataExtents = {};
 		dimName.forEach(function (name) {
-			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[name]) ? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
+			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(dataExtentsProp[name]) ? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
 		});
 
 		return {
@@ -46139,7 +46304,7 @@ var _initialiseProps = function _initialiseProps() {
 		    yAttrProp = props.yAttr,
 		    zAttrProp = props.zAttr;
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		var _state = _this3.state,
 		    dataExtentsState = _state.dataExtents,
@@ -46156,19 +46321,19 @@ var _initialiseProps = function _initialiseProps() {
 		dimName.forEach(function (name) {
 			var extentsProps = dataExtentsProp[name];
 			if (dataExtentsState[name] == null) {
-				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
 			}
 		});
 
 		// xScale
-		var xAttr = initialXAttr.name === xAttrProp ? initialXAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = initialXAttr.name === xAttrProp ? initialXAttr : Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp,
 			dataExtentsPrev: dataExtentsState
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = initialYAttr.name === yAttrProp ? initialYAttr : Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = initialYAttr.name === yAttrProp ? initialYAttr : Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp,
 			dataExtentsPrev: dataExtentsState
@@ -46178,18 +46343,24 @@ var _initialiseProps = function _initialiseProps() {
 			name: dataExtentsProp[zAttrProp] ? zAttrProp : 'unknown',
 			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : null,
 			select: null,
-			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
+			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
 
 			//console.log(dataExtentsProp)
 
 			// flatten data to plot
-		};var plotData = data.map(function (d) {
+		};var plotData = data.map(function (d, index) {
 			var flattened = {};
 			dimName.forEach(function (name) {
 				flattened[name] = dataAccessor(d, name);
 			});
 			flattened['_id'] = d._id;
 			flattened['markerID'] = d.markerID;
+			flattened['item'] = d.item;
+
+			// dataHash
+			var colorID = _this3.hashingData(d._id, index);
+			flattened['colorID'] = colorID;
+
 			return flattened;
 		});
 
@@ -46211,7 +46382,11 @@ var _initialiseProps = function _initialiseProps() {
 	this.triggerEvent = function (type, props, e) {
 		_this3.subscriptions.forEach(function (each) {
 			var state = _extends({}, _this3.state, {
-				subscriptions: _this3.subscriptions
+				subscriptions: _this3.subscriptions,
+				hitTest: {
+					canvas: _this3.hitCanvas,
+					ctx: _this3.hitCtx
+				}
 			});
 			each.listener(type, props, state, e);
 		});
@@ -46427,7 +46602,7 @@ var _initialiseProps = function _initialiseProps() {
 			selectDomain: selectDomain.slice()
 		});
 
-		if (!Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
+		if (!Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
 			return {
 				zAttr: newZAttr,
 				dataExtents: _extends({}, initialDataExtents, _defineProperty({}, name, selectDomain.slice()))
@@ -46497,7 +46672,7 @@ var _initialiseProps = function _initialiseProps() {
 		});
 
 		_this3.clearAxisAndChartOnCanvas();
-		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents)) {
+		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents)) {
 			var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, extents.slice()));
 			_this3.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
@@ -46528,7 +46703,7 @@ var _initialiseProps = function _initialiseProps() {
 		var name = initialZAttr.name,
 		    extents = initialZAttr.extents;
 
-		if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
+		if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
 
 		return _extends({}, initialZAttr, {
 			selectDomain: dataExtents[name].slice()
@@ -46621,6 +46796,119 @@ var _initialiseProps = function _initialiseProps() {
 				}));
 			});
 		}
+	};
+
+	this.pickColor = function (mouseXY, layerXY) {
+		//const canvas = contexts => contexts.chartOn;
+		var ctx = _this3.hitCtx; //canvas(this.getCanvasContexts());
+		var _props2 = _this3.props,
+		    margin = _props2.margin,
+		    ratio = _props2.ratio;
+
+		// ctx.save()
+		// ctx.setTransform(1, 0, 0, 1, 0, 0);
+		// ctx.scale(ratio, ratio);
+
+		var x = Math.round(mouseXY[0]); // * ratio + margin.left;
+		var y = Math.round(mouseXY[1]); // * ratio + margin.top;
+
+		var lx = layerXY[0];
+		var ly = layerXY[1];
+
+		var pixx = (x + margin.left) * ratio;
+		var pixy = (y + margin.top) * ratio;
+		var pixel = ctx.getImageData(pixx, pixy, 1, 1);
+		var data = pixel.data;
+		var rgba = 'rgba(' + data[0] + ', ' + data[1] + ', ' + data[2] + ', ' + data[3] / 255 + ')';
+
+		// ctx.restore();
+		return {
+			x: x, y: y,
+			data: data,
+			rgba: rgba
+		};
+	};
+
+	this.getHoveredDataItem = function (mouseXY) {
+		var x = Math.round(mouseXY[0]);
+		var y = Math.round(mouseXY[1]);
+		if (_this3.hitCtx == null) return { x: x, y: y, info: null };
+
+		var ctx = _this3.hitCtx;
+		var _props3 = _this3.props,
+		    margin = _props3.margin,
+		    ratio = _props3.ratio;
+
+		var pixx = (x + margin.left) * ratio;
+		var pixy = (y + margin.top) * ratio;
+		var pixel = ctx.getImageData(pixx, pixy, 1, 1);
+		var data = pixel.data;
+		var colorID = "rgb(" + data[0].toString() + ", " + data[1].toString() + ", " + data[2].toString() + ")";
+
+		var dataID = _this3.dataHashIDByColor[colorID];
+		if (dataID) {
+			var formatSI = Object(__WEBPACK_IMPORTED_MODULE_11_d3_format__["a" /* format */])('.3s');
+			var dataIndex = _this3.dataHashIndexByID[dataID];
+			var _data = _this3.state.plotData[dataIndex];
+			var info = [];
+			Object.keys(_data).forEach(function (key) {
+				if (key === '_id' || key === 'colorID' || key === 'markerID') return;
+
+				var value = _data[key];
+				if (value == null) return;
+
+				var keyTokens = key.split('.');
+				var shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1] : keyTokens[0];
+				var formattedValue = typeof value === 'string' ? value : formatSI(value);
+
+				info.push({
+					key: shortKey,
+					value: formattedValue
+				});
+			});
+			return { x: x, y: y, info: info };
+		}
+		return { x: x, y: y, info: null };
+	};
+
+	this.handleMouseMove = function (mouseXY, e) {
+		if (!_this3.waitingForAnimationFrame) {
+			_this3.waitingForAnimationFrame = true;
+			var state = _this3.getHoveredDataItem(mouseXY);
+			_this3.triggerEvent("mousemove", {
+				mouseXY: state
+			}, e);
+			requestAnimationFrame(function () {
+				_this3.clearMouseCoordCanvas();
+				_this3.draw({ trigger: "mousemove" });
+				_this3.waitingForAnimationFrame = false;
+			});
+		}
+	};
+
+	this.handleMouseTrack = function (mouseXY, e) {
+		if (!_this3.waitingForAnimationFrame && !_this3.axisSelectInProgress && !_this3.panInProgress) {
+			_this3.waitingForAnimationFrame = true;
+			_this3.trackInProgress = true;
+
+			//console.log(e.layerX, e.layerY)
+			var state = _this3.pickColor(mouseXY, [e.layerX, e.layerY]);
+
+			_this3.triggerEvent('track', { mouseXY: state }, e);
+			requestAnimationFrame(function () {
+				_this3.waitingForAnimationFrame = false;
+				// i don't clear
+				_this3.draw({ trigger: 'track' });
+			});
+		}
+	};
+
+	this.handleMouseTrackEnd = function (e) {
+		_this3.trackInProgress = false;
+		_this3.triggerEvent('track', { mouseXY: null }, e);
+		requestAnimationFrame(function () {
+			_this3.clearMouseCoordCanvas();
+		});
 	};
 };
 
@@ -52153,17 +52441,24 @@ var EventHandler = function (_React$Component) {
         _this.offListener = function () {
             if (_this.node) {
                 Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(_this.node).on(__WEBPACK_IMPORTED_MODULE_3__utils__["a" /* MOUSEENTER */], null).on(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* MOUSELEAVE */], null);
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', null);
             }
         };
 
         _this.handleEnter = function () {
             var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
             _this.mouseInside = true;
+            if (!_this.state.panInProgress) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.handleMouseMove);
+            }
             if (_this.props.onMouseEnter) _this.props.onMouseEnter(e);
         };
 
         _this.handleLeave = function (e) {
             _this.mouseInside = false;
+            if (!_this.state.panInProgress) {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', null);
+            }
             if (_this.props.onMouseLeave) _this.props.onMouseLeave(e);
         };
 
@@ -52175,12 +52470,20 @@ var EventHandler = function (_React$Component) {
             }
         };
 
+        _this.handleMouseMove = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+            if (!_this.state.panInProgress && _this.props.onMouseMove) {
+                var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node);
+                _this.props.onMouseMove(mouseXY, e);
+            }
+        };
+
         _this.handleMouseDown = function (e) {
             if (e.button !== 0) return;
             e.preventDefault();
 
             _this.panHappened = false;
-            if (!_this.state.panInProgress) {
+            if (!_this.state.panInProgress && _this.props.panEnabled) {
                 var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["k" /* mousePosition */])(e);
 
                 _this.setState({
@@ -52190,8 +52493,25 @@ var EventHandler = function (_React$Component) {
                     }
                 });
 
-                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove.pan', _this.handlePan).on('mouseup.pan', _this.handlePanEnd);
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.handlePan).on('mouseup', _this.handlePanEnd);
+            } else {
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.handleTrackMouse).on('mouseup', _this.handleTrackMouseEnd);
             }
+        };
+
+        _this.handleTrackMouse = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["b" /* mouse */])(_this.node);
+            if (_this.props.onMouseTrack) _this.props.onMouseTrack(mouseXY, e);
+        };
+
+        _this.handleTrackMouseEnd = function () {
+            var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
+
+            Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.mouseInside ? _this.handleMouseMove : null).on('mouseup', null);
+
+            if (_this.props.onMouseTrackEnd) _this.props.onMouseTrackEnd(e);
         };
 
         _this.handlePan = function () {
@@ -52218,7 +52538,7 @@ var EventHandler = function (_React$Component) {
             var e = __WEBPACK_IMPORTED_MODULE_2_d3_selection__["a" /* event */];
 
             if (_this.state.panStart) {
-                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove.pan', null).on('mouseup.pan', null);
+                Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* d3Window */])(_this.node)).on('mousemove', _this.mouseInside ? _this.handleMouseMove : null).on('mouseup', null);
 
                 if (_this.panHappened && _this.props.onPanEnd) {
                     var dx = _this.dx,
@@ -52258,46 +52578,6 @@ var EventHandler = function (_React$Component) {
         value: function componentWillUnmount() {
             this.offListener();
         }
-
-        // handleMouseMove = () => {
-        // 	const e = d3Event;
-        // 	if (this.mouseInteraction
-        //         && this.props.mouseMove
-        //         && !this.state.panInProgress
-        // 	) {
-        // 		const newPos = mouse(this.node);
-        // 		if (this.props.onMouseMove)
-        // 			this.props.onMouseMove(newPos, "mouse", e);
-        // 	}
-        // }
-
-        // canPan = () => {
-        //     const { pan: initialPanEnabled } = this.props;
-
-        //     const {
-        //         panEnabled,
-        //         draggable: somethingSelected
-        //     } = this.props.getAllPanConditions()
-        //             .reduce((obj, a) => {
-        //                 return {
-        //                     draggable: obj.draggable || a.draggable,
-        //                     panEnabled: obj.panEnabled && a.panEnabled
-        //                 };
-        //             }, {
-        //                 draggable: false,
-        //                 panEnabled: initialPanEnabled
-        //             });
-
-        //     return {
-        //         panEnabled,
-        //         somethingSelected
-        //     }
-        // }
-
-        // shouldPan = () => {
-        //     return this.props.pan && this.props.onPan && this.state.panStart;
-        // }
-
     }, {
         key: "render",
         value: function render() {
@@ -53233,6 +53513,7 @@ var SubscriberExt = function (_React$Component) {
 
             var type = trigger;
             var proceed = _this.props.drawOn.indexOf(type) > -1;
+            //console.log(this.props.drawOn, proceed)
 
             if (proceed || force) {
                 _this.handleDraw();
@@ -53245,7 +53526,8 @@ var SubscriberExt = function (_React$Component) {
                 yAttr = shared.yAttr,
                 zAttr = shared.zAttr,
                 plotData = shared.plotData,
-                dataExtents = shared.dataExtents;
+                dataExtents = shared.dataExtents,
+                hitTest = shared.hitTest;
 
 
             return _extends({
@@ -53253,7 +53535,8 @@ var SubscriberExt = function (_React$Component) {
                 yAttr: yAttr,
                 zAttr: zAttr,
                 plotData: plotData,
-                dataExtents: dataExtents
+                dataExtents: dataExtents,
+                hitTest: hitTest
             }, _this.moreProps);
         };
 
@@ -53352,7 +53635,8 @@ var SubscriberExt = function (_React$Component) {
                 xAttr = _nextProps$shared.xAttr,
                 yAttr = _nextProps$shared.yAttr,
                 zAttr = _nextProps$shared.zAttr,
-                dataExtents = _nextProps$shared.dataExtents;
+                dataExtents = _nextProps$shared.dataExtents,
+                hitTest = _nextProps$shared.hitTest;
 
 
             this.moreProps = _extends({}, this.moreProps, {
@@ -53360,7 +53644,8 @@ var SubscriberExt = function (_React$Component) {
                 yAttr: yAttr,
                 zAttr: zAttr,
                 plotData: plotData,
-                dataExtents: dataExtents
+                dataExtents: dataExtents,
+                hitTest: hitTest
             });
         }
     }, {
@@ -57258,6 +57543,93 @@ var LegendEventHandler = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 /* harmony default export */ __webpack_exports__["a"] = (LegendEventHandler);
+
+/***/ }),
+/* 705 */
+/*!******************************************!*\
+  !*** ./src/lib/core/MousePathTracker.js ***!
+  \******************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__SubscriberExt__ = __webpack_require__(/*! ./SubscriberExt */ 670);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 8);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+var MousePathTracker = function (_React$Component) {
+    _inherits(MousePathTracker, _React$Component);
+
+    function MousePathTracker() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        _classCallCheck(this, MousePathTracker);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = MousePathTracker.__proto__ || Object.getPrototypeOf(MousePathTracker)).call.apply(_ref, [this].concat(args))), _this), _this.draw = function (ctx, moreProps) {
+            if (moreProps && moreProps.mouseXY) {
+                //ctx.save();
+                var mouseXY = moreProps.mouseXY;
+                var x = mouseXY.x,
+                    y = mouseXY.y,
+                    data = mouseXY.data,
+                    rgba = mouseXY.rgba;
+
+
+                var radius = 3;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+                ctx.fillStyle = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["h" /* hexToRGBA */])('#000000', 0.2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.fillStyle = rgba;
+                ctx.rect(0, 0, 50, 50);
+                ctx.fill();
+                console.log(rgba);
+                //ctx.restore();
+            }
+        }, _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(MousePathTracker, [{
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__SubscriberExt__["a" /* default */], {
+                canvas: function canvas(contexts) {
+                    return contexts.mouseCoord;
+                },
+                clip: true,
+                edgeClip: false,
+                draw: this.draw,
+                drawOn: ["track"],
+                shared: this.props.shared
+            });
+        }
+    }]);
+
+    return MousePathTracker;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (MousePathTracker);
 
 /***/ })
 /******/ ]);
