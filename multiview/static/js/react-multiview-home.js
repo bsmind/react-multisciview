@@ -45117,6 +45117,10 @@ var ChartBox = function (_React$Component) {
             });
         };
 
+        _this.handleDataImageRequest = function (dataID) {
+            console.log(dataID);
+        };
+
         _this.renderScatterChart = function (h) {
             var _this$props = _this.props,
                 pcpDimension = _this$props.pcpDimension,
@@ -45138,7 +45142,8 @@ var ChartBox = function (_React$Component) {
                 yAttr: yAttr,
                 zAttr: zAttr,
                 colorsByGroup: colorsBySampleNames,
-                onScatterPanZoom: _this.handleScatterPanZoom
+                onScatterPanZoom: _this.handleScatterPanZoom,
+                onDataRequest: _this.handleDataImageRequest
             });
         };
 
@@ -45334,14 +45339,16 @@ exports.locals = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__ = __webpack_require__(/*! react-multiview/lib/core */ 32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_legends__ = __webpack_require__(/*! react-multiview/lib/legends */ 702);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__ = __webpack_require__(/*! react-multiview/lib/axes */ 84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_d3_array__ = __webpack_require__(/*! d3-array */ 9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_uniqby__ = __webpack_require__(/*! lodash.uniqby */ 88);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_lodash_uniqby___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_lodash_uniqby__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_lodash_get__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_randomcolor__ = __webpack_require__(/*! randomcolor */ 120);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_randomcolor__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__ = __webpack_require__(/*! react-multiview/lib/indicators */ 706);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_d3_array__ = __webpack_require__(/*! d3-array */ 9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_d3_scale__ = __webpack_require__(/*! d3-scale */ 19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_uniqby__ = __webpack_require__(/*! lodash.uniqby */ 88);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_uniqby___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_lodash_uniqby__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_lodash_get__ = __webpack_require__(/*! lodash.get */ 44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_randomcolor__ = __webpack_require__(/*! randomcolor */ 120);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_randomcolor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12_randomcolor__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__utils__ = __webpack_require__(/*! ../../../utils */ 77);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -45349,6 +45356,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
 
 
 
@@ -45430,6 +45440,17 @@ var ScatterChart = function (_React$Component) {
 
             markerGen.calculateMarkers(data);
 
+            var databoxSortor = function databoxSortor(info) {
+                var sorted = info.sort(function (a, b) {
+                    return Object(__WEBPACK_IMPORTED_MODULE_13__utils__["a" /* sortAlphaNum */])(a.key, b.key);
+                });
+                var index = sorted.findIndex(function (d) {
+                    return d.key === 'sample';
+                });
+                sorted.splice(0, 0, sorted.splice(index, 1)[0]);
+                return sorted;
+            };
+
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["b" /* ChartCanvas */],
                 {
@@ -45444,12 +45465,13 @@ var ScatterChart = function (_React$Component) {
                     data: data,
                     dataExtents: dimension,
                     dataAccessor: function dataAccessor(d, name) {
-                        return __WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(d, name);
+                        return __WEBPACK_IMPORTED_MODULE_11_lodash_get___default()(d, name);
                     },
                     xAttr: xAttr,
                     yAttr: yAttr,
                     zAttr: zAttr,
-                    onScatterPanZoom: onScatterPanZoom
+                    onScatterPanZoom: onScatterPanZoom,
+                    onDataRequest: this.handleDataRequest
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__["b" /* XAxis */], {
                     axisAt: 'bottom',
@@ -45475,6 +45497,14 @@ var ScatterChart = function (_React$Component) {
                     },
                     legendWidth: 200,
                     legendHeight: 35
+                }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["a" /* DataBox */], {
+                    origin: {
+                        x: Math.round((width - margin.left - margin.right) / 6) * 4,
+                        y: Math.round((height - margin.top - margin.bottom) / 10) * 3
+                    },
+                    infoSortor: databoxSortor,
+                    hint: ['sample', 'annealing_temperature', 'annealing_time', 'fit_peaks_alpha', 'fit_peaks_b', 'fit_peaks_chi_squared', 'fit_peaks_d0', 'fit_peaks_sigma1']
                 })
             );
         }
@@ -45494,7 +45524,7 @@ var _initialiseProps = function _initialiseProps() {
 
 
         var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["d" /* markerProvider */])(function (d) {
-            return __WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(d, zAttr);
+            return __WEBPACK_IMPORTED_MODULE_11_lodash_get___default()(d, zAttr);
         }, {
             type: 'square',
             width: 6,
@@ -45515,6 +45545,10 @@ var _initialiseProps = function _initialiseProps() {
 
     this.getScatterChartCanvasNode = function () {
         if (_this3.ScatterChartCanvasNode) return _this3.ScatterChartCanvasNode;
+    };
+
+    this.handleDataRequest = function (dataID) {
+        if (_this3.props.onDataRequest) _this3.props.onDataRequest(dataID);
     };
 };
 
@@ -45824,8 +45858,8 @@ var ScatterSeries = function (_React$Component) {
                         var px = Math.floor(x * ratio);
                         var py = Math.floor(y * ratio);
 
-                        for (var ppx = px - 2; ppx <= px + 2; ++ppx) {
-                            for (var ppy = py - 2; ppy <= py + 2; ++ppy) {
+                        for (var ppx = px - 4; ppx <= px + 4; ++ppx) {
+                            for (var ppy = py - 4; ppy <= py + 4; ++ppy) {
                                 var pIndex = 4 * (_this.__canvasWidth * ppy + ppx);
                                 _this.__pixelData[pIndex] = R;
                                 _this.__pixelData[pIndex + 1] = G;
@@ -46126,7 +46160,7 @@ var ChartCanvas = function (_React$Component) {
 							width: canvasDim.width,
 							height: canvasDim.height,
 							onZoom: this.handleZoom,
-							panEnabled: false,
+							panEnabled: true,
 							onMouseMove: this.handleMouseMove,
 							onPan: this.handlePan,
 							onPanEnd: this.handlePanEnd
@@ -46136,10 +46170,7 @@ var ChartCanvas = function (_React$Component) {
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
-							children,
-							__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__MousePathTracker__["a" /* default */], {
-								shared: shared
-							})
+							children
 						)
 					)
 				)
@@ -46832,7 +46863,7 @@ var _initialiseProps = function _initialiseProps() {
 	this.getHoveredDataItem = function (mouseXY) {
 		var x = Math.round(mouseXY[0]);
 		var y = Math.round(mouseXY[1]);
-		if (_this3.hitCtx == null) return { x: x, y: y, info: null };
+		if (_this3.hitCtx == null) return { x: x, y: y, info: null, id: null };
 
 		var ctx = _this3.hitCtx;
 		var _props3 = _this3.props,
@@ -46866,9 +46897,9 @@ var _initialiseProps = function _initialiseProps() {
 					value: formattedValue
 				});
 			});
-			return { x: x, y: y, info: info };
+			return { x: x, y: y, info: info, id: dataID };
 		}
-		return { x: x, y: y, info: null };
+		return { x: x, y: y, info: null, id: null };
 	};
 
 	this.handleMouseMove = function (mouseXY, e) {
@@ -46882,6 +46913,9 @@ var _initialiseProps = function _initialiseProps() {
 				_this3.clearMouseCoordCanvas();
 				_this3.draw({ trigger: "mousemove" });
 				_this3.waitingForAnimationFrame = false;
+				if (_this3.props.onDataRequest && state.id) {
+					_this3.props.onDataRequest(state.id);
+				}
 			});
 		}
 	};
@@ -57550,7 +57584,6 @@ var LegendEventHandler = function (_React$Component) {
   !*** ./src/lib/core/MousePathTracker.js ***!
   \******************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -57629,7 +57662,119 @@ var MousePathTracker = function (_React$Component) {
     return MousePathTracker;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
-/* harmony default export */ __webpack_exports__["a"] = (MousePathTracker);
+/* unused harmony default export */ var _unused_webpack_default_export = (MousePathTracker);
+
+/***/ }),
+/* 706 */
+/*!*************************************!*\
+  !*** ./src/lib/indicators/index.js ***!
+  \*************************************/
+/*! exports provided: DataBox */
+/*! exports used: DataBox */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dataBox__ = __webpack_require__(/*! ./dataBox */ 707);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__dataBox__["a"]; });
+
+
+/***/ }),
+/* 707 */
+/*!***************************************!*\
+  !*** ./src/lib/indicators/dataBox.js ***!
+  \***************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__core__ = __webpack_require__(/*! ../core */ 32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 8);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+var DataBox = function (_React$Component) {
+    _inherits(DataBox, _React$Component);
+
+    function DataBox() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        _classCallCheck(this, DataBox);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = DataBox.__proto__ || Object.getPrototypeOf(DataBox)).call.apply(_ref, [this].concat(args))), _this), _this.drawInfo = function (ctx, info) {
+            var hint = _this.props.hint;
+
+            var fontSize = 6;
+            var fontFamily = 'Roboto, sans-serif';
+            var lineHeight = Math.floor(fontSize * 2);
+
+            var textX = 0,
+                textY = 0;
+            ctx.font = fontSize + 'px ' + fontFamily;
+            ctx.fillStyle = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["h" /* hexToRGBA */])('#000000', 0.8);
+            info.forEach(function (line, index) {
+                if (hint.indexOf(line.key) === -1) return;
+                var text = line.key + ' : ' + line.value;
+                ctx.fillText(text, textX, textY);
+                textY += lineHeight;
+            });
+        }, _this.draw = function (ctx, moreProps) {
+            if (moreProps.mouseXY == null || moreProps.mouseXY.x == null || moreProps.mouseXY.y == null || moreProps.mouseXY.info == null) {
+                return;
+            }
+
+            var _moreProps$mouseXY = moreProps.mouseXY,
+                x = _moreProps$mouseXY.x,
+                y = _moreProps$mouseXY.y,
+                info = _moreProps$mouseXY.info;
+            var _this$props = _this.props,
+                origin = _this$props.origin,
+                infoSortor = _this$props.infoSortor;
+
+            ctx.save();
+            ctx.translate(origin.x, origin.y);
+            _this.drawInfo(ctx, infoSortor(info));
+            ctx.restore();
+        }, _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(DataBox, [{
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__core__["f" /* SubscriberExt */], {
+                canvas: function canvas(contexts) {
+                    return contexts.mouseCoord;
+                },
+                clip: true,
+                edgeClip: false,
+                draw: this.draw,
+                drawOn: ["mousemove"],
+                shared: this.props.shared
+            });
+        }
+    }]);
+
+    return DataBox;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (DataBox);
 
 /***/ })
 /******/ ]);

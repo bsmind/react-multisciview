@@ -77,6 +77,10 @@ class ChartBox extends React.Component {
         });
     }
 
+    handleDataImageRequest = (dataID) => {
+        console.log(dataID)
+    }
+
     renderScatterChart = (h) => {
         const {
             pcpDimension,
@@ -95,6 +99,7 @@ class ChartBox extends React.Component {
             zAttr={zAttr}
             colorsByGroup={colorsBySampleNames}
             onScatterPanZoom={this.handleScatterPanZoom}
+            onDataRequest={this.handleDataImageRequest}
         />
 
     }

@@ -11,6 +11,7 @@ import {
 } from 'react-multiview/lib/legends';
 import { XAxis, YAxis } from 'react-multiview/lib/axes';
 import { ScatterSeries, CircleMarker } from 'react-multiview/lib/series';
+import { DataBox } from 'react-multiview/lib/indicators';
 
 import {
     extent as d3Extent,
@@ -26,6 +27,8 @@ import uniqBy from 'lodash.uniqby';
 import get from 'lodash.get';
 
 import randomColor from 'randomcolor';
+
+import { sortAlphaNum } from '../../../utils';
 
 // const getColorsByGroup = (groups) => {
 //     const colors = randomColor({
@@ -90,6 +93,11 @@ class ScatterChart extends React.Component {
     	if (this.ScatterChartCanvasNode) return this.ScatterChartCanvasNode;
     }
 
+    handleDataRequest = (dataID) => {
+        if (this.props.onDataRequest)
+            this.props.onDataRequest(dataID);
+    }
+
     render() {
         const margin= {left: 60, right: 40, top: 10, bottom: 60};
         const {
@@ -102,6 +110,13 @@ class ScatterChart extends React.Component {
 
         const { markerGen } = this.state;
         markerGen.calculateMarkers(data);
+
+        const databoxSortor = info => {
+            const sorted = info.sort((a, b) => sortAlphaNum(a.key, b.key));
+            const index = sorted.findIndex(d => d.key === 'sample');
+            sorted.splice(0, 0, sorted.splice(index, 1)[0]);
+            return sorted;
+        };
 
         return (
             <ChartCanvas
@@ -118,6 +133,7 @@ class ScatterChart extends React.Component {
                 yAttr={yAttr}
                 zAttr={zAttr}
                 onScatterPanZoom={onScatterPanZoom}
+                onDataRequest={this.handleDataRequest}
             >
                 <XAxis 
                     axisAt='bottom' 
@@ -141,7 +157,24 @@ class ScatterChart extends React.Component {
                     }}
                     legendWidth={200}
                     legendHeight={35}
-                />               
+                />        
+                <DataBox 
+                    origin={{
+                        x: Math.round((width - margin.left - margin.right)/6) * 4, 
+                        y: Math.round((height - margin.top - margin.bottom)/10) * 3
+                    }}     
+                    infoSortor={databoxSortor}
+                    hint={[
+                        'sample',
+                        'annealing_temperature',
+                        'annealing_time',
+                        'fit_peaks_alpha',
+                        'fit_peaks_b',
+                        'fit_peaks_chi_squared',
+                        'fit_peaks_d0',
+                        'fit_peaks_sigma1'
+                    ]}           
+                />       
             </ChartCanvas>
         );
     }

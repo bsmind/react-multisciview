@@ -828,7 +828,7 @@ class ChartCanvas extends React.Component {
 		const x = Math.round(mouseXY[0]);
 		const y = Math.round(mouseXY[1]);
 		if (this.hitCtx == null)
-			return {x, y, info: null};
+			return {x, y, info: null, id: null};
 
 		const ctx = this.hitCtx;
 		const { margin, ratio } = this.props;
@@ -859,9 +859,9 @@ class ChartCanvas extends React.Component {
 					value: formattedValue
 				});
 			});
-			return {x, y, info};
+			return {x, y, info, id: dataID};
 		}
-		return {x, y, info: null};
+		return {x, y, info: null, id: null};
 	}
 
 	handleMouseMove = (mouseXY, e) => {
@@ -875,6 +875,9 @@ class ChartCanvas extends React.Component {
 				this.clearMouseCoordCanvas();
 				this.draw({trigger: "mousemove"});
 				this.waitingForAnimationFrame = false;
+				if (this.props.onDataRequest && state.id) {
+					this.props.onDataRequest(state.id);
+				}
 			});
 		}
 	}
@@ -972,7 +975,7 @@ class ChartCanvas extends React.Component {
 							width={canvasDim.width}
 							height={canvasDim.height}
 							onZoom={this.handleZoom}
-							panEnabled={false}
+							panEnabled={true}
 							onMouseMove={this.handleMouseMove}
 							onPan={this.handlePan}
 							onPanEnd={this.handlePanEnd}
@@ -981,9 +984,6 @@ class ChartCanvas extends React.Component {
 						/>
 						<g>
 							{children}
-							<MousePathTracker 
-								shared={shared}
-							/>
 						</g>						
 					</g>
 				</svg>
