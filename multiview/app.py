@@ -95,9 +95,22 @@ class MVSampleAPI(Resource):
         }
 
 
+class MVTiffAPI(Resource):
+    def get(self, id):
+        query = {'_id': ObjectId(id)}
+        fields = {'tiff': 1, '_id': 0}
+
+        result = mvdb.query(query=query, fields=fields, getarrays=True)
+        data = result['tiff']['data']
+
+        result['tiff']['data'] = data.tolist()
+        return result['tiff']
+
+
 api.add_resource(MVDataSampleKinds, '/api/data/kinds/<string:key>', endpoint='kinds')
 api.add_resource(MVDataAttr, '/api/data/attr', endpoint='attr')
 api.add_resource(MVSampleAPI, '/api/data/sample', endpoint='sample')
+api.add_resource(MVTiffAPI, '/api/data/tiff/<string:id>', endpoint='tiff')
 
 
 @app.route('/')

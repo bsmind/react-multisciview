@@ -927,6 +927,7 @@ class ChartCanvas extends React.Component {
 			height: this.props.height,
 			ratio: this.props.ratio,
 			origDataExtents: this.props.dataExtents,
+			imgPool: this.props.imgPool,
 			subscribe: this.subscribe,
 			unsubscribe: this.unsubscribe,
 			getCanvasContexts: this.getCanvasContexts,

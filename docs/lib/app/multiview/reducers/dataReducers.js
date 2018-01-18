@@ -2,7 +2,8 @@ import {
     getSampleAttr,
     getSampleKinds,
     addDataSamples,
-    handleSampleColorChange
+    handleSampleColorChange,
+    getTiff
 } from './dataHelper';
 
 const INITIAL_STATE = {
@@ -19,7 +20,7 @@ const INITIAL_STATE = {
     dataBySamples: {},
     numQueried: 0,
 
-
+    imgPool: {},
 }
 
 function updateSelectedSamples(state, payload) {
@@ -41,6 +42,8 @@ export function dataReducers (state=INITIAL_STATE, action) {
 
         case "UPDATE_SELECTED_SAMPLES": return updateSelectedSamples(state, payload);
         case "SAMPLE_COLOR_CHANGE": return handleSampleColorChange(state, payload);
+
+        case "GET_TIFF": return getTiff(state, payload);
         default: return state;
     }
 }

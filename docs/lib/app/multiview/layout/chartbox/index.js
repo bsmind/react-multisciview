@@ -12,15 +12,19 @@ import {
     ParallelCoordinateChart
 } from './charts';
 
+import {
+    getTiffWithPriority
+} from '../../actions/dataActions'
 
-import Test from './charts/ScatterMarkerProvider';
+//import Test from './charts/ScatterMarkerProvider';
 
 import {
     getSelectedDataArray,
     getSelectedSampleNames,
     getAttrX,
     getAttrY,
-    getAttrZ
+    getAttrZ,
+    getImgPool
 } from './selector';
 
 import {
@@ -77,8 +81,9 @@ class ChartBox extends React.Component {
         });
     }
 
-    handleDataImageRequest = (dataID) => {
-        console.log(dataID)
+    handleDataImageRequest = (dataID, priority = 3) => {
+        if (this.props.getTiffWithPriority)
+            this.props.getTiffWithPriority(dataID, priority);
     }
 
     renderScatterChart = (h) => {
@@ -86,7 +91,8 @@ class ChartBox extends React.Component {
             pcpDimension,
             pcpData,
             xAttr, yAttr, zAttr,
-            colorsBySampleNames
+            colorsBySampleNames,
+            imgPool
         } = this.props;
         
         return <ScatterChart
@@ -98,6 +104,7 @@ class ChartBox extends React.Component {
             yAttr={yAttr}
             zAttr={zAttr}
             colorsByGroup={colorsBySampleNames}
+            imgPool={imgPool}
             onScatterPanZoom={this.handleScatterPanZoom}
             onDataRequest={this.handleDataImageRequest}
         />
@@ -175,13 +182,15 @@ function mapStateToProps(state) {
         sampleAccessor: d => d.sample,
 
         pcpDimension: pcpExtents,
-        pcpData: pcpData
+        pcpData: pcpData,
+
+        imgPool: getImgPool(state),
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-
+        getTiffWithPriority
     }, dispatch);
 }
 

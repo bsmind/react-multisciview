@@ -1,7 +1,21 @@
 import axios from 'axios';
+import { 
+    PRIORITY, 
+    PriorityQueue
+} from '../utils';
 
 const MAX_NUM_SAMPLE_QUERY = 6;
 const SAMPLE_TIMEOUT = 300;
+
+const TIFF_MAX_REQUEST = 5;
+const TIFF_TIMEOUT = 100;
+
+
+
+const tiffRequest = [];
+//const tiffQueue = [];
+const pqTiff = new PriorityQueue();
+
 
 export function getSampleKinds() {
     return dispatch => {
@@ -131,4 +145,47 @@ export function handleColorChange(sampleName) {
         type: 'SAMPLE_COLOR_CHANGE',
         payload: sampleName
     };
+}
+
+export function getTiff(id) {
+    return dispatch => {
+        axios.get('/api/data/tiff/' + id)
+            .then(response => {
+                const idx = tiffRequest.indexOf(id);
+                if (idx > -1) tiffRequest.splice(idx, 1);
+                dispatch({
+                    type: "GET_TIFF",
+                    payload: {id, data: response.data}
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_TIFF_REJECTED",
+                    payload: e
+                });
+            });
+    }
+}
+
+export function getTiffWithPriority(id, priority = PRIORITY.LOW_MID) {
+    return dispatch => {
+        // if it is on-going, discard the action
+        if (tiffRequest.indexOf(id) > -1) return;
+
+        // if it is not in the pended request, add the action
+        pqTiff.replace(id, priority, (a, b) => a === b);
+
+        // if there are more than 'threshold' on-going actions,
+        // then, come later
+        if (tiffRequest.length > TIFF_MAX_REQUEST) return;
+
+        // consumes one of actions in the pended list
+        const pended = pqTiff.front();
+        tiffRequest.push(pended.data);
+
+        // delay the execution proportional to the length of on-going task
+        setTimeout( () => {
+            dispatch(getTiff(pended.data))
+        }, TIFF_TIMEOUT * tiffRequest.length / pended.priority);
+    }
 }

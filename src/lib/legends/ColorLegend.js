@@ -221,13 +221,17 @@ class ColorLegend extends React.Component {
             }
         } = this.props;
 
+        const barHeight = Math.round(legendHeight/3);
+        const outerTickSize = 7;
+        
+
         return (
             <g transform={`translate(${legendOrigin.x},${legendOrigin.y})`}>
                 <LegendEventHandler
                     x={0}
-                    y={0}
+                    y={barHeight}
                     width={legendWidth}
-                    height={legendHeight}
+                    height={outerTickSize}
                     onRangeSelect={this.handleRangeSelect}
                     onRangeSelectEnd={this.handleRangeSelectEnd}
                     onRangeSelectCancel={handleZAxisSelectCancel}

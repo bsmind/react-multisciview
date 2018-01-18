@@ -105,7 +105,8 @@ class ScatterChart extends React.Component {
             data, dimension,
             xAttr, yAttr, zAttr,
             xAccessor, yAccessor, zAccessor,
-            onScatterPanZoom
+            onScatterPanZoom,
+            imgPool
         } = this.props;
 
         const { markerGen } = this.state;
@@ -132,6 +133,7 @@ class ScatterChart extends React.Component {
                 xAttr={xAttr}
                 yAttr={yAttr}
                 zAttr={zAttr}
+                imgPool={imgPool}
                 onScatterPanZoom={onScatterPanZoom}
                 onDataRequest={this.handleDataRequest}
             >

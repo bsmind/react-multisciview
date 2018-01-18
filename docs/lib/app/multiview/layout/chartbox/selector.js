@@ -20,6 +20,8 @@ export const getAttrX = state => state.vis.attrx;
 export const getAttrY = state => state.vis.attry;
 export const getAttrZ = state => state.vis.attrz;
 
+export const getImgPool = state => state.data.imgPool;
+
 export const getColorsBySampleNames = createSelector(
     [
         getSampleKinds,
