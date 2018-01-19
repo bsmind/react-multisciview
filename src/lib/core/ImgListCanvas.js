@@ -13,12 +13,15 @@ import ImgListCanvasContainer from './ImgListCanvasContainer';
 
 
 class ImgListCanvas extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
+    constructor() {
+        super();
 
+        this.state = {
+            shipImagesByID: {}
         };
-		this.subscriptions = [];        
+        this.subscriptions = [];        
+        
+
     }
 
     getCanvasContexts = () => {
@@ -35,7 +38,60 @@ class ImgListCanvas extends React.Component {
 
     unsubscribe = (id) => {
     	this.subscriptions = this.subscriptions.filter(each => each.id !== id);
-	}
+    }
+    
+    updateSpriteSheetContents = () => {
+
+    }
+
+    updateSpriteSheet = (props = this.props) => {
+        const {
+            data
+        } = props;
+
+        const shipMargin = {
+            left: 10,
+            right: 10,
+            top: 10, 
+            bottom: 10
+        };
+        const shipDimension = getCanvasDimension({
+            width: 1024,
+            height: 1024,
+            margin: shipMargin
+        });
+        const shipGap = {x: 5, y: 5};
+        const shipImageWidth = 100;  // should keep aspect ratio of actual image
+        const shipImageHeight = 100; // should keep aspect ratio of actual image
+
+        // collect list info (id, timestamp, index) for all lists in the data
+        // for each list... positioning (left-upper corner)        
+
+        // for each list, copy image to the ship
+        // if it doens't have yet, add to query list.. mark..
+        // ... and fill with something else ?
+
+        
+        
+
+
+       // console.log(data)
+    }
+
+    componentDidMount() {
+        //console.log('componentDidMount');
+        this.updateSpriteSheet();
+    }
+
+    componentWillReceiveProps(nextProp) {
+        //console.log('componentReceiveProps');
+        this.updateSpriteSheet(nextProp);
+    }
+
+    shouldComponentUpdate() {
+        //console.log('shouldupdate')
+        return true;
+    }
 
     render () {
 		const { margin } = this.props;

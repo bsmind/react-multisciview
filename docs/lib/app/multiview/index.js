@@ -48,7 +48,7 @@ class MultiViewApp extends React.Component {
     }
 
     componentWillMount() {
-        //this.handleResize();
+        this.handleResize();
     }
 
     componentDidMount() {
@@ -56,11 +56,11 @@ class MultiViewApp extends React.Component {
         this.props.getAttributes();
         this.props.getColorMap();
 
-        //window.addEventListener("resize", () => this.handleResize());
+        window.addEventListener("resize", () => this.handleResize());
     }
 
     componentWillUnmount() {
-        //window.removeEventListener("resize", () => this.handleResize());
+        window.removeEventListener("resize", () => this.handleResize());
     }
 
     shouldComponentUpdate(nextProps) {
@@ -69,15 +69,15 @@ class MultiViewApp extends React.Component {
         return true;
     }
 
-    // handleResize = () => {
-    //     let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    //     let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    handleResize = () => {
+        let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    //     //width = width - 200;
-    //     height = height - 41.6 - 56.81 - 4.15;
+        //width = width - 200;
+        height = height - 41.6 - 56.81;// - 4.15;
 
-    //     this.setState({width, height});
-    // }
+        this.setState({width, height});
+    }
 
     handleSampleChange = (action, keys) => {
         this.props.AddDelSamples(action, keys);
@@ -119,7 +119,7 @@ class MultiViewApp extends React.Component {
     }
 
     render() {
-        //const {width} = this.state;
+        const {width, height} = this.state;
 
         //console.log(this.props.attrKinds)
 
@@ -170,7 +170,7 @@ class MultiViewApp extends React.Component {
                     onToggleDataDialog={this.onToggleDataDialog}
                 />
 
-                <ChartBox className={theme.chartbox} />
+                <ChartBox className={theme.chartbox} height={height}/>
 
                 {/* <div className={theme.footer} /> */}
 

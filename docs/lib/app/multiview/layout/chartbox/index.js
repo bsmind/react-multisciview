@@ -36,6 +36,8 @@ import {
     interpolateViridis
 } from 'd3-scale';
 
+import ImageShipTest from './imageShipTest';
+
 class ChartBox extends React.Component {
     constructor(props) {
         super(props);
@@ -183,21 +185,37 @@ class ChartBox extends React.Component {
             dataList={testdata}
             imgHeight={100}
             imgGapY={10}
+            imgGapX={10}
+            imgPool={this.props.imgPool}
+            onImageRequest={this.handleDataImageRequest}
         />;
     }
 
     render() {
-        //const { height } = this.props;
-        //const scatterHeight = height / 2;
-        //const pcpHeight = height - scatterHeight;
+        const { height } = this.props;
+        const testImageShip = false;
+        let scatterHeight, pcpHeight, testHeight = 0;
+        if (testImageShip) {
+            scatterHeight = Math.floor(height / 3);
+            pcpHeight = scatterHeight;    
+            testHeight = height - scatterHeight - pcpHeight;
+        } else {
+            pcpHeight = 200;
+            scatterHeight = Math.floor(height - pcpHeight);
+            //pcpHeight = height - scatterHeight;                
+        }
 
         //console.log(this.props);
 
         return (
             <div className={this.props.className}>
-                {this.renderParallelCoordinateChart(200)}
-                {this.renderScatterChart(250)}     
-                {this.renderItemList()}           
+                {this.renderScatterChart(scatterHeight)}              
+                {this.renderParallelCoordinateChart(pcpHeight)}
+                {testImageShip &&
+                    <ImageShipTest height={testHeight}
+                    />
+                }
+                {/* {this.renderItemList()}            */}
             </div>
         );
     }

@@ -112,7 +112,6 @@ api.add_resource(MVDataAttr, '/api/data/attr', endpoint='attr')
 api.add_resource(MVSampleAPI, '/api/data/sample', endpoint='sample')
 api.add_resource(MVTiffAPI, '/api/data/tiff/<string:id>', endpoint='tiff')
 
-
 @app.route('/')
 def start():
     return render_template('index.html')

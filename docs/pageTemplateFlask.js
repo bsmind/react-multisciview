@@ -66,10 +66,13 @@ module.exports = function(params) {
         <style>html, body { margin: 0; padding: 0; }</style>
     </head>
     <body>
-        ${getIndexContent()}
+        ${page === "index" ? getIndexContent(): getDocumentationContent()}
 
         <!-- Placed at the end of the document so the pages load faster -->
-        ${`<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-home"].entry}') }}"></script>`}
+        ${page === "index"
+            ?`<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-home"].entry}') }}"></script>`
+            :`<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-documentation"].entry}') }}"></script>`
+        }
 
     </body>
 </html>`;
