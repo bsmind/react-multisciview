@@ -100,8 +100,8 @@ class ScatterSeries extends React.Component {
                     const px = Math.floor( (x) * ratio );
                     const py = Math.floor( (y) * ratio );
     
-                    for (let ppx=px-4; ppx<=px+4; ++ppx) {
-                        for (let ppy=py-4; ppy<=py+4; ++ppy) {
+                    for (let ppy=py-4; ppy<=py+4; ++ppy) {
+                        for (let ppx=px-4; ppx<=px+4; ++ppx) {
                             const pIndex = 4*(this.__canvasWidth*ppy + ppx);
                             this.__pixelData[pIndex] = R;
                             this.__pixelData[pIndex+1] = G;

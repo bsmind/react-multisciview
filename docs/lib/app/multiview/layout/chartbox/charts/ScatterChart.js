@@ -11,7 +11,7 @@ import {
 } from 'react-multiview/lib/legends';
 import { XAxis, YAxis } from 'react-multiview/lib/axes';
 import { ScatterSeries, CircleMarker } from 'react-multiview/lib/series';
-import { DataBox } from 'react-multiview/lib/indicators';
+import { DataBox, MousePathTracker } from 'react-multiview/lib/indicators';
 
 import {
     extent as d3Extent,
@@ -98,6 +98,11 @@ class ScatterChart extends React.Component {
             this.props.onDataRequest(dataID);
     }
 
+    handleSelectDataItems = (selectedDataList) => {
+        if (this.props.onSelectDataItems)
+            this.props.onSelectDataItems(selectedDataList);
+    }
+
     render() {
         const margin= {left: 60, right: 40, top: 10, bottom: 60};
         const {
@@ -136,6 +141,7 @@ class ScatterChart extends React.Component {
                 imgPool={imgPool}
                 onScatterPanZoom={onScatterPanZoom}
                 onDataRequest={this.handleDataRequest}
+                onSelectDataItems={this.handleSelectDataItems}
             >
                 <XAxis 
                     axisAt='bottom' 
@@ -174,9 +180,12 @@ class ScatterChart extends React.Component {
                         'fit_peaks_b',
                         'fit_peaks_chi_squared',
                         'fit_peaks_d0',
-                        'fit_peaks_sigma1'
+                        'fit_peaks_sigma1',
+                        'sequence_ID'
                     ]}           
                 />       
+                <MousePathTracker 
+                />
             </ChartCanvas>
         );
     }

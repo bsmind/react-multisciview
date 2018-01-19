@@ -216,3 +216,11 @@ export function getColorMap() {
             });
     };    
 }
+
+export function addSelectedDataList(list) {
+    console.log(list)
+    return {
+        type: 'ADD_SELECTED_DATA_LIST',
+        payload: list
+    };
+}

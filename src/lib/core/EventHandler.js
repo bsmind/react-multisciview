@@ -27,8 +27,10 @@ class EventHandler extends React.Component {
             panStart: {
                 panStartXScale: null,
                 panOrigin: null,
-                chartsToPan: null,
-            }
+                //chartsToPan: null,
+            },
+            //trackInProgress: false,
+            //trackPrev: null
 		};
 	}
 
@@ -99,9 +101,10 @@ class EventHandler extends React.Component {
         if (e.button !== 0) return;
         e.preventDefault();
 
+        const mouseXY = mousePosition(e);        
         this.panHappened = false;
-        if (!this.state.panInProgress && this.props.panEnabled) {
-            const mouseXY = mousePosition(e);
+        //this.trackHappened = false;
+        if (!this.state.panInProgress) {
 
             this.setState({
                 panInProgress: true,
@@ -113,10 +116,18 @@ class EventHandler extends React.Component {
             select(d3Window(this.node))
                 .on('mousemove', this.handlePan)
                 .on('mouseup', this.handlePanEnd);
-        } else {
+        }
+    }
+
+    handleRightClick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const mouseXY = mousePosition(e);
+        if (!this.state.panInProgress) {
+            this.prev = mouseXY;
             select(d3Window(this.node))
-                .on('mousemove', this.handleTrackMouse)
-                .on('mouseup', this.handleTrackMouseEnd);
+            .on('mousemove', this.handleTrackMouse)
+            .on('mouseup', this.handleTrackMouseEnd);        
         }
     }
 
@@ -124,8 +135,10 @@ class EventHandler extends React.Component {
         const e = d3Event;
 
         const mouseXY = mouse(this.node);
-        if (this.props.onMouseTrack)
-            this.props.onMouseTrack(mouseXY, e);
+        if (this.props.onMouseTrack) {
+            this.props.onMouseTrack(this.prev.slice(), mouseXY, e);
+        }
+        this.prev = mouseXY;
     }
 
     handleTrackMouseEnd = () => {
@@ -135,6 +148,7 @@ class EventHandler extends React.Component {
             .on('mousemove', this.mouseInside ? this.handleMouseMove: null)
             .on('mouseup', null);
 
+        this.prev = null;
         if (this.props.onMouseTrackEnd)
             this.props.onMouseTrackEnd(e);
     }
@@ -199,6 +213,7 @@ class EventHandler extends React.Component {
     		style={{ fill: "red", opacity: 0. }}
             onWheel={this.handleWheel}
             onMouseDown={this.handleMouseDown}
+            onContextMenu={this.handleRightClick}
     	/>;
     }
 }

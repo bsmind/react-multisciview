@@ -5,8 +5,8 @@ import {
 } from './visHelper';
 
 const INITIAL_STATE = {
-    samples: [],
-    sampleColors: {},
+    samples: [], // unused
+    sampleColors: {}, // unused
 
     attrx: 'metadata_extract.data.sequence_ID',
     attry: 'metadata_extract.data.annealing_temperature',

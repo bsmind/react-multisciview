@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import get from 'lodash.get';
+import uniqueId from 'lodash.uniqueid';
 
 import theme from './index.css';
 
@@ -13,7 +14,8 @@ import {
 } from './charts';
 
 import {
-    getTiffWithPriority
+    getTiffWithPriority,
+    addSelectedDataList
 } from '../../actions/dataActions'
 
 //import Test from './charts/ScatterMarkerProvider';
@@ -36,6 +38,9 @@ class ChartBox extends React.Component {
     constructor(props) {
         super(props);
         this.attrExtents = {};
+        this.state = {
+            selectList: []
+        };
     }
 
     getScatterChartCanvasNode = () => {
@@ -87,6 +92,18 @@ class ChartBox extends React.Component {
             this.props.getTiffWithPriority(dataID, priority);
     }
 
+    handleScatterSelectDataItems = (listObject) => {
+        const dataIDs = Object.keys(listObject);
+        const dataList = dataIDs.map(id => {
+            this.handleDataImageRequest(id, 1);
+            return listObject[id];
+        });
+        dataList.timestamp = Date.now();
+        dataList.id = uniqueId('scatter_select_');
+        if (this.props.addSelectedDataList)
+            this.props.addSelectedDataList(dataList);
+    }
+
     renderScatterChart = (h) => {
         const {
             pcpDimension,
@@ -108,6 +125,7 @@ class ChartBox extends React.Component {
             imgPool={imgPool}
             onScatterPanZoom={this.handleScatterPanZoom}
             onDataRequest={this.handleDataImageRequest}
+            onSelectDataItems={this.handleScatterSelectDataItems}
         />
 
     }
@@ -154,6 +172,8 @@ class ChartBox extends React.Component {
         const scatterHeight = height / 2;
         const pcpHeight = height - scatterHeight;
 
+        //console.log(this.props);
+
         return (
             <div className={this.props.className}>
                 {this.renderParallelCoordinateChart(pcpHeight)}
@@ -173,6 +193,8 @@ function mapStateToProps(state) {
         extents: pcpExtents
     } = getSelectedDataArray(state);
 
+    console.log(state.data.selectedItemList)
+
     return {
         xAttr: getAttrX(state),
         yAttr: getAttrY(state),
@@ -191,7 +213,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        getTiffWithPriority
+        getTiffWithPriority,
+        addSelectedDataList
     }, dispatch);
 }
 

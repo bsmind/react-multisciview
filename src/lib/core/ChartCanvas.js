@@ -6,7 +6,6 @@ import uniqueId from 'lodash.uniqueid';
 import CanvasContainer from './CanvasContainer';
 import EventHandler from './EventHandler';
 import {XAxis, YAxis} from '../axes';
-import MousePathTracker from './MousePathTracker';
 
 import {
 	dimension as getCanvasDimension,
@@ -27,6 +26,8 @@ import randomColor from 'randomcolor';
 import {
 	format as d3Format
 } from 'd3-format';
+
+import { range as d3Range } from 'd3-array';
 
 class ChartCanvas extends React.Component {
 	constructor(props) {
@@ -795,19 +796,13 @@ class ChartCanvas extends React.Component {
 		}
 	}
 
+	// test purpose
 	pickColor = (mouseXY, layerXY) => {
-		//const canvas = contexts => contexts.chartOn;
 		const ctx = this.hitCtx;//canvas(this.getCanvasContexts());
 		const { margin, ratio } = this.props;
 		
-		// ctx.save()
-		// ctx.setTransform(1, 0, 0, 1, 0, 0);
-		// ctx.scale(ratio, ratio);
 		const x = Math.round(mouseXY[0]);// * ratio + margin.left;
 		const y = Math.round(mouseXY[1]);// * ratio + margin.top;
-
-		const lx = layerXY[0];
-		const ly = layerXY[1];
 		
 		const pixx = (x + margin.left) * ratio;
 		const pixy = (y + margin.top) * ratio;
@@ -815,8 +810,6 @@ class ChartCanvas extends React.Component {
 		const data = pixel.data;
 		const rgba = 'rgba(' + data[0] + ', ' + data[1] + ', ' + data[2] + ', ' +
 					(data[3]/255) + ')';
-
-		// ctx.restore();
 		return {
 			x, y,
 			data,
@@ -882,15 +875,70 @@ class ChartCanvas extends React.Component {
 		}
 	}
 
-	handleMouseTrack = (mouseXY, e) => {
+	searchDataItemOnPath = (startXY, endXY) => {
+		const hitCtx = this.hitCtx;
+		if (hitCtx == null) return;
+		
+		const {margin, ratio, width, height} = this.props;
+		const canvasWidth = Math.floor( width*ratio );
+		const canvasHeight = Math.floor( height*ratio );
+
+		const startX = Math.round( (startXY[0] + margin.left) * ratio );
+		const endX = Math.round( (endXY[0] + margin.left) * ratio );
+		const startY = Math.round( (startXY[1] + margin.top) * ratio );
+		const endY = Math.round( (endXY[1] + margin.top) * ratio );
+
+		const xStep = startX < endX ? 1: -1;
+		const yStep = startY < endY ? 1: -1;
+
+		const pixelData = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight).data;
+
+		const timestamp = Date.now();
+		const points = d3Range(11).map(i => {
+			const t = i / 10;
+			return {
+				x: Math.floor( startX * (1 - t) + endX * t),
+				y: Math.floor( startY * (1 - t) + endY * t)
+			}
+		});
+
+		let prev = null;
+		points.map(p => {
+			const isSame = prev && (prev.x === p.x && prev.y === p.y);
+			if (!isSame) {
+				// search in 5x5 for each position
+				for (let ppy=p.y-2; ppy<=p.y+2; ++ppy) {
+					for (let ppx=p.x-2; ppx<=p.x+2; ++ppx) {
+						const pIndex = 4 * (canvasWidth*ppy + ppx);
+						const r = pixelData[pIndex];
+						const g = pixelData[pIndex+1];
+						const b = pixelData[pIndex+2];
+						const colorID = `rgb(${r}, ${g}, ${b})`;
+						const dataID = this.dataHashIDByColor[colorID];
+						if (dataID && this.__selected[dataID] == null) {
+							const dataIndex = this.dataHashIndexByID[dataID];
+							const data = {...this.state.plotData[dataIndex]};
+							this.__selected[dataID] = {
+								timestamp,
+								data 
+							};
+						}
+					}
+				}
+				// end search
+			}
+		});
+	}
+
+	handleMouseTrack = (startXY, endXY, e) => {
 		if (!this.waitingForAnimationFrame && !this.axisSelectInProgress && !this.panInProgress) {
 			this.waitingForAnimationFrame = true;
 			this.trackInProgress = true;
 
-			//console.log(e.layerX, e.layerY)
-			const state = this.pickColor(mouseXY, [e.layerX, e.layerY]);
+			this.__selected = this.__selected || {};
+			this.searchDataItemOnPath(startXY, endXY);
 
-			this.triggerEvent('track', {mouseXY: state}, e);
+			this.triggerEvent('track', {trackXY: [startXY, endXY]}, e);
 			requestAnimationFrame(() => {
 				this.waitingForAnimationFrame = false;
 				// i don't clear
@@ -902,7 +950,11 @@ class ChartCanvas extends React.Component {
 
 	handleMouseTrackEnd = (e) => {
 		this.trackInProgress = false;
-		this.triggerEvent('track', {mouseXY: null}, e);
+		if (this.props.onSelectDataItems) {
+			this.props.onSelectDataItems({...this.__selected});
+		}
+		this.__selected = null;
+		this.triggerEvent('track', {trackXY: null}, e);
 		requestAnimationFrame(() => {
 			this.clearMouseCoordCanvas();
 		});
@@ -976,12 +1028,11 @@ class ChartCanvas extends React.Component {
 							width={canvasDim.width}
 							height={canvasDim.height}
 							onZoom={this.handleZoom}
-							panEnabled={true}
 							onMouseMove={this.handleMouseMove}
 							onPan={this.handlePan}
 							onPanEnd={this.handlePanEnd}
-							//onMouseTrack={this.handleMouseTrack}
-							//onMouseTrackEnd={this.handleMouseTrackEnd}
+							onMouseTrack={this.handleMouseTrack}
+							onMouseTrackEnd={this.handleMouseTrackEnd}
 						/>
 						<g>
 							{children}

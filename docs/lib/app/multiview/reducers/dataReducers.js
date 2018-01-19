@@ -4,7 +4,8 @@ import {
     addDataSamples,
     handleSampleColorChange,
     getTiff,
-    getColorMap
+    getColorMap,
+    addSelectedDataItemList
 } from './dataHelper';
 
 const INITIAL_STATE = {
@@ -22,7 +23,9 @@ const INITIAL_STATE = {
     numQueried: 0,
 
     imgPool: {},
-    imgColorMap: null
+    imgColorMap: null,
+
+    selectedItemList: [],
 }
 
 function updateSelectedSamples(state, payload) {
@@ -48,6 +51,8 @@ export function dataReducers (state=INITIAL_STATE, action) {
 
         case "GET_TIFF": return getTiff(state, payload);
         case "GET_COLORMAP": return getColorMap(state, payload);
+
+        case "ADD_SELECTED_DATA_LIST": return addSelectedDataItemList(state, payload);
         default: return state;
     }
 }
