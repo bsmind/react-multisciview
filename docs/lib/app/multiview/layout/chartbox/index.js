@@ -10,7 +10,8 @@ import theme from './index.css';
 
 import {
     ScatterChart,
-    ParallelCoordinateChart
+    ParallelCoordinateChart,
+    ImageListChart
 } from './charts';
 
 import {
@@ -26,7 +27,8 @@ import {
     getAttrX,
     getAttrY,
     getAttrZ,
-    getImgPool
+    getImgPool,
+    getSelectedDataItemList
 } from './selector';
 
 import {
@@ -167,17 +169,35 @@ class ChartBox extends React.Component {
         />
     }
 
+    renderItemList = () => {
+        const testdata = [
+            [{timestamp: 0, data:{_id:"5a0a47094325dff64ba8c358"}}],
+            [{timestamp: 0, data:{_id:"5a0a47094325dff64ba8c358"}}],
+            [{timestamp: 0, data:{_id:"5a0a470a4325dff64ba8c376"}}, {timestamp: 0, data:{_id:"5a0a47094325dff64ba8c358"}}]
+        ];
+        testdata.forEach((d, i) => {
+            d.timestamp = i;
+            d.id = `id-${i}`;
+        });
+        return <ImageListChart
+            dataList={testdata}
+            imgHeight={100}
+            imgGapY={10}
+        />;
+    }
+
     render() {
-        const { height } = this.props;
-        const scatterHeight = height / 2;
-        const pcpHeight = height - scatterHeight;
+        //const { height } = this.props;
+        //const scatterHeight = height / 2;
+        //const pcpHeight = height - scatterHeight;
 
         //console.log(this.props);
 
         return (
             <div className={this.props.className}>
-                {this.renderParallelCoordinateChart(pcpHeight)}
-                {this.renderScatterChart(scatterHeight)}                
+                {this.renderParallelCoordinateChart(200)}
+                {this.renderScatterChart(250)}     
+                {this.renderItemList()}           
             </div>
         );
     }
@@ -193,8 +213,6 @@ function mapStateToProps(state) {
         extents: pcpExtents
     } = getSelectedDataArray(state);
 
-    console.log(state.data.selectedItemList)
-
     return {
         xAttr: getAttrX(state),
         yAttr: getAttrY(state),
@@ -208,6 +226,7 @@ function mapStateToProps(state) {
         pcpData: pcpData,
 
         imgPool: getImgPool(state),
+        itemList: getSelectedDataItemList(state)
     };
 }
 

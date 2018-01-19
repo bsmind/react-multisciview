@@ -16,6 +16,8 @@ const getAttrTypes = state => state.data.attrTypes;
 const getSelectedSampleKeys = state => state.data.samples;
 const getSelectedSampleColors = state => state.data.sampleColors;
 
+export const getSelectedDataItemList = state => state.data.selectedItemList;
+
 export const getAttrX = state => state.vis.attrx;
 export const getAttrY = state => state.vis.attry;
 export const getAttrZ = state => state.vis.attrz;

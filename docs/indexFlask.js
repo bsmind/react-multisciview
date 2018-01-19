@@ -23,6 +23,7 @@ if (!window.Modernizr.fetch || !window.Modernizr.promises) {
     loadPage();
 }
 
+
 function loadPage() {
     ReactDOM.render(
         App(),

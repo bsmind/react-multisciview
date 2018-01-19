@@ -30,21 +30,6 @@ import randomColor from 'randomcolor';
 
 import { sortAlphaNum } from '../../../utils';
 
-// const getColorsByGroup = (groups) => {
-//     const colors = randomColor({
-//         luminosity: 'light',
-//         hue: 'random',
-//         count: groups.length
-//     });
-
-//     const colorsByGroup = {};
-//     groups.forEach((group, index) => {
-//         colorsByGroup[group] = colors[index];
-//     });
-
-//     return colorsByGroup;
-// }
-
 class ScatterChart extends React.Component {
     constructor(props) {
         super(props);
@@ -104,7 +89,7 @@ class ScatterChart extends React.Component {
     }
 
     render() {
-        const margin= {left: 60, right: 40, top: 10, bottom: 60};
+        const margin= {left: 60, right: 40, top: 10, bottom: 20};
         const {
             width, height, ratio,
             data, dimension,

@@ -965,7 +965,8 @@ class ChartCanvas extends React.Component {
     	const divStyle = {
     		position: "relative",
     		width: this.props.width,
-    		height: this.props.height
+			height: this.props.height,
+			//overflow: 'scroll',
     	};
     	const svgStyle = {
     		position: "absolute",

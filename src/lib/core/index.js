@@ -8,3 +8,5 @@ export { default as SubscriberExt } from './SubscriberExt';
 
 export { default as PCPCanvas } from './PCPCanvas';
 export { default as PCPSubscriberExt } from './PCPSubscriberExt';
+
+export { default as ImgListCanvas } from './ImgListCanvas';

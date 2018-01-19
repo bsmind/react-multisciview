@@ -29,14 +29,7 @@ function getDevServerJs(mode) {
 
 function getIndexContent() {
 	return `<!-- Main jumbotron for a primary marketing message or call to action -->
-		<div>
-			<!-- Example row of columns -->
-			<div id="app" class="react-multiview"></div>
-			<hr>
-			<footer>
-				<p>MIT license</p>
-			</footer>
-		</div> <!-- /container -->`;
+			<div id="app" class="react-multiview"></div>`;
 }
 
 function getDocumentationContent() {
@@ -68,17 +61,15 @@ module.exports = function(params) {
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/16.1.1/umd/react.production.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/16.1.1/umd/react-dom.production.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/16.1.1/umd/react-dom.production.min.js"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.js') }}"></script>
         <style>html, body { margin: 0; padding: 0; }</style>
     </head>
     <body>
-        ${page === "index" || page === "indexFlask" ? getIndexContent() : getDocumentationContent()}
+        ${getIndexContent()}
 
         <!-- Placed at the end of the document so the pages load faster -->
-        ${page === "index" || page === "indexFlask"
-            ? `<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-home"].entry}') }}"></script>`
-            : `<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-documentation"].entry}') }}"></script>`}
+        ${`<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-home"].entry}') }}"></script>`}
 
     </body>
 </html>`;

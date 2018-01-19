@@ -14,7 +14,7 @@ function buildConfig(mode) {
     const context = rootPath;
     const docsEntry = {
         "react-multiview-home": "./docs/indexFlask.js",
-        "react-multiview-documentation": "./docs/documentation.js",
+        //"react-multiview-documentation": "./docs/documentation.js",
     };
     const devServer = {
         contentBase: [
@@ -102,13 +102,6 @@ function buildConfig(mode) {
                 page: "index",
                 mode,
                 filename: "./templates/index.html"
-            }),
-            new HtmlWebpackPlugin({
-                template: "./docs/pageTemplateFlask.js",
-                inject: false,
-                page: "documentation",
-                mode,
-                filename: "./templates/documentation.html"
             }),
             new webpack.LoaderOptionsPlugin({
                 options: { remarkable: getRemarkable(), context }
