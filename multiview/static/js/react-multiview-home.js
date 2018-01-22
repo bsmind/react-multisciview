@@ -45233,6 +45233,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+
 var ScatterSeries = function (_React$Component) {
     _inherits(ScatterSeries, _React$Component);
 
@@ -45672,7 +45673,9 @@ var ScatterSeries = function (_React$Component) {
                 xAttr = moreProps.xAttr,
                 yAttr = moreProps.yAttr,
                 dataExtents = moreProps.dataExtents;
-            var origDataExtents = _this.props.shared.origDataExtents;
+            var _this$props$shared4 = _this.props.shared,
+                origDataExtents = _this$props$shared4.origDataExtents,
+                zoomFactor = _this$props$shared4.zoomFactor;
 
 
             var xAccessor = _this.getAccessor(xAttr);
@@ -45694,11 +45697,22 @@ var ScatterSeries = function (_React$Component) {
                 pointSet.push(_extends({ x: x, y: y }, d));
             });
 
+            if (pointSet.length === 1) {
+                var point = pointSet[0];
+                _this.__cache = {};
+                Object.keys(point).forEach(function (key) {
+                    _this.__cache[key] = point[key];
+                });
+            }
+
             var MIN_IMAGE_SIDE = 16;
             var imgRefWidth = void 0,
                 imgRefHeight = void 0;
-            console.log('minDist ', minDist);
-            if (minDist.x == null || minDist.y == null || minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
+
+            if (minDist.x == null || minDist.y == null) {
+                imgRefWidth = _this.__imgRefWidth * (1 / zoomFactor);
+                imgRefHeight = _this.__imgRefHeight * (1 / zoomFactor);
+            } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
                 if (_this.SubscriberExtNode == null) {
                     return;
                 }
@@ -45711,31 +45725,43 @@ var ScatterSeries = function (_React$Component) {
                 return;
             } else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
                 imgRefWidth = Math.floor(minDist.x);
-                //console.log('maybe horizontally apart.. ');
             } else if (minDist.y >= MIN_IMAGE_SIDE && minDist.x < MIN_IMAGE_SIDE) {
                 imgRefHeight = Math.floor(minDist.y);
-                //console.log('maybe vertically apart..');
             } else {
                 imgRefWidth = Math.floor(minDist.x);
                 imgRefHeight = Math.floor(minDist.y);
-                //console.log('good distribution')
             }
 
-            var imageSet = [];
-            var _this$props$shared4 = _this.props.shared,
-                imgPool = _this$props$shared4.imgPool,
-                handleImageRequest = _this$props$shared4.handleImageRequest;
+            _this.__imgRefWidth = imgRefWidth;
+            _this.__imgRefHeight = imgRefHeight;
 
-            pointSet.forEach(function (d) {
+            var imageSet = [];
+            var _this$props$shared5 = _this.props.shared,
+                imgPool = _this$props$shared5.imgPool,
+                handleImageRequest = _this$props$shared5.handleImageRequest,
+                handleImageZoom = _this$props$shared5.handleImageZoom,
+                canvasDim = _this$props$shared5.canvasDim;
+
+            var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
+
+            var imageRatio = Math.max(imgRefWidth / canvasDim.width || 0.1, imgRefHeight / canvasDim.height || 0.1);
+            //console.log(canvasDim, imgRefWidth, imgRefHeight)
+
+            var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
+
+            pointSetToUse.forEach(function (d) {
                 imageSet.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__ImgViewer__["a" /* default */], {
                     key: "imgViewer-" + d._id,
-                    x: d.x,
-                    y: d.y,
-                    imgRefWidth: imgRefWidth,
-                    imgRefHeight: imgRefHeight,
+                    x: xAccessor(d),
+                    y: yAccessor(d),
+                    imgRefWidth: _this.__imgRefWidth,
+                    imgRefHeight: _this.__imgRefHeight,
                     id: d._id,
                     imgPool: imgPool,
-                    onImageRequest: handleImageRequest
+                    onImageRequest: handleImageRequest,
+                    onImageZoom: handleImageZoom,
+                    showGrid: showGrid,
+                    svgDim: canvasDim
                 }));
             });
             return imageSet;
@@ -45866,7 +45892,9 @@ var ChartCanvas = function (_React$Component) {
 		var initialState = _this.resetChart();
 		_this.state = _extends({
 			id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()('chartcanvas-')
-		}, initialState);
+		}, initialState, {
+			zoomFactor: 1
+		});
 		_this.subscriptions = [];
 		_this.panInProgress = false;
 		_this.axisSelectInProgress = false;
@@ -45959,6 +45987,8 @@ var ChartCanvas = function (_React$Component) {
 				handleZAxisSelectEnd: this.handleZAxisSelectEnd,
 				handleZAxisSelectCancel: this.handleZAxisSelectCancel,
 				handleImageRequest: this.props.onDataRequest,
+				handleImageZoom: this.handleZoom,
+				zoomFactor: this.state.zoomFactor,
 				hitTest: {
 					canvas: this.hitCanvas,
 					ctx: this.hitCtx
@@ -46369,6 +46399,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		var SCALE_FACTOR = 0.001;
 		var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+		//console.log('canvas: ', zoomFactor)
 		var centerX = initialXScale.invert(mouseXY[0]),
 		    beginX = initialXScale.domain()[0],
 		    endX = initialXScale.domain()[1];
@@ -46394,7 +46425,8 @@ var _initialiseProps = function _initialiseProps() {
 				scale: newScaleY,
 				step: stepY
 			}),
-			dataExtents: _extends({}, _this3.state.dataExtents, (_extends4 = {}, _defineProperty(_extends4, xName, newDomainX.slice()), _defineProperty(_extends4, yName, newDomainY.slice()), _extends4))
+			dataExtents: _extends({}, _this3.state.dataExtents, (_extends4 = {}, _defineProperty(_extends4, xName, newDomainX.slice()), _defineProperty(_extends4, yName, newDomainY.slice()), _extends4)),
+			zoomFactor: zoomFactor
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom([xName, yName], [newDomainX, newDomainY], false);
@@ -59244,6 +59276,10 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_scale__ = __webpack_require__(/*! d3-scale */ 18);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -59251,6 +59287,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
 
 
 
@@ -59276,6 +59315,21 @@ var ImgViewer = function (_React$Component) {
                 width = img.width / img.height * side;
             }
             return { width: width, height: height };
+        };
+
+        _this.handleImageZoom = function (size, e) {
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["k" /* mousePosition */])(e);
+            var width = size.width,
+                height = size.height;
+
+
+            var mX = mouseXY[0] - width / 2;
+            var mY = mouseXY[1] - height / 2;
+
+            var X = Math.round(_this.props.x + mX);
+            var Y = Math.round(_this.props.y + mY);
+
+            if (_this.props.onImageZoom) _this.props.onImageZoom([X, Y], e);
         };
 
         _this.renderImage = function () {
@@ -59311,8 +59365,106 @@ var ImgViewer = function (_React$Component) {
                 y: y - height / 2,
                 width: width,
                 height: height,
-                imageRendering: 'pixelated'
+                imageRendering: 'pixelated',
+                onWheel: _this.handleImageZoom.bind(_this, { width: width, height: height })
             });
+        };
+
+        _this.renderGrid = function () {
+            if (!_this.props.showGrid || _this.state.img == null) return;
+
+            var _this$props2 = _this.props,
+                imgRefWidth = _this$props2.imgRefWidth,
+                imgRefHeight = _this$props2.imgRefHeight,
+                x = _this$props2.x,
+                y = _this$props2.y,
+                svgDim = _this$props2.svgDim;
+
+            var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
+            var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
+            var imgSide = Math.min(imgWidth, imgHeight);
+
+            var _this$getImgSize2 = _this.getImgSize(imgSide),
+                width = _this$getImgSize2.width,
+                height = _this$getImgSize2.height;
+
+            var _this$state = _this.state,
+                img = _this$state.img,
+                id = _this$state.id;
+
+
+            var xScale = Object(__WEBPACK_IMPORTED_MODULE_3_d3_scale__["b" /* scaleLinear */])().domain([0, img.width]).range([0, width]);
+            var cx = x;
+            var dx = xScale(1);
+            var sx = cx - width / 2;
+            var ex = cx + width / 2;
+            var boundX = [Math.max(sx, 0), Math.min(ex, svgDim.width)];
+            var start_ix = Math.floor((boundX[0] - sx) / dx);
+            var end_ix = img.width - Math.ceil((ex - boundX[1]) / dx);
+
+            var yScale = Object(__WEBPACK_IMPORTED_MODULE_3_d3_scale__["b" /* scaleLinear */])().domain([0, img.height]).range([0, height]);
+            var cy = y;
+            var dy = yScale(1);
+            var sy = cy - height / 2;
+            var ey = cy + height / 2;
+            var boundY = [Math.max(sy, 0), Math.min(ey, svgDim.height)];
+            var start_iy = Math.floor((boundY[0] - sy) / dy);
+            var end_iy = img.height - Math.ceil((ey - boundY[1]) / dy);
+
+            var lineStyleVertical = {
+                stroke: '#000000',
+                strokeWidth: 1,
+                y1: boundY[0],
+                y2: boundY[1]
+            };
+            var lineStyleHorizontal = {
+                stroke: '#000000',
+                strokeWidth: 1,
+                x1: boundX[0],
+                x2: boundX[1]
+            };
+            var textStyle = {
+                fontFamily: 'Roboto, sans-serif',
+                fontSize: Math.min(dx, dy) / 5,
+                textAnchor: 'start',
+                fill: 'black'
+            };
+
+            var grids = [];
+            var needToDrawVerticalLine = true;
+            for (var iy = start_iy; iy <= end_iy; ++iy) {
+                var yy = sy + iy * dy;
+                grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', _extends({
+                    key: id + '-h-' + iy,
+                    y1: yy,
+                    y2: yy
+                }, lineStyleHorizontal)));
+
+                for (var ix = start_ix; ix <= end_ix; ++ix) {
+                    var xx = sx + ix * dx;
+
+                    if (iy < img.height && ix < img.width) {
+                        grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'text',
+                            _extends({
+                                key: id + '-text-' + ix + '-' + iy,
+                                x: xx + dx / 6,
+                                y: yy + dy / 3
+                            }, textStyle),
+                            img.data[iy][ix]
+                        ));
+                    }
+
+                    if (needToDrawVerticalLine) grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', _extends({
+                        key: id + '-v-' + ix,
+                        x1: xx,
+                        x2: xx
+                    }, lineStyleVertical)));
+                }
+                needToDrawVerticalLine = false;
+            }
+
+            return grids;
         };
 
         _this.state = {
@@ -59365,7 +59517,8 @@ var ImgViewer = function (_React$Component) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'g',
                 null,
-                this.renderImage()
+                this.renderImage(),
+                this.renderGrid()
             );
         }
     }]);

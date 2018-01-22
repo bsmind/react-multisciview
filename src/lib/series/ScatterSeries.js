@@ -7,6 +7,7 @@ import { functor, hexToRGBA, isArrayOfString } from "../utils";
 import { nest as d3Nest } from "d3-collection";
 
 import { clearCanvas } from '../core/utils';
+import { mousePosition } from '../utils';
 import ImgViewer from './ImgViewer';
 
 class ScatterSeries extends React.Component {
@@ -404,7 +405,7 @@ class ScatterSeries extends React.Component {
     drawImage = (moreProps, ctx) => {
 
         const { plotData, xAttr, yAttr, dataExtents } = moreProps;
-    	const { shared: {origDataExtents} } = this.props;
+    	const { shared: {origDataExtents, zoomFactor} } = this.props;
         
         const xAccessor = this.getAccessor(xAttr);
         const yAccessor = this.getAccessor(yAttr);
@@ -427,12 +428,21 @@ class ScatterSeries extends React.Component {
             pointSet.push({x, y, ...d}); 
         });
     
+        if (pointSet.length === 1) {
+            const point = pointSet[0];
+            this.__cache = {};
+            Object.keys(point).forEach(key => {
+                this.__cache[key] = point[key];
+            });
+        }
+
         const MIN_IMAGE_SIDE = 16;
         let imgRefWidth, imgRefHeight; 
-        console.log('minDist ', minDist);
-        if ((minDist.x == null || minDist.y == null) ||
-            (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE)
-        ) {
+        
+        if (minDist.x == null || minDist.y == null) {
+            imgRefWidth = this.__imgRefWidth * (1/zoomFactor);
+            imgRefHeight = this.__imgRefHeight * (1/zoomFactor);
+        } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
             if (this.SubscriberExtNode == null) {
                 return;
             }
@@ -444,28 +454,40 @@ class ScatterSeries extends React.Component {
             return;                
         } else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
             imgRefWidth = Math.floor(minDist.x);
-            //console.log('maybe horizontally apart.. ');
         } else if (minDist.y >= MIN_IMAGE_SIDE && minDist.x < MIN_IMAGE_SIDE) {
             imgRefHeight = Math.floor(minDist.y);
-            //console.log('maybe vertically apart..');
         } else {
             imgRefWidth = Math.floor(minDist.x);
             imgRefHeight = Math.floor(minDist.y);
-            //console.log('good distribution')
         }
 
+        this.__imgRefWidth = imgRefWidth;
+        this.__imgRefHeight = imgRefHeight;
+
         const imageSet = [];
-        const { imgPool, handleImageRequest } = this.props.shared;
-        pointSet.forEach(d => {
+        const { imgPool, handleImageRequest, handleImageZoom, canvasDim } = this.props.shared;
+        const pointSetToUse = pointSet.length ? pointSet: [this.__cache];
+
+        const imageRatio = Math.max(
+            imgRefWidth / canvasDim.width || 0.1, 
+            imgRefHeight / canvasDim.height || 0.1);
+        //console.log(canvasDim, imgRefWidth, imgRefHeight)
+            
+        let showGrid = pointSetToUse.length === 1 && imageRatio > 30;
+
+        pointSetToUse.forEach(d => {
             imageSet.push(<ImgViewer
                 key={`imgViewer-${d._id}`}
-                x={d.x}
-                y={d.y}
-                imgRefWidth={imgRefWidth}
-                imgRefHeight={imgRefHeight}
+                x={xAccessor(d)}
+                y={yAccessor(d)}
+                imgRefWidth={this.__imgRefWidth}
+                imgRefHeight={this.__imgRefHeight}
                 id={d._id}
                 imgPool={imgPool}
                 onImageRequest={handleImageRequest}
+                onImageZoom={handleImageZoom}
+                showGrid={showGrid}
+                svgDim={canvasDim}
             />);
         });
         return imageSet;

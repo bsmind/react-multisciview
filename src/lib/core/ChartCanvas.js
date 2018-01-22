@@ -23,7 +23,8 @@ class ChartCanvas extends React.Component {
 		const initialState = this.resetChart();
 		this.state = {
 			id: uniqueId('chartcanvas-'),
-			...initialState
+			...initialState,
+			zoomFactor: 1
 		}
 		this.subscriptions = [];
 		this.panInProgress = false;
@@ -426,7 +427,8 @@ class ChartCanvas extends React.Component {
 		} = this.state;
 
         const SCALE_FACTOR = 0.001;
-        const zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+		const zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+		//console.log('canvas: ', zoomFactor)
         const centerX = initialXScale.invert(mouseXY[0]),
             beginX = initialXScale.domain()[0],
             endX = initialXScale.domain()[1];
@@ -470,7 +472,8 @@ class ChartCanvas extends React.Component {
 				...this.state.dataExtents,
 				[xName]: newDomainX.slice(),
 				[yName]: newDomainY.slice()
-			}
+			},
+			zoomFactor
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(
@@ -1046,6 +1049,8 @@ class ChartCanvas extends React.Component {
 			handleZAxisSelectEnd: this.handleZAxisSelectEnd,
 			handleZAxisSelectCancel: this.handleZAxisSelectCancel,
 			handleImageRequest: this.props.onDataRequest,
+			handleImageZoom: this.handleZoom,
+			zoomFactor: this.state.zoomFactor,
 			hitTest: {
 				canvas: this.hitCanvas,
 				ctx: this.hitCtx
