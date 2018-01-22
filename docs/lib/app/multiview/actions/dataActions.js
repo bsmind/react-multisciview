@@ -61,6 +61,7 @@ function getDataFromServer(list, total) {
         })
         .then(response => {
             const data = response.data;
+            //console.log('fomrServer', data)
             dispatch({
                 type: "ADD_DATA_SAMPLES",
                 payload: {
@@ -104,8 +105,6 @@ export function AddData(action, sampleNames) {
 }
 
 export function updateSelectedSamples(selected, colors) {
-
-    //console.log(selected)
     return (dispatch, getState) => {
         const dataBySamples = getState().data.dataBySamples;
         const sampleKinds = getState().data.sampleKinds;
@@ -134,12 +133,53 @@ export function updateSelectedSamples(selected, colors) {
             payload: {selected, colors}                
         });
     }
-
-    // return {
-    //     type: 'UPDATE_SELECTED_SAMPLES',
-    //     payload: {selected, colors}
-    // }
 }
+
+export function addSelectedSamples(selected) {
+    return (dispatch, getState) => {
+        const dataBySamples = getState().data.dataBySamples;
+        const sampleKinds = getState().data.sampleKinds;
+
+        const sampleNames = selected.map(key => sampleKinds[key]).filter(each => each != null);
+
+        const dataToQuery = [];
+        const dataHave = Object.keys(dataBySamples);
+
+        sampleNames.forEach(name => {
+            if (dataHave.findIndex(d => d === name) === -1)
+                dataToQuery.push(name);
+        });
+
+        if (dataToQuery.length) {
+            for (let i=0; i < dataToQuery.length; i += MAX_NUM_SAMPLE_QUERY) {
+                const sliced = dataToQuery.slice(i, i + MAX_NUM_SAMPLE_QUERY);
+                setTimeout(() => {
+                    dispatch(getDataFromServer(sliced, dataToQuery.length));
+                }, SAMPLE_TIMEOUT);
+            }
+        }    
+
+        dispatch({
+            type: 'ADD_SELECTED_SAMPLES',
+            payload: selected                
+        });
+    }
+}
+
+export function delSelectedSamples(selectedKeys) {
+    return {
+        type: 'DEL_SELECTED_SAMPLES',
+        payload: selectedKeys
+    }
+}
+
+export function changeSelectedSampleColors(selectedNames) {
+    return {
+        type: 'CHANGE_SELECTED_SAMPLE_COLORS',
+        payload: selectedNames
+    }
+}
+
 
 export function handleColorChange(sampleName) {
     return {

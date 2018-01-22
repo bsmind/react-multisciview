@@ -35,7 +35,7 @@
     "appclean": "rimraf -rf ./multiview/static/js/* && rimraf -rf ./multiview/templates/*",
     "appmodernizr": "modernizr -c config/modernizr-config.json -d ./multiview/static/js/modernizr.js",
     "appwatch": "cross-env BABEL_ENV=es webpack --config config/app.config.js --env watch && ncp docs/data/ multiview/static/resources/data && ncp docs/data/cm/ multiview/static/resources/data/cm",
-    "apptest": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && npm run appwatch"
+    "apptest": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && ncp docs/js/ multiview/static/js && npm run appwatch"
   },
   "dependencies": {
     "axios": "^0.17.1",

@@ -18,3 +18,10 @@ export function setAttr(dim, value) {
         payload: {dim, value}
     };
 }
+
+export function setSwitch(name, value) {
+    return {
+        type: "SET_SWITCH",
+        payload: {name, value}
+    }
+}

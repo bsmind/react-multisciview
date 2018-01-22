@@ -20,65 +20,70 @@ import uniqBy from 'lodash.uniqby';
 
 import randomColor from 'randomcolor';
 
-const getColorsByGroup = (groups) => {
-    const colors = randomColor({
-        luminosity: 'light',
-        hue: 'random',
-        count: groups.length
-    });
+// const getColorsByGroup = (groups) => {
+//     const colors = randomColor({
+//         luminosity: 'light',
+//         hue: 'random',
+//         count: groups.length
+//     });
 
-    const colorsByGroup = {};
-    groups.forEach((group, index) => {
-        colorsByGroup[group] = colors[index];
-    });
+//     const colorsByGroup = {};
+//     groups.forEach((group, index) => {
+//         colorsByGroup[group] = colors[index];
+//     });
 
-    return colorsByGroup;
-}
+//     return colorsByGroup;
+// }
 
-class MultiView extends React.Component {
+class ScatterChart extends React.Component {
+
     render() {
-        const height = 350;
         const margin= {left: 80, right: 40, top: 30, bottom: 40};
-        const dataToUse = this.props.data.map(d => {
-            if (d.meta == null ||
-                d.meta.data.annealing_temperature == null ||
-                d.meta.data.annealing_time == null
-            ) {
-                return {x: null, y: null};
-            } else {
-                return {
-                    id: d.item,
-                    group: d.sample,
-                    y: d.meta.data.annealing_temperature,
-                    x: d.meta.data.annealing_time
-                };
-            }
-        })
-        .filter(d => d.x != null && d.y != null)
-        .sort((a,b) => a.x - b.x);
+        const {
+            width,
+            height,
+            ratio,
+            data,
+            extents,
+            xAccessor,
+            yAccessor,
+            groups,
+            colorsByGroup,
+            groupAccessor
+        } = this.props;
 
-        const xExtents = d3Extent(dataToUse, d => d.x);
-        const groups = uniqBy(dataToUse, 'group').map(d => d.group);
-        const colorsByGroup = getColorsByGroup(groups);
+        if (data == null)
+            return null;
+
+        const xExtents = xAccessor(extents);
+        const yExtents = yAccessor(extents);
+
+        // const groups = uniqBy(dataToUse, 'group').map(d => d.group);
+        // const colorsByGroup = getColorsByGroup(groups);
+        // console.log(colorsByGroup, data, groups)
+        // data.forEach( (d, index) => {
+        //     console.log(index, colorsByGroup[groupAccessor(d)])
+        // })
 
         const markerProps = {
             r: 3,
-            stroke: d => colorsByGroup[d.group || d],
-            fill: d => colorsByGroup[d.group || d],
+            stroke: d => colorsByGroup[groupAccessor(d) || d],
+            fill: d => colorsByGroup[groupAccessor(d) || d],
             opacity: 0.5,
             strokeWidth: 1
         }
 
         //console.log(dataToUse.length)
+        //return null;
 
         return (
             <ChartCanvas
-                width={this.props.width}
+                width={width}
                 height={height}
-                ratio={this.props.ratio}
+                ratio={ratio}
                 margin={margin}
-                data={dataToUse}
-                xAccessor={d => d.x}
+                data={data}
+                xAccessor={xAccessor}
                 xExtents={xExtents}
                 xScale={scaleLinear()}
                 xFlip={false}
@@ -87,7 +92,7 @@ class MultiView extends React.Component {
                 <Chart
                     id={1}
                     //height={height}
-                    yExtents={d => d.y}
+                    yExtents={yAccessor}
                     yScale={scaleLinear()}
                     yFlip={false}
                     yPadding={0}
@@ -96,11 +101,11 @@ class MultiView extends React.Component {
                     <YAxis axisAt='left' orient='left' axisWidth={40} />
                     <Series>
                         <ScatterSeries
-                            yAccessor={d => d.y}
+                            yAccessor={yAccessor}
                             marker={CircleMarker}
                             markerProps={markerProps}
                             drawOrder={groups}
-                            orderAccessor={d => d.group}
+                            orderAccessor={groupAccessor}
                         />
                     </Series>
                 </Chart>
@@ -109,5 +114,5 @@ class MultiView extends React.Component {
     }
 }
 
-MultiView = fitWidth(MultiView);
-export default MultiView;
+ScatterChart = fitWidth(ScatterChart);
+export default ScatterChart;

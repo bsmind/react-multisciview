@@ -5,7 +5,10 @@ import {
     handleSampleColorChange,
     getTiff,
     getColorMap,
-    addSelectedDataItemList
+    addSelectedDataItemList,
+    addSelectedSamples,
+    delSelectedSamples,
+    changeSelectedSampleColors
 } from './dataHelper';
 
 const INITIAL_STATE = {
@@ -28,14 +31,6 @@ const INITIAL_STATE = {
     selectedItemList: [],
 }
 
-function updateSelectedSamples(state, payload) {
-    const {selected, colors} = payload;
-    return {
-        ...state,
-        samples: selected,
-        sampleColors: colors
-    }
-}
 
 
 export function dataReducers (state=INITIAL_STATE, action) {
@@ -44,9 +39,13 @@ export function dataReducers (state=INITIAL_STATE, action) {
     switch(type) {
         case "GET_SAMPLE_KINDS": return getSampleKinds(state, payload);
         case "GET_SAMPLE_ATTR": return getSampleAttr(state, payload);
+
         case "ADD_DATA_SAMPLES": return addDataSamples(state, payload);
 
-        case "UPDATE_SELECTED_SAMPLES": return updateSelectedSamples(state, payload);
+        case "ADD_SELECTED_SAMPLES": return addSelectedSamples(state, payload);
+        case "DEL_SELECTED_SAMPLES": return delSelectedSamples(state, payload);
+        case "CHANGE_SELECTED_SAMPLE_COLORS": return changeSelectedSampleColors(state, payload);
+        
         case "SAMPLE_COLOR_CHANGE": return handleSampleColorChange(state, payload);
 
         case "GET_TIFF": return getTiff(state, payload);

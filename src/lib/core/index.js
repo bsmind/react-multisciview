@@ -11,3 +11,7 @@ export { default as PCPSubscriberExt } from './PCPSubscriberExt';
 
 export { default as ImgListCanvas } from './ImgListCanvas';
 export { default as ImgListSubscriberExt } from './ImgListSubscriberExt';
+
+
+// svg
+export { default as ChartContainer } from './ChartContainer';

@@ -5,29 +5,17 @@ import uniqueId from 'lodash.uniqueid';
 
 import CanvasContainer from './CanvasContainer';
 import EventHandler from './EventHandler';
-import {XAxis, YAxis} from '../axes';
+import { XAxis, YAxis } from '../axes';
 
-import {
-	dimension as getCanvasDimension,
-	clearCanvas
-} from './utils';
+import { dimension as getCanvasDimension, clearCanvas } from './utils';
+import { getScale } from './scatterUtils';
+import { cursorStyle, isArrayOfString, isEqualArray } from '../utils';
 
-import {
-	getScale
-} from './scatterUtils';
-
-import {
-	cursorStyle,
-	isArrayOfString
-} from '../utils';
-
-import randomColor from 'randomcolor';
-
-import {
-	format as d3Format
-} from 'd3-format';
-
+import { format as d3Format } from 'd3-format';
 import { range as d3Range } from 'd3-array';
+
+
+
 
 class ChartCanvas extends React.Component {
 	constructor(props) {
@@ -113,12 +101,11 @@ class ChartCanvas extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
+		//const state = this.updateChart(nextProps);
 		const state = this.updateChart(nextProps);
+		//console.log(state);
 		this.clearAxisAndChartOnCanvas();
-		this.setState({
-			...this.state,
-			...state
-		});
+		this.setState({...state});
 		const {
 			width: widthPrev,
 			height: heightPrev,
@@ -171,6 +158,8 @@ class ChartCanvas extends React.Component {
 	resetChart = (props = this.props) => {
 		const {
 			data,
+			samples,		
+			seriesName,		
 			dataExtents: dataExtentsProp,
 			dataAccessor,
 			xAttr: xAttrProp,
@@ -194,7 +183,7 @@ class ChartCanvas extends React.Component {
 		// zScale: only domain...
 		const zAttr = {
 			name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
-			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): null,
+			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1],
 			select: null,
 			selectDomain: null,
 		}
@@ -226,72 +215,82 @@ class ChartCanvas extends React.Component {
 
 		return {
 			plotData,
+			seriesName,
+			samples: samples.slice(),
 			dataExtents,
 			xAttr,
 			yAttr,
 			zAttr,
-			xAccessor: d => d[xAttr],
-			yAccessor: d => d[yAttr]
 		}
 	}
 
 	updateChart = (props = this.props) => {
 		const {
 			data,
+			seriesName: seriesNameProps,
+			samples: samplesProp,				
 			dataExtents: dataExtentsProp,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
-			zAttr: zAttrProp
+			zAttr: zAttrProp,
 		} = props;
+
 		const canvasDim = getCanvasDimension(props);
 
 		const {
+			seriesName: seriesNameState,
+			samples: samplesState,
 			dataExtents: dataExtentsState,
 			xAttr: initialXAttr,
 			yAttr: initialYAttr,
 			zAttr: initialZAttr,
 		} = this.state;
 
-		// const dataExtents = {...dataExtentsProp};
-		// Object.keys(initialDataExtents).forEach(key => {
-		// 	dataExtents[key] = initialDataExtents[key].slice();
-		// });
 		const dimName = Object.keys(dataExtentsProp);
 		dimName.forEach(name => {
 			const extentsProps = dataExtentsProp[name];
-			if (dataExtentsState[name] == null) {
+			const extentsState = dataExtentsState[name];
+			if (extentsState == null) { // new field
 				dataExtentsState[name] = isArrayOfString(extentsProps)
 					? [0, extentsProps.length]
 					: extentsProps.slice();
+			} else { 
+				// expand one but ordinary 
+				if (isArrayOfString(extentsProps) && (xAttrProp !== name && yAttrProp !== name)) {
+					extentsState[0] = 0;
+					extentsState[1] = extentsProps.length;
+				} 
+				//else {
+				// 	extentsState[0] = Math.min(extentsState[0], extentsProps[0]);
+				// 	extentsState[1] = Math.max(extentsState[1], exten[1]);
+				// }
 			}
 		});
 
-
 		// xScale
-		const xAttr = (initialXAttr.name === xAttrProp)
-			? initialXAttr
-			: getScale({
+		const xAttr = getScale({
 				dataExtents: dataExtentsProp, 
 				attribute: xAttrProp,
 				dataExtentsPrev: dataExtentsState
 			}, [0, canvasDim.width]);
 
-
 		// yScale
-		const yAttr = (initialYAttr.name === yAttrProp)
-			? initialYAttr
-			: getScale({
+		const yAttr =  getScale({
 				dataExtents: dataExtentsProp, 
 				attribute: yAttrProp,
 				dataExtentsPrev: dataExtentsState
 			}, [canvasDim.height, 0]);
 
+		// need to think
 		const zAttr = (initialZAttr.name === zAttrProp)
-			? initialZAttr
+			? {
+				...initialZAttr,
+				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1]
+			}
 			: {
 				name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
-				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): null,
+				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1],
 				select: null,
 				selectDomain: (dataExtentsProp[zAttrProp] && isArrayOfString(dataExtentsProp[zAttrProp])) 
 					? null
@@ -300,33 +299,44 @@ class ChartCanvas extends React.Component {
 						: null
 			}
 
-		//console.log(dataExtentsProp)
-		
-		// flatten data to plot
-		const plotData = data.map((d,index) => {
-			const flattened = {};
-			dimName.forEach(name => {
-				flattened[name] = dataAccessor(d, name);
-			});
-			flattened['_id'] = d._id;
-			flattened['markerID']=d.markerID;
-			flattened['item']=d.item;
-
-			// dataHash
-			const colorID = this.hashingData(d._id, index);
-			flattened['colorID']=colorID;
 			
-			return flattened;
-		});
+			
+		// flatten data to plot
+		// todo: avoid unneccessary update...
+		// (need to update markerID)
+		let plotData, samples, seriesName;
+		//if (!isEqualArray(samplesProp, samplesState) || seriesNameProps !== seriesNameState) {
+			plotData = data.map((d,index) => {
+				const flattened = {};
+				dimName.forEach(name => {
+					flattened[name] = dataAccessor(d, name);
+				});
+				flattened['_id'] = d._id;
+				flattened['markerID']=d.markerID;
+				flattened['item']=d.item;
+	
+				// dataHash
+				const colorID = this.hashingData(d._id, index);
+				flattened['colorID']=colorID;
+				
+				return flattened;
+			});	
+			samples = samplesProp.slice();
+			seriesName = seriesNameProps;
+		//} else {
+		//	plotData = this.state.plotData;	
+		//	samples = samplesState;
+		//	seriesName = seriesNameState;
+		//}
 
 		return {
 			plotData,
+			samples,			
+			seriesName,
 			dataExtents: {...dataExtentsState},
 			xAttr,
 			yAttr,
 			zAttr,
-			xAccessor: d => d[xAttr],
-			yAccessor: d => d[yAttr]
 		}		
 	}
 
@@ -358,13 +368,16 @@ class ChartCanvas extends React.Component {
 		newDomain[0] = Math.max(extents[0], newDomain[0]);
 		newDomain[1] = Math.min(extents[1], newDomain[1]);
 		
-		
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
 			...this.state,
 			xAttr: {
 				...this.state.xAttr,
 				scale: scale.copy().domain(newDomain)
+			},
+			dataExtents: {
+				...this.state.dataExtents,
+				[name]: newDomain
 			}
 		});
 		if (this.props.onScatterPanZoom) {
@@ -389,6 +402,10 @@ class ChartCanvas extends React.Component {
 			yAttr: {
 				...this.state.yAttr,
 				scale: scale.copy().domain(newDomain)
+			},
+			dataExtents: {
+				...this.state,
+				[name]: newDomain
 			}
 		});
 		if (this.props.onScatterPanZoom) {
@@ -399,7 +416,6 @@ class ChartCanvas extends React.Component {
 			);
 		}		
     }
-
 
 	handleZoom = (mouseXY, e) => {
 		if (this.panInProgress) return;
@@ -449,6 +465,11 @@ class ChartCanvas extends React.Component {
 				...this.state.yAttr,
 				scale: newScaleY,
 				step: stepY
+			},
+			dataExtents: {
+				...this.state.dataExtents,
+				[xName]: newDomainX.slice(),
+				[yName]: newDomainY.slice()
 			}
 		});
 		if (this.props.onScatterPanZoom) {
@@ -460,14 +481,16 @@ class ChartCanvas extends React.Component {
 		}
 	}
 
-    panHelper = (mouseXY, initialXAttr, initialYAttr, {dx, dy}) => {
+    panHelper = (mouseXY, initialXAttr, initialYAttr, initialDataExtents, {dx, dy}) => {
 		const {
+			name: xName,
 			scale: initialXScale,
 			extents: xExtents,
 			ordinary: xOrdinary
 		} = initialXAttr;
 
 		const {
+			name: yName,
 			scale: initialYScale,
 			extents: yExtents,
 			ordinary: yOrdinary
@@ -501,6 +524,11 @@ class ChartCanvas extends React.Component {
 				...initialYAttr,
 				scale: updatedScaleY,
 				step: stepY
+			},
+			dataExtents: {
+				...initialDataExtents,
+				[xName]: newDomainX,
+				[yName]: newDomainY
 			}
         }
     }
@@ -509,22 +537,83 @@ class ChartCanvas extends React.Component {
         if (!this.waitingForPanAnimationFrame && !this.axisSelectInProgress) {
             this.waitingForPanAnimationFrame = true;
 
-			const {xAttr, yAttr} = this.state;
-			const state = this.panHelper(mouseXY, xAttr, yAttr, dxdy);
+			this.__xAttr = this.__xAttr || this.state.xAttr;
+			this.__yAttr = this.__yAttr || this.state.yAttr;
+			this.__dataExtents == this.__dataExtents || this.state.dataExtents;
+			const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
 			const {
 				xAttr: newXAttr,
-				yAttr: newYAttr
+				yAttr: newYAttr,
+				dataExtents: newDataExtents
 			} = state;
+			//this.__xAttr = state.xAttr;
+			//this.__yAttr = state.yAttr;
+			//this.__dataExtents = state.dataExtents;
+			if (this.props.showImage) {
+				this.waitingForPanAnimationFrame = false;
+				this.clearAxisAndChartOnCanvas();
+				this.setState({
+					...this.state,
+					xAttr: newXAttr,
+					yAttr: newYAttr,
+					dataExtents: newDataExtents
+				});				
+			} else {
+				this.panInProgress = true;
+				this.triggerEvent('pan', state, e);
+				requestAnimationFrame(() => {
+					this.waitingForPanAnimationFrame = false;
+					this.clearAxisAndChartOnCanvas();
+					this.draw({trigger: 'pan'});					
+					if (false & this.props.onScatterPanZoom) {
+						const xName = newXAttr.name;
+						const yName = newYAttr.name;
+						const domainX = newXAttr.scale.domain();
+						const domainY = newYAttr.scale.domain();
+						this.props.onScatterPanZoom(
+							[xName, yName],
+							[domainX, domainY],
+							true
+						);
+					}						
+				});
+			}
+        }
+    }
 
-            this.panInProgress = true;
+    handlePanEnd = (mouseXY, dxdy, e) => {
+		//const {xAttr, yAttr, dataExtents} = this.state;		
+        const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
+		this.panInProgress = false;
+		this.__xAttr = null;
+		this.__yAttr = null;
+		this.__dataExtents = null;
 
-            this.triggerEvent('pan', state, e);
+        const {
+			xAttr: newXAttr,
+			yAttr: newYAttr,
+			dataExtents: newDataExtents
+        } = state;
 
-            requestAnimationFrame(() => {
-                this.waitingForPanAnimationFrame = false;
-                this.clearAxisAndChartOnCanvas();
-				this.draw({trigger: 'pan'});
-				if (this.props.onScatterPanZoom) {
+		if (this.props.showImage) {
+			this.clearAxisAndChartOnCanvas();
+			this.setState({
+				...this.state,
+				xAttr: newXAttr,
+				yAttr: newYAttr,
+				dataExtents: newDataExtents
+			});		
+		} else {
+			this.triggerEvent('panend', state, e);
+			requestAnimationFrame(() => {
+				this.clearAxisAndChartOnCanvas();
+				this.setState({
+					...this.state,
+					xAttr: newXAttr,
+					yAttr: newYAttr,
+					dataExtents: newDataExtents
+				});
+				if (false && this.props.onScatterPanZoom) {
 					const xName = newXAttr.name;
 					const yName = newYAttr.name;
 					const domainX = newXAttr.scale.domain();
@@ -532,44 +621,11 @@ class ChartCanvas extends React.Component {
 					this.props.onScatterPanZoom(
 						[xName, yName],
 						[domainX, domainY],
-						true
+						false
 					);
-				}						
-            });
-        }
-    }
-
-    handlePanEnd = (mouseXY, dxdy, e) => {
-		const {xAttr, yAttr} = this.state;		
-        const state = this.panHelper(mouseXY, xAttr, yAttr, dxdy);
-        this.panInProgress = false;
-
-        const {
-			xAttr: newXAttr,
-			yAttr: newYAttr
-        } = state;
-
-        this.triggerEvent('panend', state, e);
-
-        requestAnimationFrame(() => {
-			this.clearAxisAndChartOnCanvas();
-            this.setState({
-				...this.state,
-				xAttr: newXAttr,
-				yAttr: newYAttr
-			});
-			if (this.props.onScatterPanZoom) {
-				const xName = newXAttr.name;
-				const yName = newYAttr.name;
-				const domainX = newXAttr.scale.domain();
-				const domainY = newYAttr.scale.domain();
-				this.props.onScatterPanZoom(
-					[xName, yName],
-					[domainX, domainY],
-					false
-				);
-			}								
-        });
+				}								
+			});	
+		}
 	}
 	
 	zAxisSelectHelper = (selectDomain, selectRange, initialZAttr, initialDataExtents) => {
@@ -583,7 +639,6 @@ class ChartCanvas extends React.Component {
 			select: selectRange.slice(),
 			selectDomain: selectDomain.slice()
 		};
-
 		if (!isArrayOfString(extents) && initialDataExtents[name]) {
 			return {
 				zAttr: newZAttr,
@@ -620,7 +675,7 @@ class ChartCanvas extends React.Component {
 				this.waitingForAnimationFrame = false;
 				this.clearAxisAndChartOnCanvas();
 				this.draw({trigger: 'pan'});
-				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				if (false && this.props.onScatterPanZoom && zAttr.name !== 'sample') {
 					this.props.onScatterPanZoom(
 						[zAttr.name],
 						[selectDomain.slice()],
@@ -647,7 +702,7 @@ class ChartCanvas extends React.Component {
 				dataExtents
 			});
 			// connect to pcp
-			if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+			if (false && this.props.onScatterPanZoom && zAttr.name !== 'sample') {
 				this.props.onScatterPanZoom(
 					[zAttr.name],
 					[selectDomain.slice()],
@@ -671,9 +726,9 @@ class ChartCanvas extends React.Component {
 				...this.state.dataExtents,
 				[name]: extents.slice()
 			};	
-			this.setState({zAttr: newZAttr, dataExtents: newDataExtents});		
+			this.setState({zAttr: newZAttr, dataExtents: newDataExtents});	
 			// connect to pcp
-			if (this.props.onScatterPanZoom) {
+			if (false && this.props.onScatterPanZoom) {
 				this.props.onScatterPanZoom(
 					[name],
 					[newZAttr.extents.slice()],
@@ -858,6 +913,7 @@ class ChartCanvas extends React.Component {
 	}
 
 	handleMouseMove = (mouseXY, e) => {
+		return;
 		if (!this.waitingForAnimationFrame) {
 			this.waitingForAnimationFrame = true;
 			const state = this.getHoveredDataItem(mouseXY);
@@ -943,7 +999,6 @@ class ChartCanvas extends React.Component {
 				this.waitingForAnimationFrame = false;
 				// i don't clear
 				this.draw({trigger: 'track'});
-
 			});
 		}
 	}
@@ -979,6 +1034,7 @@ class ChartCanvas extends React.Component {
 			width: this.props.width,
 			height: this.props.height,
 			ratio: this.props.ratio,
+			showImage: this.props.showImage,
 			origDataExtents: this.props.dataExtents,
 			imgPool: this.props.imgPool,
 			subscribe: this.subscribe,
@@ -989,6 +1045,7 @@ class ChartCanvas extends React.Component {
 			handleZAxisSelect: this.handleZAxisSelect,
 			handleZAxisSelectEnd: this.handleZAxisSelectEnd,
 			handleZAxisSelectCancel: this.handleZAxisSelectCancel,
+			handleImageRequest: this.props.onDataRequest,
 			hitTest: {
 				canvas: this.hitCanvas,
 				ctx: this.hitCtx
@@ -1022,6 +1079,11 @@ class ChartCanvas extends React.Component {
 					width={this.props.width}
 					height={this.props.height}
 				>
+					<defs>
+						<clipPath id="chart-area-clip">
+							<rect x={0} y={0} width={canvasDim.width} height={canvasDim.height} />
+						</clipPath>
+					</defs>
 					{cursor}
 					<g transform={`translate(${margin.left},${margin.top})`}>
 						<EventHandler

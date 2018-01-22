@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
+import { Grid, Row, Col } from 'react-bootstrap';
+
 import get from 'lodash.get';
 import uniqueId from 'lodash.uniqueid';
 
@@ -10,6 +12,7 @@ import theme from './index.css';
 
 import {
     ScatterChart,
+    ScatterChartSVG,
     ParallelCoordinateChart,
     ImageListChart
 } from './charts';
@@ -19,7 +22,6 @@ import {
     addSelectedDataList
 } from '../../actions/dataActions'
 
-//import Test from './charts/ScatterMarkerProvider';
 
 import {
     getSelectedDataArray,
@@ -74,6 +76,7 @@ class ChartBox extends React.Component {
     }
 
     handleScatterPanZoom = (attrList, domainList, inProgress) => {
+        return;
         const {pcpDimension} = this.props;
         const attrExtents = {};
         attrList.forEach((attr, index) => {
@@ -108,7 +111,7 @@ class ChartBox extends React.Component {
             this.props.addSelectedDataList(dataList);
     }
 
-    renderScatterChart = (h) => {
+    renderScatterChart = (w, h, margin) => {
         const {
             pcpDimension,
             pcpData,
@@ -119,7 +122,9 @@ class ChartBox extends React.Component {
         
         return <ScatterChart
             ref={node => this.ScatterChartNode = node}
+            width={w}
             height={h}
+            margin={margin}
             data={pcpData}
             dimension={pcpDimension}
             xAttr={xAttr}
@@ -131,7 +136,33 @@ class ChartBox extends React.Component {
             onDataRequest={this.handleDataImageRequest}
             onSelectDataItems={this.handleScatterSelectDataItems}
         />
+    }
 
+    renderScatterChartSVG = (w, h, margin) => {
+        const {
+            pcpDimension,
+            pcpData,
+            xAttr, yAttr, zAttr,
+            colorsBySampleNames,
+            imgPool
+        } = this.props;
+        
+        return <ScatterChartSVG
+            ref={node => this.ScatterChartSVGNode = node}
+            width={w}
+            height={h}
+            margin={margin}
+            data={pcpData}
+            dimension={pcpDimension}
+            xAttr={xAttr}
+            yAttr={yAttr}
+            zAttr={zAttr}
+            colorsByGroup={colorsBySampleNames}
+            imgPool={imgPool}
+            onScatterPanZoom={this.handleScatterPanZoom}
+            onDataRequest={this.handleDataImageRequest}
+            onSelectDataItems={this.handleScatterSelectDataItems}    
+        />;
     }
 
     renderParallelCoordinateChart = (h) => {
@@ -171,6 +202,7 @@ class ChartBox extends React.Component {
         />
     }
 
+    // need to work
     renderItemList = () => {
         const testdata = [
             [{timestamp: 0, data:{_id:"5a0a47094325dff64ba8c358"}}],
@@ -191,33 +223,51 @@ class ChartBox extends React.Component {
         />;
     }
 
+    
+
     render() {
-        const { height } = this.props;
-        const testImageShip = false;
-        let scatterHeight, pcpHeight, testHeight = 0;
-        if (testImageShip) {
-            scatterHeight = Math.floor(height / 3);
-            pcpHeight = scatterHeight;    
-            testHeight = height - scatterHeight - pcpHeight;
-        } else {
-            pcpHeight = 200;
-            scatterHeight = Math.floor(height - pcpHeight);
-            //pcpHeight = height - scatterHeight;                
-        }
+        const {width, height} = this.props;
+        const margin = {
+            left: 60,
+            right: 10,
+            top: 10,
+            bottom: 60
+        };
 
-        //console.log(this.props);
+        const chartHeight = Math.floor(height);
+        let scatterWidth = Math.floor(0.65 * width);
+        scatterWidth = Math.min(scatterWidth, chartHeight);
+        const pcpWidth = Math.floor(width - scatterWidth);
 
+        const leftStyle = {
+            width: scatterWidth,
+            float: 'left'
+        };
+        const rightStyle = {
+            marginLeft: scatterWidth
+        };
         return (
             <div className={this.props.className}>
-                {this.renderScatterChart(scatterHeight)}              
-                {this.renderParallelCoordinateChart(pcpHeight)}
-                {testImageShip &&
-                    <ImageShipTest height={testHeight}
-                    />
-                }
-                {/* {this.renderItemList()}            */}
+                <div style={leftStyle}>
+                    {/* {this.renderScatterChartSVG(scatterWidth, scatterWidth, margin)} */}
+                    {this.renderScatterChart(scatterWidth, scatterWidth, margin)}
+                </div>
+                <div style={rightStyle}> 
+                    {this.renderParallelCoordinateChart(scatterWidth)}
+                </div>
             </div>
         );
+        // return (
+        //     <div className={this.props.className}>
+        //         {this.renderScatterChart(scatterHeight)}              
+        //         {this.renderParallelCoordinateChart(pcpHeight)}
+        //         {testImageShip &&
+        //             <ImageShipTest height={testHeight}
+        //             />
+        //         }
+        //         {/* {this.renderItemList()}            */}
+        //     </div>
+        // );
     }
 }
 

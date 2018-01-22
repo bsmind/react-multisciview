@@ -24,26 +24,20 @@ import Button from 'react-toolbox/lib/button';
 
 
 import {
-    DataBox,
-    DataDialog,
-    ToolBox,
-    ControlBox,
-    ChartBox,
+    ConfigBox,
+    ScatterBox
 } from './layout';
 
 
 import theme from './index.css';
-
 import get from 'lodash.get';
 
 class MultiViewApp extends React.Component {
     constructor() {
         super();
         this.state = {
-            toolSelected: 0,
-            //width: 0,
-            //height: 0,
-            showDataDialog: false
+            width: 0,
+            height: 0,
         }
     }
 
@@ -64,8 +58,8 @@ class MultiViewApp extends React.Component {
     }
 
     shouldComponentUpdate(nextProps) {
-        if (nextProps.isDataLoading)
-            return false;
+        // if (nextProps.isDataLoading)
+        //     return false;
         return true;
     }
 
@@ -73,8 +67,8 @@ class MultiViewApp extends React.Component {
         let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-        //width = width - 200;
-        height = height - 41.6 - 56.81;// - 4.15;
+        width = width;
+        height = height - 41.6;// - 56.81;// - 4.15;
 
         this.setState({width, height});
     }
@@ -121,59 +115,29 @@ class MultiViewApp extends React.Component {
     render() {
         const {width, height} = this.state;
 
-        //console.log(this.props.attrKinds)
+        const scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
+        const scatterBoxStyle = {
+            width: scatterBoxWidth,
+            float: 'left'
+        };
+        const configBoxStyle = {
+            marginLeft: scatterBoxWidth
+        };
 
         return (
             <Layout>
-                <NavDrawer active={false} onOverlayClick={null} pinned={false}>
-                    settings go here
-                </NavDrawer>
                 <Panel>
-                    <AppBar title='React-MultiView' leftIcon='menu' onLeftIconClick={null} theme={theme} fixed flat>
-                        {/* <ControlBox className={theme.ctlbox} toolId={this.state.toolSelected} /> */}
-                    </AppBar>
+                    <AppBar title='React-MultiView' leftIcon='menu' onLeftIconClick={null} theme={theme} fixed flat />
                 </Panel>
 
-                {/* <DataBox className={theme.databox} width={200} height={height}
-                    sampleKinds={this.props.sampleKinds}
-                    samples={this.props.sampleSelected}
-                    colors={this.props.sampleColors}
-                    onSampleChange={this.handleSampleChange}
-                    onColorChange={key => this.props.changeSampleColor(key)}
-                /> */}
-
-                {/* <ToolBox className={theme.toolbox}
-                    toolid={this.state.toolSelected}
-                    attrKinds={this.props.attrKinds}
-                    attr={this.props.attr}
-                    onAttrChange={this.handleAttrChange}
-                    onToolChange={this.handleToolChange}
-                /> */}
-                <ToolBox className={theme.toolbox} 
-                    onToggleDataDialog={this.onToggleDataDialog}
-                    attrKinds={this.props.attrKinds}
-                    attrFormat={this.props.attrFormat}
-                    attr={this.props.attr}
-                    onAttrChange={this.handleAttrChange}                    
-                />
-
-
-                <DataDialog 
-                    title='Data Selector'
-                    active={this.state.showDataDialog}
-                    samples={this.props.sampleKinds}
-                    sampleSelected={this.props.sampleSelected}
-                    sampleColors={this.props.sampleColors}
-                    sampleColorOpacity={this.props.sampleColorOpacity}
-                    onColorChange={this.props.handleColorChange}
-                    onSampleUpdate={this.handleSampleUpdate}
-                    onToggleDataDialog={this.onToggleDataDialog}
-                />
-
-                <ChartBox className={theme.chartbox} height={height}/>
-
-                {/* <div className={theme.footer} /> */}
-
+                <div className={theme.chartbox}>
+                    <div style={{width: scatterBoxWidth, float: 'left'}}>
+                        <ScatterBox width={scatterBoxWidth} height={scatterBoxWidth} />
+                    </div>
+                    <div style={{marginLeft: scatterBoxWidth}}>
+                        <ConfigBox height={height}/>
+                    </div>
+                </div>
             </Layout>
         );
     }

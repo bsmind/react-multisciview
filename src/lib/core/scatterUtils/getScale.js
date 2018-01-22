@@ -1,8 +1,21 @@
 import { scaleLinear } from 'd3-scale';
-import { 
-    isArrayOfString
-} from '../../utils';
+import { isArrayOfString } from '../../utils';
 
+/**
+ * determine extents of selected attribute
+ * 
+ * dataExtents: extents of all attributes
+ * attribute: selected attribute
+ * dataExtentsPrev: previous extents of all attributes
+ * 
+ * Defulat: 
+ * - name: 'unknown'
+ * - ordinary: false
+ * - scale: scaleLinear().domain(extents).range(range)
+ * - step: 0
+ * - extents: [0, 1]      - full numeric extents
+ * - origExtents: [0, 1]  = full numeric or ordinary extents
+ */
 export default (
     {
         dataExtents,
@@ -12,33 +25,30 @@ export default (
     range
 ) => {
     const tempExtents = dataExtents[attribute];
-    const name = tempExtents != null ? attribute: 'unknown';
-    const ordinary = tempExtents != null
-        ? isArrayOfString(tempExtents)
-        : false;
-
-    let extents = tempExtents == null
-        ? [0, 1] 
-        : ordinary 
-            ?  [0, tempExtents.length]
-            : tempExtents.slice();
+    let name = 'unknown', ordinary = false, extents = [0, 1], origExtents = [0, 1];
+    let extentsToUse = [0, 1];
+    if (tempExtents) {
+        name = attribute;
+        ordinary = isArrayOfString(tempExtents);
+        extents = ordinary ? [0, tempExtents.length]: tempExtents.slice();
+        origExtents = tempExtents.slice();
+        extentsToUse = extents.slice();
+    }
     
     if (dataExtentsPrev && dataExtentsPrev[attribute]) {
-        extents = dataExtentsPrev[attribute].slice();
+        extentsToUse = dataExtentsPrev[attribute].slice();
     }
 
-    const scale = scaleLinear()
-                    .domain(extents)
-                    .range(range);
-
+    const scale = scaleLinear().domain(extentsToUse).range(range);
     const step = ordinary ? Math.abs(scale(0) - scale(1)): 0;
-
+                    
     return {
-        name,
-        extents,
+        name,     
+        scale,        
         ordinary,
-        scale,
+        extents,
+        // only for ordinary
         step,
-        origExtents: tempExtents == null ? [0, 1]: tempExtents.slice()
+        origExtents
     }
 }

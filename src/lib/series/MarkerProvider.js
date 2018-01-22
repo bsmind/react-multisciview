@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
     extent as d3Extent
 } from 'd3-array';
@@ -54,13 +56,14 @@ function MarkerProvider(valueAccessor, width, height, ratio, shape, colorSet) {
     this._ratio = ratio;
     this._shape = shape;
 
-    this._colorSet = colorSet;
+    this._colorSet = colorSet; // deprecated
+    this._colorScale = null;
 
     const offCanvas = document.createElement('canvas');
     offCanvas.width = width * ratio;
     offCanvas.height = height * ratio;
-    offCanvas.style.width = width;
-    offCanvas.style.height = height;
+    offCanvas.style.width = width + "px";
+    offCanvas.style.height = height + "px";
 
     this._canvas = offCanvas;
     this._ctx = offCanvas.getContext('2d');
@@ -83,22 +86,18 @@ providerProto.getMarkers = function() {
     return this._markers;
 }
 
+providerProto.colorScale = function(_) {
+    return arguments.length ? (this._colorScale = _, this): this._colorScale;
+}
+
+
 providerProto.calculateMarkers = function(data) {
     const accessor = this._valueAccessor,
           width = this._width,
           height = this._height,
           ratio = this._ratio,
           ctx = this._ctx,
-          colorSet = this._colorSet;
-
-    let colorScale;
-    if (colorSet != null) {
-        colorScale = d => colorSet[d];
-    } else {
-        const dataExtents = d3Extent(data.filter(d => accessor(d) != null), accessor);
-        //console.log(dataExtents)
-        colorScale = scaleSequential(interpolateViridis).domain(dataExtents);
-    }
+          colorScale = this._colorScale;
 
     let {
         type: markerType,
@@ -107,6 +106,7 @@ providerProto.calculateMarkers = function(data) {
         style,
         defaultColor
     } = this._shape;
+
     switch (markerType) {
         case 'circle':
             markerType = 'circle';
@@ -125,7 +125,6 @@ providerProto.calculateMarkers = function(data) {
             break;
     }
 
-
     const hSpacing = Math.max(markerWidth / 2, 4),
           vSpacing = Math.max(markerHeight / 2, 4);
 
@@ -136,6 +135,7 @@ providerProto.calculateMarkers = function(data) {
 
     const markers = {};
     let i = 0;
+    //console.log(data)
     data.forEach( d => {
         const value = accessor(d);
         const color = value == null ? defaultColor: colorScale(value);
@@ -181,11 +181,12 @@ providerProto.draw = function (ctx = null, ratio = 1) {
     const hSpacing = this._hSpacing;
 
     const markers = sortBy(this._markers, 'value');
+    ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.scale(ratio, ratio);
 
-    ctx.save();
+    //ctx.save();
     markers.forEach(m => {
         ctx.fillStyle = hexToRGBA(m.color, m.opacity);
         if (m.stroke != 'none') {
@@ -195,6 +196,15 @@ providerProto.draw = function (ctx = null, ratio = 1) {
         ctx.beginPath();
         if (m.type === 'square' || m.type === 'rect') {
             ctx.rect(m.x, m.y, m.width, m.height);    
+            m.svg = <rect x={0} y={0} width={m.width} height={height}
+                style={{
+                    fill: m.color,
+                    fillOpacity: m.opacity,
+                    stroke: m.stroke,
+                    strokeOpacity: 1,
+                    strokeWidth: m.strokeWidth,
+                }}
+            />;
         } else { // circle
             const radius = m.width / 2;
             ctx.arc(m.x + radius, m.y + radius, radius, 0, 2 * Math.PI, false);
@@ -209,7 +219,7 @@ providerProto.drawAt = function (
     dctx,
     dx,
     dy,
-    markerID
+    markerID,
 ) {
     const ratio = this._ratio;
     const marker = this._markers[markerID];
@@ -217,18 +227,34 @@ providerProto.drawAt = function (
     let { strokeWidth, stroke } = marker;
     const { width, height} = this._shape;
 
-    if (stroke == 'none')
+    if (stroke === 'none')
         strokeWidth = 0;
-    
+
     dctx.drawImage(
         this._canvas,
-        sx * ratio - strokeWidth,
-        sy * ratio - strokeWidth,
-        width * ratio + 2*strokeWidth,
-        height * ratio + 2*strokeWidth,
-        dx - width/2,
-        dy - height/2,
-        width,
-        height
+        (sx - strokeWidth) * ratio,
+        (sy - strokeWidth) * ratio,
+        (width + 2*strokeWidth) * ratio,
+        (height + 2*strokeWidth) * ratio,
+        dx - (width + 2*strokeWidth)/2,
+        dy - (height + 2*strokeWidth)/2,
+        width + 2*strokeWidth,
+        height + 2*strokeWidth
     );
+}
+
+providerProto.getSVG = function(
+    dx,
+    dy,
+    markerID,
+    svgKey
+) {
+    const { width, height } = this._shape;
+    const marker = this._markers[markerID];
+
+    return React.cloneElement(marker.svg, {
+        key: svgKey,
+        x: dx - width/2,
+        y: dy - height/2
+    });
 }

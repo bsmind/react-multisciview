@@ -11,6 +11,7 @@ class SubscriberExt extends React.Component {
         this.state = {
             id: uniqueId('subscriber-')
         }
+        this.moreProps = {};
     }
 
     componentWillMount() {
@@ -53,8 +54,10 @@ class SubscriberExt extends React.Component {
     }
 
     updateMoreProps = (moreProps) => {
+        //console.log(this.moreProps, moreProps)
         Object.keys(moreProps).forEach(key => {
             this.moreProps[key] = moreProps[key];
+            //console.log(key, moreProps[key])
         });
     }
 
@@ -107,7 +110,7 @@ class SubscriberExt extends React.Component {
         const moreProps = this.getMoreProps();
         const ctx = canvas(getCanvasContexts());
         this.preDraw(ctx, moreProps);
-        draw(ctx, moreProps);
+        if (draw) draw(ctx, moreProps);
         this.postDraw(ctx, moreProps);
     }
 
@@ -138,8 +141,16 @@ class SubscriberExt extends React.Component {
     }
 
     render () {
-        //console.log(this.state, this.props);
-        return null;
+        const { drawSVG, useSVG } = this.props;
+
+        if (drawSVG && useSVG) {
+            // todo clip path
+            return <g style={{clipPath: `url(#chart-area-clip)`}}>
+                {drawSVG(this.getMoreProps())}
+            </g>;
+        } else {
+            return null;
+        }
     }
 }
 
@@ -147,14 +158,18 @@ SubscriberExt.propTypes = {
     clip: PropTypes.bool,
     edgeClip: PropTypes.bool,
     selected: PropTypes.bool,
-    disablePan: PropTypes.bool
+    disablePan: PropTypes.bool,
+
+    drawSVG: PropTypes.func
 }
 
 SubscriberExt.defaultProps = {
     clip: false,
     edgeClip: false,
     selected: false,
-    disablePan: false
+    disablePan: false,
+
+    drawSVG: null
 }
 
 export default SubscriberExt;

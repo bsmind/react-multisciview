@@ -16,7 +16,7 @@ class LegendEventHandler extends React.Component {
         super();
         this.state = {
             mouseInside: false,
-            startX: null
+            startXY: null,
         };
     }
 
@@ -41,6 +41,8 @@ class LegendEventHandler extends React.Component {
 
     handleLeave = () => {
         this.setState({mouseInside: false});
+
+        
     }
     
     handleMouseDown = (e) => {
@@ -52,7 +54,7 @@ class LegendEventHandler extends React.Component {
             .on('mousemove', this.handleRangeSelect)
             .on('mouseup', this.handleRangeSelectEnd);
 
-        this.setState({startX: mouseXY[0]});
+        this.setState({startXY: mouseXY});
         e.preventDefault();        
     }
 
@@ -61,7 +63,7 @@ class LegendEventHandler extends React.Component {
 
         const mouseXY = mouse(this.node);
         if (this.props.onRangeSelect) {
-            this.props.onRangeSelect(this.state.startX, mouseXY[0], e);
+            this.props.onRangeSelect(this.state.startXY, mouseXY, e);
         }
     }
 
@@ -69,26 +71,25 @@ class LegendEventHandler extends React.Component {
         const e = d3Event;
         const mouseXY = mouse(this.node);//this.getMouseY();
 
-        if (Math.abs(mouseXY[0] - this.state.startX) < 1e-3) {
-            this.setState({startX: null});
+        const dist = this.props.getMouseMoveDist(mouseXY, this.state.startXY);
+        if (dist < 1) {
             if (this.props.onRangeSelectCancel)
                 this.props.onRangeSelectCancel(e);            
         } else {
-            //this.setState({endX: mouseXY[0]});
-            if (this.props.onRangeSelect)
-                this.props.onRangeSelectEnd(this.state.startX, mouseXY[0], e);
+            if (this.props.onRangeSelectEnd)
+                this.props.onRangeSelectEnd(this.state.startXY, mouseXY, e);
         }
 
         select(d3Window(this.node))
             .on('mousemove', null)
             .on('mouseup', null);
 
-        this.setState({startX: null});
+        this.setState({startXY: null});
     }    
 
     render() {
         const cursor = this.state.mouseInside
-        ? 'react-multiview-ew-resize-cursor'
+        ? this.props.selectCursorStyle
         : 'react-multiview-default-cursor'
     
         return <rect

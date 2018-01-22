@@ -52,7 +52,7 @@ class XAxis extends React.Component {
     	const dy = fontSize * 0.71;
 
 		const xLabels = xExtents.slice();
-		xLabels.reverse();
+		//xLabels.reverse();
 		const minval = Math.max(Math.floor(xScale.invert(xScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(xScale.invert(xScale.range()[1])), xLabels.length);
 
@@ -75,32 +75,7 @@ class XAxis extends React.Component {
     			labelY: sign * 2 * innerTickSize + dy				
 			});
 		}
-		return tickArray;
-
-    	const baseFormat = xScale.tickFormat
-    		? xScale.tickFormat(ticks)
-    		: d => d;
-
-    	const format = tickFormat
-    		? d => tickFormat(d) || ""
-    		: baseFormat;
-
-    	const tickValues = xScale.ticks(ticks);
-
-
-    	return tickValues.map(d => {
-    		const x = xScale(d); // Math.round(xScale(d));
-    		return {
-    			value: d,
-    			label: format(d),
-    			x1: x,
-    			y1: 0,
-    			x2: x,
-    			y2: sign * innerTickSize,
-    			labelX: x,
-    			labelY: sign * 2 * innerTickSize + dy
-    		};
-    	});		
+		return tickArray;	
 	}
 
     draw = (ctx, moreProps) => {
@@ -110,7 +85,6 @@ class XAxis extends React.Component {
 
 		const {
 			scale,
-			//extents,
 			step,
 			ordinary,
 			origExtents: extents

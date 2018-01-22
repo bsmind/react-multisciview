@@ -72,9 +72,8 @@
     padding: 0px 0px 0px 0px;
     position: absolute;
     left: 0;
-    top: calc(var(--appbar-height) + var(--toolbox-height));
+    top: var(--appbar-height);
     width: 100%;
     font-family: var(--preferred-font);
     font-size: var(--font-size);    
-    overflow-y: scroll;
 }

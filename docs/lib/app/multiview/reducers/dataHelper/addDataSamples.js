@@ -102,6 +102,7 @@ export default (state, payload) => {
         attrKinds
     } = state;
 
+    //console.log('reducer: ', sampleData, sampleList)
     let numQueried = state.numQueried;
 
     const attrKeys = Object.keys(attrKinds);
@@ -110,7 +111,7 @@ export default (state, payload) => {
     sampleList.forEach( (name, index) => {
         const {indexById, minmax} = calculateDataStatAll(sampleData[index], attrTypes, attrKeys);
         dataBySamples[name] = {
-            data: sampleData[index],
+            data: [...sampleData[index]],
             indexById,
             minmax
         };

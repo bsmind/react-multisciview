@@ -79,15 +79,20 @@ class MVSampleAPI(Resource):
         sampleList = args.get('name[]')
 
         #query = {"sample": {'$in': sampleList }}
-        fields = {'_npObjectIDs': 0, 'insertion_date': 0}
+        fields = {'_npObjectIDs': 0, 'insertion_date': 0, 'dataStatKey': 0}
 
         resultList = []
         for sample in sampleList:
-            query = {"sample": sample, 'item': {'$exists': 'true'}}
+            #query = {"sample": sample, 'item': {'$exists': 'true'}}
+            query = {"sample": sample, 'dataStatKey': 0}
             results = mvdb.query(query=query, fields=fields, getarrays=False)
+
+            if not isinstance(results, list):
+                results = [results]
+
             allResults = [replace_objid_to_str(doc) for doc in results]
             resultList.append(allResults)
-            #print('{}.{}'.format(sample, len(resultList)))
+            # print('{}.{}'.format(sample, results))
 
         return {
             'sampleList': sampleList,

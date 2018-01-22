@@ -5,3 +5,5 @@ export { default as ImgListSeries } from './ImgListSeries';
 
 export { default as CircleMarker } from "./CircleMarker";
 export { default as markerProvider } from './MarkerProvider';
+
+export { default as ScatterSeriesSVG } from './ScatterSeriesSVG';

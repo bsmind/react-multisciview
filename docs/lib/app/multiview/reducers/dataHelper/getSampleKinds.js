@@ -1,25 +1,26 @@
 import randomColor from 'randomcolor';
 
 const colorOptions = {
-    luminosity: 'dark',
+    luminosity: 'random',
     hue: 'random'
 }
 
-export const getRandomColor = () => {
-    return randomColor(colorOptions);
+export const getRandomColor = (usedColors = []) => {
+    let color;
+    do {
+        color = randomColor(colorOptions);
+    } while(usedColors.indexOf(color) !== -1);
+    return color;
 }
 
 export const getSampleKinds = (state, sampleKinds) => {
-    const sampleColors = {};
+    const sampleColors = {}, usedColors = [];
     const sampleNames = Object.keys(sampleKinds).map(key => sampleKinds[key]);
 
-    const colors = randomColor({
-        ...colorOptions,
-        count: sampleNames.length
-    });
-
-    sampleNames.forEach((name, index) => {
-        sampleColors[name] = colors[index];
+    sampleNames.forEach(name => {
+        const color = getRandomColor(usedColors);
+        usedColors.push(color);
+        sampleColors[name] = color;
     });
 
     return {
@@ -27,6 +28,19 @@ export const getSampleKinds = (state, sampleKinds) => {
         sampleKinds,
         sampleColors
     };
+}
+
+export const changeSelectedSampleColors = (state, names) => {
+    const sampleColors = {...state.sampleColors};
+    const usedColors = Object.keys(sampleColors).map(key => sampleColors[key]);
+
+    names.forEach(name => {
+        const color = getRandomColor(usedColors);
+        usedColors.push(color);
+        sampleColors[name] = color;
+    });
+
+    return {...state, sampleColors};
 }
 
 export const handleSampleColorChange = (state, sampleName) => {

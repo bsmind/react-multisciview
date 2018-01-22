@@ -51,7 +51,10 @@ export default function fitWidth(WrappedComponent, withRef = true, minWidth = 10
                         context.msBackingStorePixelRatio ||
                         context.oBackingStorePixelRatio ||
                         context.BackingStorePixelRatio || 1;
-        		const ratio = devicePixelRatio / backingStoreRatio;
+				const ratio = devicePixelRatio / backingStoreRatio;
+				
+				
+
         		return ratio;
         	}
         	return 1;

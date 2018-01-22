@@ -70,12 +70,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 713);
+/******/ 	return __webpack_require__(__webpack_require__.s = 709);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 713:
+/***/ 709:
 /*!*******************************!*\
   !*** ./docs/documentation.js ***!
   \*******************************/
