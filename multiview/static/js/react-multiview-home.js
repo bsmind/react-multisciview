@@ -45676,6 +45676,7 @@ var ScatterSeries = function (_React$Component) {
             var _this$props$shared4 = _this.props.shared,
                 origDataExtents = _this$props$shared4.origDataExtents,
                 zoomFactor = _this$props$shared4.zoomFactor;
+            var canvasDim = _this.props.shared.canvasDim;
 
 
             var xAccessor = _this.getAccessor(xAttr);
@@ -45691,6 +45692,12 @@ var ScatterSeries = function (_React$Component) {
 
                 if (x == null || y == null) return;
                 if (!dataFilter(d)) return;
+
+                // filter out of canvas
+                // todo: margin 
+                if (x < -5 && x > canvasDim.width + 5) return;
+                if (y < -5 && y > canvasDim.height + 5) return;
+
                 if (distComputor) {
                     distComputor(x, y, minDist, pointSet);
                 }
@@ -45705,10 +45712,10 @@ var ScatterSeries = function (_React$Component) {
                 });
             }
 
-            var MIN_IMAGE_SIDE = 16;
+            var MIN_IMAGE_SIDE = 6;
             var imgRefWidth = void 0,
                 imgRefHeight = void 0;
-
+            console.log(minDist);
             if (minDist.x == null || minDist.y == null) {
                 imgRefWidth = _this.__imgRefWidth * (1 / zoomFactor);
                 imgRefHeight = _this.__imgRefHeight * (1 / zoomFactor);
@@ -45740,12 +45747,12 @@ var ScatterSeries = function (_React$Component) {
                 imgPool = _this$props$shared5.imgPool,
                 handleImageRequest = _this$props$shared5.handleImageRequest,
                 handleImageZoom = _this$props$shared5.handleImageZoom,
-                canvasDim = _this$props$shared5.canvasDim;
+                handlePan = _this$props$shared5.handlePan,
+                handlePanEnd = _this$props$shared5.handlePanEnd;
 
             var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
 
             var imageRatio = Math.max(imgRefWidth / canvasDim.width || 0.1, imgRefHeight / canvasDim.height || 0.1);
-            //console.log(canvasDim, imgRefWidth, imgRefHeight)
 
             var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
@@ -45759,7 +45766,6 @@ var ScatterSeries = function (_React$Component) {
                     id: d._id,
                     imgPool: imgPool,
                     onImageRequest: handleImageRequest,
-                    onImageZoom: handleImageZoom,
                     showGrid: showGrid,
                     svgDim: canvasDim
                 }));
@@ -45846,11 +45852,12 @@ ScatterSeries.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__CanvasContainer__ = __webpack_require__(/*! ./CanvasContainer */ 602);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__EventHandler__ = __webpack_require__(/*! ./EventHandler */ 603);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__axes__ = __webpack_require__(/*! ../axes */ 85);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ./utils */ 59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 269);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils__ = __webpack_require__(/*! ../utils */ 7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_d3_format__ = __webpack_require__(/*! d3-format */ 46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_d3_array__ = __webpack_require__(/*! d3-array */ 9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__legends__ = __webpack_require__(/*! ../legends */ 696);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ./utils */ 59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 269);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils__ = __webpack_require__(/*! ../utils */ 7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_d3_format__ = __webpack_require__(/*! d3-format */ 46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_d3_array__ = __webpack_require__(/*! d3-array */ 9);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45862,6 +45869,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -45968,7 +45976,7 @@ var ChartCanvas = function (_React$Component) {
 				position: "absolute",
 				zIndex: this.props.zIndex + 5
 			};
-			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(this.props);
+			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(this.props);
 			var shared = _extends({
 				canvasDim: canvasDim,
 				margin: margin,
@@ -45989,18 +45997,23 @@ var ChartCanvas = function (_React$Component) {
 				handleImageRequest: this.props.onDataRequest,
 				handleImageZoom: this.handleZoom,
 				zoomFactor: this.state.zoomFactor,
+				handlePan: this.handlePan,
+				handlePanEnd: this.handlePanEnd,
 				hitTest: {
 					canvas: this.hitCanvas,
 					ctx: this.hitCtx
 				}
 			}, this.state);
 
-			var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["c" /* cursorStyle */])(true);
+			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["c" /* cursorStyle */])(true);
 
-			var children = [];
+			var children = [],
+			    childrenWithHandler = [];
 			__WEBPACK_IMPORTED_MODULE_0_react___default.a.Children.forEach(this.props.children, function (child) {
 				if (!__WEBPACK_IMPORTED_MODULE_0_react___default.a.isValidElement(child)) return;
-				children.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
+				if (child.type === __WEBPACK_IMPORTED_MODULE_6__legends__["a" /* ColorLegend */]) {
+					childrenWithHandler.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
+				} else children.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 			});
 
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -46039,6 +46052,11 @@ var ChartCanvas = function (_React$Component) {
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						"g",
 						{ transform: "translate(" + margin.left + "," + margin.top + ")" },
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+							"g",
+							null,
+							children
+						),
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__EventHandler__["a" /* default */], {
 							ref: function ref(node) {
 								return _this2.eventHandlerNode = node;
@@ -46055,7 +46073,7 @@ var ChartCanvas = function (_React$Component) {
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
-							children
+							childrenWithHandler
 						)
 					)
 				)
@@ -46088,17 +46106,17 @@ var _initialiseProps = function _initialiseProps() {
 	this.clearAxisAndChartOnCanvas = function () {
 		var canvases = _this3.getCanvasContexts();
 		if (canvases && canvases.axes && canvases.chartOn) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
 		}
 		if (_this3.hitCtx) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([_this3.hitCtx], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([_this3.hitCtx], _this3.props.ratio);
 		}
 	};
 
 	this.clearMouseCoordCanvas = function () {
 		var canvases = _this3.getCanvasContexts();
 		if (canvases && canvases.mouseCoord) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([canvases.mouseCoord], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.mouseCoord], _this3.props.ratio);
 		}
 	};
 
@@ -46154,16 +46172,16 @@ var _initialiseProps = function _initialiseProps() {
 		    yAttrProp = props.yAttr,
 		    zAttrProp = props.zAttr;
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
@@ -46195,7 +46213,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		var dataExtents = {};
 		dimName.forEach(function (name) {
-			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[name]) ? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
+			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(dataExtentsProp[name]) ? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
 		});
 
 		return {
@@ -46221,7 +46239,7 @@ var _initialiseProps = function _initialiseProps() {
 		    zAttrProp = props.zAttr;
 
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		var _state = _this3.state,
 		    seriesNameState = _state.seriesName,
@@ -46238,10 +46256,10 @@ var _initialiseProps = function _initialiseProps() {
 			var extentsState = dataExtentsState[name];
 			if (extentsState == null) {
 				// new field
-				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
 			} else {
 				// expand one but ordinary 
-				if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
+				if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
 					extentsState[0] = 0;
 					extentsState[1] = extentsProps.length;
 				}
@@ -46253,14 +46271,14 @@ var _initialiseProps = function _initialiseProps() {
 		});
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp,
 			dataExtentsPrev: dataExtentsState
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp,
 			dataExtentsPrev: dataExtentsState
@@ -46273,7 +46291,7 @@ var _initialiseProps = function _initialiseProps() {
 			name: dataExtentsProp[zAttrProp] ? zAttrProp : 'unknown',
 			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : [0, 1],
 			select: null,
-			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
+			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
 
 			// flatten data to plot
 			// todo: avoid unneccessary update...
@@ -46500,7 +46518,8 @@ var _initialiseProps = function _initialiseProps() {
 				_this3.setState(_extends({}, _this3.state, {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				}));
 			} else {
 				_this3.panInProgress = true;
@@ -46548,7 +46567,8 @@ var _initialiseProps = function _initialiseProps() {
 				_this3.setState(_extends({}, _this3.state, {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				}));
 				if (false) {
 					var xName = newXAttr.name;
@@ -46570,7 +46590,7 @@ var _initialiseProps = function _initialiseProps() {
 			select: selectRange.slice(),
 			selectDomain: selectDomain.slice()
 		});
-		if (!Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
+		if (!Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
 			return {
 				zAttr: newZAttr,
 				dataExtents: _extends({}, initialDataExtents, _defineProperty({}, name, selectDomain.slice()))
@@ -46640,7 +46660,7 @@ var _initialiseProps = function _initialiseProps() {
 		});
 
 		_this3.clearAxisAndChartOnCanvas();
-		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents)) {
+		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents)) {
 			var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, extents.slice()));
 			_this3.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
@@ -46671,7 +46691,7 @@ var _initialiseProps = function _initialiseProps() {
 		var name = initialZAttr.name,
 		    extents = initialZAttr.extents;
 
-		if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["i" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
+		if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
 
 		return _extends({}, initialZAttr, {
 			selectDomain: dataExtents[name].slice()
@@ -46806,7 +46826,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		var dataID = _this3.dataHashIDByColor[colorID];
 		if (dataID) {
-			var formatSI = Object(__WEBPACK_IMPORTED_MODULE_9_d3_format__["a" /* format */])('.3s');
+			var formatSI = Object(__WEBPACK_IMPORTED_MODULE_10_d3_format__["a" /* format */])('.3s');
 			var dataIndex = _this3.dataHashIndexByID[dataID];
 			var _data = _this3.state.plotData[dataIndex];
 			var info = [];
@@ -46873,7 +46893,7 @@ var _initialiseProps = function _initialiseProps() {
 		var pixelData = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight).data;
 
 		var timestamp = Date.now();
-		var points = Object(__WEBPACK_IMPORTED_MODULE_10_d3_array__["f" /* range */])(11).map(function (i) {
+		var points = Object(__WEBPACK_IMPORTED_MODULE_11_d3_array__["f" /* range */])(11).map(function (i) {
 			var t = i / 10;
 			return {
 				x: Math.floor(startX * (1 - t) + endX * t),
@@ -59276,8 +59296,9 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils__ = __webpack_require__(/*! ../utils */ 7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_scale__ = __webpack_require__(/*! d3-scale */ 18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_selection__ = __webpack_require__(/*! d3-selection */ 48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_scale__ = __webpack_require__(/*! d3-scale */ 18);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -59287,6 +59308,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -59317,21 +59339,6 @@ var ImgViewer = function (_React$Component) {
             return { width: width, height: height };
         };
 
-        _this.handleImageZoom = function (size, e) {
-            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_2__utils__["k" /* mousePosition */])(e);
-            var width = size.width,
-                height = size.height;
-
-
-            var mX = mouseXY[0] - width / 2;
-            var mY = mouseXY[1] - height / 2;
-
-            var X = Math.round(_this.props.x + mX);
-            var Y = Math.round(_this.props.y + mY);
-
-            if (_this.props.onImageZoom) _this.props.onImageZoom([X, Y], e);
-        };
-
         _this.renderImage = function () {
             var _this$props = _this.props,
                 imgRefWidth = _this$props.imgRefWidth,
@@ -59360,13 +59367,15 @@ var ImgViewer = function (_React$Component) {
                 height = _this$getImgSize.height;
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('image', {
+                ref: function ref(node) {
+                    return _this.node = node;
+                },
                 xlinkHref: _this.state.img.url,
                 x: x - width / 2,
                 y: y - height / 2,
                 width: width,
                 height: height,
-                imageRendering: 'pixelated',
-                onWheel: _this.handleImageZoom.bind(_this, { width: width, height: height })
+                imageRendering: 'pixelated'
             });
         };
 
@@ -59393,7 +59402,7 @@ var ImgViewer = function (_React$Component) {
                 id = _this$state.id;
 
 
-            var xScale = Object(__WEBPACK_IMPORTED_MODULE_3_d3_scale__["b" /* scaleLinear */])().domain([0, img.width]).range([0, width]);
+            var xScale = Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["b" /* scaleLinear */])().domain([0, img.width]).range([0, width]);
             var cx = x;
             var dx = xScale(1);
             var sx = cx - width / 2;
@@ -59402,7 +59411,7 @@ var ImgViewer = function (_React$Component) {
             var start_ix = Math.floor((boundX[0] - sx) / dx);
             var end_ix = img.width - Math.ceil((ex - boundX[1]) / dx);
 
-            var yScale = Object(__WEBPACK_IMPORTED_MODULE_3_d3_scale__["b" /* scaleLinear */])().domain([0, img.height]).range([0, height]);
+            var yScale = Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["b" /* scaleLinear */])().domain([0, img.height]).range([0, height]);
             var cy = y;
             var dy = yScale(1);
             var sy = cy - height / 2;
@@ -59485,7 +59494,6 @@ var ImgViewer = function (_React$Component) {
                 this.setState({ id: id, img: imgPool[id] });
             }
             if (this.props.onImageRequest) {
-                //console.log('imgViewer: request image, ', id);
                 this.props.onImageRequest(id, 5);
             }
         }
@@ -59506,7 +59514,6 @@ var ImgViewer = function (_React$Component) {
                 return;
             }
             if (onImageRequest) {
-                // console.log('imgViewer: request image, ', id);
                 onImageRequest(id, 5);
             }
             this.setState({ id: null, img: null });

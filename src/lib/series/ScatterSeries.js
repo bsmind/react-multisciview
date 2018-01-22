@@ -405,7 +405,8 @@ class ScatterSeries extends React.Component {
     drawImage = (moreProps, ctx) => {
 
         const { plotData, xAttr, yAttr, dataExtents } = moreProps;
-    	const { shared: {origDataExtents, zoomFactor} } = this.props;
+        const { shared: {origDataExtents, zoomFactor} } = this.props;
+        const { canvasDim } = this.props.shared;
         
         const xAccessor = this.getAccessor(xAttr);
         const yAccessor = this.getAccessor(yAttr);
@@ -422,6 +423,12 @@ class ScatterSeries extends React.Component {
 
             if (x == null || y == null) return;
             if(!dataFilter(d)) return;
+
+            // filter out of canvas
+            // todo: margin 
+            if (x < -5 && x > canvasDim.width + 5) return;
+            if (y < -5 && y > canvasDim.height + 5) return;
+
             if (distComputor) {
                 distComputor(x, y, minDist, pointSet);
             }
@@ -436,9 +443,9 @@ class ScatterSeries extends React.Component {
             });
         }
 
-        const MIN_IMAGE_SIDE = 16;
+        const MIN_IMAGE_SIDE = 6;
         let imgRefWidth, imgRefHeight; 
-        
+        console.log(minDist)
         if (minDist.x == null || minDist.y == null) {
             imgRefWidth = this.__imgRefWidth * (1/zoomFactor);
             imgRefHeight = this.__imgRefHeight * (1/zoomFactor);
@@ -465,13 +472,14 @@ class ScatterSeries extends React.Component {
         this.__imgRefHeight = imgRefHeight;
 
         const imageSet = [];
-        const { imgPool, handleImageRequest, handleImageZoom, canvasDim } = this.props.shared;
+        const { imgPool, handleImageRequest, handleImageZoom, 
+            handlePan, handlePanEnd
+        } = this.props.shared;
         const pointSetToUse = pointSet.length ? pointSet: [this.__cache];
 
         const imageRatio = Math.max(
             imgRefWidth / canvasDim.width || 0.1, 
             imgRefHeight / canvasDim.height || 0.1);
-        //console.log(canvasDim, imgRefWidth, imgRefHeight)
             
         let showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
@@ -485,7 +493,6 @@ class ScatterSeries extends React.Component {
                 id={d._id}
                 imgPool={imgPool}
                 onImageRequest={handleImageRequest}
-                onImageZoom={handleImageZoom}
                 showGrid={showGrid}
                 svgDim={canvasDim}
             />);

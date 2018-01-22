@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {mousePosition} from '../utils';
+import {select, event as d3Event, mouse} from 'd3-selection';
+import {mousePosition, d3Window} from '../utils';
 import {scaleLinear} from 'd3-scale';
 
 class ImgViewer extends React.Component {
@@ -19,7 +20,6 @@ class ImgViewer extends React.Component {
             this.setState({id, img: imgPool[id]});
         }
         if (this.props.onImageRequest) {
-            //console.log('imgViewer: request image, ', id);
             this.props.onImageRequest(id, 5);
         }
     }
@@ -36,7 +36,6 @@ class ImgViewer extends React.Component {
             return;
         }
         if (onImageRequest) {
-           // console.log('imgViewer: request image, ', id);
             onImageRequest(id, 5);
         }
         this.setState({id: null, img: null});
@@ -53,20 +52,6 @@ class ImgViewer extends React.Component {
             width = (img.width / img.height) * side;
         }
         return {width, height};
-    }
-
-    handleImageZoom = (size, e) => {
-        const mouseXY = mousePosition(e);
-        const {width, height} = size;
-
-        const mX = mouseXY[0] - width/2;
-        const mY = mouseXY[1] - height/2;
-
-        const X = Math.round(this.props.x + mX);
-        const Y = Math.round(this.props.y + mY);
-        
-        if (this.props.onImageZoom)
-           this.props.onImageZoom([X, Y], e);
     }
 
     renderImage = () => {
@@ -89,13 +74,13 @@ class ImgViewer extends React.Component {
 
         const {width, height} = this.getImgSize(imgSide);
         return <image
+            ref={node => this.node = node}
             xlinkHref={this.state.img.url}
             x={x - width/2}
             y={y - height/2}
             width={width}
             height={height}
             imageRendering={'pixelated'}
-            onWheel={this.handleImageZoom.bind(this, {width, height})}
         />;
     }
 

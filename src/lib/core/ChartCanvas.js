@@ -6,6 +6,7 @@ import uniqueId from 'lodash.uniqueid';
 import CanvasContainer from './CanvasContainer';
 import EventHandler from './EventHandler';
 import { XAxis, YAxis } from '../axes';
+import { ColorLegend } from '../legends';
 
 import { dimension as getCanvasDimension, clearCanvas } from './utils';
 import { getScale } from './scatterUtils';
@@ -559,7 +560,8 @@ class ChartCanvas extends React.Component {
 					...this.state,
 					xAttr: newXAttr,
 					yAttr: newYAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				});				
 			} else {
 				this.panInProgress = true;
@@ -614,7 +616,8 @@ class ChartCanvas extends React.Component {
 					...this.state,
 					xAttr: newXAttr,
 					yAttr: newYAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				});
 				if (false && this.props.onScatterPanZoom) {
 					const xName = newXAttr.name;
@@ -1051,6 +1054,8 @@ class ChartCanvas extends React.Component {
 			handleImageRequest: this.props.onDataRequest,
 			handleImageZoom: this.handleZoom,
 			zoomFactor: this.state.zoomFactor,
+			handlePan: this.handlePan,
+			handlePanEnd: this.handlePanEnd,
 			hitTest: {
 				canvas: this.hitCanvas,
 				ctx: this.hitCtx
@@ -1060,10 +1065,13 @@ class ChartCanvas extends React.Component {
 
 		const cursor = cursorStyle(true);
 
-		const children = [];
+		const children = [], childrenWithHandler = [];
 		React.Children.forEach(this.props.children, child => {
 			if (!React.isValidElement(child)) return;
-			children.push(React.cloneElement(child,{shared}));
+			if (child.type === ColorLegend) {
+				childrenWithHandler.push(React.cloneElement(child,{shared}));
+			} else 
+				children.push(React.cloneElement(child,{shared}));
 		});
 
 		return (
@@ -1091,6 +1099,9 @@ class ChartCanvas extends React.Component {
 					</defs>
 					{cursor}
 					<g transform={`translate(${margin.left},${margin.top})`}>
+						<g>
+							{children}
+						</g>										
 						<EventHandler
 							ref={node => this.eventHandlerNode = node}
 							width={canvasDim.width}
@@ -1103,8 +1114,8 @@ class ChartCanvas extends React.Component {
 							onMouseTrackEnd={this.handleMouseTrackEnd}
 						/>
 						<g>
-							{children}
-						</g>						
+							{childrenWithHandler}
+						</g>
 					</g>
 				</svg>
 			</div>
