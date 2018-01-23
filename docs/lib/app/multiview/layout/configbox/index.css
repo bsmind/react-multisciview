@@ -53,3 +53,7 @@
     height: var(--infodiv-height);
     padding: 5px;
 }
+
+.tabStyle {
+    outline: 'none';
+}

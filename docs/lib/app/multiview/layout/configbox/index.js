@@ -11,7 +11,10 @@ import {
     getSelectedSampleColors,
     getSampleColorOpacity,
     getSelectedSampleKeys,
-    getShowImageSwitch
+    getShowImageSwitch,
+    // for pcp
+    getSelectedDataArray,
+    getPCPSelectedDimension
 } from '../../selectors';
 
 import {
@@ -22,18 +25,23 @@ import {
 
 import {
     setAttr,
-    setSwitch
+    setSwitch,
+    updateAttrSelect
 } from '../../actions/visActions';
 
 import {Tab, Tabs} from 'react-toolbox';
 import DataTab from './DataTab';
 import ScatterTab from './ScatterTab';
+import PcpTab from './pcpTab';
+
+import Dropdown from 'react-toolbox/lib/dropdown';
+
 
 class ConfigBox extends React.Component {
     constructor() {
         super();
         this.state = {
-            index: 0
+            index: 0,
         }
     }
     
@@ -59,7 +67,10 @@ class ConfigBox extends React.Component {
 
     render() {
         return (
-            <Tabs index={this.state.index} onChange={this.handleTabChange} fixed>
+            <Tabs fixed
+                style={{outline: 'none'}}
+                index={this.state.index} 
+                onChange={this.handleTabChange}>
                 <Tab label='DATA'>
                     <DataTab 
                         height={this.props.height}
@@ -82,13 +93,33 @@ class ConfigBox extends React.Component {
                         onSwitchChange={this.props.setSwitch}
                     />
                 </Tab>
-                <Tab label='PCP'><small>PCP</small></Tab>
+                <Tab label='PCP'>
+                    <PcpTab
+                        dimKinds={this.props.attrKinds}
+                        dimOrder={this.props.dimOrder}
+                        dimension={this.props.dimension}
+                        data={this.props.data}
+                        attrFormat={this.props.attrFormat}
+                        zAttr={this.props.attr.z}
+                        colorsBySampleNames={this.props.sampleColors}
+                        onColorAttrChange={this.handleAttrChange}
+                        onAttrSelectChange={this.props.updateAttrSelect}
+                    />
+                </Tab>
             </Tabs>
         );
     }
 }
 
 function mapStateToProps(state) {
+    const {id, samples, data, extents: dimension} = getSelectedDataArray(state);
+    const pcpDimension = getPCPSelectedDimension(state);
+    // const pcpExtents = {};
+    // pcpDimension.forEach(dimName => {
+    //     pcpExtents[dimName] = dimension[dimName];
+    // });
+    //console.log(getAttrKinds(state))
+
     return {
         sampleKinds: getSampleKinds(state),
         sampleColors: getSelectedSampleColors(state),
@@ -104,6 +135,17 @@ function mapStateToProps(state) {
         attrFormat: state.data.attrFormat,
 
         showImage: getShowImageSwitch(state),
+
+        // for pcp
+        dimOrder: pcpDimension,
+        dimension: dimension,
+        data,
+
+        // data,
+        // colorAccessor,
+        // titleFormat,
+        // onPCPAxisSelect,
+    
     };
 }
 
@@ -113,7 +155,8 @@ function mapDispatchToProps(dispatch) {
         delSelectedSamples,
         changeSelectedSampleColors,
         setAttr,
-        setSwitch
+        setSwitch,
+        updateAttrSelect
     }, dispatch);
 }
 

@@ -29,6 +29,8 @@ export const getAttrKinds = state => state.data.attrKinds;
 
 export const getImgPool = state => state.data.imgPool;
 
+
+
 export const getSelectedSampleNames = createSelector(
     [
         getSampleKinds,
@@ -92,33 +94,5 @@ export const getSelectedDataArray = createSelector(
     }
 );
 
-// export const getMarkerProvider = createSelector(
-//     [
-//         getSelectedSampleColors,
-//         getSampleColorOpacity,
-//         getAttrZ
-//     ],
-//     (
-//         colorsBySampleNames,
-//         opacity,
-//         attrz
-//     ) => {
-//         // todo: shape go to vis reducer
-//         const shape = {
-//             type: 'square',
-//             width: 6,
-//             height: 6,
-//             defaultColor: '#FF0000',
-//             style: {
-//                 strokeWidth: 1,
-//                 opacity
-//             }
-//         }
-//         let mProvider = markerProvider(d => get(d, attrz), shape, 2.5);
-//         if (attrz === 'sample') {
-//             mProvider.colorSet(colorsBySampleNames);
-//         }
-//         return mProvider;
-//     }
-// );
+export const getPCPSelectedDimension = state => state.vis.selectedDimension;
 

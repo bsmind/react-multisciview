@@ -25,3 +25,10 @@ export function setSwitch(name, value) {
         payload: {name, value}
     }
 }
+
+export function updateAttrSelect(newSelect) {
+    return {
+        type: 'SET_PCP_SELECT_DIM',
+        payload: newSelect
+    }
+}
