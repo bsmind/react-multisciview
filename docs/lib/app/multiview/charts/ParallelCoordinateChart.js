@@ -17,8 +17,13 @@ class ParallelCoordinateChart extends React.Component {
         if (this.PCPCanvasNode) return this.PCPCanvasNode;
     }
 
+    handleUnmountPCP = (dimOrder) => {
+        if (this.props.updateDimOrder)
+            this.props.updateDimOrder(dimOrder);
+    }
+
     render () {
-        const margin= {left: 60, right: 40, top: 10, bottom: 10};
+        const margin= {left: 60, right: 40, top: 20, bottom: 10};
         const {
             width,
             height,
@@ -29,14 +34,8 @@ class ParallelCoordinateChart extends React.Component {
             colorAccessor,
             titleFormat,
             onPCPAxisSelect,
+            pcpAttrSelect
         } = this.props;
-
-        // const dimName = Object.keys(dimension).sort(sortAlphaNum);
-        // const index = dimName.indexOf('sample');
-        // if (index !== -1) {
-        //     dimName.splice(index, 1);
-        //     dimName.splice(0, 0, 'sample');
-        // }
 
         return (
             <PCPCanvas
@@ -58,6 +57,8 @@ class ParallelCoordinateChart extends React.Component {
                 titleFormat={titleFormat}
 
                 onPCPAxisSelect={onPCPAxisSelect}
+                pcpAttrSelect={pcpAttrSelect}
+                onUnmount={this.handleUnmountPCP}
             >
                 <Series>
                     <PCPPolyLineSeries

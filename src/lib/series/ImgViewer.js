@@ -55,33 +55,40 @@ class ImgViewer extends React.Component {
     }
 
     renderImage = () => {
-        const { imgRefWidth, imgRefHeight, x, y } = this.props;
+        const { imgRefWidth, imgRefHeight, x, y, id } = this.props;
+        const { backgroundRectRef } = this.props;
         let imgWidth = imgRefWidth ? imgRefWidth: imgRefHeight;
         let imgHeight = imgRefHeight ? imgRefHeight: imgRefWidth;
         let imgSide = Math.min(imgWidth, imgHeight);
         if (this.state.img == null || this.state.id == null) {
-            return <rect
-                x={x - imgSide/2}
-                y={y - imgSide/2}
-                width={imgSide}
-                height={imgSide}
-                style={{
-                    fill: '#000000',
-                    opacity: 0.3
-                }}
-            />;
+            return React.cloneElement(backgroundRectRef, {
+                key: `imgViewer-empty-${id}`,
+                x: x - imgSide/2,
+                y: y - imgSide/2,
+                width: imgSide,
+                height: imgSide/2
+            });
         }
 
         const {width, height} = this.getImgSize(imgSide);
-        return <image
-            ref={node => this.node = node}
-            xlinkHref={this.state.img.url}
-            x={x - width/2}
-            y={y - height/2}
-            width={width}
-            height={height}
-            imageRendering={'pixelated'}
-        />;
+        return <g>
+            {React.cloneElement(backgroundRectRef, {
+                key: `imgViewer-bg-${id}`,
+                x: x - width/2 - 1,
+                y: y - height/2 - 1,
+                width: width + 2,
+                height: height + 2
+            })}
+            <image
+                ref={node => this.node = node}
+                xlinkHref={this.state.img.url}
+                x={x - width/2}
+                y={y - height/2}
+                width={width}
+                height={height}
+                imageRendering={'pixelated'}
+            />
+        </g>;
     }
 
     renderGrid = () => {

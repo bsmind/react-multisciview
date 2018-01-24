@@ -43,7 +43,10 @@ class ScatterBox extends React.Component {
             onDataRequest: this.handleDataImageRequest,
             onSelectDataItems: null
         }
-        return <ScatterChart {...chartProps} />;
+        return <ScatterChart 
+            ref={'ScatterChartRef'}
+            {...chartProps} 
+        />;
     }
 }
 
@@ -72,4 +75,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ScatterBox);
+export default connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ScatterBox);

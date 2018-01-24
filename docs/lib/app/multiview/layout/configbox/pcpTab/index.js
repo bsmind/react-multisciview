@@ -8,6 +8,7 @@ import { scaleSequential, interpolateViridis } from 'd3-scale';
 
 
 class PcpTab extends React.Component {
+
     handleColorAttrChange = (value) => {
         if (this.props.onColorAttrChange)
             this.props.onColorAttrChange('z', value);
@@ -39,6 +40,12 @@ class PcpTab extends React.Component {
 
         if (this.props.onAttrSelectChange) {
             this.props.onAttrSelectChange(dimOrderCopy);
+        }
+    }
+
+    handleUpdateDimOrder = (dimOrder) => {
+        if (this.props.onAttrSelectChange) {
+            this.props.onAttrSelectChange(dimOrder)
         }
     }
 
@@ -81,7 +88,8 @@ class PcpTab extends React.Component {
         const {
             data, dimension, dimOrder,
             attrFormat, 
-            zAttr, colorsBySampleNames
+            zAttr, colorsBySampleNames,
+            onPCPAxisSelect, pcpAttrSelect
         } = this.props;
 
         const colorExtents = dimension[zAttr];
@@ -99,12 +107,16 @@ class PcpTab extends React.Component {
 
         return <div>
             <ParallelCoordinateChart
+                ref={node => this.PCPChartNode = node}
                 height={250}
                 data={data}
                 dimOrder={dimOrder}
                 dimension={dimension}
                 colorAccessor={colorAccessor}
                 titleFormat={attrFormat}
+                updateDimOrder={this.handleUpdateDimOrder}
+                onPCPAxisSelect={onPCPAxisSelect}
+                pcpAttrSelect={pcpAttrSelect}
             />
             {this.renderOptions()}
         </div>

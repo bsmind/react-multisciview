@@ -258,3 +258,7 @@ providerProto.getSVG = function(
         y: dy - height/2
     });
 }
+
+providerProto.getSVGRef = function(markerID) {
+    return this._markers[markerID].svg;
+}

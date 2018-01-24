@@ -176,6 +176,7 @@ class ScatterSeries extends React.Component {
         const {ordinary, name, step, scale, extents, origExtents} = attr;
         return (d) => {
             const value = d[name];
+            if (value == null) return null;
             let scaledValue;
             if (ordinary) {
                 let index = origExtents.indexOf(value);
@@ -232,9 +233,23 @@ class ScatterSeries extends React.Component {
         };
     }
 
-    getDistanceComputor = (xRange, yRange) => {
-        const inRange = (v, minv, maxv) => minv < v && v < maxv;
+    getDistanceComputor = () => {
         return (x, y, minDist, pointSet) => {
+            if (pointSet.length === 0) {
+                return;
+            } 
+            pointSet.forEach(p => {
+                const distX = Math.abs(p.x - x);
+                const distY = Math.abs(p.y - y);
+                minDist.x = Math.min(minDist.x || distX, distX);
+                minDist.y = Math.min(minDist.y || distY, distY);
+            });
+        }
+    }
+
+    getDistanceComputorSum = (xRange, yRange) => {
+        const inRange = (v, minv, maxv) => minv < v && v < maxv;
+        return (x, y, sumDist, pointSet) => {
             if (!inRange(x, xRange[0], xRange[1]) || !inRange(y, yRange[1], yRange[0])) return;
             if (pointSet.length === 0) {
                 //pointSet.push({x, y});                    
@@ -243,12 +258,13 @@ class ScatterSeries extends React.Component {
             pointSet.forEach(p => {
                 const distX = Math.abs(p.x - x);
                 const distY = Math.abs(p.y - y);
-                minDist.x = Math.min(minDist.x || distX, distX);
-                minDist.y = Math.min(minDist.x || distY, distY);
+                sumDist.x = sumDist.x + distX;
+                sumDist.y = sumDist.y + distY;
+                sumDist.count= sumDist.count + 1;
             });
             //pointSet.push({x, y});
         }
-    }
+    }    
 
     preDraw = (hitTest) => {
         const { width, height, ratio, margin } = this.props.shared;
@@ -293,10 +309,6 @@ class ScatterSeries extends React.Component {
         const xAccessor = this.getAccessor(xAttr);
         const yAccessor = this.getAccessor(yAttr);
 
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
-        ctx.imageSmoothingEnabled = false;        
         this.drawOnCanvas(ctx, plotData, xAccessor, yAccessor, dataFilter, hitTestor, distComputor);
         this.postDraw();
     }
@@ -402,19 +414,50 @@ class ScatterSeries extends React.Component {
         return points;
     }
 
+    updateRefImageSize = (minDist, numPoints, zoomFactor = 1) => {
+        const MIN_IMAGE_SIDE = 12;
+        const inversed = 1 / zoomFactor;
+        if (minDist.x == null && minDist.y == null && numPoints <= 1) {
+           // console.log('case 1: ', minDist, numPoints)
+            this.__imgRefWidth = (this.__imgRefWidth || 200) * inversed;
+            this.__imgRefHeight = (this.__imgRefHeight || 200) * inversed;
+        } 
+
+        else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= 20) {
+            //console.log('case 2: ', minDist, numPoints)
+            this.__imgRefWidth = (this.__imgRefWidth || MIN_IMAGE_SIDE) * inversed;
+            this.__imgRefHeight = (this.__imgRefHeight || MIN_IMAGE_SIDE) * inversed;
+        }        
+
+        else if ( (minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= 20) {
+            //console.log('case 3: ', minDist, numPoints)            
+            this.__imgRefWidth = (this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
+            this.__imgRefHeight = (this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
+        }
+
+        else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y >= MIN_IMAGE_SIDE) {
+            //console.log('case 4: ', minDist, numPoints)            
+            this.__imgRefWidth = (this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
+            this.__imgRefHeight = (this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
+        }
+        
+        else {
+            //console.log('case 5: do not render image', minDist, numPoints)
+            this.__imgRefWidth = null;
+            this.__imgRefHeight = null;
+        }
+    }
+
     drawImage = (moreProps, ctx) => {
 
-        const { plotData, xAttr, yAttr, dataExtents } = moreProps;
-        const { shared: {origDataExtents, zoomFactor} } = this.props;
+        const { plotData, xAttr, yAttr, dataExtents, zoomFactor } = moreProps;
+        const { shared: {origDataExtents} } = this.props;
         const { canvasDim } = this.props.shared;
         
         const xAccessor = this.getAccessor(xAttr);
         const yAccessor = this.getAccessor(yAttr);
         const dataFilter = this.getDataFilter(dataExtents, origDataExtents);
-        const distComputor = this.getDistanceComputor(
-            xAttr.scale.range(), 
-            yAttr.scale.range()
-        );
+        const distComputor = this.getDistanceComputor();
         
         const pointSet = [], minDist = {x: null, y: null};
         plotData.forEach(d => {
@@ -426,15 +469,17 @@ class ScatterSeries extends React.Component {
 
             // filter out of canvas
             // todo: margin 
-            if (x < -5 && x > canvasDim.width + 5) return;
-            if (y < -5 && y > canvasDim.height + 5) return;
+            if (x < 0 || x > canvasDim.width) return;
+            if (y < 0 || y > canvasDim.height) return;
 
             if (distComputor) {
                 distComputor(x, y, minDist, pointSet);
+                //distComputor(x, y, sumDist, pointSet);
             }
             pointSet.push({x, y, ...d}); 
         });
     
+        // cache
         if (pointSet.length === 1) {
             const point = pointSet[0];
             this.__cache = {};
@@ -443,43 +488,33 @@ class ScatterSeries extends React.Component {
             });
         }
 
-        const MIN_IMAGE_SIDE = 6;
-        let imgRefWidth, imgRefHeight; 
-        console.log(minDist)
-        if (minDist.x == null || minDist.y == null) {
-            imgRefWidth = this.__imgRefWidth * (1/zoomFactor);
-            imgRefHeight = this.__imgRefHeight * (1/zoomFactor);
-        } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
-            if (this.SubscriberExtNode == null) {
-                return;
-            }
+        this.updateRefImageSize(minDist, pointSet.length, zoomFactor);
+        //console.log(pointSet)
+
+        // this.__imgRefWidth = Math.max(imgRefWidth, imgRefHeight);
+        // this.__imgRefHeight = Math.max(imgRefHeight, imgRefWidth);
+        if (this.__imgRefWidth == null && this.__imgRefHeight == null) {
+            if (this.SubscriberExtNode == null) return;
             const { getCanvasContexts } = this.props.shared;
             ctx = ctx ? ctx: getCanvasContexts().chartOn;
             this.SubscriberExtNode.preDraw(ctx);
             this.drawOnCanvasForce(ctx, pointSet);
             this.SubscriberExtNode.postDraw(ctx);
             return;                
-        } else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
-            imgRefWidth = Math.floor(minDist.x);
-        } else if (minDist.y >= MIN_IMAGE_SIDE && minDist.x < MIN_IMAGE_SIDE) {
-            imgRefHeight = Math.floor(minDist.y);
-        } else {
-            imgRefWidth = Math.floor(minDist.x);
-            imgRefHeight = Math.floor(minDist.y);
         }
 
-        this.__imgRefWidth = imgRefWidth;
-        this.__imgRefHeight = imgRefHeight;
+        //console.log(this.__imgRefWidth, this.__imgRefHeight)
 
         const imageSet = [];
         const { imgPool, handleImageRequest, handleImageZoom, 
             handlePan, handlePanEnd
         } = this.props.shared;
+        const { markerProvider } = this.props;
         const pointSetToUse = pointSet.length ? pointSet: [this.__cache];
 
         const imageRatio = Math.max(
-            imgRefWidth / canvasDim.width || 0.1, 
-            imgRefHeight / canvasDim.height || 0.1);
+            this.__imgRefWidth / canvasDim.width || 0.1, 
+            this.__imgRefHeight / canvasDim.height || 0.1);
             
         let showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
@@ -495,6 +530,7 @@ class ScatterSeries extends React.Component {
                 onImageRequest={handleImageRequest}
                 showGrid={showGrid}
                 svgDim={canvasDim}
+                backgroundRectRef={markerProvider.getSVGRef(d.markerID)}
             />);
         });
         return imageSet;
@@ -556,3 +592,33 @@ ScatterSeries.defaultProps = {
 
 
 export default ScatterSeries;
+
+
+// const MIN_IMAGE_SIDE = 6;
+// let imgRefWidth, imgRefHeight, shouldRenderImage = true;
+// if (minDist.x == null || minDist.y == null) {
+//     // special case
+//     // 1. no point or single point
+//     imgRefWidth = this.__imgRefWidth * (1/zoomFactor);
+//     imgRefHeight = this.__imgRefHeight * (1/zoomFactor);            
+// } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
+//     // too condense, so do not render image
+//     shouldRenderImage = false;
+//     imgRefWidth = Math.floor(minDist.x);
+//     imgRefHeight = Math.floor(minDist.y);            
+// } else {
+//     imgRefWidth = Math.floor(minDist.x);
+//     imgRefHeight = Math.floor(minDist.y);
+// }
+
+// if (pointSet.length < 20 || 
+//     (imgRefHeight >= MIN_IMAGE_SIDE || imgRefWidth >= MIN_IMAGE_SIDE)
+// ) {
+//     imgRefWidth = Math.max(imgRefWidth, MIN_IMAGE_SIDE);
+//     imgRefHeight = Math.max(imgRefHeight, MIN_IMAGE_SIDE); 
+//     shouldRenderImage = true;
+// } else {
+//     shouldRenderImage = false;
+// }
+    
+

@@ -30,20 +30,16 @@ class PCPPolyLineSeries extends React.Component {
                 return nullPositionY;
             }
             return ordinary
-                ? scale(extents.length - extents.indexOf(yValue) - 1) - step/2
+                ? scale(extents.indexOf(yValue)) - step/2
                 : scale(yValue);
+            // return ordinary
+            //     ? scale(extents.length - extents.indexOf(yValue) - 1) - step/2
+            //     : scale(yValue);
         };
 
         const xAccessor = (config) => {
             return config.position;
         }
-
-        // const activeDimOrder = dimOrder.map(key => {
-        //     const config = dimConfig[key];
-        //     if (config.active) {
-        //         return key;
-        //     }
-        // }).filter(each => each != undefined);
 
         ctx.save();
         nest.forEach(groupByStroke => {
@@ -86,23 +82,7 @@ class PCPPolyLineSeries extends React.Component {
                     ctx.lineTo(p2[0], p2[1]);
                 }
             });
-            ctx.stroke();
-            
-            // ctx.strokeStyle = hexToRGBA(stroke, opacity);
-            // ctx.lineWidth = strokeWidth;
-            // ctx.beginPath()
-            // group.forEach(d => {
-            //     const p1Config = dimConfig[dimOrder[0]];
-            //     const p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
-
-            //     ctx.moveTo(p1[0], p1[1]);
-            //     for (let i=1; i<dimOrder.length; ++i) {
-            //         const p2Config = dimConfig[dimOrder[i]];
-            //         const p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
-            //         ctx.lineTo(p2[0], p2[1]);
-            //     }
-            // });
-            // ctx.stroke();
+            ctx.stroke();            
         });
         ctx.restore();
     }

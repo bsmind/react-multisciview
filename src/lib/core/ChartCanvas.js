@@ -223,6 +223,7 @@ class ChartCanvas extends React.Component {
 			xAttr,
 			yAttr,
 			zAttr,
+			zoomFactor: 1,
 		}
 	}
 
@@ -339,6 +340,7 @@ class ChartCanvas extends React.Component {
 			xAttr,
 			yAttr,
 			zAttr,
+			zoomFactor: 1
 		}		
 	}
 
@@ -352,7 +354,11 @@ class ChartCanvas extends React.Component {
 					ctx: this.hitCtx
 				}
     		};
-    		each.listener(type, props, state, e);
+    		each.listener(type, {
+				zoomFactor: 1,
+				...props
+			}, 
+			state, e);
     	});
     }
 
@@ -380,7 +386,8 @@ class ChartCanvas extends React.Component {
 			dataExtents: {
 				...this.state.dataExtents,
 				[name]: newDomain
-			}
+			},
+			zoomFactor: 1
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(
@@ -408,7 +415,8 @@ class ChartCanvas extends React.Component {
 			dataExtents: {
 				...this.state,
 				[name]: newDomain
-			}
+			},
+			zoomFactor: 1
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(

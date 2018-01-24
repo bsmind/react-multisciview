@@ -41076,6 +41076,8 @@ function setAttr(state, payload) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_lodash_get__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -41161,10 +41163,26 @@ var MultiViewApp = function (_React$Component) {
             _this.setState({ showDataDialog: !_this.state.showDataDialog });
         };
 
+        _this.handlePCPAxisSelect = function (axisTitle, domain, inProgress, aux) {
+            var ScatterBoxRef = _this.refs['ScatterBoxRef'].getWrappedInstance();
+            var ScatterChartRef = ScatterBoxRef.refs['ScatterChartRef'].getWrappedInstance();
+            var ScatterCanvasNode = ScatterChartRef.getScatterChartCanvasNode();
+            ScatterCanvasNode.handleByOther({
+                what: 'extents',
+                data: _defineProperty({}, axisTitle, domain.slice()),
+                inProgress: inProgress });
+            _this.pcpAttrSelect[axisTitle] = {
+                domain: domain.slice(),
+                auxiliary: aux ? aux.slice() : null
+            };
+        };
+
         _this.state = {
             width: 0,
             height: 0
         };
+
+        _this.pcpAttrSelect = {};
         return _this;
     }
 
@@ -41202,9 +41220,19 @@ var MultiViewApp = function (_React$Component) {
             //     return false;
             return true;
         }
+
+        // update scatter plot by pcp
+
     }, {
         key: 'render',
+
+
+        // todo: update pcp by scatter plot
+
+
         value: function render() {
+            var _this4 = this;
+
             var _state = this.state,
                 width = _state.width,
                 height = _state.height;
@@ -41233,12 +41261,22 @@ var MultiViewApp = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'div',
                         { style: { width: scatterBoxWidth, float: 'left' } },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["b" /* ScatterBox */], { width: scatterBoxWidth, height: scatterBoxWidth })
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["b" /* ScatterBox */], {
+                            ref: 'ScatterBoxRef',
+                            width: scatterBoxWidth, height: scatterBoxWidth
+                        })
                     ),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'div',
                         { style: { marginLeft: scatterBoxWidth } },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["a" /* ConfigBox */], { height: height })
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["a" /* ConfigBox */], {
+                            ref: function ref(node) {
+                                return _this4.configBoxNode = node;
+                            },
+                            height: height,
+                            onPCPAxisSelect: this.handlePCPAxisSelect,
+                            pcpAttrSelect: this.pcpAttrSelect
+                        })
                     )
                 )
             );
@@ -41281,7 +41319,7 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps)(MultiViewApp));
+/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps, null, { withRef: true })(MultiViewApp));
 
 /***/ }),
 /* 576 */
@@ -42517,6 +42555,8 @@ var ConfigBox = function (_React$Component) {
     _createClass(ConfigBox, [{
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_6_react_toolbox__["Tabs"],
                 { fixed: true,
@@ -42553,6 +42593,9 @@ var ConfigBox = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_6_react_toolbox__["Tab"],
                     { label: 'PCP' },
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__pcpTab__["a" /* default */], {
+                        ref: function ref(node) {
+                            return _this2.pcpTabNode = node;
+                        },
                         dimKinds: this.props.attrKinds,
                         dimOrder: this.props.dimOrder,
                         dimension: this.props.dimension,
@@ -42561,7 +42604,9 @@ var ConfigBox = function (_React$Component) {
                         zAttr: this.props.attr.z,
                         colorsBySampleNames: this.props.sampleColors,
                         onColorAttrChange: this.handleAttrChange,
-                        onAttrSelectChange: this.props.updateAttrSelect
+                        onAttrSelectChange: this.props.updateAttrSelect,
+                        onPCPAxisSelect: this.props.onPCPAxisSelect,
+                        pcpAttrSelect: this.props.pcpAttrSelect
                     })
                 )
             );
@@ -45481,6 +45526,7 @@ var ScatterSeries = function (_React$Component) {
 
             return function (d) {
                 var value = d[name];
+                if (value == null) return null;
                 var scaledValue = void 0;
                 if (ordinary) {
                     var index = origExtents.indexOf(value);
@@ -45539,11 +45585,25 @@ var ScatterSeries = function (_React$Component) {
             };
         };
 
-        _this.getDistanceComputor = function (xRange, yRange) {
+        _this.getDistanceComputor = function () {
+            return function (x, y, minDist, pointSet) {
+                if (pointSet.length === 0) {
+                    return;
+                }
+                pointSet.forEach(function (p) {
+                    var distX = Math.abs(p.x - x);
+                    var distY = Math.abs(p.y - y);
+                    minDist.x = Math.min(minDist.x || distX, distX);
+                    minDist.y = Math.min(minDist.y || distY, distY);
+                });
+            };
+        };
+
+        _this.getDistanceComputorSum = function (xRange, yRange) {
             var inRange = function inRange(v, minv, maxv) {
                 return minv < v && v < maxv;
             };
-            return function (x, y, minDist, pointSet) {
+            return function (x, y, sumDist, pointSet) {
                 if (!inRange(x, xRange[0], xRange[1]) || !inRange(y, yRange[1], yRange[0])) return;
                 if (pointSet.length === 0) {
                     //pointSet.push({x, y});                    
@@ -45552,8 +45612,9 @@ var ScatterSeries = function (_React$Component) {
                 pointSet.forEach(function (p) {
                     var distX = Math.abs(p.x - x);
                     var distY = Math.abs(p.y - y);
-                    minDist.x = Math.min(minDist.x || distX, distX);
-                    minDist.y = Math.min(minDist.x || distY, distY);
+                    sumDist.x = sumDist.x + distX;
+                    sumDist.y = sumDist.y + distY;
+                    sumDist.count = sumDist.count + 1;
                 });
                 //pointSet.push({x, y});
             };
@@ -45616,10 +45677,6 @@ var ScatterSeries = function (_React$Component) {
             var xAccessor = _this.getAccessor(xAttr);
             var yAccessor = _this.getAccessor(yAttr);
 
-            ctx.mozImageSmoothingEnabled = false;
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
             _this.drawOnCanvas(ctx, plotData, xAccessor, yAccessor, dataFilter, hitTestor, distComputor);
             _this.postDraw();
         };
@@ -45714,21 +45771,48 @@ var ScatterSeries = function (_React$Component) {
             return points;
         };
 
+        _this.updateRefImageSize = function (minDist, numPoints) {
+            var zoomFactor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+            var MIN_IMAGE_SIDE = 12;
+            var inversed = 1 / zoomFactor;
+            if (minDist.x == null && minDist.y == null && numPoints <= 1) {
+                // console.log('case 1: ', minDist, numPoints)
+                _this.__imgRefWidth = (_this.__imgRefWidth || 200) * inversed;
+                _this.__imgRefHeight = (_this.__imgRefHeight || 200) * inversed;
+            } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= 20) {
+                //console.log('case 2: ', minDist, numPoints)
+                _this.__imgRefWidth = (_this.__imgRefWidth || MIN_IMAGE_SIDE) * inversed;
+                _this.__imgRefHeight = (_this.__imgRefHeight || MIN_IMAGE_SIDE) * inversed;
+            } else if ((minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= 20) {
+                //console.log('case 3: ', minDist, numPoints)            
+                _this.__imgRefWidth = (_this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
+                _this.__imgRefHeight = (_this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
+            } else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y >= MIN_IMAGE_SIDE) {
+                //console.log('case 4: ', minDist, numPoints)            
+                _this.__imgRefWidth = (_this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
+                _this.__imgRefHeight = (_this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
+            } else {
+                //console.log('case 5: do not render image', minDist, numPoints)
+                _this.__imgRefWidth = null;
+                _this.__imgRefHeight = null;
+            }
+        };
+
         _this.drawImage = function (moreProps, ctx) {
             var plotData = moreProps.plotData,
                 xAttr = moreProps.xAttr,
                 yAttr = moreProps.yAttr,
-                dataExtents = moreProps.dataExtents;
-            var _this$props$shared4 = _this.props.shared,
-                origDataExtents = _this$props$shared4.origDataExtents,
-                zoomFactor = _this$props$shared4.zoomFactor;
+                dataExtents = moreProps.dataExtents,
+                zoomFactor = moreProps.zoomFactor;
+            var origDataExtents = _this.props.shared.origDataExtents;
             var canvasDim = _this.props.shared.canvasDim;
 
 
             var xAccessor = _this.getAccessor(xAttr);
             var yAccessor = _this.getAccessor(yAttr);
             var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
-            var distComputor = _this.getDistanceComputor(xAttr.scale.range(), yAttr.scale.range());
+            var distComputor = _this.getDistanceComputor();
 
             var pointSet = [],
                 minDist = { x: null, y: null };
@@ -45741,15 +45825,17 @@ var ScatterSeries = function (_React$Component) {
 
                 // filter out of canvas
                 // todo: margin 
-                if (x < -5 && x > canvasDim.width + 5) return;
-                if (y < -5 && y > canvasDim.height + 5) return;
+                if (x < 0 || x > canvasDim.width) return;
+                if (y < 0 || y > canvasDim.height) return;
 
                 if (distComputor) {
                     distComputor(x, y, minDist, pointSet);
+                    //distComputor(x, y, sumDist, pointSet);
                 }
                 pointSet.push(_extends({ x: x, y: y }, d));
             });
 
+            // cache
             if (pointSet.length === 1) {
                 var point = pointSet[0];
                 _this.__cache = {};
@@ -45758,17 +45844,13 @@ var ScatterSeries = function (_React$Component) {
                 });
             }
 
-            var MIN_IMAGE_SIDE = 6;
-            var imgRefWidth = void 0,
-                imgRefHeight = void 0;
-            console.log(minDist);
-            if (minDist.x == null || minDist.y == null) {
-                imgRefWidth = _this.__imgRefWidth * (1 / zoomFactor);
-                imgRefHeight = _this.__imgRefHeight * (1 / zoomFactor);
-            } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
-                if (_this.SubscriberExtNode == null) {
-                    return;
-                }
+            _this.updateRefImageSize(minDist, pointSet.length, zoomFactor);
+            //console.log(pointSet)
+
+            // this.__imgRefWidth = Math.max(imgRefWidth, imgRefHeight);
+            // this.__imgRefHeight = Math.max(imgRefHeight, imgRefWidth);
+            if (_this.__imgRefWidth == null && _this.__imgRefHeight == null) {
+                if (_this.SubscriberExtNode == null) return;
                 var getCanvasContexts = _this.props.shared.getCanvasContexts;
 
                 ctx = ctx ? ctx : getCanvasContexts().chartOn;
@@ -45776,29 +45858,22 @@ var ScatterSeries = function (_React$Component) {
                 _this.drawOnCanvasForce(ctx, pointSet);
                 _this.SubscriberExtNode.postDraw(ctx);
                 return;
-            } else if (minDist.x >= MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
-                imgRefWidth = Math.floor(minDist.x);
-            } else if (minDist.y >= MIN_IMAGE_SIDE && minDist.x < MIN_IMAGE_SIDE) {
-                imgRefHeight = Math.floor(minDist.y);
-            } else {
-                imgRefWidth = Math.floor(minDist.x);
-                imgRefHeight = Math.floor(minDist.y);
             }
 
-            _this.__imgRefWidth = imgRefWidth;
-            _this.__imgRefHeight = imgRefHeight;
+            //console.log(this.__imgRefWidth, this.__imgRefHeight)
 
             var imageSet = [];
-            var _this$props$shared5 = _this.props.shared,
-                imgPool = _this$props$shared5.imgPool,
-                handleImageRequest = _this$props$shared5.handleImageRequest,
-                handleImageZoom = _this$props$shared5.handleImageZoom,
-                handlePan = _this$props$shared5.handlePan,
-                handlePanEnd = _this$props$shared5.handlePanEnd;
+            var _this$props$shared4 = _this.props.shared,
+                imgPool = _this$props$shared4.imgPool,
+                handleImageRequest = _this$props$shared4.handleImageRequest,
+                handleImageZoom = _this$props$shared4.handleImageZoom,
+                handlePan = _this$props$shared4.handlePan,
+                handlePanEnd = _this$props$shared4.handlePanEnd;
+            var markerProvider = _this.props.markerProvider;
 
             var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
 
-            var imageRatio = Math.max(imgRefWidth / canvasDim.width || 0.1, imgRefHeight / canvasDim.height || 0.1);
+            var imageRatio = Math.max(_this.__imgRefWidth / canvasDim.width || 0.1, _this.__imgRefHeight / canvasDim.height || 0.1);
 
             var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
@@ -45813,7 +45888,8 @@ var ScatterSeries = function (_React$Component) {
                     imgPool: imgPool,
                     onImageRequest: handleImageRequest,
                     showGrid: showGrid,
-                    svgDim: canvasDim
+                    svgDim: canvasDim,
+                    backgroundRectRef: markerProvider.getSVGRef(d.markerID)
                 }));
             });
             return imageSet;
@@ -45878,6 +45954,33 @@ ScatterSeries.defaultProps = {
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (ScatterSeries);
+
+// const MIN_IMAGE_SIDE = 6;
+// let imgRefWidth, imgRefHeight, shouldRenderImage = true;
+// if (minDist.x == null || minDist.y == null) {
+//     // special case
+//     // 1. no point or single point
+//     imgRefWidth = this.__imgRefWidth * (1/zoomFactor);
+//     imgRefHeight = this.__imgRefHeight * (1/zoomFactor);            
+// } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE) {
+//     // too condense, so do not render image
+//     shouldRenderImage = false;
+//     imgRefWidth = Math.floor(minDist.x);
+//     imgRefHeight = Math.floor(minDist.y);            
+// } else {
+//     imgRefWidth = Math.floor(minDist.x);
+//     imgRefHeight = Math.floor(minDist.y);
+// }
+
+// if (pointSet.length < 20 || 
+//     (imgRefHeight >= MIN_IMAGE_SIDE || imgRefWidth >= MIN_IMAGE_SIDE)
+// ) {
+//     imgRefWidth = Math.max(imgRefWidth, MIN_IMAGE_SIDE);
+//     imgRefHeight = Math.max(imgRefHeight, MIN_IMAGE_SIDE); 
+//     shouldRenderImage = true;
+// } else {
+//     shouldRenderImage = false;
+// }
 
 /***/ }),
 /* 602 */
@@ -46269,7 +46372,8 @@ var _initialiseProps = function _initialiseProps() {
 			dataExtents: dataExtents,
 			xAttr: xAttr,
 			yAttr: yAttr,
-			zAttr: zAttr
+			zAttr: zAttr,
+			zoomFactor: 1
 		};
 	};
 
@@ -46376,7 +46480,8 @@ var _initialiseProps = function _initialiseProps() {
 			dataExtents: _extends({}, dataExtentsState),
 			xAttr: xAttr,
 			yAttr: yAttr,
-			zAttr: zAttr
+			zAttr: zAttr,
+			zoomFactor: 1
 		};
 	};
 
@@ -46389,7 +46494,9 @@ var _initialiseProps = function _initialiseProps() {
 					ctx: _this3.hitCtx
 				}
 			});
-			each.listener(type, props, state, e);
+			each.listener(type, _extends({
+				zoomFactor: 1
+			}, props), state, e);
 		});
 	};
 
@@ -46414,7 +46521,8 @@ var _initialiseProps = function _initialiseProps() {
 			xAttr: _extends({}, _this3.state.xAttr, {
 				scale: scale.copy().domain(newDomain)
 			}),
-			dataExtents: _extends({}, _this3.state.dataExtents, _defineProperty({}, name, newDomain))
+			dataExtents: _extends({}, _this3.state.dataExtents, _defineProperty({}, name, newDomain)),
+			zoomFactor: 1
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom([name], [newDomain], false);
@@ -46436,7 +46544,8 @@ var _initialiseProps = function _initialiseProps() {
 			yAttr: _extends({}, _this3.state.yAttr, {
 				scale: scale.copy().domain(newDomain)
 			}),
-			dataExtents: _extends({}, _this3.state, _defineProperty({}, name, newDomain))
+			dataExtents: _extends({}, _this3.state, _defineProperty({}, name, newDomain)),
+			zoomFactor: 1
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom([name], [newDomain], false);
@@ -49485,7 +49594,7 @@ var PCPYAxis = function (_React$Component) {
 			var dx = fontSize * 0.35;
 
 			var yLabels = yExtents.slice();
-			if (!flip) yLabels.reverse();
+			//if (!flip) yLabels.reverse();
 
 			var minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
 			var maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
@@ -52182,7 +52291,8 @@ var SubscriberExt = function (_React$Component) {
                 zAttr = shared.zAttr,
                 plotData = shared.plotData,
                 dataExtents = shared.dataExtents,
-                hitTest = shared.hitTest;
+                hitTest = shared.hitTest,
+                zoomFactor = shared.zoomFactor;
 
 
             return _extends({
@@ -52191,7 +52301,8 @@ var SubscriberExt = function (_React$Component) {
                 zAttr: zAttr,
                 plotData: plotData,
                 dataExtents: dataExtents,
-                hitTest: hitTest
+                hitTest: hitTest,
+                zoomFactor: zoomFactor
             }, _this.moreProps);
         };
 
@@ -52292,7 +52403,8 @@ var SubscriberExt = function (_React$Component) {
                 yAttr = _nextProps$shared.yAttr,
                 zAttr = _nextProps$shared.zAttr,
                 dataExtents = _nextProps$shared.dataExtents,
-                hitTest = _nextProps$shared.hitTest;
+                hitTest = _nextProps$shared.hitTest,
+                zoomFactor = _nextProps$shared.zoomFactor;
 
 
             this.moreProps = _extends({}, this.moreProps, {
@@ -52301,7 +52413,8 @@ var SubscriberExt = function (_React$Component) {
                 zAttr: zAttr,
                 plotData: plotData,
                 dataExtents: dataExtents,
-                hitTest: hitTest
+                hitTest: hitTest,
+                zoomFactor: zoomFactor
             });
         }
     }, {
@@ -52409,6 +52522,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+function isSameDomain(domainA, domainB) {
+    var sameStart = Math.abs(domainA[0] - domainB[0]) < 1e-6;
+    var sameEnd = Math.abs(domainA[1] - domainB[1]) < 1e-6;
+    var sameWidth = Math.abs(domainA[1] - domainA[0] - (domainB[1] - domainB[0])) < 1e-6;
+    return sameStart && sameEnd && sameWidth;
+}
+
 var PCPCanvas = function (_React$Component) {
     _inherits(PCPCanvas, _React$Component);
 
@@ -52502,22 +52622,29 @@ var PCPCanvas = function (_React$Component) {
         _this.resetChart = function () {
             var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props;
             var margin = props.margin,
-                anotherData = props.anotherData;
+                pcpAttrSelect = props.pcpAttrSelect;
 
             var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
             var xScale = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["d" /* getXScale */])(props, canvasDim.width);
             var dimConfig = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["a" /* getNewDimComfig */])(props, xScale, canvasDim.height, canvasDim.height + margin.bottom / 2);
-            var plotData = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["c" /* getPlotData */])(props);
-
-            if (anotherData) {
-                var who = anotherData.who,
-                    what = anotherData.what,
-                    data = anotherData.data;
-
-                if (who !== _this.state.id) {
-                    // do somthing according to what & data
+            Object.keys(pcpAttrSelect).forEach(function (key) {
+                var prevSelect = pcpAttrSelect[key];
+                var currConfig = dimConfig[key];
+                if (prevSelect && currConfig) {
+                    var currExtents = currConfig.extents;
+                    var currScale = currConfig.scale;
+                    if (prevSelect.auxiliary) {
+                        // ordinary, need to adjust select region
+                        console.log('ordinary, need to adjust');
+                    } else {
+                        var selectDomain = prevSelect.domain;
+                        if (!isSameDomain(currExtents, selectDomain)) {
+                            currConfig.select = [currScale(selectDomain[0]), currScale(selectDomain[1])];
+                        }
+                    }
                 }
-            }
+            });
+            var plotData = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["c" /* getPlotData */])(props);
 
             return {
                 xScale: xScale,
@@ -52534,8 +52661,7 @@ var PCPCanvas = function (_React$Component) {
                 data = props.data,
                 colorAccessor = props.colorAccessor,
                 axisWidth = props.axisWidth,
-                margin = props.margin,
-                anotherData = props.anotherData;
+                margin = props.margin;
             var _this$state = _this.state,
                 initialXScale = _this$state.xScale,
                 initialDimConfig = _this$state.dimConfig;
@@ -52562,17 +52688,6 @@ var PCPCanvas = function (_React$Component) {
                 dimAccessor: dimAccessor,
                 colorAccessor: colorAccessor
             });
-
-            if (anotherData) {
-                var who = anotherData.who,
-                    what = anotherData.what,
-                    _data = anotherData.data;
-                //console.log(anotherData)
-
-                if (who !== _this.state.id) {
-                    // do somthing according to what & data
-                }
-            }
 
             return {
                 xScale: newXScale,
@@ -52719,9 +52834,8 @@ var PCPCanvas = function (_React$Component) {
                 step = config.step;
 
             if (ordinary) {
-                // send domain in percentage, [0, 1]
                 if (start == null || end == null) {
-                    _this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+                    _this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress, extents.slice());
                 } else {
                     var startDomain = scale.invert(start);
                     var endDomain = scale.invert(end);
@@ -52730,8 +52844,23 @@ var PCPCanvas = function (_React$Component) {
                         startDomain = endDomain;
                         endDomain = temp;
                     }
-                    _this.props.onPCPAxisSelect(axisTitle, [startDomain, endDomain], inProgress);
+                    _this.props.onPCPAxisSelect(axisTitle, [startDomain, endDomain], inProgress, extents.slice());
                 }
+                // if (start == null || end == null) {
+                //    this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+                // } else {
+                //     let startDomain = scale.invert(start);
+                //     let endDomain = scale.invert(end);
+                //     if (startDomain > endDomain) {
+                //         const temp = startDomain;
+                //         startDomain = endDomain;
+                //         endDomain = temp;
+                //     }
+                //     this.props.onPCPAxisSelect(
+                //         axisTitle, 
+                //         [startDomain, endDomain], 
+                //         inProgress);    
+                // }
             } else {
                 if (start == null || end == null) {
                     _this.props.onPCPAxisSelect(axisTitle, extents, inProgress);
@@ -52773,14 +52902,6 @@ var PCPCanvas = function (_React$Component) {
                     _this.clearAxesAndPCPOnCanvas();
                     _this.draw({ trigger: 'selectrange' });
                     _this.onPCPAxisSelect(axisTitle, start, end, true, _this.__dimConfig);
-                    // if (this.props.onPCPAxisSelect)
-                    //     this.props.onPCPAxisSelect(
-                    //         this.state.id,
-                    //         axisTitle, 
-                    //         [start, end], 
-                    //         axisScale,
-                    //         true
-                    //     );
                 });
             }
         };
@@ -52802,14 +52923,6 @@ var PCPCanvas = function (_React$Component) {
                     dimConfig: dimConfig
                 });
                 _this.onPCPAxisSelect(axisTitle, start, end, false, state.dimConfig);
-                // if (this.props.onPCPAxisSelect)
-                //     this.props.onPCPAxisSelect(
-                //         this.state.id,
-                //         axisTitle,
-                //         [start, end],
-                //         axisScale,
-                //         false
-                //     );
             });
         };
 
@@ -52831,14 +52944,6 @@ var PCPCanvas = function (_React$Component) {
                 dimConfig: newDimConfig
             });
             _this.onPCPAxisSelect(axisTitle, null, null, false, newDimConfig);
-            // if (this.props.onPCPAxisSelect)
-            //     this.props.onPCPAxisSelect(
-            //         this.state.id,
-            //         axisTitle,
-            //         null,
-            //         null,
-            //         false
-            //     );
         };
 
         _this.rangeSelectHelperByOther = function (dimSelects, initDimConfig) {
@@ -52931,6 +53036,33 @@ var PCPCanvas = function (_React$Component) {
         value: function componentWillMount() {
             var state = this.resetChart();
             this.setState(state);
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            // store current state...
+            // dimOrder
+            // select range  <-- coupled with scatter plot
+            var _state2 = this.state,
+                xScale = _state2.xScale,
+                dimConfig = _state2.dimConfig;
+
+            var dimOrder = xScale.domain().slice();
+            // const dimSelect = {};
+            // Object.keys(dimConfig).forEach(key => {
+            //     const config = dimConfig[key];
+            //     const { select, scale, ordinary, title } = config;
+            //     if (select) {
+            //         if (ordinary) {
+
+            //         } else {
+
+            //         }
+            //     }
+            // });
+            // console.log(dimConfig)
+
+            if (this.props.onUnmount) this.props.onUnmount(dimOrder);
         }
     }, {
         key: 'componentWillReceiveProps',
@@ -54646,21 +54778,20 @@ var ImgViewer = function (_React$Component) {
                 imgRefWidth = _this$props.imgRefWidth,
                 imgRefHeight = _this$props.imgRefHeight,
                 x = _this$props.x,
-                y = _this$props.y;
+                y = _this$props.y,
+                id = _this$props.id;
+            var backgroundRectRef = _this.props.backgroundRectRef;
 
             var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
             var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
             var imgSide = Math.min(imgWidth, imgHeight);
             if (_this.state.img == null || _this.state.id == null) {
-                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
+                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+                    key: 'imgViewer-empty-' + id,
                     x: x - imgSide / 2,
                     y: y - imgSide / 2,
                     width: imgSide,
-                    height: imgSide,
-                    style: {
-                        fill: '#000000',
-                        opacity: 0.3
-                    }
+                    height: imgSide / 2
                 });
             }
 
@@ -54668,17 +54799,28 @@ var ImgViewer = function (_React$Component) {
                 width = _this$getImgSize.width,
                 height = _this$getImgSize.height;
 
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('image', {
-                ref: function ref(node) {
-                    return _this.node = node;
-                },
-                xlinkHref: _this.state.img.url,
-                x: x - width / 2,
-                y: y - height / 2,
-                width: width,
-                height: height,
-                imageRendering: 'pixelated'
-            });
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'g',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+                    key: 'imgViewer-bg-' + id,
+                    x: x - width / 2 - 1,
+                    y: y - height / 2 - 1,
+                    width: width + 2,
+                    height: height + 2
+                }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('image', {
+                    ref: function ref(node) {
+                        return _this.node = node;
+                    },
+                    xlinkHref: _this.state.img.url,
+                    x: x - width / 2,
+                    y: y - height / 2,
+                    width: width,
+                    height: height,
+                    imageRendering: 'pixelated'
+                })
+            );
         };
 
         _this.renderGrid = function () {
@@ -54917,19 +55059,15 @@ var PCPPolyLineSeries = function (_React$Component) {
                 if (yValue == null || yValue == undefined) {
                     return nullPositionY;
                 }
-                return ordinary ? scale(extents.length - extents.indexOf(yValue) - 1) - step / 2 : scale(yValue);
+                return ordinary ? scale(extents.indexOf(yValue)) - step / 2 : scale(yValue);
+                // return ordinary
+                //     ? scale(extents.length - extents.indexOf(yValue) - 1) - step/2
+                //     : scale(yValue);
             };
 
             var xAccessor = function xAccessor(config) {
                 return config.position;
             };
-
-            // const activeDimOrder = dimOrder.map(key => {
-            //     const config = dimConfig[key];
-            //     if (config.active) {
-            //         return key;
-            //     }
-            // }).filter(each => each != undefined);
 
             ctx.save();
             nest.forEach(function (groupByStroke) {
@@ -54979,22 +55117,6 @@ var PCPPolyLineSeries = function (_React$Component) {
                     }
                 });
                 ctx.stroke();
-
-                // ctx.strokeStyle = hexToRGBA(stroke, opacity);
-                // ctx.lineWidth = strokeWidth;
-                // ctx.beginPath()
-                // group.forEach(d => {
-                //     const p1Config = dimConfig[dimOrder[0]];
-                //     const p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
-
-                //     ctx.moveTo(p1[0], p1[1]);
-                //     for (let i=1; i<dimOrder.length; ++i) {
-                //         const p2Config = dimConfig[dimOrder[i]];
-                //         const p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
-                //         ctx.lineTo(p2[0], p2[1]);
-                //     }
-                // });
-                // ctx.stroke();
             });
             ctx.restore();
         }, _temp), _possibleConstructorReturn(_this, _ret);
@@ -55447,6 +55569,10 @@ providerProto.getSVG = function (dx, dy, markerID, svgKey) {
         x: dx - width / 2,
         y: dy - height / 2
     });
+};
+
+providerProto.getSVGRef = function (markerID) {
+    return this._markers[markerID].svg;
 };
 
 /***/ }),
@@ -58703,6 +58829,10 @@ var PcpTab = function (_React$Component) {
             if (_this.props.onAttrSelectChange) {
                 _this.props.onAttrSelectChange(dimOrderCopy);
             }
+        }, _this.handleUpdateDimOrder = function (dimOrder) {
+            if (_this.props.onAttrSelectChange) {
+                _this.props.onAttrSelectChange(dimOrder);
+            }
         }, _this.renderOptions = function () {
             var _this$props = _this.props,
                 dimKindsProp = _this$props.dimKinds,
@@ -58745,13 +58875,17 @@ var PcpTab = function (_React$Component) {
     _createClass(PcpTab, [{
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             var _props = this.props,
                 data = _props.data,
                 dimension = _props.dimension,
                 dimOrder = _props.dimOrder,
                 attrFormat = _props.attrFormat,
                 zAttr = _props.zAttr,
-                colorsBySampleNames = _props.colorsBySampleNames;
+                colorsBySampleNames = _props.colorsBySampleNames,
+                onPCPAxisSelect = _props.onPCPAxisSelect,
+                pcpAttrSelect = _props.pcpAttrSelect;
 
 
             var colorExtents = dimension[zAttr];
@@ -58771,12 +58905,18 @@ var PcpTab = function (_React$Component) {
                 'div',
                 null,
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__charts__["a" /* ParallelCoordinateChart */], {
+                    ref: function ref(node) {
+                        return _this2.PCPChartNode = node;
+                    },
                     height: 250,
                     data: data,
                     dimOrder: dimOrder,
                     dimension: dimension,
                     colorAccessor: colorAccessor,
-                    titleFormat: attrFormat
+                    titleFormat: attrFormat,
+                    updateDimOrder: this.handleUpdateDimOrder,
+                    onPCPAxisSelect: onPCPAxisSelect,
+                    pcpAttrSelect: pcpAttrSelect
                 }),
                 this.renderOptions()
             );
@@ -58865,7 +59005,9 @@ var ScatterBox = function (_React$Component) {
                 onDataRequest: this.handleDataImageRequest,
                 onSelectDataItems: null
             });
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__charts__["b" /* ScatterChart */], chartProps);
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__charts__["b" /* ScatterChart */], _extends({
+                ref: 'ScatterChartRef'
+            }, chartProps));
         }
     }]);
 
@@ -58901,7 +59043,7 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps)(ScatterBox));
+/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_2_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps, null, { withRef: true })(ScatterBox));
 
 /***/ }),
 /* 697 */
@@ -59798,6 +59940,8 @@ var ParallelCoordinateChart = function (_React$Component) {
 
         return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ParallelCoordinateChart.__proto__ || Object.getPrototypeOf(ParallelCoordinateChart)).call.apply(_ref, [this].concat(args))), _this), _this.getPCPCanvasNode = function () {
             if (_this.PCPCanvasNode) return _this.PCPCanvasNode;
+        }, _this.handleUnmountPCP = function (dimOrder) {
+            if (_this.props.updateDimOrder) _this.props.updateDimOrder(dimOrder);
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
@@ -59806,7 +59950,7 @@ var ParallelCoordinateChart = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
-            var margin = { left: 60, right: 40, top: 10, bottom: 10 };
+            var margin = { left: 60, right: 40, top: 20, bottom: 10 };
             var _props = this.props,
                 width = _props.width,
                 height = _props.height,
@@ -59816,14 +59960,9 @@ var ParallelCoordinateChart = function (_React$Component) {
                 dimOrder = _props.dimOrder,
                 colorAccessor = _props.colorAccessor,
                 titleFormat = _props.titleFormat,
-                onPCPAxisSelect = _props.onPCPAxisSelect;
+                onPCPAxisSelect = _props.onPCPAxisSelect,
+                pcpAttrSelect = _props.pcpAttrSelect;
 
-            // const dimName = Object.keys(dimension).sort(sortAlphaNum);
-            // const index = dimName.indexOf('sample');
-            // if (index !== -1) {
-            //     dimName.splice(index, 1);
-            //     dimName.splice(0, 0, 'sample');
-            // }
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */],
@@ -59849,7 +59988,9 @@ var ParallelCoordinateChart = function (_React$Component) {
 
                     titleFormat: titleFormat,
 
-                    onPCPAxisSelect: onPCPAxisSelect
+                    onPCPAxisSelect: onPCPAxisSelect,
+                    pcpAttrSelect: pcpAttrSelect,
+                    onUnmount: this.handleUnmountPCP
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["e" /* Series */],

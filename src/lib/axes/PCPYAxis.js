@@ -57,7 +57,7 @@ class PCPYAxis extends React.Component {
     	const dx = fontSize * 0.35;
 
 		const yLabels = yExtents.slice();
-        if (!flip) yLabels.reverse();
+        //if (!flip) yLabels.reverse();
         
 		const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);

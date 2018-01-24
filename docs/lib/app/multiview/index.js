@@ -39,6 +39,8 @@ class MultiViewApp extends React.Component {
             width: 0,
             height: 0,
         }
+
+        this.pcpAttrSelect={};
     }
 
     componentWillMount() {
@@ -112,6 +114,26 @@ class MultiViewApp extends React.Component {
         this.setState({showDataDialog: !this.state.showDataDialog});
     }
 
+    // update scatter plot by pcp
+    handlePCPAxisSelect = (axisTitle, domain, inProgress, aux) => {
+        const ScatterBoxRef = this.refs['ScatterBoxRef'].getWrappedInstance();
+        const ScatterChartRef = ScatterBoxRef.refs['ScatterChartRef'].getWrappedInstance();
+        const ScatterCanvasNode = ScatterChartRef.getScatterChartCanvasNode();
+        ScatterCanvasNode.handleByOther({
+            what: 'extents', 
+            data: {[axisTitle]: domain.slice()},
+            inProgress}
+        );
+        this.pcpAttrSelect[axisTitle] = {
+            domain: domain.slice(),
+            auxiliary: aux ? aux.slice(): null
+        };
+    }
+
+    // todo: update pcp by scatter plot
+
+
+
     render() {
         const {width, height} = this.state;
 
@@ -132,10 +154,18 @@ class MultiViewApp extends React.Component {
 
                 <div className={theme.chartbox}>
                     <div style={{width: scatterBoxWidth, float: 'left'}}>
-                        <ScatterBox width={scatterBoxWidth} height={scatterBoxWidth} />
+                        <ScatterBox 
+                            ref={'ScatterBoxRef'}
+                            width={scatterBoxWidth} height={scatterBoxWidth} 
+                        />
                     </div>
                     <div style={{marginLeft: scatterBoxWidth}}>
-                        <ConfigBox height={height}/>
+                        <ConfigBox
+                            ref={node => this.configBoxNode = node} 
+                            height={height}
+                            onPCPAxisSelect={this.handlePCPAxisSelect}
+                            pcpAttrSelect={this.pcpAttrSelect}
+                        />
                     </div>
                 </div>
             </Layout>
@@ -176,4 +206,4 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MultiViewApp);
+export default connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(MultiViewApp);

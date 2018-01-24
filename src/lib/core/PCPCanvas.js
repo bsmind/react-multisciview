@@ -32,6 +32,13 @@ import forEach from 'lodash.foreach';
 import { scalePoint, scaleLinear } from 'd3-scale';
 import uniqueId from 'lodash.uniqueid';
 
+function isSameDomain(domainA, domainB) {
+    const sameStart = Math.abs(domainA[0] - domainB[0]) < 1e-6;
+    const sameEnd = Math.abs(domainA[1] - domainB[1]) < 1e-6;
+    const sameWidth = Math.abs((domainA[1] - domainA[0]) - (domainB[1] - domainB[0])) < 1e-6;
+    return sameStart && sameEnd && sameWidth;
+}
+
 class PCPCanvas extends React.Component {
     constructor() {
         super();
@@ -135,7 +142,7 @@ class PCPCanvas extends React.Component {
     }
 
     resetChart = (props = this.props) => {
-        const { margin, anotherData } = props;
+        const { margin, pcpAttrSelect } = props;
         const canvasDim = getCanvasDimension(props);
         const xScale = getXScale(props, canvasDim.width);
         const dimConfig = getNewDimComfig(props,
@@ -143,14 +150,23 @@ class PCPCanvas extends React.Component {
             canvasDim.height,
             canvasDim.height + margin.bottom / 2
         );
-        const plotData = getPlotData(props);
-
-        if (anotherData) {
-            const {who, what, data} = anotherData;
-            if (who !== this.state.id) {
-                // do somthing according to what & data
+        Object.keys(pcpAttrSelect).forEach(key => {
+            const prevSelect = pcpAttrSelect[key];
+            const currConfig = dimConfig[key];
+            if (prevSelect && currConfig) {
+                const currExtents = currConfig.extents;
+                const currScale = currConfig.scale;
+                if (prevSelect.auxiliary) { // ordinary, need to adjust select region
+                    console.log('ordinary, need to adjust')
+                } else {
+                    const selectDomain = prevSelect.domain;
+                    if (!isSameDomain(currExtents, selectDomain)) {
+                        currConfig.select = [currScale(selectDomain[0]), currScale(selectDomain[1])];
+                    }
+                }
             }
-        }
+        });
+        const plotData = getPlotData(props);
 
         return {
             xScale,
@@ -168,7 +184,6 @@ class PCPCanvas extends React.Component {
             colorAccessor,
             axisWidth,
             margin,
-            anotherData
         } = props;
 
         const { 
@@ -206,15 +221,7 @@ class PCPCanvas extends React.Component {
             dimAccessor,
             colorAccessor
        });
-
-       if (anotherData) {
-            const {who, what, data} = anotherData;
-            //console.log(anotherData)
-            if (who !== this.state.id) {
-                // do somthing according to what & data
-            }
-        }
-   
+  
         return {
             xScale: newXScale,
             dimConfig: newDimConfig,
@@ -225,6 +232,30 @@ class PCPCanvas extends React.Component {
     componentWillMount() {
         const state = this.resetChart();
         this.setState(state);
+    }
+
+    componentWillUnmount() {
+        // store current state...
+        // dimOrder
+        // select range  <-- coupled with scatter plot
+        const {xScale, dimConfig} = this.state;
+        const dimOrder = xScale.domain().slice();
+        // const dimSelect = {};
+        // Object.keys(dimConfig).forEach(key => {
+        //     const config = dimConfig[key];
+        //     const { select, scale, ordinary, title } = config;
+        //     if (select) {
+        //         if (ordinary) {
+
+        //         } else {
+
+        //         }
+        //     }
+        // });
+        // console.log(dimConfig)
+
+        if (this.props.onUnmount)
+            this.props.onUnmount(dimOrder);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -374,9 +405,13 @@ class PCPCanvas extends React.Component {
         const config = dimConfig[axisTitle];
         const { ordinary, scale, extents, step } = config;
         if (ordinary) {
-            // send domain in percentage, [0, 1]
             if (start == null || end == null) {
-               this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+                this.props.onPCPAxisSelect(
+                    axisTitle, 
+                    [0, extents.length], 
+                    inProgress,
+                    extents.slice()
+                );
             } else {
                 let startDomain = scale.invert(start);
                 let endDomain = scale.invert(end);
@@ -388,8 +423,25 @@ class PCPCanvas extends React.Component {
                 this.props.onPCPAxisSelect(
                     axisTitle, 
                     [startDomain, endDomain], 
-                    inProgress);    
+                    inProgress,
+                    extents.slice()
+                );                    
             }
+            // if (start == null || end == null) {
+            //    this.props.onPCPAxisSelect(axisTitle, [0, extents.length], inProgress);
+            // } else {
+            //     let startDomain = scale.invert(start);
+            //     let endDomain = scale.invert(end);
+            //     if (startDomain > endDomain) {
+            //         const temp = startDomain;
+            //         startDomain = endDomain;
+            //         endDomain = temp;
+            //     }
+            //     this.props.onPCPAxisSelect(
+            //         axisTitle, 
+            //         [startDomain, endDomain], 
+            //         inProgress);    
+            // }
         } else {
             if (start == null || end == null) {
                 this.props.onPCPAxisSelect(axisTitle, extents, inProgress);
@@ -430,14 +482,6 @@ class PCPCanvas extends React.Component {
                 this.clearAxesAndPCPOnCanvas();
                 this.draw({trigger: 'selectrange'});
                 this.onPCPAxisSelect(axisTitle, start, end, true, this.__dimConfig);
-                // if (this.props.onPCPAxisSelect)
-                //     this.props.onPCPAxisSelect(
-                //         this.state.id,
-                //         axisTitle, 
-                //         [start, end], 
-                //         axisScale,
-                //         true
-                //     );
             });
         }
     }
@@ -460,14 +504,6 @@ class PCPCanvas extends React.Component {
                 dimConfig
             });
             this.onPCPAxisSelect(axisTitle, start, end, false, state.dimConfig);
-            // if (this.props.onPCPAxisSelect)
-            //     this.props.onPCPAxisSelect(
-            //         this.state.id,
-            //         axisTitle,
-            //         [start, end],
-            //         axisScale,
-            //         false
-            //     );
         });
     }
 
@@ -490,14 +526,6 @@ class PCPCanvas extends React.Component {
             dimConfig: newDimConfig
         });
         this.onPCPAxisSelect(axisTitle, null, null, false, newDimConfig);
-        // if (this.props.onPCPAxisSelect)
-        //     this.props.onPCPAxisSelect(
-        //         this.state.id,
-        //         axisTitle,
-        //         null,
-        //         null,
-        //         false
-        //     );
     }
 
     rangeSelectHelperByOther = (dimSelects, initDimConfig) => {

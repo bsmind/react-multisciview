@@ -95,6 +95,7 @@ class ConfigBox extends React.Component {
                 </Tab>
                 <Tab label='PCP'>
                     <PcpTab
+                        ref={node => this.pcpTabNode = node}
                         dimKinds={this.props.attrKinds}
                         dimOrder={this.props.dimOrder}
                         dimension={this.props.dimension}
@@ -104,6 +105,8 @@ class ConfigBox extends React.Component {
                         colorsBySampleNames={this.props.sampleColors}
                         onColorAttrChange={this.handleAttrChange}
                         onAttrSelectChange={this.props.updateAttrSelect}
+                        onPCPAxisSelect={this.props.onPCPAxisSelect}
+                        pcpAttrSelect={this.props.pcpAttrSelect}
                     />
                 </Tab>
             </Tabs>
