@@ -34,11 +34,11 @@ class PCPCanvasContainer extends React.Component {
 
     	return (
     		<div style={divStyle}>
-    			<canvas id="pcpOff" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />            
+    			<canvas id="pcpOff" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			<canvas id="pcpOn" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			<canvas id="axes" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} />
     			{/* <canvas id="mouseCoord" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
-                {/* <canvas id="off" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
+    			{/* <canvas id="off" ref={this.setCanvas} width={canvasWidth} height={canvasHeight} style={canvasStyle} /> */}
     		</div>
     	);
     }

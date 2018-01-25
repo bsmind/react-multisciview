@@ -1,5 +1,7 @@
+import React from "react";
+
 export default (useCrossHairStyleCursor = true) => {
-    const style = `
+	const style = `
     .react-multiview-grabbing-cursor {
         pointer-events: all;
         cursor: -moz-grabbing;
@@ -14,7 +16,7 @@ export default (useCrossHairStyleCursor = true) => {
         pointer-events: all;
         cursor: pointer;
     }`;
-    const tooltipStyle = `
+	const tooltipStyle = `
     .react-multiview-avoid-interaction {
         pointer-events: none;
     }
@@ -40,5 +42,5 @@ export default (useCrossHairStyleCursor = true) => {
     .react-multiview-ew-resize-cursor {
         cursor: ew-resize;
     }`;
-    return (<style type="text/css">{useCrossHairStyleCursor ? style + tooltipStyle: tooltipStyle}</style>);
-}
+	return (<style type="text/css">{useCrossHairStyleCursor ? style + tooltipStyle : tooltipStyle}</style>);
+};

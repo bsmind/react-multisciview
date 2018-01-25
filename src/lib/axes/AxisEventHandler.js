@@ -1,30 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { select, event as d3Event, mouse, touches } from "d3-selection";
-import { mean } from "d3-array";
-
-const d3Window = node => {
-	return (node
-        && (node.ownerDocument && node.ownerDocument.defaultView)
-            || (node.document && node)
-            || node.defaultView
-	);
-};
-
-const mousePosition = (e, defaultRect) => {
-	const container = e.currentTarget;
-	const rect = defaultRect || container.getBoundingClientRect(),
-		x = e.clientX - rect.left - container.clientLeft,
-		y = e.clientY - rect.top - container.clientTop,
-		xy = [Math.round(x), Math.round(y)];
-	return xy;
-};
-
-const sign = (x) => (x > 0) - (x < 0);
-
-const MOUSEMOVE = "mousemove.pan";
-const MOUSEUP = "mouseup.pan";
+import { select, mouse } from "d3-selection";
+import { d3Window, mousePosition } from "../utils";
 
 class AxisEventHandler extends React.Component {
 	constructor() {
@@ -39,17 +17,17 @@ class AxisEventHandler extends React.Component {
 
     	const { scale } = this.props;
     	const startScale = scale.copy();
-		select(d3Window(this.node))
-			.on(MOUSEMOVE, this.handleDrag, false)
-			.on(MOUSEUP, this.handleDragEnd, false);
+    	select(d3Window(this.node))
+    		.on("mousemove", this.handleDrag, false)
+    		.on("mouseup", this.handleDragEnd, false);
 
-		const startXY = mousePosition(e);
-		this.setState({
-			startPos: {
-				startXY,
-				startScale
-			}
-		});
+    	const startXY = mousePosition(e);
+    	this.setState({
+    		startPos: {
+    			startXY,
+    			startScale
+    		}
+    	});
     }
 
     handleDrag = () => {
@@ -58,20 +36,20 @@ class AxisEventHandler extends React.Component {
     	this.dragHappened = true;
     	if (startPos) {
     		const { startScale, startXY } = startPos;
-    		const { getMouseDelta, getInverted, scale } = this.props;
-			const mouseXY = mouse(this.node);
+    		const { getMouseDelta, getInverted } = this.props;
+    		const mouseXY = mouse(this.node);
     		const diff = getMouseDelta(startXY, mouseXY);
 
-            const SCALE_FACTOR = 0.005;
-            const zoomFactor = Math.max(Math.min(1 + diff * SCALE_FACTOR, 3), 0.1);
-            const center = getInverted(startScale, startXY),
-                  begin = startScale.domain()[0],
-                  end = startScale.domain()[1];
+    		const SCALE_FACTOR = 0.005;
+    		const zoomFactor = Math.max(Math.min(1 + diff * SCALE_FACTOR, 3), 0.1);
+    		const center = getInverted(startScale, startXY),
+    			begin = startScale.domain()[0],
+    			end = startScale.domain()[1];
 
-            const newDomain = [
-                center - (center - begin)*zoomFactor,
-                center + (end - center)*zoomFactor
-            ];
+    		const newDomain = [
+    			center - (center - begin) * zoomFactor,
+    			center + (end - center) * zoomFactor
+    		];
 
     		if (this.props.onDomainChange) {
     			this.props.onDomainChange(newDomain);
@@ -80,21 +58,9 @@ class AxisEventHandler extends React.Component {
     }
 
     handleDragEnd = () => {
-    	if (!this.dragHappened) {
-    		if (this.clicked) {
-
-    		} else {
-    			this.clicked = true;
-    			setTimeout(() => {
-    				this.clicked = false;
-    			}, 300);
-    		}
-    	}
-
-    	// console.log('handleDragEnd');
     	select(d3Window(this.node))
-    		.on(MOUSEMOVE, null)
-    		.on(MOUSEUP, null);
+    		.on("mousemove", null)
+    		.on("mouseup", null);
 
     	this.setState({
     		startPos: null
@@ -102,10 +68,9 @@ class AxisEventHandler extends React.Component {
     }
 
     render() {
-
-        const cursor = this.state.startPos
-            ? this.props.zoomCursorClassName
-            : 'react-multiview-default-cursor';
+    	const cursor = this.state.startPos
+    		? this.props.zoomCursorClassName
+    		: "react-multiview-default-cursor";
 
     	return <rect
     		ref={node => this.node = node}
@@ -120,7 +85,17 @@ class AxisEventHandler extends React.Component {
     }
 }
 
-AxisEventHandler.propTypes = {};
+AxisEventHandler.propTypes = {
+	scale: PropTypes.func,
+	getMouseDelta: PropTypes.func,
+	getInverted: PropTypes.func,
+	onDomainChange: PropTypes.func,
+	zoomCursorClassName: PropTypes.string,
+	x: PropTypes.number,
+	y: PropTypes.number,
+	width: PropTypes.number,
+	height: PropTypes.number
+};
 AxisEventHandler.defaultProps = {};
 
 export default AxisEventHandler;

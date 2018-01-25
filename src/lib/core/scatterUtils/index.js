@@ -1,1 +1,1 @@
-export { default as getScale } from './getScale';
+export { default as getScale } from "./getScale";

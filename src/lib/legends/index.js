@@ -1,1 +1,1 @@
-export { default as ColorLegend } from './ColorLegend';
+export { default as ColorLegend } from "./ColorLegend";

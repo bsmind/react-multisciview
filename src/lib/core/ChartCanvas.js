@@ -1,32 +1,28 @@
 import React from "react";
-import PropTypes, { shape } from "prop-types";
+import PropTypes from "prop-types";
 
-import uniqueId from 'lodash.uniqueid';
+import uniqueId from "lodash.uniqueid";
 
-import CanvasContainer from './CanvasContainer';
-import EventHandler from './EventHandler';
-import { XAxis, YAxis } from '../axes';
-import { ColorLegend } from '../legends';
+import CanvasContainer from "./CanvasContainer";
+import EventHandler from "./EventHandler";
+import { ColorLegend } from "../legends";
 
-import { dimension as getCanvasDimension, clearCanvas } from './utils';
-import { getScale } from './scatterUtils';
-import { cursorStyle, isArrayOfString, isEqualArray } from '../utils';
+import { dimension as getCanvasDimension, clearCanvas } from "./utils";
+import { getScale } from "./scatterUtils";
+import { cursorStyle, isArrayOfString } from "../utils";
 
-import { format as d3Format } from 'd3-format';
-import { range as d3Range } from 'd3-array';
-
-
-
+import { format as d3Format } from "d3-format";
+import { range as d3Range } from "d3-array";
 
 class ChartCanvas extends React.Component {
 	constructor(props) {
 		super(props);
 		const initialState = this.resetChart();
 		this.state = {
-			id: uniqueId('chartcanvas-'),
+			id: uniqueId("chartcanvas-"),
 			...initialState,
 			zoomFactor: 1
-		}
+		};
 		this.subscriptions = [];
 		this.panInProgress = false;
 		this.axisSelectInProgress = false;
@@ -40,7 +36,6 @@ class ChartCanvas extends React.Component {
 		this.dataHashColorByID = {};
 		this.dataHashIndexByID = {};
 
-		// off-canvas for hit test
 		this.hitCanvas = null;
 		this.hitCtx = null;
 	}
@@ -59,8 +54,8 @@ class ChartCanvas extends React.Component {
 
     unsubscribe = (id) => {
     	this.subscriptions = this.subscriptions.filter(each => each.id !== id);
-	}
-	
+    }
+
 	clearAxisAndChartOnCanvas = () => {
 		const canvases = this.getCanvasContexts();
 		if (canvases && canvases.axes && canvases.chartOn) {
@@ -80,17 +75,17 @@ class ChartCanvas extends React.Component {
 			clearCanvas([
 				canvases.mouseCoord
 			], this.props.ratio);
-		}		
+		}
 	}
 
 	updateHitTestCanvas = (prop = this.props) => {
 		const { ratio, width, height } = prop;
-		this.hitCanvas = document.createElement('canvas');
+		this.hitCanvas = document.createElement("canvas");
 		this.hitCanvas.width = Math.floor(width * ratio);
 		this.hitCanvas.height = Math.floor(height * ratio);
 		this.hitCanvas.style.width = width;
 		this.hitCanvas.style.height = height;
-		this.hitCtx = this.hitCanvas.getContext('2d');
+		this.hitCtx = this.hitCanvas.getContext("2d");
 	}
 
 	componentDidMount() {
@@ -105,22 +100,22 @@ class ChartCanvas extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		const state = this.updateChart(nextProps);
 		this.clearAxisAndChartOnCanvas();
-		this.setState({...state});
+		this.setState({ ...state });
 		const {
 			width: widthPrev,
 			height: heightPrev,
 			ratio: ratioPrev
 		} = this.props;
-		const { width, height, ratio} = nextProps;
+		const { width, height, ratio } = nextProps;
 
 		if (widthPrev !== width ||
 			heightPrev !== height ||
-			ratio !== ratio) {
+			ratioPrev !== ratio) {
 			this.updateHitTestCanvas(nextProps);
 		}
 	}
 
-	shouldComponentUpdate(){
+	shouldComponentUpdate() {
 		const inProgress = this.panInProgress ||
 						   this.otherInProgress ||
 						   this.axisSelectInProgress ||
@@ -137,7 +132,7 @@ class ChartCanvas extends React.Component {
 		this.G = this.G % 255;
 		this.B = this.B % 255;
 
-		//return {R: this.R, G: this.G, B: this.B};
+		// return {R: this.R, G: this.G, B: this.B};
 		return `rgb(${this.R}, ${this.G}, ${this.B})`;
 	}
 
@@ -158,8 +153,8 @@ class ChartCanvas extends React.Component {
 	resetChart = (props = this.props) => {
 		const {
 			data,
-			samples,		
-			seriesName,		
+			samples,
+			seriesName,
 			dataExtents: dataExtentsProp,
 			dataAccessor,
 			xAttr: xAttrProp,
@@ -170,45 +165,47 @@ class ChartCanvas extends React.Component {
 
 		// xScale
 		const xAttr = getScale({
-			dataExtents: dataExtentsProp, 
+			dataExtents: dataExtentsProp,
 			attribute: xAttrProp
 		}, [0, canvasDim.width]);
 
 		// yScale
 		const yAttr = getScale({
-			dataExtents: dataExtentsProp, 
+			dataExtents: dataExtentsProp,
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
 
 		// zScale: only domain...
 		const zAttr = {
-			name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
-			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1],
+			name: dataExtentsProp[zAttrProp] ? zAttrProp : "unknown",
+			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : [0, 1],
 			select: null,
 			selectDomain: null,
-		}
-		
+		};
+
 		// flatten data to plot
+		/*eslint-disable */
 		const dimName = Object.keys(dataExtentsProp);
 		const plotData = data.map((d, index) => {
 			const flattened = {};
 			dimName.forEach(name => {
 				flattened[name] = dataAccessor(d, name);
 			});
-			flattened['_id'] = d._id;
-			flattened['markerID']=d.markerID;
-			flattened['item'] = d.item;
+			flattened["_id"] = d._id;
+			flattened["markerID"] = d.markerID;
+			flattened["item"] = d.item;
 
 			// dataHash
 			const colorID = this.hashingData(d._id, index);
-			flattened['colorID']=colorID;
+			flattened["colorID"] = colorID;
 
 			return flattened;
 		});
+		/* eslint-enable */
 
 		const dataExtents = {};
 		dimName.forEach(name => {
-			dataExtents[name] = isArrayOfString(dataExtentsProp[name])
+			dataExtents[name] = isArrayOfString(dataExtentsProp[name]) // eslint-disable-line
 				? [0, dataExtentsProp[name].length]
 				: dataExtentsProp[name].slice();
 		});
@@ -222,14 +219,14 @@ class ChartCanvas extends React.Component {
 			yAttr,
 			zAttr,
 			zoomFactor: 1,
-		}
+		};
 	}
 
 	updateChart = (props = this.props) => {
 		const {
 			data,
 			seriesName: seriesNameProps,
-			samples: samplesProp,				
+			samples: samplesProp,
 			dataExtents: dataExtentsProp,
 			dataAccessor,
 			xAttr: xAttrProp,
@@ -240,8 +237,6 @@ class ChartCanvas extends React.Component {
 		const canvasDim = getCanvasDimension(props);
 
 		const {
-			seriesName: seriesNameState,
-			samples: samplesState,
 			dataExtents: dataExtentsState,
 			xAttr: initialXAttr,
 			yAttr: initialYAttr,
@@ -253,117 +248,115 @@ class ChartCanvas extends React.Component {
 			const extentsProps = dataExtentsProp[name];
 			const extentsState = dataExtentsState[name];
 			if (extentsState == null) { // new field
-				dataExtentsState[name] = isArrayOfString(extentsProps)
+				dataExtentsState[name] = isArrayOfString(extentsProps) // eslint-disable-line
 					? [0, extentsProps.length]
 					: extentsProps.slice();
-			} 
-			else if (name !== initialXAttr.name && name !== initialYAttr.name) {
-				dataExtentsState[name] = isArrayOfString(extentsProps)
-				? [0, extentsProps.length]
-				: extentsProps.slice();			
-			}
-			else { 
-				// expand one but ordinary 
+			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
+				dataExtentsState[name] = isArrayOfString(extentsProps) // eslint-disable-line
+					? [0, extentsProps.length]
+					: extentsProps.slice();
+			} else {
+				// expand one but ordinary
 				if (isArrayOfString(extentsProps) && (xAttrProp !== name && yAttrProp !== name)) {
-					extentsState[0] = 0;
-					extentsState[1] = extentsProps.length;
-				} 
-				//else {
+					extentsState[0] = 0; // eslint-disable-line
+					extentsState[1] = extentsProps.length; // eslint-disable-line
+				}
+				// else {
 				// 	extentsState[0] = Math.min(extentsState[0], extentsProps[0]);
 				// 	extentsState[1] = Math.max(extentsState[1], exten[1]);
 				// }
 			}
 		});
-		//console.log(dataExtentsProp, dataExtentsState)
+		// console.log(dataExtentsProp, dataExtentsState)
 
 		// xScale
 		const xAttr = getScale({
-				dataExtents: dataExtentsProp, 
-				attribute: xAttrProp,
-				dataExtentsPrev: dataExtentsState
-			}, [0, canvasDim.width]);
+			dataExtents: dataExtentsProp,
+			attribute: xAttrProp,
+			dataExtentsPrev: dataExtentsState
+		}, [0, canvasDim.width]);
 
 		// yScale
 		const yAttr =  getScale({
-				dataExtents: dataExtentsProp, 
-				attribute: yAttrProp,
-				dataExtentsPrev: dataExtentsState
-			}, [canvasDim.height, 0]);
+			dataExtents: dataExtentsProp,
+			attribute: yAttrProp,
+			dataExtentsPrev: dataExtentsState
+		}, [canvasDim.height, 0]);
 
 		// need to think
 		const zAttr = (initialZAttr.name === zAttrProp)
 			? {
 				...initialZAttr,
-				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1]
+				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : [0, 1]
 			}
 			: {
-				name: dataExtentsProp[zAttrProp] ? zAttrProp: 'unknown',
-				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice(): [0, 1],
+				name: dataExtentsProp[zAttrProp] ? zAttrProp : "unknown",
+				extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : [0, 1],
 				select: null,
-				selectDomain: (dataExtentsProp[zAttrProp] && isArrayOfString(dataExtentsProp[zAttrProp])) 
+				selectDomain: (dataExtentsProp[zAttrProp] && isArrayOfString(dataExtentsProp[zAttrProp]))
 					? null
-					: dataExtentsState[zAttrProp] 
+					: dataExtentsState[zAttrProp]
 						? dataExtentsState[zAttrProp].slice()
 						: null
-			}
+			};
 
-			
-			
 		// flatten data to plot
 		// todo: avoid unneccessary update...
 		// (need to update markerID)
-		let plotData, samples, seriesName;
-		//if (!isEqualArray(samplesProp, samplesState) || seriesNameProps !== seriesNameState) {
-			plotData = data.map((d,index) => {
-				const flattened = {};
-				dimName.forEach(name => {
-					flattened[name] = dataAccessor(d, name);
-				});
-				flattened['_id'] = d._id;
-				flattened['markerID']=d.markerID;
-				flattened['item']=d.item;
-	
-				// dataHash
-				const colorID = this.hashingData(d._id, index);
-				flattened['colorID']=colorID;
-				
-				return flattened;
-			});	
-			samples = samplesProp.slice();
-			seriesName = seriesNameProps;
-		//} else {
-		//	plotData = this.state.plotData;	
+		// const samples, seriesName;
+		// if (!isEqualArray(samplesProp, samplesState) || seriesNameProps !== seriesNameState) {
+		/*eslint-disable */
+		const plotData = data.map((d, index) => {
+			const flattened = {};
+			dimName.forEach(name => {
+				flattened[name] = dataAccessor(d, name);
+			});
+			flattened["_id"] = d._id;
+			flattened["markerID"] = d.markerID;
+			flattened["item"] = d.item;
+
+			// dataHash
+			const colorID = this.hashingData(d._id, index);
+			flattened["colorID"] = colorID;
+
+			return flattened;
+		});
+		/* eslint-enable */
+		const samples = samplesProp.slice();
+		const seriesName = seriesNameProps;
+		// } else {
+		//	plotData = this.state.plotData;
 		//	samples = samplesState;
 		//	seriesName = seriesNameState;
-		//}
+		// }
 
 		return {
 			plotData,
-			samples,			
+			samples,
 			seriesName,
-			dataExtents: {...dataExtentsState},
+			dataExtents: { ...dataExtentsState },
 			xAttr,
 			yAttr,
 			zAttr,
 			zoomFactor: 1
-		}		
+		};
 	}
 
     triggerEvent = (type, props, e) => {
     	this.subscriptions.forEach(each => {
     		const state = {
     			...this.state,
-				subscriptions: this.subscriptions,
-				hitTest: {
-					canvas: this.hitCanvas,
-					ctx: this.hitCtx
-				}
+    			subscriptions: this.subscriptions,
+    			hitTest: {
+    				canvas: this.hitCanvas,
+    				ctx: this.hitCtx
+    			}
     		};
     		each.listener(type, {
-				zoomFactor: 1,
-				...props
-			}, 
-			state, e);
+    			zoomFactor: 1,
+    			...props
+    		},
+    		state, e);
     	});
     }
 
@@ -373,7 +366,7 @@ class ChartCanvas extends React.Component {
     			each.draw(props);
     	});
     }
-	
+
 	handleXAxisZoom = (newDomain) => {
     	const { xAttr: initialXAttr } = this.state;
 		const { scale, extents, name, ordinary } = initialXAttr;
@@ -386,10 +379,10 @@ class ChartCanvas extends React.Component {
 		const newDataExtents = {
 			...this.state.dataExtents,
 			[name]: newDomain
-		}
+		};
 
-		//console.log(newDataExtents)
-		
+		// console.log(newDataExtents)
+
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
 			...this.state,
@@ -402,76 +395,76 @@ class ChartCanvas extends React.Component {
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(newDataExtents, false);
-		}		
-    }
+		}
+	}
 
     handleYAxisZoom = (newDomain) => {
     	const { yAttr: initialYAttr } = this.state;
-		const { scale, extents, name, ordinary } = initialYAttr;
+    	const { scale, extents, name, ordinary } = initialYAttr;
 
-		if (ordinary) {
-			newDomain[0] = Math.max(extents[0], newDomain[0]);
-			newDomain[1] = Math.min(extents[1], newDomain[1]);
-		}
+    	if (ordinary) {
+    		newDomain[0] = Math.max(extents[0], newDomain[0]);
+    		newDomain[1] = Math.min(extents[1], newDomain[1]);
+    	}
 
-		const newDataExtents = {
-			...this.state.dataExtents,
-			[name]: newDomain
-		}
-		
-    	this.clearAxisAndChartOnCanvas();		
-		this.setState({
-			...this.state,
-			yAttr: {
-				...this.state.yAttr,
-				scale: scale.copy().domain(newDomain)
-			},
-			dataExtents: newDataExtents,
-			zoomFactor: 1
-		});
-		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(false, newDataExtents);
-		}		
+    	const newDataExtents = {
+    		...this.state.dataExtents,
+    		[name]: newDomain
+    	};
+
+    	this.clearAxisAndChartOnCanvas();
+    	this.setState({
+    		...this.state,
+    		yAttr: {
+    			...this.state.yAttr,
+    			scale: scale.copy().domain(newDomain)
+    		},
+    		dataExtents: newDataExtents,
+    		zoomFactor: 1
+    	});
+    	if (this.props.onScatterPanZoom) {
+    		this.props.onScatterPanZoom(false, newDataExtents);
+    	}
     }
 
 	handleZoom = (mouseXY, e) => {
 		if (this.panInProgress) return;
 
 		const {
-			xAttr: {scale: initialXScale, extents: xExtents, name: xName, ordinary: xOrdinary},
-			yAttr: {scale: initialYScale, extents: yExtents, name: yName, ordinary: yOrdinary}
+			xAttr: { scale: initialXScale, extents: xExtents, name: xName, ordinary: xOrdinary },
+			yAttr: { scale: initialYScale, extents: yExtents, name: yName, ordinary: yOrdinary }
 		} = this.state;
 
-        const SCALE_FACTOR = 0.001;
+		const SCALE_FACTOR = 0.001;
 		const zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
-        const centerX = initialXScale.invert(mouseXY[0]),
-            beginX = initialXScale.domain()[0],
-            endX = initialXScale.domain()[1];
+		const centerX = initialXScale.invert(mouseXY[0]),
+			beginX = initialXScale.domain()[0],
+			endX = initialXScale.domain()[1];
 		const centerY = initialYScale.invert(mouseXY[1]),
-            beginY = initialYScale.domain()[0],
-            endY = initialYScale.domain()[1];
+			beginY = initialYScale.domain()[0],
+			endY = initialYScale.domain()[1];
 
-        const newDomainX = [
-            Math.max(centerX - (centerX - beginX)*zoomFactor, xExtents[0]),
-            Math.min(centerX + (endX - centerX)*zoomFactor, xExtents[1])
+		const newDomainX = [
+			Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]),
+			Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])
 		];
 		if (xOrdinary) {
-			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]);
-			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]);
+			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
+			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
 		}
 		const newScaleX = initialXScale.copy().domain(newDomainX);
 		const stepX = !xOrdinary
 			? 0
 			: Math.abs(newScaleX(0) - newScaleX(1));
 
-        const newDomainY = [
-            Math.max(centerY - (centerY - beginY)*zoomFactor, yExtents[0]),
-            Math.min(centerY + (endY - centerY)*zoomFactor, yExtents[1])
+		const newDomainY = [
+			Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]),
+			Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])
 		];
 		if (yOrdinary) {
-			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]);
-			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]);
-		}		
+			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
+			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
+		}
 		const newScaleY = initialYScale.copy().domain(newDomainY);
 		const stepY = !yOrdinary
 			? 0
@@ -481,7 +474,7 @@ class ChartCanvas extends React.Component {
 			...this.state.dataExtents,
 			[xName]: newDomainX.slice(),
 			[yName]: newDomainY.slice()
-		}
+		};
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
 			...this.state,
@@ -503,146 +496,146 @@ class ChartCanvas extends React.Component {
 		}
 	}
 
-    panHelper = (mouseXY, initialXAttr, initialYAttr, initialDataExtents, {dx, dy}) => {
-		const {
-			name: xName,
-			scale: initialXScale,
-			extents: xExtents,
-			ordinary: xOrdinary
-		} = initialXAttr;
+    panHelper = (mouseXY, initialXAttr, initialYAttr, initialDataExtents, { dx, dy }) => {
+    	const {
+    		name: xName,
+    		scale: initialXScale,
+    		extents: xExtents,
+    		ordinary: xOrdinary
+    	} = initialXAttr;
 
-		const {
-			name: yName,
-			scale: initialYScale,
-			extents: yExtents,
-			ordinary: yOrdinary
-		} = initialYAttr;
+    	const {
+    		name: yName,
+    		scale: initialYScale,
+    		extents: yExtents,
+    		ordinary: yOrdinary
+    	} = initialYAttr;
 
-        const newDomainX = initialXScale.range()
-                            .map(x => x - dx)
-							.map(initialXScale.invert);
-		newDomainX[0] = Math.max(xExtents[0], newDomainX[0]);
-		newDomainX[1] = Math.min(xExtents[1], newDomainX[1]);
-							
-		const newDomainY = initialYScale.range()
-							.map(y => y - dy)
-							.map(initialYScale.invert);
-		newDomainY[0] = Math.max(yExtents[0], newDomainY[0]);
-		newDomainY[1] = Math.min(yExtents[1], newDomainY[1]);
-					
-		const updatedScaleX = initialXScale.copy().domain(newDomainX);
-		const updatedScaleY = initialYScale.copy().domain(newDomainY);
+    	const newDomainX = initialXScale.range()
+    		.map(x => x - dx)
+    		.map(initialXScale.invert);
+    	newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
+    	newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
 
-		const stepX = !xOrdinary ? 0: Math.abs(updatedScaleX(0) - updatedScaleX(1));
-		const stepY = !yOrdinary ? 0: Math.abs(updatedScaleY(0) - updatedScaleY(1));
-		
-        return {
-			xAttr: {
-				...initialXAttr,
-				scale: updatedScaleX,
-				step: stepX
-			},
-			yAttr: {
-				...initialYAttr,
-				scale: updatedScaleY,
-				step: stepY
-			},
-			dataExtents: {
-				...initialDataExtents,
-				[xName]: newDomainX,
-				[yName]: newDomainY
-			}
-        }
+    	const newDomainY = initialYScale.range()
+    		.map(y => y - dy)
+    		.map(initialYScale.invert);
+    	newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
+    	newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
+
+    	const updatedScaleX = initialXScale.copy().domain(newDomainX);
+    	const updatedScaleY = initialYScale.copy().domain(newDomainY);
+
+    	const stepX = !xOrdinary ? 0 : Math.abs(updatedScaleX(0) - updatedScaleX(1));
+    	const stepY = !yOrdinary ? 0 : Math.abs(updatedScaleY(0) - updatedScaleY(1));
+
+    	return {
+    		xAttr: {
+    			...initialXAttr,
+    			scale: updatedScaleX,
+    			step: stepX
+    		},
+    		yAttr: {
+    			...initialYAttr,
+    			scale: updatedScaleY,
+    			step: stepY
+    		},
+    		dataExtents: {
+    			...initialDataExtents,
+    			[xName]: newDomainX,
+    			[yName]: newDomainY
+    		}
+    	};
     }
 
     handlePan = (mouseXY, dxdy, e) => {
-        if (!this.waitingForPanAnimationFrame && !this.axisSelectInProgress) {
-            this.waitingForPanAnimationFrame = true;
+    	if (!this.waitingForPanAnimationFrame && !this.axisSelectInProgress) {
+    		this.waitingForPanAnimationFrame = true;
 
-			this.__xAttr = this.__xAttr || this.state.xAttr;
-			this.__yAttr = this.__yAttr || this.state.yAttr;
-			this.__dataExtents == this.__dataExtents || this.state.dataExtents;
-			const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
-			const {
-				xAttr: newXAttr,
-				yAttr: newYAttr,
-				dataExtents: newDataExtents
-			} = state;
-			if (this.props.showImage) {
-				this.waitingForPanAnimationFrame = false;
-				this.clearAxisAndChartOnCanvas();
-				this.setState({
-					...this.state,
-					xAttr: newXAttr,
-					yAttr: newYAttr,
-					dataExtents: newDataExtents,
-					zoomFactor: 1
-				});				
-				if (this.props.onScatterPanZoom) {
-					this.props.onScatterPanZoom(newDataExtents, false);
-				}
-				// this.__xAttr = null;
-				// this.__yAttr = null;
-				// this.__dataExtents = null;
-				
-			} else {
-				this.panInProgress = true;
-				this.triggerEvent('pan', state, e);
-				requestAnimationFrame(() => {
-					this.waitingForPanAnimationFrame = false;
-					this.clearAxisAndChartOnCanvas();
-					this.draw({trigger: 'pan'});					
-					if (this.props.onScatterPanZoom) {
-						this.props.onScatterPanZoom(newDataExtents, true);
-					}						
-				});
-			}
-        }
+    		this.__xAttr = this.__xAttr || this.state.xAttr;
+    		this.__yAttr = this.__yAttr || this.state.yAttr;
+    		this.__dataExtents = this.__dataExtents || this.state.dataExtents;
+    		const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
+    		const {
+    			xAttr: newXAttr,
+    			yAttr: newYAttr,
+    			dataExtents: newDataExtents
+    		} = state;
+    		if (this.props.showImage) {
+    			this.waitingForPanAnimationFrame = false;
+    			this.clearAxisAndChartOnCanvas();
+    			this.setState({
+    				...this.state,
+    				xAttr: newXAttr,
+    				yAttr: newYAttr,
+    				dataExtents: newDataExtents,
+    				zoomFactor: 1
+    			});
+    			if (this.props.onScatterPanZoom) {
+    				this.props.onScatterPanZoom(newDataExtents, false);
+    			}
+    			// this.__xAttr = null;
+    			// this.__yAttr = null;
+    			// this.__dataExtents = null;
+
+    		} else {
+    			this.panInProgress = true;
+    			this.triggerEvent("pan", state, e);
+    			requestAnimationFrame(() => {
+    				this.waitingForPanAnimationFrame = false;
+    				this.clearAxisAndChartOnCanvas();
+    				this.draw({ trigger: "pan" });
+    				if (this.props.onScatterPanZoom) {
+    					this.props.onScatterPanZoom(newDataExtents, true);
+    				}
+    			});
+    		}
+    	}
     }
 
     handlePanEnd = (mouseXY, dxdy, e) => {
-		//const {xAttr, yAttr, dataExtents} = this.state;		
-        const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
-		this.panInProgress = false;
-		this.__xAttr = null;
-		this.__yAttr = null;
-		this.__dataExtents = null;
+    	// const {xAttr, yAttr, dataExtents} = this.state;
+    	const state = this.panHelper(mouseXY, this.__xAttr, this.__yAttr, this.__dataExtents, dxdy);
+    	this.panInProgress = false;
+    	this.__xAttr = null;
+    	this.__yAttr = null;
+    	this.__dataExtents = null;
 
-        const {
-			xAttr: newXAttr,
-			yAttr: newYAttr,
-			dataExtents: newDataExtents
-        } = state;
+    	const {
+    		xAttr: newXAttr,
+    		yAttr: newYAttr,
+    		dataExtents: newDataExtents
+    	} = state;
 
-		if (this.props.showImage) {
-			this.clearAxisAndChartOnCanvas();
-			this.setState({
-				...this.state,
-				xAttr: newXAttr,
-				yAttr: newYAttr,
-				dataExtents: newDataExtents
-			});		
-			if (this.props.onScatterPanZoom) {
-				this.props.onScatterPanZoom(newDataExtents, false);
-			}							
-		} else {
-			this.triggerEvent('panend', state, e);
-			requestAnimationFrame(() => {
-				this.clearAxisAndChartOnCanvas();
-				this.setState({
-					...this.state,
-					xAttr: newXAttr,
-					yAttr: newYAttr,
-					dataExtents: newDataExtents,
-					zoomFactor: 1
-				});
-				if (this.props.onScatterPanZoom) {
-					this.props.onScatterPanZoom(newDataExtents, false);
-				}						
-			});	
-		}
-	}
-	
+    	if (this.props.showImage) {
+    		this.clearAxisAndChartOnCanvas();
+    		this.setState({
+    			...this.state,
+    			xAttr: newXAttr,
+    			yAttr: newYAttr,
+    			dataExtents: newDataExtents
+    		});
+    		if (this.props.onScatterPanZoom) {
+    			this.props.onScatterPanZoom(newDataExtents, false);
+    		}
+    	} else {
+    		this.triggerEvent("panend", state, e);
+    		requestAnimationFrame(() => {
+    			this.clearAxisAndChartOnCanvas();
+    			this.setState({
+    				...this.state,
+    				xAttr: newXAttr,
+    				yAttr: newYAttr,
+    				dataExtents: newDataExtents,
+    				zoomFactor: 1
+    			});
+    			if (this.props.onScatterPanZoom) {
+    				this.props.onScatterPanZoom(newDataExtents, false);
+    			}
+    		});
+    	}
+    }
+
 	zAxisSelectHelper = (selectDomain, selectRange, initialZAttr, initialDataExtents) => {
 		const {
 			name,
@@ -666,47 +659,46 @@ class ChartCanvas extends React.Component {
 		return {
 			zAttr: newZAttr,
 			dataExtents: initialDataExtents
-		}
+		};
 	}
 
 	handleZAxisSelect = (selectDomain, selectRange, e) => {
 		if (!this.panInProgress &&
 			!this.waitingForPanAnimationFrame &&
-			!this.waitingForAnimationFrame) 
-		{
+			!this.waitingForAnimationFrame) {
 			this.waitingForAnimationFrame = true;
 			this.__zAttr = this.__zAttr || this.state.zAttr;
 			this.__dataExtents = this.__dataExtents || this.state.dataExtents;
 
-			const {zAttr, dataExtents} = this.zAxisSelectHelper(selectDomain, selectRange, this.__zAttr, this.__dataExtents);
+			const { zAttr, dataExtents } = this.zAxisSelectHelper(selectDomain, selectRange, this.__zAttr, this.__dataExtents);
 			if (this.props.showImage) {
 				this.waitingForAnimationFrame = false;
 				this.__zAttr = null;
 				this.__dataExtents = null;
 				this.clearAxisAndChartOnCanvas();
-				this.setState({zAttr, dataExtents});
-				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				this.setState({ zAttr, dataExtents });
+				if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
 					this.props.onScatterPanZoom(dataExtents, false);
-				}													
+				}
 			} else {
 				this.__zAttr = zAttr;
 				this.__dataExtents = dataExtents;
 				this.axisSelectInProgress = true;
-				this.triggerEvent('pan', {zAttr, dataExtents}, e);
+				this.triggerEvent("pan", { zAttr, dataExtents }, e);
 				requestAnimationFrame(() => {
 					this.waitingForAnimationFrame = false;
 					this.clearAxisAndChartOnCanvas();
-					this.draw({trigger: 'pan'});
-					if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					this.draw({ trigger: "pan" });
+					if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
 						this.props.onScatterPanZoom(dataExtents, true);
-					}													
-				});	
+					}
+				});
 			}
 		}
 	}
 
 	handleZAxisSelectEnd = (selectDomain, selectRange, e) => {
-		const {zAttr, dataExtents} = this.zAxisSelectHelper(
+		const { zAttr, dataExtents } = this.zAxisSelectHelper(
 			selectDomain, selectRange,
 			this.__zAttr, this.__dataExtents
 		);
@@ -715,55 +707,55 @@ class ChartCanvas extends React.Component {
 		this.axisSelectInProgress = false;
 		if (this.props.showImage) {
 			this.clearAxisAndChartOnCanvas();
-			this.setState({zAttr, dataExtents});
-			if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
-				this.props.onScatterPanZoom(dataExtents, false);				
-			}															
+			this.setState({ zAttr, dataExtents });
+			if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
+				this.props.onScatterPanZoom(dataExtents, false);
+			}
 		} else {
-			this.triggerEvent('pan', {zAttr, dataExtents}, e);
+			this.triggerEvent("pan", { zAttr, dataExtents }, e);
 			requestAnimationFrame(() => {
 				this.clearAxisAndChartOnCanvas();
-				this.setState({zAttr, dataExtents});
+				this.setState({ zAttr, dataExtents });
 				// connect to pcp
-				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
-					this.props.onScatterPanZoom(dataExtents, false);				
-				}															
-			});	
+				if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
+					this.props.onScatterPanZoom(dataExtents, false);
+				}
+			});
 		}
 	}
 
-	handleZAxisSelectCancel = (e) => {
-		const {name, extents} = this.state.zAttr;
+	handleZAxisSelectCancel = (e) => { // eslint-disable-line
+		const { name, extents } = this.state.zAttr;
 		const newZAttr = {
 			...this.state.zAttr,
 			select: null,
 			selectDomain: null
 		};
 
-		this.clearAxisAndChartOnCanvas();		
+		this.clearAxisAndChartOnCanvas();
 		if (this.state.dataExtents[name] && !isArrayOfString(extents)) {
 			const newDataExtents = {
 				...this.state.dataExtents,
 				[name]: extents.slice()
-			};	
-			this.setState({zAttr: newZAttr, dataExtents: newDataExtents});	
+			};
+			this.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
 			if (this.props.onScatterPanZoom) {
 				this.props.onScatterPanZoom(newDataExtents, false);
-			}															
+			}
 		} else {
-			this.setState({zAttr: newZAttr});
-		}	
+			this.setState({ zAttr: newZAttr });
+		}
 	}
-	
+
 
 	updateAttr = (attr, initialAttr, dataExtents) => {
 		const domain = dataExtents[attr];
 		if (domain == null) return initialAttr;
 
-		const {scale: initialScale, ordinary} = initialAttr;
+		const { scale: initialScale, ordinary } = initialAttr;
 		const newScale = initialScale.copy().domain(domain);
-		const step = !ordinary ? 0: Math.abs(newScale(0) - newScale(1));
+		const step = !ordinary ? 0 : Math.abs(newScale(0) - newScale(1));
 		return {
 			...initialAttr,
 			scale: newScale,
@@ -774,7 +766,7 @@ class ChartCanvas extends React.Component {
 		const { name, extents } = initialZAttr;
 		if (isArrayOfString(extents) || dataExtents[name] == null)
 			return initialZAttr;
-		
+
 		return {
 			...initialZAttr,
 			selectDomain: dataExtents[name].slice()
@@ -782,21 +774,21 @@ class ChartCanvas extends React.Component {
 	}
 	updateExtents = (initialExtents, newExtents) => {
 		Object.keys(newExtents).map(key => {
-			const extents = newExtents[key].length 
-				? newExtents[key].slice()
-				: this.state.dataExtents[key].slice();
-			
+			// const extents = newExtents[key].length
+			// 	? newExtents[key].slice()
+			// 	: this.state.dataExtents[key].slice();
+
 			initialExtents[key] = newExtents[key];
 		});
 		return initialExtents;
 	}
 
-	handleByOther = ({what, data, inProgress}) => {
+	handleByOther = ({ what, data, inProgress }) => {
 		// must what: extents
-		if (what !== 'extents') return;
+		if (what !== "extents") return;
 		if (this.panInProgress) return;
 
-		//console.log(data, inProgress)
+		// console.log(data, inProgress)
 		if (inProgress && this.props.showImage) {
 			if (!this.waitingForAnimationFrame) {
 				this.waitingForAnimationFrame = true;
@@ -807,7 +799,7 @@ class ChartCanvas extends React.Component {
 				this.__yAttr = this.__yAttr || this.state.yAttr;
 				this.__zAttr = this.__zAttr || this.state.zAttr;
 
-				const newDataExtents = this.updateExtents(this.__dataExtents, data);				
+				const newDataExtents = this.updateExtents(this.__dataExtents, data);
 				const newXAttr = this.updateAttr(this.props.xAttr, this.__xAttr, data);
 				const newYAttr = this.updateAttr(this.props.yAttr, this.__yAttr, data);
 				const newZAttr = this.updateZAttr(this.__zAttr, data);
@@ -819,16 +811,16 @@ class ChartCanvas extends React.Component {
 
 				this.otherInProgress = true;
 
-				this.triggerEvent('pan', {
-					xAttr: newXAttr, 
-					yAttr: newYAttr, 
+				this.triggerEvent("pan", {
+					xAttr: newXAttr,
+					yAttr: newYAttr,
 					zAttr: newZAttr,
 					dataExtents: newDataExtents
 				});
 				requestAnimationFrame(() => {
 					this.waitingForAnimationFrame = false;
 					this.clearAxisAndChartOnCanvas();
-					this.draw({trigger: 'pan'});
+					this.draw({ trigger: "pan" });
 				});
 			}
 		} else {
@@ -836,62 +828,41 @@ class ChartCanvas extends React.Component {
 			this.__xAttr = this.__xAttr || this.state.xAttr;
 			this.__yAttr = this.__yAttr || this.state.yAttr;
 			this.__zAttr = this.__zAttr || this.state.zAttr;
-		
+
 			const newXAttr = this.updateAttr(this.props.xAttr, this.__xAttr, data);
 			const newYAttr = this.updateAttr(this.props.yAttr, this.__yAttr, data);
 			const newZAttr = this.updateZAttr(this.__zAttr, data);
-			const newDataExtents = this.updateExtents(this.__dataExtents, data);				
-			
+			const newDataExtents = this.updateExtents(this.__dataExtents, data);
+
 			this.__xAttr = null;
 			this.__yAttr = null;
 			this.__zAttr = null;
 			this.__dataExtents = null;
-			
+
 			this.otherInProgress = false;
-			this.triggerEvent('pan', {
-				xAttr: newXAttr, 
-				yAttr: newYAttr, 
+			this.triggerEvent("pan", {
+				xAttr: newXAttr,
+				yAttr: newYAttr,
 				zAttr: newZAttr,
 				dataExtents: newDataExtents
 			});
 			requestAnimationFrame(() => {
 				this.clearAxisAndChartOnCanvas();
-				this.setState({...this.state,
+				this.setState({ ...this.state,
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					zAttr: newZAttr,
 					dataExtents: newDataExtents
 				});
-			});		
+			});
 		}
-	}
-
-	// test purpose
-	pickColor = (mouseXY, layerXY) => {
-		const ctx = this.hitCtx;//canvas(this.getCanvasContexts());
-		const { margin, ratio } = this.props;
-		
-		const x = Math.round(mouseXY[0]);// * ratio + margin.left;
-		const y = Math.round(mouseXY[1]);// * ratio + margin.top;
-		
-		const pixx = (x + margin.left) * ratio;
-		const pixy = (y + margin.top) * ratio;
-		const pixel = ctx.getImageData( pixx, pixy, 1, 1);
-		const data = pixel.data;
-		const rgba = 'rgba(' + data[0] + ', ' + data[1] + ', ' + data[2] + ', ' +
-					(data[3]/255) + ')';
-		return {
-			x, y,
-			data,
-			rgba
-		};
 	}
 
 	getHoveredDataItem = (mouseXY) => {
 		const x = Math.round(mouseXY[0]);
 		const y = Math.round(mouseXY[1]);
 		if (this.hitCtx == null)
-			return {x, y, info: null, id: null};
+			return { x, y, info: null, id: null };
 
 		const ctx = this.hitCtx;
 		const { margin, ratio } = this.props;
@@ -903,33 +874,33 @@ class ChartCanvas extends React.Component {
 
 		const dataID = this.dataHashIDByColor[colorID];
 		if (dataID) {
-			const formatSI = d3Format('.3s');
+			const formatSI = d3Format(".3s");
 			const dataIndex = this.dataHashIndexByID[dataID];
 			const data = this.state.plotData[dataIndex];
 			const info = [];
 			Object.keys(data).forEach(key => {
-				if (key === '_id' || key === 'colorID' || key === 'markerID') return;
+				if (key === "_id" || key === "colorID" || key === "markerID") return;
 
 				const value = data[key];
 				if (value == null) return;
 
-				const keyTokens = key.split('.');
-				const shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1]: keyTokens[0];
-				const formattedValue = typeof value === 'string' ? value: formatSI(value);
+				const keyTokens = key.split(".");
+				const shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1] : keyTokens[0];
+				const formattedValue = typeof value === "string" ? value : formatSI(value);
 
 				info.push({
 					key: shortKey,
 					value: formattedValue
 				});
 			});
-			return {x, y, info, id: dataID};
+			return { x, y, info, id: dataID };
 		}
-		return {x, y, info: null, id: null};
+		return { x, y, info: null, id: null };
 	}
 
 	handleMouseMove = (mouseXY, e) => {
 		return;
-		if (!this.waitingForAnimationFrame) {
+		if (!this.waitingForAnimationFrame) { // eslint-disable-line
 			this.waitingForAnimationFrame = true;
 			const state = this.getHoveredDataItem(mouseXY);
 			this.triggerEvent("mousemove", {
@@ -937,7 +908,7 @@ class ChartCanvas extends React.Component {
 			}, e);
 			requestAnimationFrame(() => {
 				this.clearMouseCoordCanvas();
-				this.draw({trigger: "mousemove"});
+				this.draw({ trigger: "mousemove" });
 				this.waitingForAnimationFrame = false;
 				if (this.props.onDataRequest && state.id) {
 					this.props.onDataRequest(state.id);
@@ -949,18 +920,15 @@ class ChartCanvas extends React.Component {
 	searchDataItemOnPath = (startXY, endXY) => {
 		const hitCtx = this.hitCtx;
 		if (hitCtx == null) return;
-		
-		const {margin, ratio, width, height} = this.props;
-		const canvasWidth = Math.floor( width*ratio );
-		const canvasHeight = Math.floor( height*ratio );
+
+		const { margin, ratio, width, height } = this.props;
+		const canvasWidth = Math.floor( width * ratio );
+		const canvasHeight = Math.floor( height * ratio );
 
 		const startX = Math.round( (startXY[0] + margin.left) * ratio );
 		const endX = Math.round( (endXY[0] + margin.left) * ratio );
 		const startY = Math.round( (startXY[1] + margin.top) * ratio );
 		const endY = Math.round( (endXY[1] + margin.top) * ratio );
-
-		const xStep = startX < endX ? 1: -1;
-		const yStep = startY < endY ? 1: -1;
 
 		const pixelData = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight).data;
 
@@ -970,28 +938,28 @@ class ChartCanvas extends React.Component {
 			return {
 				x: Math.floor( startX * (1 - t) + endX * t),
 				y: Math.floor( startY * (1 - t) + endY * t)
-			}
+			};
 		});
 
-		let prev = null;
+		const prev = null;
 		points.map(p => {
 			const isSame = prev && (prev.x === p.x && prev.y === p.y);
 			if (!isSame) {
 				// search in 5x5 for each position
-				for (let ppy=p.y-2; ppy<=p.y+2; ++ppy) {
-					for (let ppx=p.x-2; ppx<=p.x+2; ++ppx) {
-						const pIndex = 4 * (canvasWidth*ppy + ppx);
+				for (let ppy = p.y - 2; ppy <= p.y + 2; ++ppy) {
+					for (let ppx = p.x - 2; ppx <= p.x + 2; ++ppx) {
+						const pIndex = 4 * (canvasWidth * ppy + ppx);
 						const r = pixelData[pIndex];
-						const g = pixelData[pIndex+1];
-						const b = pixelData[pIndex+2];
+						const g = pixelData[pIndex + 1];
+						const b = pixelData[pIndex + 2];
 						const colorID = `rgb(${r}, ${g}, ${b})`;
 						const dataID = this.dataHashIDByColor[colorID];
 						if (dataID && this.__selected[dataID] == null) {
 							const dataIndex = this.dataHashIndexByID[dataID];
-							const data = {...this.state.plotData[dataIndex]};
+							const data = { ...this.state.plotData[dataIndex] };
 							this.__selected[dataID] = {
 								timestamp,
-								data 
+								data
 							};
 						}
 					}
@@ -1009,11 +977,11 @@ class ChartCanvas extends React.Component {
 			this.__selected = this.__selected || {};
 			this.searchDataItemOnPath(startXY, endXY);
 
-			this.triggerEvent('track', {trackXY: [startXY, endXY]}, e);
+			this.triggerEvent("track", { trackXY: [startXY, endXY] }, e);
 			requestAnimationFrame(() => {
 				this.waitingForAnimationFrame = false;
 				// i don't clear
-				this.draw({trigger: 'track'});
+				this.draw({ trigger: "track" });
 			});
 		}
 	}
@@ -1021,22 +989,22 @@ class ChartCanvas extends React.Component {
 	handleMouseTrackEnd = (e) => {
 		this.trackInProgress = false;
 		if (this.props.onSelectDataItems) {
-			this.props.onSelectDataItems({...this.__selected});
+			this.props.onSelectDataItems({ ...this.__selected });
 		}
 		this.__selected = null;
-		this.triggerEvent('track', {trackXY: null}, e);
+		this.triggerEvent("track", { trackXY: null }, e);
 		requestAnimationFrame(() => {
 			this.clearMouseCoordCanvas();
 		});
 	}
 
-    render() {
+	render() {
 		const { margin } = this.props;
     	const divStyle = {
     		position: "relative",
     		width: this.props.width,
 			height: this.props.height,
-			//overflow: 'scroll',
+			// overflow: 'scroll',
     	};
     	const svgStyle = {
     		position: "absolute",
@@ -1068,7 +1036,7 @@ class ChartCanvas extends React.Component {
 			hitTest: {
 				canvas: this.hitCanvas,
 				ctx: this.hitCtx
-			},		
+			},
 			...this.state
 		};
 
@@ -1078,14 +1046,14 @@ class ChartCanvas extends React.Component {
 		React.Children.forEach(this.props.children, child => {
 			if (!React.isValidElement(child)) return;
 			if (child.type === ColorLegend) {
-				childrenWithHandler.push(React.cloneElement(child,{shared}));
-			} else 
-				children.push(React.cloneElement(child,{shared}));
+				childrenWithHandler.push(React.cloneElement(child, { shared }));
+			} else
+				children.push(React.cloneElement(child, { shared }));
 		});
 
 		return (
 			<div
-				style={divStyle} 
+				style={divStyle}
 				className={this.props.className}
 			>
 				<CanvasContainer
@@ -1110,7 +1078,7 @@ class ChartCanvas extends React.Component {
 					<g transform={`translate(${margin.left},${margin.top})`}>
 						<g>
 							{children}
-						</g>										
+						</g>
 						<EventHandler
 							ref={node => this.eventHandlerNode = node}
 							width={canvasDim.width}
@@ -1131,6 +1099,34 @@ class ChartCanvas extends React.Component {
 		);
 	}
 }
+
+ChartCanvas.propTypes = {
+	ratio: PropTypes.number,
+	width: PropTypes.number,
+	height: PropTypes.number,
+	data: PropTypes.array,
+	samples: PropTypes.array,
+	seriesName: PropTypes.string,
+	dataExtents: PropTypes.object,
+	dataAccessor: PropTypes.func,
+	xAttr: PropTypes.string,
+	yAttr: PropTypes.string,
+	zAttr: PropTypes.string,
+	onScatterPanZoom: PropTypes.func,
+	showImage: PropTypes.bool,
+	margin: PropTypes.shape({
+		left: PropTypes.number,
+		right: PropTypes.number,
+		top: PropTypes.number,
+		bottom: PropTypes.number
+	}),
+	onDataRequest: PropTypes.func,
+	onSelectDataItems: PropTypes.func,
+	zIndex: PropTypes.number,
+	imgPool: PropTypes.object,
+	children: PropTypes.any,
+	className: PropTypes.any
+};
 
 
 export default ChartCanvas;

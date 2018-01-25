@@ -1,19 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-import PCPAxisEventHandler from './PCPAxisEventHandler';
+import PCPAxisEventHandler from "./PCPAxisEventHandler";
 import {
 	drawAxisLine,
-    drawTicks,
-    drawAxisTitle
+	drawTicks,
+	drawAxisTitle
 } from "./draw";
-import {
-	hexToRGBA
-} from '../utils';
-import { PCPSubscriberExt } from '../core';
+import { hexToRGBA } from "../utils";
+import { PCPSubscriberExt } from "../core";
 
-import { scaleLinear } from 'd3-scale';
-import { format as d3Format } from 'd3-format';
+import { format as d3Format } from "d3-format";
 
 class PCPYAxis extends React.Component {
     getTicks = (yScale) => {
@@ -46,50 +43,47 @@ class PCPYAxis extends React.Component {
     			labelY: y + dx
     		};
     	});
-	}
-	
-    getTicksOrdinary = (yScale, moreProps) => {
-		const { ticks, tickFormat, innerTickSize, orient, height } = this.props;
-    	const { fontSize } = this.props.labelStyle;
-        const { step: yStep, extents: yExtents, flip} = moreProps.dimConfig; 
+    }
 
-        const sign = orient === "left" || orient === "top" ? -1 : 1;
+    getTicksOrdinary = (yScale, moreProps) => {
+    	const { innerTickSize, orient, height } = this.props;
+    	const { fontSize } = this.props.labelStyle;
+    	const { step: yStep, extents: yExtents } = moreProps.dimConfig;
+
+    	const sign = orient === "left" || orient === "top" ? -1 : 1;
     	const dx = fontSize * 0.35;
 
-		const yLabels = yExtents.slice();
-        //if (!flip) yLabels.reverse();
-        
-		const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
-		const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
+    	const yLabels = yExtents.slice();
 
-		const tickArray = [];
-		for (let i=minval; i<maxval; ++i) {
-			const y = yScale(i);
+    	const minval = Math.max(Math.floor(yScale.invert(yScale.range()[0])), 0);
+    	const maxval = Math.min(Math.ceil(yScale.invert(yScale.range()[1])), yLabels.length);
 
-			if (y < 0 || y > height) {
-				continue;
-			}
+    	const tickArray = [];
+    	for (let i = minval; i < maxval; ++i) {
+    		const y = yScale(i);
 
-			tickArray.push({
-				value: i,
-				label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + '...': yLabels[i],
-				x1: 0,
-				y1: y - yStep/2,
-				x2: sign * innerTickSize,
-				y2: y - yStep/2,
-				labelX: sign * ( 1.2 * innerTickSize + dx),
-				labelY: y + dx - yStep/2
-			});
-		}
-		return tickArray;
-	}	
-	
+    		if (y < 0 || y > height) {
+    			continue;
+    		}
+
+    		tickArray.push({
+    			value: i,
+    			label: yLabels[i].length > 13 ? yLabels[i].substring(0, 13) + "..." : yLabels[i],
+    			x1: 0,
+    			y1: y - yStep / 2,
+    			x2: sign * innerTickSize,
+    			y2: y - yStep / 2,
+    			labelX: sign * ( 1.2 * innerTickSize + dx),
+    			labelY: y + dx - yStep / 2
+    		});
+    	}
+    	return tickArray;
+    }
+
 	drawNullMarker = (ctx, moreProps) => {
-		const { dimConfig: {position, nullPositionY, title} } = moreProps;
-		//console.log(title, position, nullPositionY);
-		//ctx.fillRect(position-2, nullPositionY, 4, 4);
+		const { dimConfig: { nullPositionY } } = moreProps;
 		ctx.beginPath();
-		ctx.rect(-2, nullPositionY-2, 4, 4);
+		ctx.rect(-2, nullPositionY - 2, 4, 4);
 		ctx.fill();
 	}
 
@@ -97,96 +91,80 @@ class PCPYAxis extends React.Component {
 		const { axisWidth } = this.props;
 		const halfWidth = axisWidth / 2;
 		const halfhalfWidth = axisWidth / 4;
-		ctx.fillStyle = hexToRGBA('#000000', 0.3);
+		ctx.fillStyle = hexToRGBA("#000000", 0.3);
 		ctx.rect(-halfhalfWidth, start, halfWidth, end - start);
 		ctx.fill();
 	}
 
     draw = (ctx, moreProps) => {
-        //console.log('moreProps: ', moreProps);
-        //console.log('props: ', this.props)
     	const {
-            height, 
-            showDomain, showTicks, showTitle, showTickLabel, 
-            titleFormat,
-            labelStyle } = this.props;
-        // const { scale: yScale, title } = this.props.config;
-        const { fontSize } = labelStyle;
-        const { margin } = this.props.shared;
-        const { 
-            scale: yScale, 
-            position: axisLocation,
-            title,
-			ordinary,
-			select,
-        } = moreProps.dimConfig;
+    		height,
+    		showDomain, showTicks, showTitle, showTickLabel,
+    		titleFormat,
+    		labelStyle } = this.props;
+    	const { fontSize } = labelStyle;
+    	const {
+    		scale: yScale,
+    		position: axisLocation,
+    		title,
+    		ordinary,
+    		select,
+    	} = moreProps.dimConfig;
 
     	ctx.save();
     	ctx.translate(axisLocation, 0);
 
-        if (showTitle) {
-            //drawAxisTitle(ctx)
-            drawAxisTitle(ctx,{
-                label: titleFormat(title),
-                x: 0,
-                y: -fontSize
-            }, {
-                ...labelStyle,
-                textAnchor: 'middle'
-            });
-        }
+    	if (showTitle) {
+    		drawAxisTitle(ctx, {
+    			label: titleFormat(title),
+    			x: 0,
+    			y: -fontSize
+    		}, {
+    			...labelStyle,
+    			textAnchor: "middle"
+    		});
+    	}
 
     	if (showDomain) {
-			drawAxisLine(ctx, this.props, [0, height]);
-			// drawNullMarker
-			this.drawNullMarker(ctx, moreProps);
-			// end drawNullMarker
+    		drawAxisLine(ctx, this.props, [0, height]);
+    		this.drawNullMarker(ctx, moreProps);
     	}
 
     	if (showTicks) {
     		const { orient } = this.props;
-			const textAnchor = orient === "left" ? "end" : "start";
-			drawTicks(ctx, 
-				ordinary ? this.getTicksOrdinary(yScale, moreProps): this.getTicks(yScale),
+    		const textAnchor = orient === "left" ? "end" : "start";
+    		drawTicks(ctx,
+    			ordinary ? this.getTicksOrdinary(yScale, moreProps) : this.getTicks(yScale),
     			this.props.tickStyle,
     			showTickLabel ? { ...labelStyle, textAnchor } : null
     		);
-		}
-		
-		if (select) {
-			let [start, end] = select;
-			if (start > end) {
-				start = select[1];
-				end = select[0];
-			}
-			this.drawSelect(ctx, start, end);
-		}		
+    	}
 
-    	ctx.restore();        
+    	if (select) {
+    		let [start, end] = select;
+    		if (start > end) {
+    			start = select[1];
+    			end = select[0];
+    		}
+    		this.drawSelect(ctx, start, end);
+    	}
+
+    	ctx.restore();
     }
 
     getDrawRegion = () => {
-        const { axisWidth, orient, height } = this.props;
-        const { margin } = this.props.shared;
+    	const { axisWidth, height } = this.props;
+    	const { margin } = this.props.shared;
 
-        const 
-            x = 0,
-            y = margin.top/2,
-            w = axisWidth,
-            h = height;
+    	const
+    		x = 0,
+    		y = margin.top / 2,
+    		w = axisWidth,
+    		h = height;
 
-    
-        //const halfAxisWidth = newAxisWidth/2;
-        //const tx = (orient === 'left') ? -halfAxisWidth: halfAxisWidth;
-        //const ty = 0;
-        //const transform = `translate(${tx},${ty})`;
-        
-        return { 
-            x, y, width: w, height: h,
-            //tx 
-        }
+    	return { x, y, width: w, height: h };
     }
-	
+
 	handleRangeSelect = (start, end, e) => {
 		if (this.props.onRangeSelect) {
 			this.props.onRangeSelect(this.props.title, start, end, e);
@@ -205,48 +183,51 @@ class PCPYAxis extends React.Component {
 		}
 	}
 
-    render () {
-        const {
-            axisLocation,
-            shared: {margin},
-            height,
-            title
-        } = this.props;
+	render() {
+		const { axisLocation } = this.props;
+		const rect = this.getDrawRegion();
 
-        const rect = this.getDrawRegion();
-
-        //console.log(this.props)
-
-        return (
-            <g transform={`translate(${axisLocation},${0})`}>
-                <PCPAxisEventHandler
+		return (
+			<g transform={`translate(${axisLocation},${0})`}>
+				<PCPAxisEventHandler
 					{...rect}
 					onRangeSelect={this.handleRangeSelect}
 					onRangeSelectEnd={this.handleRangeSelectEnd}
 					onRangeSelectCancle={this.handleRangeSelectCancel}
-                    //topHeight={height}
-                    //tx={0}
-                    //onAxisMove={this.handleAxisMove}
-                    //onAxisMoveEnd={this.handleAxisMoveEnd}
-                    moveCursorClassName={"react-multiview-grabbing-cursor"}
-                    zoomCursorClassName={"react-multiview-ns-resize-cursor"}
-                />
-                <PCPSubscriberExt 
-                    ref={node => this.node = node}
-                    canvas={contexts => contexts.axes}
-                    clip={false}
-                    edgeClip={false}
-                    draw={this.draw}
-                    drawOn={['moveaxis','selectrange']}
-                    shared={this.props.shared}
-                    dimConfig={this.props.dimConfig}
-                />
-            </g>
-        );
-    }
+					moveCursorClassName={"react-multiview-grabbing-cursor"}
+					zoomCursorClassName={"react-multiview-ns-resize-cursor"}
+				/>
+				<PCPSubscriberExt
+					ref={node => this.node = node}
+					canvas={contexts => contexts.axes}
+					clip={false}
+					edgeClip={false}
+					draw={this.draw}
+					drawOn={["moveaxis", "selectrange"]}
+					shared={this.props.shared}
+					dimConfig={this.props.dimConfig}
+				/>
+			</g>
+		);
+	}
 }
 
 PCPYAxis.propTypes = {
+	shared: PropTypes.shape({
+		margin: PropTypes.shape({
+			left: PropTypes.number,
+			right: PropTypes.number,
+			top: PropTypes.number,
+			bottom: PropTypes.number
+		})
+	}),
+	onRangeSelect: PropTypes.func,
+	onRangeSelectEnd: PropTypes.func,
+	onRangeSelectCancel: PropTypes.func,
+	title: PropTypes.string,
+	axisLocation: PropTypes.number,
+	dimConfig: PropTypes.object,
+
 	width: PropTypes.number,
 	height: PropTypes.number,
 	axisWidth: PropTypes.number,
@@ -282,19 +263,17 @@ PCPYAxis.propTypes = {
 	}),
 
 	showTicks: PropTypes.bool,
-    showTickLabel: PropTypes.bool,
-    showTitle: PropTypes.bool,
-    showDomain: PropTypes.bool,
-    
-    titleFormat: PropTypes.func,
+	showTickLabel: PropTypes.bool,
+	showTitle: PropTypes.bool,
+	showDomain: PropTypes.bool,
+
+	titleFormat: PropTypes.func,
 
 	className: PropTypes.string,
 	domainClassName: PropTypes.string,
 
 	zoomEnabled: PropTypes.bool,
 	getMouseDelta: PropTypes.func,
-	// onContextMenu: PropTypes.func,
-	// onDoubleBlick: PropTypes.func,
 };
 
 PCPYAxis.defaultProps = {
@@ -320,13 +299,13 @@ PCPYAxis.defaultProps = {
 	},
 
 	showTicks: true,
-    showTickLabel: true,
-    showTitle: true,
-    showDomain: true,
-    
+	showTickLabel: true,
+	showTitle: true,
+	showDomain: true,
+
 	titleFormat: d => d,
-	tickFormat: x => d3Format('.3s')(x),
-	//tickFormat: x => x,
+	tickFormat: x => d3Format(".3s")(x),
+	// tickFormat: x => x,
 
 	className: "",
 	domainClassName: "",

@@ -1,13 +1,8 @@
-import { createSelector } from 'reselect';
-import forEach from 'lodash.foreach';
-import uniqBy from 'lodash.uniqby';
-import get from 'lodash.get';
-import uniqueId from 'lodash.uniqueid';
-import { scaleLinear, scalePoint } from 'd3-scale';
-import { extent as d3Extent } from 'd3-array';
-import { sortAlphaNum } from '../utils';
-import { format as d3Format } from 'd3-format';
-import { markerProvider } from 'react-multiview/lib/series';
+import { createSelector } from "reselect";
+import forEach from "lodash.foreach";
+import uniqBy from "lodash.uniqby";
+import uniqueId from "lodash.uniqueid";
+import { markerProvider } from "react-multiview/lib/series"; // eslint-disable-line
 
 
 export const getShowImageSwitch = state => state.vis.showImage;
@@ -34,66 +29,66 @@ export const getImgPool = state => state.data.imgPool;
 
 
 export const getSelectedSampleNames = createSelector(
-    [
-        getSampleKinds,
-        getSelectedSampleKeys
-    ],
-    (
-        kinds,
-        keys
-    ) => {
-        return keys.map(key => kinds[key]);
-    }
+	[
+		getSampleKinds,
+		getSelectedSampleKeys
+	],
+	(
+		kinds,
+		keys
+	) => {
+		return keys.map(key => kinds[key]);
+	}
 );
 
 export const getSelectedDataArray = createSelector(
-    [
-        getSelectedSampleNames,
-        getDataBySamples,
-        getAttrTypes,
-    ],
-    (
-        selectedSampleNames,
-        data,
-        types,
-    ) => {
-        let selectedDataArray = [];
-        const g_minmax = {};
+	[
+		getSelectedSampleNames,
+		getDataBySamples,
+		getAttrTypes,
+	],
+	(
+		selectedSampleNames,
+		data,
+		types,
+	) => {
+		let selectedDataArray = [];
+		const g_minmax = {};
 
-        forEach(data, (dataObject, sampleName) => {
-           if (selectedSampleNames.includes(sampleName)) {
-                const { data: dataSample, indexById, minmax } = dataObject;
+		forEach(data, (dataObject, sampleName) => {
+			if (selectedSampleNames.includes(sampleName)) {
+				const { data: dataSample, minmax } = dataObject;
 
-                selectedDataArray = selectedDataArray.concat(dataSample);
+				selectedDataArray = selectedDataArray.concat(dataSample);
 
-                //console.log(sampleName, minmax);
-                forEach(minmax, (value, attr) => {
-                    if (g_minmax[attr] == null) {
-                        g_minmax[attr] = value;
-                    } else {
-                        const t = types[attr];
-                        let g_value = g_minmax[attr];
-                        if (t === 'num') {
-                            g_value[0] = Math.min(g_value[0], value[0]);
-                            g_value[1] = Math.max(g_value[1], value[1]);
-                        } else if (t === 'str') {
-                            g_value = uniqBy(g_value.concat(value), d => d);
-                            g_minmax[attr] = g_value;
-                        } else {
-                            // ignore unknown type
-                        }
-                    }
-                });
-           }
-        });
+				// console.log(sampleName, minmax);
+				forEach(minmax, (value, attr) => {
+					if (g_minmax[attr] == null) {
+						g_minmax[attr] = value; // eslint-disable-line
+					} else {
+						const t = types[attr];
+						let g_value = g_minmax[attr];
+						if (t === "num") {
+							g_value[0] = Math.min(g_value[0], value[0]);
+							g_value[1] = Math.max(g_value[1], value[1]);
+						} else if (t === "str") {
+							g_value = uniqBy(g_value.concat(value), d => d);
+							g_minmax[attr] = g_value; // eslint-disable-line
+						} else {
+							// ignore unknown type
+						}
+					}
+				});
+			}
+		});
 
-        return {
-            id: uniqueId('dataSeries_'),
-            samples: selectedSampleNames,
-            data: selectedDataArray,
-            extents: g_minmax
-        }
-    }
+		return {
+			id: uniqueId("dataSeries_"),
+			samples: selectedSampleNames,
+			data: selectedDataArray,
+			extents: g_minmax
+		};
+	}
 );
 
 export const getPCPSelectedDimension = state => state.vis.selectedDimension;

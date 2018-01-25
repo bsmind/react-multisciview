@@ -26,8 +26,8 @@ class CanvasContainer extends React.Component {
 
     	const canvasStyle = {
     		position: "absolute",
-    		width: width + 'px',
-    		height: height + 'px'
+    		width: width + "px",
+    		height: height + "px"
     	};
     	const canvasWidth = width * ratio;
     	const canvasHeight = height * ratio;

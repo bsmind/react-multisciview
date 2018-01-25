@@ -23,6 +23,7 @@
     "babel:es": "cross-env BABEL_ENV=es babel src --out-dir build/es --source-maps",
     "release": "npm run clean && npm run babel:cjs && npm run babel:es && cp README.md build/ && node scripts/release.js",
     "lint": "eslint --ext .js,.jsx src --fix",
+    "lintapp": "eslint --ext .js,.jsx docs --fix",
     "upgrade:patch": "npm version patch",
     "preversion": "npm run lint",
     "version": "node scripts/updateVersion.js && git add \"src/index.js\"",

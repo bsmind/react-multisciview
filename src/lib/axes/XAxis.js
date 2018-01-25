@@ -2,18 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import AxisEventHandler from "./AxisEventHandler";
-import {
-	drawAxisLine,
-	drawTicks
-} from "./draw";
+import { drawAxisLine, drawTicks } from "./draw";
 import { SubscriberExt } from "../core";
 
 class XAxis extends React.Component {
-
     getTicks = (xScale) => {
     	const { ticks, tickFormat, innerTickSize, orient } = this.props;
     	const { fontSize } = this.props.labelStyle;
-    	//const { xScale } = this.props.shared;
 
     	const baseFormat = xScale.tickFormat
     		? xScale.tickFormat(ticks)
@@ -41,54 +36,53 @@ class XAxis extends React.Component {
     			labelY: sign * 2 * innerTickSize + dy
     		};
     	});
-	}
-	
+    }
+
 	getTicksOrdinary = (xScale, xExtents, xStep) => {
-		const { ticks, tickFormat, innerTickSize, orient } = this.props;
-		const { canvasDim: {width}} = this.props.shared;
+		const { innerTickSize, orient } = this.props;
+		const { canvasDim: { width } } = this.props.shared;
     	const { fontSize } = this.props.labelStyle;
-		
+
     	const sign = orient === "top" || orient === "left" ? -1 : 1;
     	const dy = fontSize * 0.71;
 
 		const xLabels = xExtents.slice();
-		//xLabels.reverse();
 		const minval = Math.max(Math.floor(xScale.invert(xScale.range()[0])), 0);
 		const maxval = Math.min(Math.ceil(xScale.invert(xScale.range()[1])), xLabels.length);
 
 		const maxLabelLength = Math.floor(xStep / 5);
 
 		const tickArray = [];
-		for (let i=minval; i<maxval; ++i) {
-			const x = xScale(i) + xStep/2;
+		for (let i = minval; i < maxval; ++i) {
+			const x = xScale(i) + xStep / 2;
 
 			if (x < 0 || x > width) continue;
 
 			tickArray.push({
 				value: i,
-				label: xLabels[i].length < maxLabelLength ? xLabels[i] : xLabels[i].substring(0, maxLabelLength) + '...',
+				label: xLabels[i].length < maxLabelLength ? xLabels[i] : xLabels[i].substring(0, maxLabelLength) + "...",
     			x1: x,
     			y1: 0,
     			x2: x,
     			y2: sign * innerTickSize,
     			labelX: x,
-    			labelY: sign * 2 * innerTickSize + dy				
+    			labelY: sign * 2 * innerTickSize + dy
 			});
 		}
-		return tickArray;	
+		return tickArray;
 	}
 
     draw = (ctx, moreProps) => {
-		const { showDomain, showTicks, showTickLabel } = this.props;
-		const { xAttr } = moreProps;
+    	const { showDomain, showTicks, showTickLabel } = this.props;
+    	const { xAttr } = moreProps;
     	const axisLocation = this.getAxisLocation();
 
-		const {
-			scale,
-			step,
-			ordinary,
-			origExtents: extents
-		} = xAttr;
+    	const {
+    		scale,
+    		step,
+    		ordinary,
+    		origExtents: extents
+    	} = xAttr;
 
     	ctx.save();
     	ctx.translate(0, axisLocation);
@@ -98,8 +92,8 @@ class XAxis extends React.Component {
     	}
 
     	if (showTicks) {
-			drawTicks(ctx, 
-				ordinary ? this.getTicksOrdinary(scale, extents, step) : this.getTicks(scale),
+    		drawTicks(ctx,
+    			ordinary ? this.getTicksOrdinary(scale, extents, step) : this.getTicks(scale),
     			this.props.tickStyle,
     			showTickLabel ? this.props.labelStyle : null
     		);
@@ -109,8 +103,8 @@ class XAxis extends React.Component {
     }
 
     getAxisLocation = () => {
-        const { axisAt } = this.props;
-        const { canvasDim: {height} } = this.props.shared;
+    	const { axisAt } = this.props;
+    	const { canvasDim: { height } } = this.props.shared;
 
     	let axisLocation;
     	switch (axisAt) {
@@ -123,8 +117,8 @@ class XAxis extends React.Component {
     }
 
     getDrawRegion = () => {
-        const { axisHeight, orient } = this.props;
-        const { canvasDim: {width} } = this.props.shared;
+    	const { axisHeight, orient } = this.props;
+    	const { canvasDim: { width } } = this.props.shared;
 
     	const
     		x = 0,
@@ -149,27 +143,27 @@ class XAxis extends React.Component {
     render() {
     	const
     		rect = this.getDrawRegion(),
-            axisLocation = this.getAxisLocation(),
-            { xAttr:{scale:xScale} } = this.props.shared;
+    		axisLocation = this.getAxisLocation(),
+    		{ xAttr: { scale: xScale } } = this.props.shared;
 
     	return (
     		<g transform={`translate(${0},${axisLocation})`}>
-				<AxisEventHandler
-					{...rect}
-					scale={xScale}
-					getMouseDelta={this.props.getMouseDelta}
-					getInverted={this.props.getInverted}
-					onDomainChange={this.onDomainChange}
-					zoomCursorClassName={'react-multiview-ew-resize-cursor'}						
-				/>
+    			<AxisEventHandler
+    				{...rect}
+    				scale={xScale}
+    				getMouseDelta={this.props.getMouseDelta}
+    				getInverted={this.props.getInverted}
+    				onDomainChange={this.onDomainChange}
+    				zoomCursorClassName={"react-multiview-ew-resize-cursor"}
+    			/>
     			<SubscriberExt
     				ref={node => this.node = node}
     				canvas={contexts => contexts.axes}
     				clip={false}
     				edgeClip={false}
     				draw={this.draw}
-                    drawOn={["pan"]}
-                    shared={this.props.shared}
+    				drawOn={["pan"]}
+    				shared={this.props.shared}
     			/>
     		</g>
     	);
@@ -177,6 +171,16 @@ class XAxis extends React.Component {
 }
 
 XAxis.propTypes = {
+	shared: PropTypes.shape({
+		canvasDim: PropTypes.shape({
+			width: PropTypes.number,
+			height: PropTypes.number,
+		}),
+		handleXAxisZoom: PropTypes.func,
+		xAttr: PropTypes.object,
+	}),
+	getInverted: PropTypes.func,
+
 	width: PropTypes.number,
 	height: PropTypes.number,
 	axisHeight: PropTypes.number,

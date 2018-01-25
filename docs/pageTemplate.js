@@ -78,10 +78,10 @@ function getDocumentationContent() {
 
 
 module.exports = function(params) {
-    const { mode, page } = params.htmlWebpackPlugin.options;
-    const { chunks } = params.htmlWebpackPlugin.files;
+	const { mode, page } = params.htmlWebpackPlugin.options;
+	const { chunks } = params.htmlWebpackPlugin.files;
 
-    return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -112,10 +112,10 @@ module.exports = function(params) {
 
         <!-- Placed at the end of the document so the pages load faster -->
         ${page === "index"
-            ? `<script type="text/javascript" src="${chunks["react-multiview-home"].entry}"></script>`
-            : `<script type="text/javascript" src="${chunks["react-multiview-documentation"].entry}"></script>`}
+		? `<script type="text/javascript" src="${chunks["react-multiview-home"].entry}"></script>`
+		: `<script type="text/javascript" src="${chunks["react-multiview-documentation"].entry}"></script>`}
 
         ${getDevServerJs(mode)}
     </body>
 </html>`;
-}
+};

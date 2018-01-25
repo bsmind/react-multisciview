@@ -31,7 +31,7 @@ export default function fitWidth(WrappedComponent, withRef = true, minWidth = 10
 		}
 
         handleWindowResize = () => {
-        	const el = ReactDOM.findDOMNode(this.node);
+        	const el = ReactDOM.findDOMNode(this.node); //eslint-disable-line
         	const w = el.parentNode.clientWidth;
 
         	if (w > minWidth) this.setState({ width: w });
@@ -51,9 +51,7 @@ export default function fitWidth(WrappedComponent, withRef = true, minWidth = 10
                         context.msBackingStorePixelRatio ||
                         context.oBackingStorePixelRatio ||
                         context.BackingStorePixelRatio || 1;
-				const ratio = devicePixelRatio / backingStoreRatio;
-				
-				
+        		const ratio = devicePixelRatio / backingStoreRatio;
 
         		return ratio;
         	}
