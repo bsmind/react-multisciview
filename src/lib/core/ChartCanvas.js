@@ -570,9 +570,6 @@ class ChartCanvas extends React.Component {
 			} = state;
 			if (this.props.showImage) {
 				this.waitingForPanAnimationFrame = false;
-				this.__xAttr = null;
-				this.__yAttr = null;
-				this.__dataExtents = null;
 				this.clearAxisAndChartOnCanvas();
 				this.setState({
 					...this.state,
@@ -584,6 +581,10 @@ class ChartCanvas extends React.Component {
 				if (this.props.onScatterPanZoom) {
 					this.props.onScatterPanZoom(newDataExtents, false);
 				}
+				// this.__xAttr = null;
+				// this.__yAttr = null;
+				// this.__dataExtents = null;
+				
 			} else {
 				this.panInProgress = true;
 				this.triggerEvent('pan', state, e);
@@ -796,7 +797,7 @@ class ChartCanvas extends React.Component {
 		if (this.panInProgress) return;
 
 		//console.log(data, inProgress)
-		if (inProgress) {
+		if (inProgress && this.props.showImage) {
 			if (!this.waitingForAnimationFrame) {
 				this.waitingForAnimationFrame = true;
 

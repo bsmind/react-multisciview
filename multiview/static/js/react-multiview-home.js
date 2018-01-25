@@ -41209,6 +41209,7 @@ var MultiViewApp = function (_React$Component) {
                 domain: domain.slice(),
                 auxiliary: aux ? aux.slice() : null
             };
+            _this.__dataExtents[axisTitle] = domain.slice();
         };
 
         _this.handleScatterPanZoom = function (newDataExtents, inProgress) {
@@ -41221,11 +41222,6 @@ var MultiViewApp = function (_React$Component) {
                 var pcpNode = ConfigBoxRef.refs['PCPTabRef'].refs['PCPChartRef'].node.refs['PCPCanvasRef'];
                 pcpNode.handleByOtherFull(_this.__dataExtents, inProgress);
             }
-            //console.log(ConfigBoxRef)
-            //const PCPTabRef = ConfigBoxRef.refs['PCPTabRef'].getWrappedInstance();
-            //console.log(PCPTabRef);
-            //console.log(newDataExtents)
-            //Object.keys(newDataExtents).forEach()
         };
 
         _this.state = {
@@ -45876,6 +45872,10 @@ var ScatterSeries = function (_React$Component) {
             var pointSet = [],
                 minDist = { x: null, y: null };
             plotData.forEach(function (d) {
+                if (d._id == null) {
+                    console.log('unknown error:missing id ', d);
+                    return;
+                }
                 var x = xAccessor(d);
                 var y = yAccessor(d);
 
@@ -45937,6 +45937,10 @@ var ScatterSeries = function (_React$Component) {
             var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
             pointSetToUse.forEach(function (d) {
+                if (d._id == null) {
+                    console.log('error in ', d);
+                    return;
+                }
                 imageSet.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__ImgViewer__["a" /* default */], {
                     key: "imgViewer-" + d._id,
                     x: xAccessor(d),
@@ -46757,9 +46761,6 @@ var _initialiseProps = function _initialiseProps() {
 
 			if (_this3.props.showImage) {
 				_this3.waitingForPanAnimationFrame = false;
-				_this3.__xAttr = null;
-				_this3.__yAttr = null;
-				_this3.__dataExtents = null;
 				_this3.clearAxisAndChartOnCanvas();
 				_this3.setState(_extends({}, _this3.state, {
 					xAttr: newXAttr,
@@ -46770,6 +46771,9 @@ var _initialiseProps = function _initialiseProps() {
 				if (_this3.props.onScatterPanZoom) {
 					_this3.props.onScatterPanZoom(newDataExtents, false);
 				}
+				// this.__xAttr = null;
+				// this.__yAttr = null;
+				// this.__dataExtents = null;
 			} else {
 				_this3.panInProgress = true;
 				_this3.triggerEvent('pan', state, e);
@@ -46977,7 +46981,7 @@ var _initialiseProps = function _initialiseProps() {
 		if (_this3.panInProgress) return;
 
 		//console.log(data, inProgress)
-		if (inProgress) {
+		if (inProgress && _this3.props.showImage) {
 			if (!_this3.waitingForAnimationFrame) {
 				_this3.waitingForAnimationFrame = true;
 

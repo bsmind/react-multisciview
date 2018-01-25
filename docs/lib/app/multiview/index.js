@@ -129,6 +129,7 @@ class MultiViewApp extends React.Component {
             domain: domain.slice(),
             auxiliary: aux ? aux.slice(): null
         };
+        this.__dataExtents[axisTitle] = domain.slice();
     }
 
     // todo: update pcp by scatter plot
@@ -142,11 +143,6 @@ class MultiViewApp extends React.Component {
             const pcpNode = ConfigBoxRef.refs['PCPTabRef'].refs['PCPChartRef'].node.refs['PCPCanvasRef'];
             pcpNode.handleByOtherFull(this.__dataExtents, inProgress);
         }
-        //console.log(ConfigBoxRef)
-        //const PCPTabRef = ConfigBoxRef.refs['PCPTabRef'].getWrappedInstance();
-        //console.log(PCPTabRef);
-        //console.log(newDataExtents)
-        //Object.keys(newDataExtents).forEach()
     }    
 
 

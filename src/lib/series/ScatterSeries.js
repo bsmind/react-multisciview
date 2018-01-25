@@ -472,6 +472,10 @@ class ScatterSeries extends React.Component {
         
         const pointSet = [], minDist = {x: null, y: null};
         plotData.forEach(d => {
+            if (d._id == null) {
+                console.log('unknown error:missing id ', d);
+                return;
+            }
             let x = xAccessor(d);
             let y = yAccessor(d);
 
@@ -530,6 +534,10 @@ class ScatterSeries extends React.Component {
         let showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
         pointSetToUse.forEach(d => {
+            if (d._id == null) {
+                console.log('error in ', d);
+                return;
+            }
             imageSet.push(<ImgViewer
                 key={`imgViewer-${d._id}`}
                 x={xAccessor(d)}
