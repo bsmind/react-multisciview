@@ -45188,15 +45188,17 @@ var _initialiseProps = function _initialiseProps() {
 		var newDomainX = initialXScale.range().map(function (x) {
 			return x - dx;
 		}).map(initialXScale.invert);
-		newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
-		newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
-
+		if (xOrdinary) {
+			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
+			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
+		}
 		var newDomainY = initialYScale.range().map(function (y) {
 			return y - dy;
 		}).map(initialYScale.invert);
-		newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
-		newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
-
+		if (yOrdinary) {
+			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
+			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
+		}
 		var updatedScaleX = initialXScale.copy().domain(newDomainX);
 		var updatedScaleY = initialYScale.copy().domain(newDomainY);
 
@@ -54987,9 +54989,14 @@ var ScatterChart = function (_React$Component) {
           opacity: opacity
         }
       };
+      var interpolate = __WEBPACK_IMPORTED_MODULE_10_d3_scale__["a" /* interpolateViridis */]; //interpolateRainbow;
       var colorScale = zAttr === "sample" ? function (d) {
         return colorsByGroup[d];
-      } : dimension[zAttr] ? Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["d" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["a" /* interpolateViridis */]).domain(dimension[zAttr]) : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["d" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["a" /* interpolateViridis */]).domain([0, 1]);
+      } : dimension[zAttr]
+      // ? scaleLinear().domain(dimension[zAttr]).range(['red', 'yellow'])
+      // : scaleLinear().domain([0, 1]).range(['red', 'black']);
+      //? scaleSequential(interpolate).domain(dimension[zAttr])
+      ? Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["d" /* scaleSequential */])(interpolate).domain([dimension[zAttr][0], dimension[zAttr][1] / 3]) : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["d" /* scaleSequential */])(interpolate).domain([0, 1]);
 
       var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* markerProvider */])(function (d) {
         return __WEBPACK_IMPORTED_MODULE_8_lodash_get___default()(d, zAttr);

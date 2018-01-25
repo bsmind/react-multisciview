@@ -12,7 +12,10 @@ import { DataBox, MousePathTracker } from "react-multiview/lib/indicators";
 import get from "lodash.get";
 import { sortAlphaNum } from "../utils";
 
-import { scaleSequential, interpolateViridis } from "d3-scale";
+import { scaleSequential, 
+	interpolateViridis, interpolateInferno, interpolatePlasma,
+	interpolateRainbow,
+	scaleLinear } from "d3-scale";
 import { extent as d3Extent } from "d3-array";
 
 class ScatterChart extends React.Component {
@@ -44,11 +47,15 @@ class ScatterChart extends React.Component {
 				opacity
 			}
 		};
+		const interpolate = interpolateViridis; //interpolateRainbow;
 		const colorScale = zAttr === "sample"
 			? d => colorsByGroup[d]
 			: dimension[zAttr]
-				? scaleSequential(interpolateViridis).domain(dimension[zAttr])
-				: scaleSequential(interpolateViridis).domain([0, 1]);
+				// ? scaleLinear().domain(dimension[zAttr]).range(['red', 'yellow'])
+				// : scaleLinear().domain([0, 1]).range(['red', 'black']);
+				//? scaleSequential(interpolate).domain(dimension[zAttr])
+				? scaleSequential(interpolate).domain([dimension[zAttr][0], dimension[zAttr][1]/3])
+				: scaleSequential(interpolate).domain([0, 1]);
 
 		const mProvider = markerProvider(d => get(d, zAttr), shape, ratio);
 		mProvider.colorScale(colorScale);

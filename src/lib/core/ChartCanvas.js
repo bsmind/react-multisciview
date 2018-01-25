@@ -513,16 +513,18 @@ class ChartCanvas extends React.Component {
 
     	const newDomainX = initialXScale.range()
     		.map(x => x - dx)
-    		.map(initialXScale.invert);
-    	newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
-    	newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
-
+			.map(initialXScale.invert);
+		if (xOrdinary) {
+			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
+			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
+		}
     	const newDomainY = initialYScale.range()
     		.map(y => y - dy)
-    		.map(initialYScale.invert);
-    	newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
-    	newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
-
+			.map(initialYScale.invert);
+		if (yOrdinary) {
+			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
+			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
+		}
     	const updatedScaleX = initialXScale.copy().domain(newDomainX);
     	const updatedScaleY = initialYScale.copy().domain(newDomainY);
 
