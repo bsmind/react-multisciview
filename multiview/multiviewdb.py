@@ -1,4 +1,4 @@
-from db.mongomanager import MongoManager
+from db.multiviewmongo import MultiViewMongo
 
 # change db setting
 from db.saxs_v2.db_config import MONGODB_CONFIG
@@ -43,7 +43,7 @@ class MultiViewDB(object):
         #print(self.dataStat)
 
         # open db
-        self.db = MongoManager(
+        self.db = MultiViewMongo(
             self.db_config['NAME'],
             self.db_config['COLLECTION'],
             self.db_config['HOST'],
@@ -65,9 +65,8 @@ class MultiViewDB(object):
                 if 'tiff' in doc and self.tiff_config['SAVE']:
                     self._add_tiff(doc)
 
-
-                break
-                #self.db.save(doc)
+                doc['dataStatKey'] = 0
+                self.db.save(doc)
                 count += 1
                 print('Add {}: {}'.format(count, fn))
 
@@ -76,7 +75,7 @@ class MultiViewDB(object):
                 self.dataStat[key] = sorted(value, key=lambda x: re.sub('[^A-Za-z]+', '', x).upper())
 
         self.dataStat['dataStatKey'] = 1
-        #self.db.save(self.dataStat)
+        self.db.save(self.dataStat)
 
         print('\n%d documents are inserted to the DB\n' % count)
         #pp.pprint(flattenDict(doc))
