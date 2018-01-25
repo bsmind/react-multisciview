@@ -141,8 +141,36 @@ class PCPCanvas extends React.Component {
     	this.subscriptions = this.subscriptions.filter(each => each.id !== id);
     }
 
+    updateDimConfigSelect = (dimConfig, dataExtents) => {
+        const newDimConfig = {};
+        Object.keys(dimConfig).forEach(key => {
+            const config = dimConfig[key];
+            const { scale } = config;
+            const range = scale.range();
+            if (dataExtents[key]) {
+                const selectDomain = dataExtents[key];
+                let start = scale(selectDomain[0]);
+                let end = scale(selectDomain[1]);
+                const diff = Math.abs(start - end)
+                if ( diff > 1) {
+                    start = Math.min(Math.max(start, range[1]), range[0]);
+                    end = Math.min(Math.max(end, range[1]), range[0]);
+                    if (start > end) {
+                        const temp = start;
+                        start = end;
+                        end = temp;
+                    }
+                    if (!(start === range[1] && end === range[0]))
+                        config.select = [start, end];
+                }
+            }
+            newDimConfig[key] = {...config};
+        });
+        return newDimConfig;
+    }
+
     resetChart = (props = this.props) => {
-        const { margin, pcpAttrSelect } = props;
+        const { margin, dataExtents } = props;
         const canvasDim = getCanvasDimension(props);
         const xScale = getXScale(props, canvasDim.width);
         const dimConfig = getNewDimComfig(props,
@@ -150,27 +178,16 @@ class PCPCanvas extends React.Component {
             canvasDim.height,
             canvasDim.height + margin.bottom / 2
         );
-        Object.keys(pcpAttrSelect).forEach(key => {
-            const prevSelect = pcpAttrSelect[key];
-            const currConfig = dimConfig[key];
-            if (prevSelect && currConfig) {
-                const currExtents = currConfig.extents;
-                const currScale = currConfig.scale;
-                if (prevSelect.auxiliary) { // ordinary, need to adjust select region
-                    console.log('ordinary, need to adjust')
-                } else {
-                    const selectDomain = prevSelect.domain;
-                    if (!isSameDomain(currExtents, selectDomain)) {
-                        currConfig.select = [currScale(selectDomain[0]), currScale(selectDomain[1])];
-                    }
-                }
-            }
-        });
+
+        //console.log(dataExtents, dimConfig)
+        //this.updateDimConfigSelect(dimConfig, dataExtents);
+        //console.log(dimConfig);
+
         const plotData = getPlotData(props);
 
         return {
             xScale,
-            dimConfig,
+            dimConfig: this.updateDimConfigSelect(dimConfig, dataExtents),
             plotData
         }
     }
@@ -593,6 +610,51 @@ class PCPCanvas extends React.Component {
         }
     }
 
+    handleByOtherFull = (dataExtents, inProgress) => {
+        if (this.axisMoveInProgress || this.axisSelectInProgress) return;
+
+        if (inProgress) {
+            if (!this.waitingForAnimationFrame) {
+                this.waitingForAxisMoveAnimationFrame = true;
+
+                if (!this.currChartCopied) {
+                    this.copyChartInGrey();
+                    this.currChartCopied = true;
+                }
+                    
+                this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+                
+                const newDimConfig = this.updateDimConfigSelect(this.__dimConfig, dataExtents);
+                //const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+                this.__dimConfig = newDimConfig;
+
+                this.triggerEvent('selectrange', {dimConfig: newDimConfig}, null);
+                requestAnimationFrame(() => {
+                    this.waitingForAnimationFrame = false;
+                    this.clearAxesAndPCPOnCanvas();
+                    this.draw({trigger: 'selectrange'})
+                });
+            }
+        } else {
+            this.__dimConfig = this.__dimConfig || this.state.dimConfig;
+            
+            //const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+            const newDimConfig = this.updateDimConfigSelect(this.__dimConfig, dataExtents)
+
+            this.__dimConfig = null;//state.dimConfig;
+            this.currChartCopied = false;
+            
+            this.triggerEvent('selectrange', {dimConfig: newDimConfig}, null);
+            requestAnimationFrame(() => {
+                this.clearAxesAndPCPOnOffCanvas();
+                this.setState({
+                    dimConfig: newDimConfig
+                });                    
+            });            
+        }
+    }
+    
+
     render() {
     	const divStyle = {
     		position: "relative",
@@ -611,7 +673,8 @@ class PCPCanvas extends React.Component {
             width,
             height,
             zIndex,
-            axisWidth: axisWidthProp
+            axisWidth: axisWidthProp,
+            dimName
         } = this.props;
         const axisWidth = (axisWidthProp%2 === 0) ? axisWidthProp: axisWidthProp + 1 || 26;
         const canvasDim = getCanvasDimension({width, height, margin});
@@ -632,8 +695,11 @@ class PCPCanvas extends React.Component {
         }
 
         const pcpYAxisList = [];
-        forEach(this.state.dimConfig, (config, title) => {
-            //if (!config.active) return;
+
+        dimName.forEach(name => {
+            const config = this.state.dimConfig[name];
+            //console.log(config, name)
+            const title = config.title;
             pcpYAxisList.push( 
                 <PCPYAxis key={`pcp-yaxis-${title}`}
                     title={title}

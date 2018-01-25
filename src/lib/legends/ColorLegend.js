@@ -289,7 +289,7 @@ class ColorLegend extends React.Component {
 
         return (
             <g transform={transform}>
-                <LegendEventHandler
+                {/* <LegendEventHandler
                     x={0}
                     y={0}
                     width={width}
@@ -299,7 +299,7 @@ class ColorLegend extends React.Component {
                     onRangeSelect={this.handleRangeSelect}
                     onRangeSelectEnd={this.handleRangeSelectEnd}
                     onRangeSelectCancel={handleZAxisSelectCancel}
-                />
+                /> */}
                 <SubscriberExt
                     ref={node => this.node = node}
                     canvas={contexts => contexts.axes}

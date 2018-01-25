@@ -19549,16 +19549,17 @@ function sortAlphaNum(a, b) {
 /*!******************************************************!*\
   !*** ./docs/lib/app/multiview/actions/visActions.js ***!
   \******************************************************/
-/*! exports provided: AddDelSamples, changeSampleColor, setAttr, setSwitch, updateAttrSelect */
-/*! exports used: AddDelSamples, setAttr, setSwitch, updateAttrSelect */
+/*! exports provided: AddDelSamples, changeSampleColor, setAttr, setSwitch, setSlider, updateAttrSelect */
+/*! exports used: AddDelSamples, setAttr, setSlider, setSwitch, updateAttrSelect */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = AddDelSamples;
 /* unused harmony export changeSampleColor */
 /* harmony export (immutable) */ __webpack_exports__["b"] = setAttr;
-/* harmony export (immutable) */ __webpack_exports__["c"] = setSwitch;
-/* harmony export (immutable) */ __webpack_exports__["d"] = updateAttrSelect;
+/* harmony export (immutable) */ __webpack_exports__["d"] = setSwitch;
+/* harmony export (immutable) */ __webpack_exports__["c"] = setSlider;
+/* harmony export (immutable) */ __webpack_exports__["e"] = updateAttrSelect;
 function AddDelSamples(action, keys) {
     return {
         type: 'ADD_DEL_SAMPLES',
@@ -19587,6 +19588,13 @@ function setSwitch(name, value) {
     };
 }
 
+function setSlider(name, value) {
+    return {
+        type: 'SET_SLIDER',
+        payload: { name: name, value: value }
+    };
+}
+
 function updateAttrSelect(newSelect) {
     return {
         type: 'SET_PCP_SELECT_DIM',
@@ -19599,16 +19607,18 @@ function updateAttrSelect(newSelect) {
 /*!***************************************************!*\
   !*** ./docs/lib/app/multiview/selectors/index.js ***!
   \***************************************************/
-/*! exports provided: getShowImageSwitch, getSampleKinds, getSelectedSampleKeys, getSelectedSampleColors, getSampleColorOpacity, getSelectedDataItemList, getAttrX, getAttrY, getAttrZ, getAttrKinds, getImgPool, getSelectedSampleNames, getSelectedDataArray, getPCPSelectedDimension */
-/*! exports used: getAttrKinds, getAttrX, getAttrY, getAttrZ, getImgPool, getPCPSelectedDimension, getSampleColorOpacity, getSampleKinds, getSelectedDataArray, getSelectedSampleColors, getSelectedSampleKeys, getShowImageSwitch */
+/*! exports provided: getShowImageSwitch, getMinPoints, getMinImageSize, getSampleKinds, getSelectedSampleKeys, getSelectedSampleColors, getSampleColorOpacity, getSelectedDataItemList, getAttrX, getAttrY, getAttrZ, getAttrKinds, getImgPool, getSelectedSampleNames, getSelectedDataArray, getPCPSelectedDimension */
+/*! exports used: getAttrKinds, getAttrX, getAttrY, getAttrZ, getImgPool, getMinImageSize, getMinPoints, getPCPSelectedDimension, getSampleColorOpacity, getSampleKinds, getSelectedDataArray, getSelectedSampleColors, getSelectedSampleKeys, getShowImageSwitch */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getShowImageSwitch; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getSampleKinds; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getSelectedSampleKeys; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getSelectedSampleColors; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getSampleColorOpacity; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return getShowImageSwitch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getMinPoints; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getMinImageSize; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getSampleKinds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return getSelectedSampleKeys; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getSelectedSampleColors; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getSampleColorOpacity; });
 /* unused harmony export getSelectedDataItemList */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAttrX; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getAttrY; });
@@ -19616,8 +19626,8 @@ function updateAttrSelect(newSelect) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getAttrKinds; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getImgPool; });
 /* unused harmony export getSelectedSampleNames */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getSelectedDataArray; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getPCPSelectedDimension; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getSelectedDataArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getPCPSelectedDimension; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_reselect__ = __webpack_require__(/*! reselect */ 598);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_reselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_reselect__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_foreach__ = __webpack_require__(/*! lodash.foreach */ 76);
@@ -19646,6 +19656,12 @@ function updateAttrSelect(newSelect) {
 
 var getShowImageSwitch = function getShowImageSwitch(state) {
     return state.vis.showImage;
+};
+var getMinPoints = function getMinPoints(state) {
+    return state.vis.minPoints;
+};
+var getMinImageSize = function getMinImageSize(state) {
+    return state.vis.minImageSize;
 };
 
 var getDataBySamples = function getDataBySamples(state) {
@@ -40815,6 +40831,8 @@ var INITIAL_STATE = {
     attrz: 'sample',
 
     showImage: false,
+    minPoints: 20,
+    minImageSize: 10,
 
     // for pcp
     selectedDimension: ['sample', 'metadata_extract.data.annealing_temperature', 'metadata_extract.data.annealing_time', 'linecut_qr.data.fit_peaks_d0', 'linecut_qr.data.fit_peaks_sigma1']
@@ -40827,6 +40845,20 @@ function setSwitch(state, payload) {
     switch (name) {
         case 'showImage':
             return _extends({}, state, { showImage: value });
+        default:
+            return state;
+    }
+}
+
+function setSlider(state, payload) {
+    var name = payload.name,
+        value = payload.value;
+
+    switch (name) {
+        case 'minPoints':
+            return _extends({}, state, { minPoints: value });
+        case 'minImageSize':
+            return _extends({}, state, { minImageSize: value });
         default:
             return state;
     }
@@ -40851,6 +40883,8 @@ function visReducers() {
             return Object(__WEBPACK_IMPORTED_MODULE_0__visHelper__["c" /* setAttr */])(state, payload);
         case 'SET_SWITCH':
             return setSwitch(state, payload);
+        case 'SET_SLIDER':
+            return setSlider(state, payload);
         case 'SET_PCP_SELECT_DIM':
             return setSelectDim(state, payload);
         default:
@@ -41177,12 +41211,30 @@ var MultiViewApp = function (_React$Component) {
             };
         };
 
+        _this.handleScatterPanZoom = function (newDataExtents, inProgress) {
+            Object.keys(newDataExtents).forEach(function (key) {
+                _this.__dataExtents[key] = newDataExtents[key].slice();
+            });
+
+            var ConfigBoxRef = _this.refs['ConfigBoxRef'].getWrappedInstance();
+            if (ConfigBoxRef.refs['PCPTabRef']) {
+                var pcpNode = ConfigBoxRef.refs['PCPTabRef'].refs['PCPChartRef'].node.refs['PCPCanvasRef'];
+                pcpNode.handleByOtherFull(_this.__dataExtents, inProgress);
+            }
+            //console.log(ConfigBoxRef)
+            //const PCPTabRef = ConfigBoxRef.refs['PCPTabRef'].getWrappedInstance();
+            //console.log(PCPTabRef);
+            //console.log(newDataExtents)
+            //Object.keys(newDataExtents).forEach()
+        };
+
         _this.state = {
             width: 0,
             height: 0
         };
 
         _this.pcpAttrSelect = {};
+        _this.__dataExtents = {};
         return _this;
     }
 
@@ -41223,16 +41275,12 @@ var MultiViewApp = function (_React$Component) {
 
         // update scatter plot by pcp
 
-    }, {
-        key: 'render',
-
 
         // todo: update pcp by scatter plot
 
-
+    }, {
+        key: 'render',
         value: function render() {
-            var _this4 = this;
-
             var _state = this.state,
                 width = _state.width,
                 height = _state.height;
@@ -41263,19 +41311,19 @@ var MultiViewApp = function (_React$Component) {
                         { style: { width: scatterBoxWidth, float: 'left' } },
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["b" /* ScatterBox */], {
                             ref: 'ScatterBoxRef',
-                            width: scatterBoxWidth, height: scatterBoxWidth
+                            width: scatterBoxWidth, height: scatterBoxWidth,
+                            onScatterPanZoom: this.handleScatterPanZoom
                         })
                     ),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'div',
                         { style: { marginLeft: scatterBoxWidth } },
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__layout__["a" /* ConfigBox */], {
-                            ref: function ref(node) {
-                                return _this4.configBoxNode = node;
-                            },
+                            ref: 'ConfigBoxRef',
                             height: height,
-                            onPCPAxisSelect: this.handlePCPAxisSelect,
-                            pcpAttrSelect: this.pcpAttrSelect
+                            onPCPAxisSelect: this.handlePCPAxisSelect
+                            //pcpAttrSelect={this.pcpAttrSelect}
+                            , dataExtents: this.__dataExtents
                         })
                     )
                 )
@@ -42555,8 +42603,6 @@ var ConfigBox = function (_React$Component) {
     _createClass(ConfigBox, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_6_react_toolbox__["Tabs"],
                 { fixed: true,
@@ -42585,17 +42631,18 @@ var ConfigBox = function (_React$Component) {
                         attr: this.props.attr,
                         attrFormat: this.props.attrFormat,
                         showImage: this.props.showImage,
+                        minPoints: this.props.minPoints,
+                        minImageSize: this.props.minImageSize,
                         onAttrChange: this.handleAttrChange,
-                        onSwitchChange: this.props.setSwitch
+                        onSwitchChange: this.props.setSwitch,
+                        onSliderChange: this.props.setSlider
                     })
                 ),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     __WEBPACK_IMPORTED_MODULE_6_react_toolbox__["Tab"],
                     { label: 'PCP' },
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__pcpTab__["a" /* default */], {
-                        ref: function ref(node) {
-                            return _this2.pcpTabNode = node;
-                        },
+                        ref: 'PCPTabRef',
                         dimKinds: this.props.attrKinds,
                         dimOrder: this.props.dimOrder,
                         dimension: this.props.dimension,
@@ -42605,8 +42652,9 @@ var ConfigBox = function (_React$Component) {
                         colorsBySampleNames: this.props.sampleColors,
                         onColorAttrChange: this.handleAttrChange,
                         onAttrSelectChange: this.props.updateAttrSelect,
-                        onPCPAxisSelect: this.props.onPCPAxisSelect,
-                        pcpAttrSelect: this.props.pcpAttrSelect
+                        onPCPAxisSelect: this.props.onPCPAxisSelect
+                        //pcpAttrSelect={this.props.pcpAttrSelect}
+                        , dataExtents: this.props.dataExtents
                     })
                 )
             );
@@ -42617,13 +42665,13 @@ var ConfigBox = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 function mapStateToProps(state) {
-    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["i" /* getSelectedDataArray */])(state),
+    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["k" /* getSelectedDataArray */])(state),
         id = _getSelectedDataArray.id,
         samples = _getSelectedDataArray.samples,
         data = _getSelectedDataArray.data,
         dimension = _getSelectedDataArray.extents;
 
-    var pcpDimension = Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["f" /* getPCPSelectedDimension */])(state);
+    var pcpDimension = Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["h" /* getPCPSelectedDimension */])(state);
     // const pcpExtents = {};
     // pcpDimension.forEach(dimName => {
     //     pcpExtents[dimName] = dimension[dimName];
@@ -42631,10 +42679,10 @@ function mapStateToProps(state) {
     //console.log(getAttrKinds(state))
 
     return {
-        sampleKinds: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["h" /* getSampleKinds */])(state),
-        sampleColors: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["j" /* getSelectedSampleColors */])(state),
-        sampleColorOpacity: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["g" /* getSampleColorOpacity */])(state),
-        sampleSelected: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["k" /* getSelectedSampleKeys */])(state),
+        sampleKinds: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["j" /* getSampleKinds */])(state),
+        sampleColors: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["l" /* getSelectedSampleColors */])(state),
+        sampleColorOpacity: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["i" /* getSampleColorOpacity */])(state),
+        sampleSelected: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["m" /* getSelectedSampleKeys */])(state),
 
         attrKinds: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["a" /* getAttrKinds */])(state),
         attr: {
@@ -42644,7 +42692,9 @@ function mapStateToProps(state) {
         },
         attrFormat: state.data.attrFormat,
 
-        showImage: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["l" /* getShowImageSwitch */])(state),
+        showImage: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["n" /* getShowImageSwitch */])(state),
+        minPoints: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["g" /* getMinPoints */])(state),
+        minImageSize: Object(__WEBPACK_IMPORTED_MODULE_3__selectors__["f" /* getMinImageSize */])(state),
 
         // for pcp
         dimOrder: pcpDimension,
@@ -42665,12 +42715,13 @@ function mapDispatchToProps(dispatch) {
         delSelectedSamples: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["d" /* delSelectedSamples */],
         changeSelectedSampleColors: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["c" /* changeSelectedSampleColors */],
         setAttr: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["b" /* setAttr */],
-        setSwitch: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["c" /* setSwitch */],
-        updateAttrSelect: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["d" /* updateAttrSelect */]
+        setSwitch: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["d" /* setSwitch */],
+        setSlider: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["c" /* setSlider */],
+        updateAttrSelect: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["e" /* updateAttrSelect */]
     }, dispatch);
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_1_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps)(ConfigBox));
+/* harmony default export */ __webpack_exports__["a"] = (Object(__WEBPACK_IMPORTED_MODULE_1_react_redux__["b" /* connect */])(mapStateToProps, mapDispatchToProps, null, { withRef: true })(ConfigBox));
 
 /***/ }),
 /* 598 */
@@ -45773,18 +45824,21 @@ var ScatterSeries = function (_React$Component) {
 
         _this.updateRefImageSize = function (minDist, numPoints) {
             var zoomFactor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+            var _this$props4 = _this.props,
+                minPoints = _this$props4.minPoints,
+                minImageSize = _this$props4.minImageSize;
 
-            var MIN_IMAGE_SIDE = 12;
+            var MIN_IMAGE_SIDE = minImageSize;
             var inversed = 1 / zoomFactor;
             if (minDist.x == null && minDist.y == null && numPoints <= 1) {
                 // console.log('case 1: ', minDist, numPoints)
                 _this.__imgRefWidth = (_this.__imgRefWidth || 200) * inversed;
                 _this.__imgRefHeight = (_this.__imgRefHeight || 200) * inversed;
-            } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= 20) {
+            } else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= minPoints) {
                 //console.log('case 2: ', minDist, numPoints)
                 _this.__imgRefWidth = (_this.__imgRefWidth || MIN_IMAGE_SIDE) * inversed;
                 _this.__imgRefHeight = (_this.__imgRefHeight || MIN_IMAGE_SIDE) * inversed;
-            } else if ((minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= 20) {
+            } else if ((minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= minPoints) {
                 //console.log('case 3: ', minDist, numPoints)            
                 _this.__imgRefWidth = (_this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
                 _this.__imgRefHeight = (_this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
@@ -45805,9 +45859,14 @@ var ScatterSeries = function (_React$Component) {
                 yAttr = moreProps.yAttr,
                 dataExtents = moreProps.dataExtents,
                 zoomFactor = moreProps.zoomFactor;
-            var origDataExtents = _this.props.shared.origDataExtents;
+            var _this$props5 = _this.props,
+                origDataExtents = _this$props5.shared.origDataExtents,
+                minPoints = _this$props5.minPoints,
+                minImageSize = _this$props5.minImageSize;
             var canvasDim = _this.props.shared.canvasDim;
 
+
+            if (plotData.length === 0) return;
 
             var xAccessor = _this.getAccessor(xAttr);
             var yAccessor = _this.getAccessor(yAttr);
@@ -45899,10 +45958,21 @@ var ScatterSeries = function (_React$Component) {
         return _this;
     }
 
-    // svg version of the draw function using MarkerProvider
-
-
     _createClass(ScatterSeries, [{
+        key: "componentWillReceiveProps",
+        value: function componentWillReceiveProps(nextProps) {
+            var minImageSize = nextProps.minImageSize;
+
+            if (this.__imgRefWidth || this.__imgRefHeight) {
+                this.__imgRefWidth = Math.max(minImageSize, this.__imgRefWidth || minImageSize);
+                this.__imgRefHeight = Math.max(minImageSize, this.__imgRefHeight || minImageSize);
+                //forceUpdate();
+            }
+        }
+
+        // svg version of the draw function using MarkerProvider
+
+    }, {
         key: "render",
         value: function render() {
             var _this2 = this;
@@ -46081,9 +46151,7 @@ var ChartCanvas = function (_React$Component) {
 	}, {
 		key: "componentWillReceiveProps",
 		value: function componentWillReceiveProps(nextProps) {
-			//const state = this.updateChart(nextProps);
 			var state = this.updateChart(nextProps);
-			//console.log(state);
 			this.clearAxisAndChartOnCanvas();
 			this.setState(_extends({}, state));
 			var _props = this.props,
@@ -46407,6 +46475,8 @@ var _initialiseProps = function _initialiseProps() {
 			if (extentsState == null) {
 				// new field
 				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
+			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) ? [0, extentsProps.length] : extentsProps.slice();
 			} else {
 				// expand one but ordinary 
 				if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["i" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
@@ -46419,6 +46489,7 @@ var _initialiseProps = function _initialiseProps() {
 				// }
 			}
 		});
+		//console.log(dataExtentsProp, dataExtentsState)
 
 		// xScale
 		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
@@ -46510,22 +46581,29 @@ var _initialiseProps = function _initialiseProps() {
 		var initialXAttr = _this3.state.xAttr;
 		var scale = initialXAttr.scale,
 		    extents = initialXAttr.extents,
-		    name = initialXAttr.name;
+		    name = initialXAttr.name,
+		    ordinary = initialXAttr.ordinary;
 
 
-		newDomain[0] = Math.max(extents[0], newDomain[0]);
-		newDomain[1] = Math.min(extents[1], newDomain[1]);
+		if (ordinary) {
+			newDomain[0] = Math.max(extents[0], newDomain[0]);
+			newDomain[1] = Math.min(extents[1], newDomain[1]);
+		}
+
+		var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, newDomain));
+
+		//console.log(newDataExtents)
 
 		_this3.clearAxisAndChartOnCanvas();
 		_this3.setState(_extends({}, _this3.state, {
 			xAttr: _extends({}, _this3.state.xAttr, {
 				scale: scale.copy().domain(newDomain)
 			}),
-			dataExtents: _extends({}, _this3.state.dataExtents, _defineProperty({}, name, newDomain)),
+			dataExtents: newDataExtents,
 			zoomFactor: 1
 		}));
 		if (_this3.props.onScatterPanZoom) {
-			_this3.props.onScatterPanZoom([name], [newDomain], false);
+			_this3.props.onScatterPanZoom(newDataExtents, false);
 		}
 	};
 
@@ -46533,22 +46611,27 @@ var _initialiseProps = function _initialiseProps() {
 		var initialYAttr = _this3.state.yAttr;
 		var scale = initialYAttr.scale,
 		    extents = initialYAttr.extents,
-		    name = initialYAttr.name;
+		    name = initialYAttr.name,
+		    ordinary = initialYAttr.ordinary;
 
 
-		newDomain[0] = Math.max(extents[0], newDomain[0]);
-		newDomain[1] = Math.min(extents[1], newDomain[1]);
+		if (ordinary) {
+			newDomain[0] = Math.max(extents[0], newDomain[0]);
+			newDomain[1] = Math.min(extents[1], newDomain[1]);
+		}
+
+		var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, newDomain));
 
 		_this3.clearAxisAndChartOnCanvas();
 		_this3.setState(_extends({}, _this3.state, {
 			yAttr: _extends({}, _this3.state.yAttr, {
 				scale: scale.copy().domain(newDomain)
 			}),
-			dataExtents: _extends({}, _this3.state, _defineProperty({}, name, newDomain)),
+			dataExtents: newDataExtents,
 			zoomFactor: 1
 		}));
 		if (_this3.props.onScatterPanZoom) {
-			_this3.props.onScatterPanZoom([name], [newDomain], false);
+			_this3.props.onScatterPanZoom(false, newDataExtents);
 		}
 	};
 
@@ -46572,7 +46655,6 @@ var _initialiseProps = function _initialiseProps() {
 
 		var SCALE_FACTOR = 0.001;
 		var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
-		//console.log('canvas: ', zoomFactor)
 		var centerX = initialXScale.invert(mouseXY[0]),
 		    beginX = initialXScale.domain()[0],
 		    endX = initialXScale.domain()[1];
@@ -46581,13 +46663,22 @@ var _initialiseProps = function _initialiseProps() {
 		    endY = initialYScale.domain()[1];
 
 		var newDomainX = [Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]), Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])];
+		if (xOrdinary) {
+			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]);
+			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]);
+		}
 		var newScaleX = initialXScale.copy().domain(newDomainX);
 		var stepX = !xOrdinary ? 0 : Math.abs(newScaleX(0) - newScaleX(1));
 
 		var newDomainY = [Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]), Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])];
+		if (yOrdinary) {
+			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]);
+			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]);
+		}
 		var newScaleY = initialYScale.copy().domain(newDomainY);
 		var stepY = !yOrdinary ? 0 : Math.abs(newScaleY(0) - newScaleY(1));
 
+		var newDataExtents = _extends({}, _this3.state.dataExtents, (_extends4 = {}, _defineProperty(_extends4, xName, newDomainX.slice()), _defineProperty(_extends4, yName, newDomainY.slice()), _extends4));
 		_this3.clearAxisAndChartOnCanvas();
 		_this3.setState(_extends({}, _this3.state, {
 			xAttr: _extends({}, _this3.state.xAttr, {
@@ -46598,11 +46689,11 @@ var _initialiseProps = function _initialiseProps() {
 				scale: newScaleY,
 				step: stepY
 			}),
-			dataExtents: _extends({}, _this3.state.dataExtents, (_extends4 = {}, _defineProperty(_extends4, xName, newDomainX.slice()), _defineProperty(_extends4, yName, newDomainY.slice()), _extends4)),
+			dataExtents: newDataExtents,
 			zoomFactor: zoomFactor
 		}));
 		if (_this3.props.onScatterPanZoom) {
-			_this3.props.onScatterPanZoom([xName, yName], [newDomainX, newDomainY], false);
+			_this3.props.onScatterPanZoom(newDataExtents, false);
 		}
 	};
 
@@ -46663,12 +46754,12 @@ var _initialiseProps = function _initialiseProps() {
 			var newXAttr = state.xAttr,
 			    newYAttr = state.yAttr,
 			    newDataExtents = state.dataExtents;
-			//this.__xAttr = state.xAttr;
-			//this.__yAttr = state.yAttr;
-			//this.__dataExtents = state.dataExtents;
 
 			if (_this3.props.showImage) {
 				_this3.waitingForPanAnimationFrame = false;
+				_this3.__xAttr = null;
+				_this3.__yAttr = null;
+				_this3.__dataExtents = null;
 				_this3.clearAxisAndChartOnCanvas();
 				_this3.setState(_extends({}, _this3.state, {
 					xAttr: newXAttr,
@@ -46676,6 +46767,9 @@ var _initialiseProps = function _initialiseProps() {
 					dataExtents: newDataExtents,
 					zoomFactor: 1
 				}));
+				if (_this3.props.onScatterPanZoom) {
+					_this3.props.onScatterPanZoom(newDataExtents, false);
+				}
 			} else {
 				_this3.panInProgress = true;
 				_this3.triggerEvent('pan', state, e);
@@ -46683,12 +46777,8 @@ var _initialiseProps = function _initialiseProps() {
 					_this3.waitingForPanAnimationFrame = false;
 					_this3.clearAxisAndChartOnCanvas();
 					_this3.draw({ trigger: 'pan' });
-					if (false & _this3.props.onScatterPanZoom) {
-						var xName = newXAttr.name;
-						var yName = newYAttr.name;
-						var domainX = newXAttr.scale.domain();
-						var domainY = newYAttr.scale.domain();
-						_this3.props.onScatterPanZoom([xName, yName], [domainX, domainY], true);
+					if (_this3.props.onScatterPanZoom) {
+						_this3.props.onScatterPanZoom(newDataExtents, true);
 					}
 				});
 			}
@@ -46715,6 +46805,9 @@ var _initialiseProps = function _initialiseProps() {
 				yAttr: newYAttr,
 				dataExtents: newDataExtents
 			}));
+			if (_this3.props.onScatterPanZoom) {
+				_this3.props.onScatterPanZoom(newDataExtents, false);
+			}
 		} else {
 			_this3.triggerEvent('panend', state, e);
 			requestAnimationFrame(function () {
@@ -46725,12 +46818,8 @@ var _initialiseProps = function _initialiseProps() {
 					dataExtents: newDataExtents,
 					zoomFactor: 1
 				}));
-				if (false) {
-					var xName = newXAttr.name;
-					var yName = newYAttr.name;
-					var domainX = newXAttr.scale.domain();
-					var domainY = newYAttr.scale.domain();
-					_this3.props.onScatterPanZoom([xName, yName], [domainX, domainY], false);
+				if (_this3.props.onScatterPanZoom) {
+					_this3.props.onScatterPanZoom(newDataExtents, false);
 				}
 			});
 		}
@@ -46767,18 +46856,29 @@ var _initialiseProps = function _initialiseProps() {
 			    zAttr = _zAxisSelectHelper.zAttr,
 			    dataExtents = _zAxisSelectHelper.dataExtents;
 
-			_this3.__zAttr = zAttr;
-			_this3.__dataExtents = dataExtents;
-			_this3.axisSelectInProgress = true;
-			_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
-			requestAnimationFrame(function () {
+			if (_this3.props.showImage) {
 				_this3.waitingForAnimationFrame = false;
+				_this3.__zAttr = null;
+				_this3.__dataExtents = null;
 				_this3.clearAxisAndChartOnCanvas();
-				_this3.draw({ trigger: 'pan' });
-				if (false) {
-					_this3.props.onScatterPanZoom([zAttr.name], [selectDomain.slice()], true);
+				_this3.setState({ zAttr: zAttr, dataExtents: dataExtents });
+				if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					_this3.props.onScatterPanZoom(dataExtents, false);
 				}
-			});
+			} else {
+				_this3.__zAttr = zAttr;
+				_this3.__dataExtents = dataExtents;
+				_this3.axisSelectInProgress = true;
+				_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
+				requestAnimationFrame(function () {
+					_this3.waitingForAnimationFrame = false;
+					_this3.clearAxisAndChartOnCanvas();
+					_this3.draw({ trigger: 'pan' });
+					if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+						_this3.props.onScatterPanZoom(dataExtents, true);
+					}
+				});
+			}
 		}
 	};
 
@@ -46790,18 +46890,23 @@ var _initialiseProps = function _initialiseProps() {
 		_this3.__zAttr = null;
 		_this3.__dataExtents = null;
 		_this3.axisSelectInProgress = false;
-		_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
-		requestAnimationFrame(function () {
+		if (_this3.props.showImage) {
 			_this3.clearAxisAndChartOnCanvas();
-			_this3.setState({
-				zAttr: zAttr,
-				dataExtents: dataExtents
-			});
-			// connect to pcp
-			if (false) {
-				_this3.props.onScatterPanZoom([zAttr.name], [selectDomain.slice()], false);
+			_this3.setState({ zAttr: zAttr, dataExtents: dataExtents });
+			if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				_this3.props.onScatterPanZoom(dataExtents, false);
 			}
-		});
+		} else {
+			_this3.triggerEvent('pan', { zAttr: zAttr, dataExtents: dataExtents }, e);
+			requestAnimationFrame(function () {
+				_this3.clearAxisAndChartOnCanvas();
+				_this3.setState({ zAttr: zAttr, dataExtents: dataExtents });
+				// connect to pcp
+				if (_this3.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					_this3.props.onScatterPanZoom(dataExtents, false);
+				}
+			});
+		}
 	};
 
 	this.handleZAxisSelectCancel = function (e) {
@@ -46819,8 +46924,8 @@ var _initialiseProps = function _initialiseProps() {
 			var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, extents.slice()));
 			_this3.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
-			if (false) {
-				_this3.props.onScatterPanZoom([name], [newZAttr.extents.slice()], false);
+			if (_this3.props.onScatterPanZoom) {
+				_this3.props.onScatterPanZoom(newDataExtents, false);
 			}
 		} else {
 			_this3.setState({ zAttr: newZAttr });
@@ -50882,17 +50987,6 @@ var ColorLegend = function (_React$Component) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'g',
                 { transform: transform },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__LegendEventHandler__["a" /* default */], {
-                    x: 0,
-                    y: 0,
-                    width: width,
-                    height: height,
-                    getMouseMoveDist: getMouseMoveDist,
-                    selectCursorStyle: cursor,
-                    onRangeSelect: this.handleRangeSelect,
-                    onRangeSelectEnd: this.handleRangeSelectEnd,
-                    onRangeSelectCancel: handleZAxisSelectCancel
-                }),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__core__["f" /* SubscriberExt */], {
                     ref: function ref(node) {
                         return _this2.node = node;
@@ -51200,7 +51294,6 @@ var _initialiseProps = function _initialiseProps() {
   !*** ./src/lib/legends/LegendEventHandler.js ***!
   \***********************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51318,7 +51411,7 @@ var LegendEventHandler = function (_React$Component) {
     return LegendEventHandler;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
-/* harmony default export */ __webpack_exports__["a"] = (LegendEventHandler);
+/* unused harmony default export */ var _unused_webpack_default_export = (LegendEventHandler);
 
 /***/ }),
 /* 657 */
@@ -52619,36 +52712,52 @@ var PCPCanvas = function (_React$Component) {
             });
         };
 
+        _this.updateDimConfigSelect = function (dimConfig, dataExtents) {
+            var newDimConfig = {};
+            Object.keys(dimConfig).forEach(function (key) {
+                var config = dimConfig[key];
+                var scale = config.scale;
+
+                var range = scale.range();
+                if (dataExtents[key]) {
+                    var selectDomain = dataExtents[key];
+                    var start = scale(selectDomain[0]);
+                    var end = scale(selectDomain[1]);
+                    var diff = Math.abs(start - end);
+                    if (diff > 1) {
+                        start = Math.min(Math.max(start, range[1]), range[0]);
+                        end = Math.min(Math.max(end, range[1]), range[0]);
+                        if (start > end) {
+                            var temp = start;
+                            start = end;
+                            end = temp;
+                        }
+                        if (!(start === range[1] && end === range[0])) config.select = [start, end];
+                    }
+                }
+                newDimConfig[key] = _extends({}, config);
+            });
+            return newDimConfig;
+        };
+
         _this.resetChart = function () {
             var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props;
             var margin = props.margin,
-                pcpAttrSelect = props.pcpAttrSelect;
+                dataExtents = props.dataExtents;
 
             var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
             var xScale = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["d" /* getXScale */])(props, canvasDim.width);
             var dimConfig = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["a" /* getNewDimComfig */])(props, xScale, canvasDim.height, canvasDim.height + margin.bottom / 2);
-            Object.keys(pcpAttrSelect).forEach(function (key) {
-                var prevSelect = pcpAttrSelect[key];
-                var currConfig = dimConfig[key];
-                if (prevSelect && currConfig) {
-                    var currExtents = currConfig.extents;
-                    var currScale = currConfig.scale;
-                    if (prevSelect.auxiliary) {
-                        // ordinary, need to adjust select region
-                        console.log('ordinary, need to adjust');
-                    } else {
-                        var selectDomain = prevSelect.domain;
-                        if (!isSameDomain(currExtents, selectDomain)) {
-                            currConfig.select = [currScale(selectDomain[0]), currScale(selectDomain[1])];
-                        }
-                    }
-                }
-            });
+
+            //console.log(dataExtents, dimConfig)
+            //this.updateDimConfigSelect(dimConfig, dataExtents);
+            //console.log(dimConfig);
+
             var plotData = Object(__WEBPACK_IMPORTED_MODULE_9__pcpUtils__["c" /* getPlotData */])(props);
 
             return {
                 xScale: xScale,
-                dimConfig: dimConfig,
+                dimConfig: _this.updateDimConfigSelect(dimConfig, dataExtents),
                 plotData: plotData
             };
         };
@@ -53018,6 +53127,50 @@ var PCPCanvas = function (_React$Component) {
             }
         };
 
+        _this.handleByOtherFull = function (dataExtents, inProgress) {
+            if (_this.axisMoveInProgress || _this.axisSelectInProgress) return;
+
+            if (inProgress) {
+                if (!_this.waitingForAnimationFrame) {
+                    _this.waitingForAxisMoveAnimationFrame = true;
+
+                    if (!_this.currChartCopied) {
+                        _this.copyChartInGrey();
+                        _this.currChartCopied = true;
+                    }
+
+                    _this.__dimConfig = _this.__dimConfig || _this.state.dimConfig;
+
+                    var newDimConfig = _this.updateDimConfigSelect(_this.__dimConfig, dataExtents);
+                    //const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+                    _this.__dimConfig = newDimConfig;
+
+                    _this.triggerEvent('selectrange', { dimConfig: newDimConfig }, null);
+                    requestAnimationFrame(function () {
+                        _this.waitingForAnimationFrame = false;
+                        _this.clearAxesAndPCPOnCanvas();
+                        _this.draw({ trigger: 'selectrange' });
+                    });
+                }
+            } else {
+                _this.__dimConfig = _this.__dimConfig || _this.state.dimConfig;
+
+                //const state = this.rangeSelectHelperByOther(data, this.__dimConfig);
+                var _newDimConfig = _this.updateDimConfigSelect(_this.__dimConfig, dataExtents);
+
+                _this.__dimConfig = null; //state.dimConfig;
+                _this.currChartCopied = false;
+
+                _this.triggerEvent('selectrange', { dimConfig: _newDimConfig }, null);
+                requestAnimationFrame(function () {
+                    _this.clearAxesAndPCPOnOffCanvas();
+                    _this.setState({
+                        dimConfig: _newDimConfig
+                    });
+                });
+            }
+        };
+
         _this.mutableState = {};
         _this.subscriptions = [];
         _this.state = {
@@ -53099,7 +53252,8 @@ var PCPCanvas = function (_React$Component) {
                 width = _props.width,
                 height = _props.height,
                 zIndex = _props.zIndex,
-                axisWidthProp = _props.axisWidth;
+                axisWidthProp = _props.axisWidth,
+                dimName = _props.dimName;
 
             var axisWidth = axisWidthProp % 2 === 0 ? axisWidthProp : axisWidthProp + 1 || 26;
             var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])({ width: width, height: height, margin: margin });
@@ -53120,8 +53274,11 @@ var PCPCanvas = function (_React$Component) {
             };
 
             var pcpYAxisList = [];
-            __WEBPACK_IMPORTED_MODULE_10_lodash_foreach___default()(this.state.dimConfig, function (config, title) {
-                //if (!config.active) return;
+
+            dimName.forEach(function (name) {
+                var config = _this2.state.dimConfig[name];
+                //console.log(config, name)
+                var title = config.title;
                 pcpYAxisList.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__axes__["a" /* PCPYAxis */], { key: 'pcp-yaxis-' + title,
                     title: title,
                     axisLocation: config.position,
@@ -53515,13 +53672,14 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 /* harmony default export */ __webpack_exports__["a"] = (function (_ref, xScale, innerHeight, nullPositionY) {
-    var dimName = _ref.dimName,
+    var dimNameProp = _ref.dimName,
         dimExtents = _ref.dimExtents,
         dimAccessor = _ref.dimAccessor,
         axisWidth = _ref.axisWidth;
     var initialDimConfig = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
 
     var newDimConfig = {};
+    var dimName = Object.keys(dimExtents);
     dimName.forEach(function (name) {
         var axisExtents = dimAccessor(dimExtents, name) == null ? [0, 1] : dimAccessor(dimExtents, name);
 
@@ -58601,7 +58759,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../../../node_module
 
 
 // module
-exports.push([module.i, "._3FjVqank1OUdvLUdQc5gtQ {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n._3FjVqank1OUdvLUdQc5gtQ *,\n    ._3FjVqank1OUdvLUdQc5gtQ *::after,\n    ._3FjVqank1OUdvLUdQc5gtQ *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n._3FjVqank1OUdvLUdQc5gtQ._1X4rU5383dJ0DGF3IK7iRB ._9zebeODCaURQRDmkMGMH7 {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.k_BntcoGBS2w6vVa65bIn {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n._1yR36K8Yr1x0GUhT9YUKBd {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n._9zebeODCaURQRDmkMGMH7 {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n._9zebeODCaURQRDmkMGMH7:not(._2Xm4YDEzrtKy9Q1ocF0Zzw) {\n  margin-top: -13px;\n}\n._9zebeODCaURQRDmkMGMH7._2Xm4YDEzrtKy9Q1ocF0Zzw {\n  bottom: 0;\n}\n._9zebeODCaURQRDmkMGMH7::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.JEdg755fYUyqYHe8iU-Xu {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.JEdg755fYUyqYHe8iU-Xu.Fkey6Tzqlq3ltNetC6azC {\n  background-color: rgb(238, 238, 238);\n}\n._1XZX0yRGOWpBI00dIhICAF {\n  position: relative\n}\n._1XZX0yRGOWpBI00dIhICAF::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.X8aH_h4fOLwilLWR_1zPf {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.X8aH_h4fOLwilLWR_1zPf *,\n    .X8aH_h4fOLwilLWR_1zPf *::after,\n    .X8aH_h4fOLwilLWR_1zPf *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.X8aH_h4fOLwilLWR_1zPf + .uF04svHPBbFTBpSOe9Y85 {\n  margin-top: -3.25px;\n}\n._1EOyoAnzFaGEUTsEX5OByV {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n.uF04svHPBbFTBpSOe9Y85 {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n.uF04svHPBbFTBpSOe9Y85._1tRcTX31EJ-FRaO5MUpmaJ {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n._26DVueXzzWCNrommR2_F2P {\n  position: relative\n}\n._26DVueXzzWCNrommR2_F2P > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n._26DVueXzzWCNrommR2_F2P .mehTlNPvnFsDdZ8kuJJe_ {\n  color: rgb(117, 117, 117);\n}\n._26DVueXzzWCNrommR2_F2P ~ .uF04svHPBbFTBpSOe9Y85 {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1 {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n._1UK3Dgv9gLeOqDfZeBdRR1._2LeYOjc6xHX8uM_PfWjd7T:not(.biEqmcbXilcU4SRpC7ew4):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4 {\n  pointer-events: none;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4:not(.TT4r8IkTgAYtYve1wB_-m) {\n  opacity: 0.5;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4 > ._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n._676r2GkgkOCjKV9W2Qj9f [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n._676r2GkgkOCjKV9W2Qj9f :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n.eOAmOd2ALYl1Geazwwftn > :last-child {\n  margin-right: 0;\n}\n.eOAmOd2ALYl1Geazwwftn > :first-child {\n  margin-left: 10.4px;\n}\n._676r2GkgkOCjKV9W2Qj9f,\n.eOAmOd2ALYl1Geazwwftn {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n.MLVN3bMpMx-WWFBpXigae {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n.MLVN3bMpMx-WWFBpXigae > * {\n  padding: 0;\n}\n.MLVN3bMpMx-WWFBpXigae > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n._3Qu9MSxSh1jQdW783XQEuE {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n._3Qu9MSxSh1jQdW783XQEuE.EYaSp0j6gdJqJUVVk3AD3 {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n._3XI9OYsa8Y-V3B9e3jhj-r {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n._16r456XLeJ1AWiPi2tt0-v {\n  display: block\n}\n._16r456XLeJ1AWiPi2tt0-v:not(.OY9SF66EynWSMeIeiq-09) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n._16r456XLeJ1AWiPi2tt0-v.OY9SF66EynWSMeIeiq-09 {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n._3FjVqank1OUdvLUdQc5gtQ {\n    padding: 0;\n    padding-top: 0px;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1 {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n._3Qu9MSxSh1jQdW783XQEuE {\n    min-width: 0;\n}\n._16r456XLeJ1AWiPi2tt0-v {\n    max-width: 100%;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n._1TA1NEjIfA761QvdemRDQp {\n    height: 25.83px; \n}\n._1BlFSfloPePdQpCaskQC1l {\n    height: 30.99px;\n}\n._2BoNf5ifBC2lhrXjCwYiiO {\n    height: calc(65% - 36.933px);\n    overflow-y: scroll;\n}\n._2f5GsOgW8C_vohG-QSybqs {\n    height: calc(35% - 19.887px);\n    padding: 5px;\n}\n._34kc72COeHrozX3llNMFvL {\n    outline: 'none';\n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/layout/configbox/index.css"],"names":[],"mappings":"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AC7B,8BAA8B;MAC1B,2BAA2B;UACvB,uBAAuB;EAC/B,eAAe;EACf,yBAAyB;MACrB,sBAAsB;UAClB,wBAAwB;CACjC;AACD;EACE,0BAA0B;MACtB,uBAAuB;UACnB,oBAAoB;EAC5B,gBAAgB;EAChB,qBAAqB;EACrB,qBAAqB;EACrB,cAAc;EACd,aAAa;EACb,UAAU;EACV,mBAAmB;EACnB,WAAW;CACZ;AACD;EACE,qBAAqB;CACtB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;CACrB;AACD;EACE,uBAAuB;EACvB,kBAAkB;CACnB;AACD;IACI,WAAW;IACX,iBAAiB;CACpB;AACD;IACI,gBAAgB;IAChB,mBAAmB;IACnB,mBAAmB;CACtB;AACD;IACI,aAAa;CAChB;AACD;IACI,gBAAgB;IAChB,iBAAiB;IACjB,wBAAwB;CAC3B;AACD;IACI,gBAAgB;CACnB;AACD;IACI,gBAAgB;CACnB;AACD;IACI,6BAA6B;IAC7B,mBAAmB;CACtB;AACD;IACI,6BAA6B;IAC7B,aAAa;CAChB;AACD;IACI,gBAAgB;CACnB","file":"index.css","sourcesContent":[".autocomplete {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.autocomplete *,\n    .autocomplete *::after,\n    .autocomplete *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.autocomplete.focus .suggestions {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.values {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.value {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.suggestions {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.suggestions:not(.up) {\n  margin-top: -13px;\n}\n.suggestions.up {\n  bottom: 0;\n}\n.suggestions::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.suggestion {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.suggestion.active {\n  background-color: rgb(238, 238, 238);\n}\n.input {\n  position: relative\n}\n.input::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.list {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.list *,\n    .list *::after,\n    .list *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.list + .divider {\n  margin-top: -3.25px;\n}\n.subheader {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n.divider {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n.divider.inset {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n.listItem {\n  position: relative\n}\n.listItem > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n.listItem .ripple {\n  color: rgb(117, 117, 117);\n}\n.listItem ~ .divider {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n.item {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n.item.selectable:not(.disabled):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n.item.disabled {\n  pointer-events: none;\n}\n.item.disabled:not(.checkboxItem) {\n  opacity: 0.5;\n}\n.item.disabled > .checkbox > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n.left [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n.left :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n.right > :last-child {\n  margin-right: 0;\n}\n.right > :first-child {\n  margin-left: 10.4px;\n}\n.left,\n.right {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n.itemAction {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n.itemAction > * {\n  padding: 0;\n}\n.itemAction > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n.itemContentRoot {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n.itemContentRoot.large {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n.checkbox {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n.checkbox > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n.checkbox > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n.itemText {\n  display: block\n}\n.itemText:not(.primary) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n.itemText.primary {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n.autocomplete {\n    padding: 0;\n    padding-top: 0px;\n}\n.item {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n.itemContentRoot {\n    min-width: 0;\n}\n.itemText {\n    max-width: 100%;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n.btndiv {\n    height: 25.83px; \n}\n.seldiv {\n    height: 30.99px;\n}\n.listdiv {\n    height: calc(65% - 36.933px);\n    overflow-y: scroll;\n}\n.infodiv {\n    height: calc(35% - 19.887px);\n    padding: 5px;\n}\n.tabStyle {\n    outline: 'none';\n}"],"sourceRoot":""}]);
+exports.push([module.i, "._3FjVqank1OUdvLUdQc5gtQ {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n._3FjVqank1OUdvLUdQc5gtQ *,\n    ._3FjVqank1OUdvLUdQc5gtQ *::after,\n    ._3FjVqank1OUdvLUdQc5gtQ *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n._3FjVqank1OUdvLUdQc5gtQ._1X4rU5383dJ0DGF3IK7iRB ._9zebeODCaURQRDmkMGMH7 {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.k_BntcoGBS2w6vVa65bIn {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n._1yR36K8Yr1x0GUhT9YUKBd {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n._9zebeODCaURQRDmkMGMH7 {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n._9zebeODCaURQRDmkMGMH7:not(._2Xm4YDEzrtKy9Q1ocF0Zzw) {\n  margin-top: -13px;\n}\n._9zebeODCaURQRDmkMGMH7._2Xm4YDEzrtKy9Q1ocF0Zzw {\n  bottom: 0;\n}\n._9zebeODCaURQRDmkMGMH7::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.JEdg755fYUyqYHe8iU-Xu {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.JEdg755fYUyqYHe8iU-Xu.Fkey6Tzqlq3ltNetC6azC {\n  background-color: rgb(238, 238, 238);\n}\n._1XZX0yRGOWpBI00dIhICAF {\n  position: relative\n}\n._1XZX0yRGOWpBI00dIhICAF::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.X8aH_h4fOLwilLWR_1zPf {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.X8aH_h4fOLwilLWR_1zPf *,\n    .X8aH_h4fOLwilLWR_1zPf *::after,\n    .X8aH_h4fOLwilLWR_1zPf *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.X8aH_h4fOLwilLWR_1zPf + .uF04svHPBbFTBpSOe9Y85 {\n  margin-top: -3.25px;\n}\n._1EOyoAnzFaGEUTsEX5OByV {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n.uF04svHPBbFTBpSOe9Y85 {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n.uF04svHPBbFTBpSOe9Y85._1tRcTX31EJ-FRaO5MUpmaJ {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n._26DVueXzzWCNrommR2_F2P {\n  position: relative\n}\n._26DVueXzzWCNrommR2_F2P > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n._26DVueXzzWCNrommR2_F2P .mehTlNPvnFsDdZ8kuJJe_ {\n  color: rgb(117, 117, 117);\n}\n._26DVueXzzWCNrommR2_F2P ~ .uF04svHPBbFTBpSOe9Y85 {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1 {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n._1UK3Dgv9gLeOqDfZeBdRR1._2LeYOjc6xHX8uM_PfWjd7T:not(.biEqmcbXilcU4SRpC7ew4):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4 {\n  pointer-events: none;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4:not(.TT4r8IkTgAYtYve1wB_-m) {\n  opacity: 0.5;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1.biEqmcbXilcU4SRpC7ew4 > ._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n._676r2GkgkOCjKV9W2Qj9f [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n._676r2GkgkOCjKV9W2Qj9f :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n.eOAmOd2ALYl1Geazwwftn > :last-child {\n  margin-right: 0;\n}\n.eOAmOd2ALYl1Geazwwftn > :first-child {\n  margin-left: 10.4px;\n}\n._676r2GkgkOCjKV9W2Qj9f,\n.eOAmOd2ALYl1Geazwwftn {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n.MLVN3bMpMx-WWFBpXigae {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n.MLVN3bMpMx-WWFBpXigae > * {\n  padding: 0;\n}\n.MLVN3bMpMx-WWFBpXigae > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n._3Qu9MSxSh1jQdW783XQEuE {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n._3Qu9MSxSh1jQdW783XQEuE.EYaSp0j6gdJqJUVVk3AD3 {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n._3XI9OYsa8Y-V3B9e3jhj-r {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n._3XI9OYsa8Y-V3B9e3jhj-r > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n._16r456XLeJ1AWiPi2tt0-v {\n  display: block\n}\n._16r456XLeJ1AWiPi2tt0-v:not(.OY9SF66EynWSMeIeiq-09) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n._16r456XLeJ1AWiPi2tt0-v.OY9SF66EynWSMeIeiq-09 {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n._3FjVqank1OUdvLUdQc5gtQ {\n    padding: 0;\n    padding-top: 0px;\n}\n._1UK3Dgv9gLeOqDfZeBdRR1 {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n._3jps0bFPN-l2wZT22ygYyB {\n    z-index: 50;\n}\n.txqolArENceAOC_YByrUB {\n    z-index: 50;\n}\n\n", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/layout/configbox/index.css"],"names":[],"mappings":"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","file":"index.css","sourcesContent":[".autocomplete {\n  padding: 6.5px 0;\n  position: relative;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.autocomplete *,\n    .autocomplete *::after,\n    .autocomplete *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.autocomplete.focus .suggestions {\n  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n          box-shadow: 0 1px 6px rgba(0, 0, 0, .12), 0 1px 4px rgba(0, 0, 0, .24);\n  max-height: 45vh;\n  visibility: visible;\n}\n.values {\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  -ms-flex-wrap: wrap;\n      flex-wrap: wrap;\n  list-style: none;\n  margin: 0;\n  padding: 0 0 3.25px 0;\n}\n.value {\n  margin: 1.625px 3.25px 1.625px 0;\n}\n.suggestions {\n  background-color: rgb(255, 255, 255);\n  list-style: none;\n  max-height: 0;\n  overflow-x: hidden;\n  overflow-y: auto;\n  padding: 0;\n  position: absolute;\n  -webkit-transition-duration: 0.35s;\n          transition-duration: 0.35s;\n  -webkit-transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, -webkit-box-shadow;\n  transition-property: max-height, box-shadow;\n  transition-property: max-height, box-shadow, -webkit-box-shadow;\n  -webkit-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  visibility: hidden;\n  width: 100%;\n  z-index: 100\n}\n.suggestions:not(.up) {\n  margin-top: -13px;\n}\n.suggestions.up {\n  bottom: 0;\n}\n.suggestions::-webkit-scrollbar {\n  height: 0;\n  width: 0;\n}\n.suggestion {\n  cursor: pointer;\n  font-size: 10.4px;\n  padding: 6.5px\n}\n.suggestion.active {\n  background-color: rgb(238, 238, 238);\n}\n.input {\n  position: relative\n}\n.input::after {\n  border-left: 3.56571px solid transparent;\n  border-right: 3.56571px solid transparent;\n  border-top: 3.56571px solid rgba(0, 0, 0, 0.12);\n  content: '';\n  height: 0;\n  pointer-events: none;\n  position: absolute;\n  right: 5.2px;\n  top: 50%;\n  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);\n  width: 0;\n}\n.list {\n  display: inline-block;\n  list-style: none;\n  margin: 0;\n  padding: 3.25px 0;\n  position: relative;\n  text-align: left;\n  white-space: nowrap;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.list *,\n    .list *::after,\n    .list *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.list + .divider {\n  margin-top: -3.25px;\n}\n.subheader {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  font-weight: 500;\n  line-height: 31.2px;\n  margin: -3.25px 0 0;\n  padding-left: 10.4px;\n}\n.divider {\n  background-color: rgb(238, 238, 238);\n  border: 0;\n  height: 0.65px;\n  margin: -0.65px 0 0\n}\n.divider.inset {\n  margin-left: 46.8px;\n  margin-right: 10.4px;\n}\n.listItem {\n  position: relative\n}\n.listItem > [data-react-toolbox='ripple'] {\n  overflow: hidden;\n}\n.listItem .ripple {\n  color: rgb(117, 117, 117);\n}\n.listItem ~ .divider {\n  margin-bottom: 3.25px;\n  margin-top: 3.25px;\n}\n.item {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  color: rgb(33, 33, 33);\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  min-height: 31.2px;\n  padding: 0 10.4px;\n  position: relative\n}\n.item.selectable:not(.disabled):hover {\n  background-color: rgb(238, 238, 238);\n  cursor: pointer;\n}\n.item.disabled {\n  pointer-events: none;\n}\n.item.disabled:not(.checkboxItem) {\n  opacity: 0.5;\n}\n.item.disabled > .checkbox > [data-react-toolbox='label'] {\n  opacity: 0.5;\n}\n.left [data-react-toolbox='font-icon'] {\n  width: 11.7px;\n}\n.left :last-child > [data-react-toolbox='font-icon'] {\n  margin-right: 14.3px;\n}\n.right > :last-child {\n  margin-right: 0;\n}\n.right > :first-child {\n  margin-left: 10.4px;\n}\n.left,\n.right {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 0;\n      -ms-flex: 0 0 auto;\n          flex: 0 0 auto;\n}\n.itemAction {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  margin: 5.2px 10.4px 5.2px 0\n}\n.itemAction > * {\n  padding: 0;\n}\n.itemAction > [data-react-toolbox='font-icon'] {\n  color: rgb(117, 117, 117);\n  font-size: 15.6px;\n}\n.itemContentRoot {\n  display: block;\n  -webkit-box-flex: 1;\n      -ms-flex-positive: 1;\n          flex-grow: 1\n}\n.itemContentRoot.large {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  height: 46.8px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n}\n.checkbox {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  cursor: pointer;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  height: 100%;\n  margin: 0;\n  min-height: 31.2px;\n  width: 100%\n}\n.checkbox > [data-react-toolbox='check'] {\n  margin-right: 24.7px;\n}\n.checkbox > [data-react-toolbox='label'] {\n  padding-left: 0;\n}\n.itemText {\n  display: block\n}\n.itemText:not(.primary) {\n  color: rgb(117, 117, 117);\n  font-size: 9.1px;\n  padding-top: 1.95px;\n  white-space: normal;\n}\n.itemText.primary {\n  color: rgb(33, 33, 33);\n  font-size: 10.4px;\n}\n.autocomplete {\n    padding: 0;\n    padding-top: 0px;\n}\n.item {\n    max-width: 100%;\n    min-height: 19.5px;\n    max-height: 19.5px;\n}\n.knob {\n    z-index: 50;\n}\n.innerknob {\n    z-index: 50;\n}\n\n"],"sourceRoot":""}]);
 
 // exports
 exports.locals = {
@@ -58632,11 +58790,8 @@ exports.locals = {
 	"large": "EYaSp0j6gdJqJUVVk3AD3",
 	"itemText": "_16r456XLeJ1AWiPi2tt0-v",
 	"primary": "OY9SF66EynWSMeIeiq-09",
-	"btndiv": "_1TA1NEjIfA761QvdemRDQp",
-	"seldiv": "_1BlFSfloPePdQpCaskQC1l",
-	"listdiv": "_2BoNf5ifBC2lhrXjCwYiiO",
-	"infodiv": "_2f5GsOgW8C_vohG-QSybqs",
-	"tabStyle": "_34kc72COeHrozX3llNMFvL"
+	"knob": "_3jps0bFPN-l2wZT22ygYyB",
+	"innerknob": "txqolArENceAOC_YByrUB"
 };
 
 /***/ }),
@@ -58657,7 +58812,11 @@ exports.locals = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_sortAlphaNum__ = __webpack_require__(/*! ../../utils/sortAlphaNum */ 257);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider__ = __webpack_require__(/*! react-toolbox/lib/slider */ 409);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_sortAlphaNum__ = __webpack_require__(/*! ../../utils/sortAlphaNum */ 257);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__index_css__ = __webpack_require__(/*! ./index.css */ 692);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__index_css__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -58665,6 +58824,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
 
 
 
@@ -58713,16 +58875,19 @@ var ScatterTab = function (_React$Component) {
     _createClass(ScatterTab, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             var _props = this.props,
                 attrKindsProp = _props.attrKinds,
-                attrFormat = _props.attrFormat;
+                attrFormat = _props.attrFormat,
+                showImage = _props.showImage,
+                minPoints = _props.minPoints,
+                minImageSize = _props.minImageSize,
+                onSwitchChange = _props.onSwitchChange,
+                onSliderChange = _props.onSliderChange;
 
 
             var attrKinds = Object.keys(attrKindsProp).map(function (attrKey) {
                 return attrFormat(attrKindsProp[attrKey]);
-            }).sort(__WEBPACK_IMPORTED_MODULE_4__utils_sortAlphaNum__["a" /* default */]);
+            }).sort(__WEBPACK_IMPORTED_MODULE_5__utils_sortAlphaNum__["a" /* default */]);
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
@@ -58730,10 +58895,32 @@ var ScatterTab = function (_React$Component) {
                 this.renderAttrSelector('x', attrKinds),
                 this.renderAttrSelector('y', attrKinds),
                 this.renderAttrSelector('z', attrKinds),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', accent: this.props.showImage,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', accent: showImage,
                     onClick: function onClick() {
-                        return _this2.props.onSwitchChange('showImage', !_this2.props.showImage);
-                    } })
+                        return onSwitchChange('showImage', !showImage);
+                    } }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'p',
+                        null,
+                        'MIN. # POINTS:'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 100, step: 5, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_6__index_css___default.a,
+                        onChange: function onChange(value) {
+                            return onSliderChange('minPoints', value);
+                        } }),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'p',
+                        null,
+                        'MIN. IMAGE SIDE:'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 40, step: 5, value: minImageSize, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_6__index_css___default.a,
+                        onChange: function onChange(value) {
+                            return onSliderChange('minImageSize', value);
+                        } })
+                )
             );
         }
     }]);
@@ -58875,8 +59062,6 @@ var PcpTab = function (_React$Component) {
     _createClass(PcpTab, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             var _props = this.props,
                 data = _props.data,
                 dimension = _props.dimension,
@@ -58905,9 +59090,7 @@ var PcpTab = function (_React$Component) {
                 'div',
                 null,
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__charts__["a" /* ParallelCoordinateChart */], {
-                    ref: function ref(node) {
-                        return _this2.PCPChartNode = node;
-                    },
+                    ref: 'PCPChartRef',
                     height: 250,
                     data: data,
                     dimOrder: dimOrder,
@@ -58915,8 +59098,9 @@ var PcpTab = function (_React$Component) {
                     colorAccessor: colorAccessor,
                     titleFormat: attrFormat,
                     updateDimOrder: this.handleUpdateDimOrder,
-                    onPCPAxisSelect: onPCPAxisSelect,
-                    pcpAttrSelect: pcpAttrSelect
+                    onPCPAxisSelect: onPCPAxisSelect
+                    //pcpAttrSelect={pcpAttrSelect}
+                    , dataExtents: this.props.dataExtents
                 }),
                 this.renderOptions()
             );
@@ -59001,7 +59185,6 @@ var ScatterBox = function (_React$Component) {
             };
             var chartProps = _extends({}, this.props, {
                 margin: margin,
-                onScatterPanZoom: null,
                 onDataRequest: this.handleDataImageRequest,
                 onSelectDataItems: null
             });
@@ -59015,7 +59198,7 @@ var ScatterBox = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 function mapStateToProps(state) {
-    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["i" /* getSelectedDataArray */])(state),
+    var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["k" /* getSelectedDataArray */])(state),
         id = _getSelectedDataArray.id,
         samples = _getSelectedDataArray.samples,
         data = _getSelectedDataArray.data,
@@ -59026,14 +59209,16 @@ function mapStateToProps(state) {
         xAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["b" /* getAttrX */])(state),
         yAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["c" /* getAttrY */])(state),
         zAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["d" /* getAttrZ */])(state),
-        colorsByGroup: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getSelectedSampleColors */])(state),
+        colorsByGroup: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["l" /* getSelectedSampleColors */])(state),
         seriesName: id,
         samples: samples,
         data: data,
         dimension: dimension,
         imgPool: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["e" /* getImgPool */])(state),
-        opacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getSampleColorOpacity */])(state),
-        showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["l" /* getShowImageSwitch */])(state)
+        opacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["i" /* getSampleColorOpacity */])(state),
+        showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["n" /* getShowImageSwitch */])(state),
+        minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getMinPoints */])(state),
+        minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["f" /* getMinImageSize */])(state)
     };
 }
 
@@ -59209,7 +59394,9 @@ var ScatterChart = function (_React$Component) {
                 zAccessor = _props.zAccessor,
                 onScatterPanZoom = _props.onScatterPanZoom,
                 imgPool = _props.imgPool,
-                showImage = _props.showImage;
+                showImage = _props.showImage,
+                minPoints = _props.minPoints,
+                minImageSize = _props.minImageSize;
 
             //console.log(markerProvider)
 
@@ -59249,9 +59436,9 @@ var ScatterChart = function (_React$Component) {
                     yAttr: yAttr,
                     zAttr: zAttr,
                     imgPool: imgPool,
-                    showImage: showImage
-                    //onScatterPanZoom={onScatterPanZoom}
-                    , onDataRequest: this.handleDataRequest
+                    showImage: showImage,
+                    onScatterPanZoom: onScatterPanZoom,
+                    onDataRequest: this.handleDataRequest
                     //onSelectDataItems={this.handleSelectDataItems}
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_axes__["b" /* XAxis */], {
@@ -59268,7 +59455,9 @@ var ScatterChart = function (_React$Component) {
                     __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["e" /* Series */],
                     null,
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["b" /* ScatterSeries */], {
-                        markerProvider: markerProvider
+                        markerProvider: markerProvider,
+                        minPoints: minPoints,
+                        minImageSize: minImageSize
                     })
                 ),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_legends__["a" /* ColorLegend */], {
@@ -59948,8 +60137,6 @@ var ParallelCoordinateChart = function (_React$Component) {
     _createClass(ParallelCoordinateChart, [{
         key: 'render',
         value: function render() {
-            var _this2 = this;
-
             var margin = { left: 60, right: 40, top: 20, bottom: 10 };
             var _props = this.props,
                 width = _props.width,
@@ -59967,9 +60154,7 @@ var ParallelCoordinateChart = function (_React$Component) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["c" /* PCPCanvas */],
                 {
-                    ref: function ref(node) {
-                        return _this2.PCPCanvasNode = node;
-                    },
+                    ref: 'PCPCanvasRef',
                     width: width,
                     height: height,
                     ratio: ratio,
@@ -59988,8 +60173,9 @@ var ParallelCoordinateChart = function (_React$Component) {
 
                     titleFormat: titleFormat,
 
-                    onPCPAxisSelect: onPCPAxisSelect,
-                    pcpAttrSelect: pcpAttrSelect,
+                    onPCPAxisSelect: onPCPAxisSelect
+                    //pcpAttrSelect={pcpAttrSelect}
+                    , dataExtents: this.props.dataExtents,
                     onUnmount: this.handleUnmountPCP
                 },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(

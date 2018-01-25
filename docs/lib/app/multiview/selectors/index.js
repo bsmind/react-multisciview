@@ -11,6 +11,8 @@ import { markerProvider } from 'react-multiview/lib/series';
 
 
 export const getShowImageSwitch = state => state.vis.showImage;
+export const getMinPoints = state => state.vis.minPoints;
+export const getMinImageSize = state => state.vis.minImageSize;
 
 const getDataBySamples = state => state.data.dataBySamples;
 export const getSampleKinds = state => state.data.sampleKinds;

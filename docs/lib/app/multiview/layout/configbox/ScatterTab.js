@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 
 import Autocomplete from 'react-toolbox/lib/autocomplete';
 import {Button} from 'react-toolbox/lib/button';
+import Slider from 'react-toolbox/lib/slider';
 import sortAlphaNum from '../../utils/sortAlphaNum';
 
-
+import theme from './index.css';
 
 class ScatterTab extends React.Component {
     renderAttrSelector = (axis, attrKinds) => {
@@ -28,7 +29,12 @@ class ScatterTab extends React.Component {
     render() {
         const {
             attrKinds: attrKindsProp,
-            attrFormat
+            attrFormat,
+            showImage,
+            minPoints,
+            minImageSize,
+            onSwitchChange,
+            onSliderChange
         } = this.props;
 
         const attrKinds = Object.keys(attrKindsProp).map(attrKey => {
@@ -39,8 +45,18 @@ class ScatterTab extends React.Component {
             {this.renderAttrSelector('x', attrKinds)}
             {this.renderAttrSelector('y', attrKinds)}
             {this.renderAttrSelector('z', attrKinds)}
-            <Button icon='photo' label="Show Image" accent={this.props.showImage}
-                onClick={() => this.props.onSwitchChange('showImage', !this.props.showImage)} />
+            <Button icon='photo' label="Show Image" accent={showImage}
+                onClick={() => onSwitchChange('showImage', !showImage)} />
+
+            <div>
+                <p>MIN. # POINTS:</p>
+                <Slider pinned min={5} max={100} step={5} value={minPoints} disabled={!showImage} theme={theme}
+                    onChange={value => onSliderChange('minPoints', value)} />
+                <p>MIN. IMAGE SIDE:</p>
+                <Slider pinned min={5} max={40} step={5} value={minImageSize} disabled={!showImage} theme={theme}
+                    onChange={value => onSliderChange('minImageSize', value)} />
+            </div>
+
         </div>);
     }
 }

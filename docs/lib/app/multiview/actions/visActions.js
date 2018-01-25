@@ -26,6 +26,13 @@ export function setSwitch(name, value) {
     }
 }
 
+export function setSlider(name, value) {
+    return {
+        type: 'SET_SLIDER',
+        payload: {name, value}
+    }
+}
+
 export function updateAttrSelect(newSelect) {
     return {
         type: 'SET_PCP_SELECT_DIM',

@@ -13,6 +13,8 @@ const INITIAL_STATE = {
     attrz: 'sample',
 
     showImage: false,
+    minPoints: 20,
+    minImageSize: 10,
 
     // for pcp
     selectedDimension: [
@@ -32,6 +34,15 @@ function setSwitch(state, payload) {
     }
 }
 
+function setSlider(state, payload) {
+    const {name, value} = payload;
+    switch(name) {
+        case 'minPoints': return {...state, minPoints: value};
+        case 'minImageSize': return {...state, minImageSize: value};
+        default: return state;
+    }
+}
+
 function setSelectDim(state, payload) {
     return {...state, selectedDimension: payload.slice()};
 }
@@ -43,6 +54,7 @@ export function visReducers(state = INITIAL_STATE, action) {
         case 'CHANGE_SAMPLE_COLOR': return changeSampleColor(state, payload);
         case 'SET_ATTR': return setAttr(state, payload);
         case 'SET_SWITCH': return setSwitch(state, payload);
+        case 'SET_SLIDER': return setSlider(state, payload);
         case 'SET_PCP_SELECT_DIM': return setSelectDim(state, payload);
         default: return state;
     }

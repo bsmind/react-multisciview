@@ -12,6 +12,8 @@ import {
     getSampleColorOpacity,
     getSelectedSampleKeys,
     getShowImageSwitch,
+    getMinPoints,
+    getMinImageSize,
     // for pcp
     getSelectedDataArray,
     getPCPSelectedDimension
@@ -26,6 +28,7 @@ import {
 import {
     setAttr,
     setSwitch,
+    setSlider,
     updateAttrSelect
 } from '../../actions/visActions';
 
@@ -89,13 +92,16 @@ class ConfigBox extends React.Component {
                         attr={this.props.attr}
                         attrFormat={this.props.attrFormat}
                         showImage={this.props.showImage}
+                        minPoints={this.props.minPoints}
+                        minImageSize={this.props.minImageSize}
                         onAttrChange={this.handleAttrChange}
                         onSwitchChange={this.props.setSwitch}
+                        onSliderChange={this.props.setSlider}
                     />
                 </Tab>
                 <Tab label='PCP'>
                     <PcpTab
-                        ref={node => this.pcpTabNode = node}
+                        ref={'PCPTabRef'}
                         dimKinds={this.props.attrKinds}
                         dimOrder={this.props.dimOrder}
                         dimension={this.props.dimension}
@@ -106,7 +112,8 @@ class ConfigBox extends React.Component {
                         onColorAttrChange={this.handleAttrChange}
                         onAttrSelectChange={this.props.updateAttrSelect}
                         onPCPAxisSelect={this.props.onPCPAxisSelect}
-                        pcpAttrSelect={this.props.pcpAttrSelect}
+                        //pcpAttrSelect={this.props.pcpAttrSelect}
+                        dataExtents={this.props.dataExtents}
                     />
                 </Tab>
             </Tabs>
@@ -138,6 +145,8 @@ function mapStateToProps(state) {
         attrFormat: state.data.attrFormat,
 
         showImage: getShowImageSwitch(state),
+        minPoints: getMinPoints(state),
+        minImageSize: getMinImageSize(state),
 
         // for pcp
         dimOrder: pcpDimension,
@@ -159,8 +168,9 @@ function mapDispatchToProps(dispatch) {
         changeSelectedSampleColors,
         setAttr,
         setSwitch,
+        setSlider,
         updateAttrSelect
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ConfigBox);
+export default connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ConfigBox);

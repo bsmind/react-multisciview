@@ -88,7 +88,7 @@ class ScatterChart extends React.Component {
             xAttr, yAttr, zAttr,
             xAccessor, yAccessor, zAccessor,
             onScatterPanZoom,
-            imgPool, showImage
+            imgPool, showImage, minPoints, minImageSize,
         } = this.props;
 
         //console.log(markerProvider)
@@ -119,7 +119,7 @@ class ScatterChart extends React.Component {
                 zAttr={zAttr}
                 imgPool={imgPool}
                 showImage={showImage}
-                //onScatterPanZoom={onScatterPanZoom}
+                onScatterPanZoom={onScatterPanZoom}
                 onDataRequest={this.handleDataRequest}
                 //onSelectDataItems={this.handleSelectDataItems}
             >
@@ -136,6 +136,8 @@ class ScatterChart extends React.Component {
                 <Series>
                     <ScatterSeries
                         markerProvider={markerProvider}
+                        minPoints={minPoints}
+                        minImageSize={minImageSize}
                     />
                 </Series>        
                     <ColorLegend 

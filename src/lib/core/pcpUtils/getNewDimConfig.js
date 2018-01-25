@@ -6,7 +6,7 @@ import { scaleLinear } from 'd3-scale';
 
 export default (
     {
-        dimName,
+        dimName: dimNameProp,
         dimExtents,
         dimAccessor,
         axisWidth
@@ -17,6 +17,7 @@ export default (
     initialDimConfig = {}
 ) => {
     const newDimConfig = {};
+    const dimName = Object.keys(dimExtents);
     dimName.forEach(name => {
         const axisExtents = dimAccessor(dimExtents, name) == null
             ? [0, 1]

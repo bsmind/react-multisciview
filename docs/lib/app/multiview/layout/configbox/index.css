@@ -26,34 +26,11 @@
     max-height: var(--list-item-max-height);
 }
 
-.itemContentRoot {
-    min-width: 0;
+.knob {
+    z-index: 50;
 }
 
-.itemText {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.innerknob {
+    z-index: 50;
 }
 
-.btndiv {
-    height: var(--btndiv-height); 
-}
-
-.seldiv {
-    height: var(--seldiv-height);
-}
-
-.listdiv {
-    height: var(--listdiv-height);
-    overflow-y: scroll;
-}
-
-.infodiv {
-    height: var(--infodiv-height);
-    padding: 5px;
-}
-
-.tabStyle {
-    outline: 'none';
-}

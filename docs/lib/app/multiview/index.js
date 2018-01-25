@@ -41,6 +41,7 @@ class MultiViewApp extends React.Component {
         }
 
         this.pcpAttrSelect={};
+        this.__dataExtents={};
     }
 
     componentWillMount() {
@@ -131,6 +132,22 @@ class MultiViewApp extends React.Component {
     }
 
     // todo: update pcp by scatter plot
+    handleScatterPanZoom = (newDataExtents, inProgress) => {
+        Object.keys(newDataExtents).forEach(key => {
+            this.__dataExtents[key] = newDataExtents[key].slice();
+        });
+
+        const ConfigBoxRef = this.refs['ConfigBoxRef'].getWrappedInstance();
+        if (ConfigBoxRef.refs['PCPTabRef']) {
+            const pcpNode = ConfigBoxRef.refs['PCPTabRef'].refs['PCPChartRef'].node.refs['PCPCanvasRef'];
+            pcpNode.handleByOtherFull(this.__dataExtents, inProgress);
+        }
+        //console.log(ConfigBoxRef)
+        //const PCPTabRef = ConfigBoxRef.refs['PCPTabRef'].getWrappedInstance();
+        //console.log(PCPTabRef);
+        //console.log(newDataExtents)
+        //Object.keys(newDataExtents).forEach()
+    }    
 
 
 
@@ -157,14 +174,16 @@ class MultiViewApp extends React.Component {
                         <ScatterBox 
                             ref={'ScatterBoxRef'}
                             width={scatterBoxWidth} height={scatterBoxWidth} 
+                            onScatterPanZoom={this.handleScatterPanZoom}
                         />
                     </div>
                     <div style={{marginLeft: scatterBoxWidth}}>
                         <ConfigBox
-                            ref={node => this.configBoxNode = node} 
+                            ref={'ConfigBoxRef'} 
                             height={height}
                             onPCPAxisSelect={this.handlePCPAxisSelect}
-                            pcpAttrSelect={this.pcpAttrSelect}
+                            //pcpAttrSelect={this.pcpAttrSelect}
+                            dataExtents={this.__dataExtents}
                         />
                     </div>
                 </div>

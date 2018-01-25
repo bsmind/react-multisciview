@@ -103,9 +103,7 @@ class ChartCanvas extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		//const state = this.updateChart(nextProps);
 		const state = this.updateChart(nextProps);
-		//console.log(state);
 		this.clearAxisAndChartOnCanvas();
 		this.setState({...state});
 		const {
@@ -258,7 +256,13 @@ class ChartCanvas extends React.Component {
 				dataExtentsState[name] = isArrayOfString(extentsProps)
 					? [0, extentsProps.length]
 					: extentsProps.slice();
-			} else { 
+			} 
+			else if (name !== initialXAttr.name && name !== initialYAttr.name) {
+				dataExtentsState[name] = isArrayOfString(extentsProps)
+				? [0, extentsProps.length]
+				: extentsProps.slice();			
+			}
+			else { 
 				// expand one but ordinary 
 				if (isArrayOfString(extentsProps) && (xAttrProp !== name && yAttrProp !== name)) {
 					extentsState[0] = 0;
@@ -270,6 +274,7 @@ class ChartCanvas extends React.Component {
 				// }
 			}
 		});
+		//console.log(dataExtentsProp, dataExtentsState)
 
 		// xScale
 		const xAttr = getScale({
@@ -371,10 +376,19 @@ class ChartCanvas extends React.Component {
 	
 	handleXAxisZoom = (newDomain) => {
     	const { xAttr: initialXAttr } = this.state;
-		const { scale, extents, name } = initialXAttr;
+		const { scale, extents, name, ordinary } = initialXAttr;
 
-		newDomain[0] = Math.max(extents[0], newDomain[0]);
-		newDomain[1] = Math.min(extents[1], newDomain[1]);
+		if (ordinary) {
+			newDomain[0] = Math.max(extents[0], newDomain[0]);
+			newDomain[1] = Math.min(extents[1], newDomain[1]);
+		}
+
+		const newDataExtents = {
+			...this.state.dataExtents,
+			[name]: newDomain
+		}
+
+		//console.log(newDataExtents)
 		
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
@@ -383,28 +397,28 @@ class ChartCanvas extends React.Component {
 				...this.state.xAttr,
 				scale: scale.copy().domain(newDomain)
 			},
-			dataExtents: {
-				...this.state.dataExtents,
-				[name]: newDomain
-			},
+			dataExtents: newDataExtents,
 			zoomFactor: 1
 		});
 		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(
-				[name],
-				[newDomain],
-				false
-			);
+			this.props.onScatterPanZoom(newDataExtents, false);
 		}		
     }
 
     handleYAxisZoom = (newDomain) => {
     	const { yAttr: initialYAttr } = this.state;
-		const { scale, extents, name } = initialYAttr;
+		const { scale, extents, name, ordinary } = initialYAttr;
 
-		newDomain[0] = Math.max(extents[0], newDomain[0]);
-		newDomain[1] = Math.min(extents[1], newDomain[1]);
+		if (ordinary) {
+			newDomain[0] = Math.max(extents[0], newDomain[0]);
+			newDomain[1] = Math.min(extents[1], newDomain[1]);
+		}
 
+		const newDataExtents = {
+			...this.state.dataExtents,
+			[name]: newDomain
+		}
+		
     	this.clearAxisAndChartOnCanvas();		
 		this.setState({
 			...this.state,
@@ -412,18 +426,11 @@ class ChartCanvas extends React.Component {
 				...this.state.yAttr,
 				scale: scale.copy().domain(newDomain)
 			},
-			dataExtents: {
-				...this.state,
-				[name]: newDomain
-			},
+			dataExtents: newDataExtents,
 			zoomFactor: 1
 		});
 		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(
-				[name],
-				[newDomain],
-				false
-			);
+			this.props.onScatterPanZoom(false, newDataExtents);
 		}		
     }
 
@@ -437,7 +444,6 @@ class ChartCanvas extends React.Component {
 
         const SCALE_FACTOR = 0.001;
 		const zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
-		//console.log('canvas: ', zoomFactor)
         const centerX = initialXScale.invert(mouseXY[0]),
             beginX = initialXScale.domain()[0],
             endX = initialXScale.domain()[1];
@@ -449,6 +455,10 @@ class ChartCanvas extends React.Component {
             Math.max(centerX - (centerX - beginX)*zoomFactor, xExtents[0]),
             Math.min(centerX + (endX - centerX)*zoomFactor, xExtents[1])
 		];
+		if (xOrdinary) {
+			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]);
+			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]);
+		}
 		const newScaleX = initialXScale.copy().domain(newDomainX);
 		const stepX = !xOrdinary
 			? 0
@@ -458,12 +468,20 @@ class ChartCanvas extends React.Component {
             Math.max(centerY - (centerY - beginY)*zoomFactor, yExtents[0]),
             Math.min(centerY + (endY - centerY)*zoomFactor, yExtents[1])
 		];
+		if (yOrdinary) {
+			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]);
+			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]);
+		}		
 		const newScaleY = initialYScale.copy().domain(newDomainY);
 		const stepY = !yOrdinary
 			? 0
 			: Math.abs(newScaleY(0) - newScaleY(1));
 
-		
+		const newDataExtents = {
+			...this.state.dataExtents,
+			[xName]: newDomainX.slice(),
+			[yName]: newDomainY.slice()
+		}
 		this.clearAxisAndChartOnCanvas();
 		this.setState({
 			...this.state,
@@ -477,19 +495,11 @@ class ChartCanvas extends React.Component {
 				scale: newScaleY,
 				step: stepY
 			},
-			dataExtents: {
-				...this.state.dataExtents,
-				[xName]: newDomainX.slice(),
-				[yName]: newDomainY.slice()
-			},
+			dataExtents: newDataExtents,
 			zoomFactor
 		});
 		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(
-				[xName, yName],
-				[newDomainX, newDomainY],
-				false
-			);
+			this.props.onScatterPanZoom(newDataExtents, false);
 		}
 	}
 
@@ -558,11 +568,11 @@ class ChartCanvas extends React.Component {
 				yAttr: newYAttr,
 				dataExtents: newDataExtents
 			} = state;
-			//this.__xAttr = state.xAttr;
-			//this.__yAttr = state.yAttr;
-			//this.__dataExtents = state.dataExtents;
 			if (this.props.showImage) {
 				this.waitingForPanAnimationFrame = false;
+				this.__xAttr = null;
+				this.__yAttr = null;
+				this.__dataExtents = null;
 				this.clearAxisAndChartOnCanvas();
 				this.setState({
 					...this.state,
@@ -571,6 +581,9 @@ class ChartCanvas extends React.Component {
 					dataExtents: newDataExtents,
 					zoomFactor: 1
 				});				
+				if (this.props.onScatterPanZoom) {
+					this.props.onScatterPanZoom(newDataExtents, false);
+				}
 			} else {
 				this.panInProgress = true;
 				this.triggerEvent('pan', state, e);
@@ -578,16 +591,8 @@ class ChartCanvas extends React.Component {
 					this.waitingForPanAnimationFrame = false;
 					this.clearAxisAndChartOnCanvas();
 					this.draw({trigger: 'pan'});					
-					if (false & this.props.onScatterPanZoom) {
-						const xName = newXAttr.name;
-						const yName = newYAttr.name;
-						const domainX = newXAttr.scale.domain();
-						const domainY = newYAttr.scale.domain();
-						this.props.onScatterPanZoom(
-							[xName, yName],
-							[domainX, domainY],
-							true
-						);
+					if (this.props.onScatterPanZoom) {
+						this.props.onScatterPanZoom(newDataExtents, true);
 					}						
 				});
 			}
@@ -616,6 +621,9 @@ class ChartCanvas extends React.Component {
 				yAttr: newYAttr,
 				dataExtents: newDataExtents
 			});		
+			if (this.props.onScatterPanZoom) {
+				this.props.onScatterPanZoom(newDataExtents, false);
+			}							
 		} else {
 			this.triggerEvent('panend', state, e);
 			requestAnimationFrame(() => {
@@ -627,17 +635,9 @@ class ChartCanvas extends React.Component {
 					dataExtents: newDataExtents,
 					zoomFactor: 1
 				});
-				if (false && this.props.onScatterPanZoom) {
-					const xName = newXAttr.name;
-					const yName = newYAttr.name;
-					const domainX = newXAttr.scale.domain();
-					const domainY = newYAttr.scale.domain();
-					this.props.onScatterPanZoom(
-						[xName, yName],
-						[domainX, domainY],
-						false
-					);
-				}								
+				if (this.props.onScatterPanZoom) {
+					this.props.onScatterPanZoom(newDataExtents, false);
+				}						
 			});	
 		}
 	}
@@ -677,26 +677,30 @@ class ChartCanvas extends React.Component {
 			this.__zAttr = this.__zAttr || this.state.zAttr;
 			this.__dataExtents = this.__dataExtents || this.state.dataExtents;
 
-			const {zAttr, dataExtents} = this.zAxisSelectHelper(
-				selectDomain, selectRange,
-				this.__zAttr, this.__dataExtents);
-
-			this.__zAttr = zAttr;
-			this.__dataExtents = dataExtents;
-			this.axisSelectInProgress = true;
-			this.triggerEvent('pan', {zAttr, dataExtents}, e);
-			requestAnimationFrame(() => {
+			const {zAttr, dataExtents} = this.zAxisSelectHelper(selectDomain, selectRange, this.__zAttr, this.__dataExtents);
+			if (this.props.showImage) {
 				this.waitingForAnimationFrame = false;
+				this.__zAttr = null;
+				this.__dataExtents = null;
 				this.clearAxisAndChartOnCanvas();
-				this.draw({trigger: 'pan'});
-				if (false && this.props.onScatterPanZoom && zAttr.name !== 'sample') {
-					this.props.onScatterPanZoom(
-						[zAttr.name],
-						[selectDomain.slice()],
-						true
-					);
+				this.setState({zAttr, dataExtents});
+				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					this.props.onScatterPanZoom(dataExtents, false);
 				}													
-			});
+			} else {
+				this.__zAttr = zAttr;
+				this.__dataExtents = dataExtents;
+				this.axisSelectInProgress = true;
+				this.triggerEvent('pan', {zAttr, dataExtents}, e);
+				requestAnimationFrame(() => {
+					this.waitingForAnimationFrame = false;
+					this.clearAxisAndChartOnCanvas();
+					this.draw({trigger: 'pan'});
+					if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+						this.props.onScatterPanZoom(dataExtents, true);
+					}													
+				});	
+			}
 		}
 	}
 
@@ -708,22 +712,23 @@ class ChartCanvas extends React.Component {
 		this.__zAttr = null;
 		this.__dataExtents = null;
 		this.axisSelectInProgress = false;
-		this.triggerEvent('pan', {zAttr, dataExtents}, e);
-		requestAnimationFrame(() => {
+		if (this.props.showImage) {
 			this.clearAxisAndChartOnCanvas();
-			this.setState({
-				zAttr,
-				dataExtents
-			});
-			// connect to pcp
-			if (false && this.props.onScatterPanZoom && zAttr.name !== 'sample') {
-				this.props.onScatterPanZoom(
-					[zAttr.name],
-					[selectDomain.slice()],
-					false
-				);
+			this.setState({zAttr, dataExtents});
+			if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+				this.props.onScatterPanZoom(dataExtents, false);				
 			}															
-		});
+		} else {
+			this.triggerEvent('pan', {zAttr, dataExtents}, e);
+			requestAnimationFrame(() => {
+				this.clearAxisAndChartOnCanvas();
+				this.setState({zAttr, dataExtents});
+				// connect to pcp
+				if (this.props.onScatterPanZoom && zAttr.name !== 'sample') {
+					this.props.onScatterPanZoom(dataExtents, false);				
+				}															
+			});	
+		}
 	}
 
 	handleZAxisSelectCancel = (e) => {
@@ -742,14 +747,9 @@ class ChartCanvas extends React.Component {
 			};	
 			this.setState({zAttr: newZAttr, dataExtents: newDataExtents});	
 			// connect to pcp
-			if (false && this.props.onScatterPanZoom) {
-				this.props.onScatterPanZoom(
-					[name],
-					[newZAttr.extents.slice()],
-					false
-				);
+			if (this.props.onScatterPanZoom) {
+				this.props.onScatterPanZoom(newDataExtents, false);
 			}															
-				
 		} else {
 			this.setState({zAttr: newZAttr});
 		}	

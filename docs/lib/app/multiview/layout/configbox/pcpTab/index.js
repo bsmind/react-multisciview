@@ -107,7 +107,7 @@ class PcpTab extends React.Component {
 
         return <div>
             <ParallelCoordinateChart
-                ref={node => this.PCPChartNode = node}
+                ref={'PCPChartRef'}
                 height={250}
                 data={data}
                 dimOrder={dimOrder}
@@ -116,7 +116,8 @@ class PcpTab extends React.Component {
                 titleFormat={attrFormat}
                 updateDimOrder={this.handleUpdateDimOrder}
                 onPCPAxisSelect={onPCPAxisSelect}
-                pcpAttrSelect={pcpAttrSelect}
+                //pcpAttrSelect={pcpAttrSelect}
+                dataExtents={this.props.dataExtents}
             />
             {this.renderOptions()}
         </div>

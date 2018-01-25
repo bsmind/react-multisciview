@@ -16,6 +16,15 @@ class ScatterSeries extends React.Component {
         this.minDist = {x: null, y: null};
     }
 
+    componentWillReceiveProps(nextProps) {
+        const { minImageSize } = nextProps;
+        if (this.__imgRefWidth || this.__imgRefHeight) {
+            this.__imgRefWidth = Math.max(minImageSize, this.__imgRefWidth || minImageSize);
+            this.__imgRefHeight = Math.max(minImageSize, this.__imgRefHeight || minImageSize);
+            //forceUpdate();
+        }
+    }
+
     drawMarkersWithProvider = (ctx, moreProps) => {
     	const { markerProvider, shared: {origDataExtents, ratio} } = this.props;
         const { plotData, dataExtents } = moreProps;
@@ -415,7 +424,8 @@ class ScatterSeries extends React.Component {
     }
 
     updateRefImageSize = (minDist, numPoints, zoomFactor = 1) => {
-        const MIN_IMAGE_SIDE = 12;
+        const {minPoints, minImageSize} = this.props;
+        const MIN_IMAGE_SIDE = minImageSize;
         const inversed = 1 / zoomFactor;
         if (minDist.x == null && minDist.y == null && numPoints <= 1) {
            // console.log('case 1: ', minDist, numPoints)
@@ -423,13 +433,13 @@ class ScatterSeries extends React.Component {
             this.__imgRefHeight = (this.__imgRefHeight || 200) * inversed;
         } 
 
-        else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= 20) {
+        else if (minDist.x < MIN_IMAGE_SIDE && minDist.y < MIN_IMAGE_SIDE && numPoints <= minPoints) {
             //console.log('case 2: ', minDist, numPoints)
             this.__imgRefWidth = (this.__imgRefWidth || MIN_IMAGE_SIDE) * inversed;
             this.__imgRefHeight = (this.__imgRefHeight || MIN_IMAGE_SIDE) * inversed;
         }        
 
-        else if ( (minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= 20) {
+        else if ( (minDist.x >= MIN_IMAGE_SIDE || minDist.y >= MIN_IMAGE_SIDE) && numPoints <= minPoints) {
             //console.log('case 3: ', minDist, numPoints)            
             this.__imgRefWidth = (this.__imgRefWidth || Math.floor(minDist.x)) * inversed;
             this.__imgRefHeight = (this.__imgRefHeight || Math.floor(minDist.y)) * inversed;
@@ -449,10 +459,11 @@ class ScatterSeries extends React.Component {
     }
 
     drawImage = (moreProps, ctx) => {
-
         const { plotData, xAttr, yAttr, dataExtents, zoomFactor } = moreProps;
-        const { shared: {origDataExtents} } = this.props;
+        const { shared: {origDataExtents}, minPoints, minImageSize } = this.props;
         const { canvasDim } = this.props.shared;
+
+        if (plotData.length === 0) return;
         
         const xAccessor = this.getAccessor(xAttr);
         const yAccessor = this.getAccessor(yAttr);

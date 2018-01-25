@@ -12,7 +12,9 @@ import {
     getSelectedDataArray,
     getImgPool,
     getSampleColorOpacity,
-    getShowImageSwitch
+    getShowImageSwitch,
+    getMinPoints,
+    getMinImageSize
 } from '../../selectors';
 
 import {
@@ -39,7 +41,6 @@ class ScatterBox extends React.Component {
         const chartProps = {
             ...this.props,
             margin,
-            onScatterPanZoom: null,
             onDataRequest: this.handleDataImageRequest,
             onSelectDataItems: null
         }
@@ -66,6 +67,8 @@ function mapStateToProps(state) {
         imgPool: getImgPool(state),
         opacity: getSampleColorOpacity(state),
         showImage: getShowImageSwitch(state),
+        minPoints: getMinPoints(state),
+        minImageSize: getMinImageSize(state),
     };
 }
 

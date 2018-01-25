@@ -39,7 +39,7 @@ class ParallelCoordinateChart extends React.Component {
 
         return (
             <PCPCanvas
-                ref={node => this.PCPCanvasNode = node}
+                ref={'PCPCanvasRef'}
                 width={width}
                 height={height}
                 ratio={ratio}
@@ -57,7 +57,8 @@ class ParallelCoordinateChart extends React.Component {
                 titleFormat={titleFormat}
 
                 onPCPAxisSelect={onPCPAxisSelect}
-                pcpAttrSelect={pcpAttrSelect}
+                //pcpAttrSelect={pcpAttrSelect}
+                dataExtents={this.props.dataExtents}
                 onUnmount={this.handleUnmountPCP}
             >
                 <Series>
