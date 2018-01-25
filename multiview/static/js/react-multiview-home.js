@@ -50081,7 +50081,7 @@ var PCPAxisEventHandler = function (_React$Component) {
             var e = __WEBPACK_IMPORTED_MODULE_3_d3_selection__["a" /* event */];
             var mouseY = _this.getMouseY();
 
-            if (Math.abs(mouseY - _this.state.startY) < 1e-6) {
+            if (Math.abs(mouseY - _this.state.startY) < 1) {
                 _this.setState({ startY: null, endY: null });
                 if (_this.props.onRangeSelectCancle) _this.props.onRangeSelectCancle(e);
             } else {

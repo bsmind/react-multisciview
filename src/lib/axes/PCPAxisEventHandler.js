@@ -78,7 +78,7 @@ class PCPAxisEventHandler extends React.Component {
         const e = d3Event;
         const mouseY = this.getMouseY();
 
-        if (Math.abs(mouseY - this.state.startY) < 1e-6) {
+        if (Math.abs(mouseY - this.state.startY) < 1) {
             this.setState({startY: null, endY: null});
             if (this.props.onRangeSelectCancle)
                 this.props.onRangeSelectCancle(e);            
