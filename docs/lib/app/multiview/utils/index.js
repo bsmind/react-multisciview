@@ -1,6 +1,7 @@
 export { default as sortAlphaNum } from "./sortAlphaNum";
 export { default as randomColor } from "./randomColor";
 export { default as PriorityQueue } from "./PriorityQueue";
+export { colorInterpolators, getColorInterpolator } from './colorSchemes';
 
 export const PRIORITY = {
 	HIGH: 5,

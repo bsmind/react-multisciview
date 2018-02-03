@@ -39,3 +39,17 @@ export function updateAttrSelect(newSelect) {
 		payload: newSelect
 	};
 }
+
+export function setZColorScheme(attr, newScheme) {
+	return {
+		type: 'SET_Z_COLOR_SCHEME',
+		payload: {attr, newScheme}
+	};
+}
+
+export function setZColorDomain(attr, newDomain) {
+	return {
+		type: 'SET_Z_COLOR_DOMAIN',
+		payload: {attr, newDomain}
+	};
+}

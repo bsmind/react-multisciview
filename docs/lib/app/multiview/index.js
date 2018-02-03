@@ -147,7 +147,8 @@ class MultiViewApp extends React.Component {
     render() {
     	const { width, height } = this.state;
 
-    	const scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
+		const scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
+		//const configBoxWidth = Math.floor(width - scatterBoxWidth);
     	return (
     		<Layout>
     			<Panel>
@@ -164,7 +165,7 @@ class MultiViewApp extends React.Component {
     				</div>
     				<div style={{ marginLeft: scatterBoxWidth }}>
     					<ConfigBox
-    						ref={"ConfigBoxRef"} // eslint-disable-line
+							ref={"ConfigBoxRef"} // eslint-disable-line
     						height={height}
     						onPCPAxisSelect={this.handlePCPAxisSelect}
     						// pcpAttrSelect={this.pcpAttrSelect}

@@ -27,7 +27,6 @@ export const getAttrKinds = state => state.data.attrKinds;
 export const getImgPool = state => state.data.imgPool;
 
 
-
 export const getSelectedSampleNames = createSelector(
 	[
 		getSampleKinds,
@@ -93,3 +92,59 @@ export const getSelectedDataArray = createSelector(
 
 export const getPCPSelectedDimension = state => state.vis.selectedDimension;
 
+export const getColorScheme = createSelector(
+	[
+		state => state.vis.colorSchemes,
+		getAttrZ,
+		getSampleColorOpacity,
+		getSelectedDataArray
+	],
+	(
+		colorSchemes,
+		attrz,
+		opacity,
+		{extents}
+	) => {
+		const scheme = {
+			type: 'Viridis',
+			minDomain: 0,
+			maxDomain: 10,
+			colorDomain: [0, 10],
+			opacity: 1,
+			active: false,
+			ordinary: false,
+			reverse: false,
+		};
+		const tempExtents = extents[attrz];
+		const tempScheme = colorSchemes[attrz] ? colorSchemes[attrz]: {};
+		//console.log(tempScheme, tempExtents)
+		if (tempExtents == null) {
+			return {
+				...scheme,
+				...tempScheme
+			};
+		} else {
+			if (attrz === 'sample') {
+				return {
+					...scheme,
+					...tempScheme,
+					type: 'Sample',
+					minDomain: 0,
+					maxDomain: tempExtents.length,
+					colorDomain: [0, tempExtents.length],
+					active: true,
+					ordinary: true	
+				};
+			} else {
+				return {
+					...scheme,
+					...tempScheme,
+					minDomain: tempExtents[0],
+					maxDomain: tempExtents[1],
+					active: true,
+					ordinary: false,
+				};
+			}	
+		}
+	}
+)

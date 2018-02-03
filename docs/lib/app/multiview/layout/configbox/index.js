@@ -17,7 +17,9 @@ import {
 	getMinImageSize,
 	// for pcp
 	getSelectedDataArray,
-	getPCPSelectedDimension
+	getPCPSelectedDimension,
+	// for colorScheme
+	getColorScheme,
 } from "../../selectors";
 
 import {
@@ -30,7 +32,9 @@ import {
 	setAttr,
 	setSwitch,
 	setSlider,
-	updateAttrSelect
+	updateAttrSelect,
+	setZColorScheme,
+	setZColorDomain
 } from "../../actions/visActions";
 
 import { Tab, Tabs } from "react-toolbox";
@@ -56,7 +60,7 @@ class ConfigBox extends React.Component {
     	const {
     		attr,
     		attrFormat,
-    		attrKinds
+			attrKinds,
     	} = this.props;
 
     	const oldAttr = attrFormat(attr[dim]);
@@ -64,7 +68,7 @@ class ConfigBox extends React.Component {
     		const attrKeys = Object.keys(attrKinds);
     		const index = attrKeys.findIndex(key => key.includes(value));
     		this.props.setAttr(dim, attrKeys[index]);
-    	}
+		}
     }
 
     render() {
@@ -89,13 +93,16 @@ class ConfigBox extends React.Component {
     				<ScatterTab
     					attrKinds={this.props.attrKinds}
     					attr={this.props.attr}
-    					attrFormat={this.props.attrFormat}
+						attrFormat={this.props.attrFormat}
+						zColorScheme={this.props.zColorScheme}
     					showImage={this.props.showImage}
     					minPoints={this.props.minPoints}
     					minImageSize={this.props.minImageSize}
     					onAttrChange={this.handleAttrChange}
     					onSwitchChange={this.props.setSwitch}
-    					onSliderChange={this.props.setSlider}
+						onSliderChange={this.props.setSlider}
+						onColorSchemeChange={this.props.setZColorScheme}
+						onColorDomainChange={this.props.setZColorDomain}
     				/>
     			</Tab>
     			<Tab label="PCP">
@@ -146,6 +153,9 @@ function mapStateToProps(state) {
 		dimOrder: pcpDimension,
 		dimension: dimension,
 		data,
+
+		// color Scheme
+		zColorScheme: getColorScheme(state)
 	};
 }
 
@@ -157,7 +167,9 @@ function mapDispatchToProps(dispatch) {
 		setAttr,
 		setSwitch,
 		setSlider,
-		updateAttrSelect
+		updateAttrSelect,
+		setZColorScheme,
+		setZColorDomain,
 	}, dispatch);
 }
 

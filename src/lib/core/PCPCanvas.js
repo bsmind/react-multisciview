@@ -657,7 +657,8 @@ class PCPCanvas extends React.Component {
     	const pcpYAxisList = [];
 
     	dimName.forEach(name => {
-    		const config = this.state.dimConfig[name];
+			const config = this.state.dimConfig[name];
+			if (config == null) return;
     		// console.log(config, name)
     		const title = config.title;
     		pcpYAxisList.push(

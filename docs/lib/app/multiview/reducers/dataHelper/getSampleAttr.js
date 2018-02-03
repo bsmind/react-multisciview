@@ -35,8 +35,6 @@ export default function getSampleAttr(state, payload) {
 		attrTypes[attr] = type; // eslint-disable-line
 	});
 
-	// console.log(attrKinds)
-
 	return { ...state,
 		attrKinds,
 		attrMinMax,

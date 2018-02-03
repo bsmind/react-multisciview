@@ -18,6 +18,7 @@ const INITIAL_STATE = {
 	sampleColorOpacity: 0.5,
 
 	attrKinds: {},
+	attrColorSchemes: {},
 	attrMinMax: {}, // global min, max
 	attrTypes: {},
 	attrFormat: attrKey => attrKey,

@@ -20,6 +20,10 @@ const INITIAL_STATE = {
 		"linecut_qr.data.fit_peaks_d0",
 		"linecut_qr.data.fit_peaks_sigma1"
 	],
+
+	// for z-axis colorSchemes
+	colorSchemes: {}
+
 };
 
 function setSwitch(state, payload) {
@@ -43,6 +47,34 @@ function setSelectDim(state, payload) {
 	return { ...state, selectedDimension: payload.slice() };
 }
 
+function setZColorScheme(state, payload) {
+	const {attr, newScheme} = payload;
+	const prev = state.colorSchemes[attr] ? state.colorSchemes[attr]: {};
+	return {...state,
+		colorSchemes: {
+			...state.colorSchemes,
+			[attr]: {
+				...prev,
+				type: newScheme
+			}
+		}
+	};
+}
+
+function setZColorDomain(state, payload) {
+	const {attr, newDomain} = payload;
+	const prev = state.colorSchemes[attr] ? state.colorSchemes[attr]: {};
+	return {...state,
+		colorSchemes: {
+			...state.colorSchemes,
+			[attr]: {
+				...prev,
+				colorDomain: newDomain
+			}
+		}
+	};	
+}
+
 export function visReducers(state = INITIAL_STATE, action) {
 	const { type, payload } = action;
 	switch (type) {
@@ -50,6 +82,8 @@ export function visReducers(state = INITIAL_STATE, action) {
 	case "SET_SWITCH": return setSwitch(state, payload);
 	case "SET_SLIDER": return setSlider(state, payload);
 	case "SET_PCP_SELECT_DIM": return setSelectDim(state, payload);
+	case "SET_Z_COLOR_SCHEME": return setZColorScheme(state, payload);
+	case "SET_Z_COLOR_DOMAIN": return setZColorDomain(state, payload);
 	default: return state;
 	}
 }
