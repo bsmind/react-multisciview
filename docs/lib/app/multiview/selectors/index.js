@@ -116,12 +116,38 @@ export const getColorScheme = createSelector(
 			reverse: false,
 		};
 		const tempExtents = extents[attrz];
+		const minDomain = tempExtents && attrz !== 'sample' ? tempExtents[0]: 0;
+		const maxDomain = tempExtents && attrz !== 'sample' ? tempExtents[1]: 10;
+
 		const tempScheme = colorSchemes[attrz] ? colorSchemes[attrz]: {};
-		//console.log(tempScheme, tempExtents)
-		if (tempExtents == null) {
+
+		let colorDomain = tempScheme.colorDomain;
+		if (colorDomain != null) {
+			let left = colorDomain[0];
+			if (left < minDomain || left > maxDomain) left = minDomain;
+
+			let right = colorDomain[1];
+			if (right < minDomain || right > maxDomain) right = maxDomain;
+
+			if (left > right) {
+				const temp = left;
+				left = right;
+				right = temp;
+			}
+
+			colorDomain = [left, right];
+		} else {
+			colorDomain = [minDomain, maxDomain];
+		}
+
+		//console.log(tempExtents)
+		if (tempExtents == null || attrz === 'sample') {
 			return {
 				...scheme,
-				...tempScheme
+				...tempScheme,
+				minDomain,
+				maxDomain,
+				colorDomain
 			};
 		} else {
 			if (attrz === 'sample') {
@@ -139,8 +165,9 @@ export const getColorScheme = createSelector(
 				return {
 					...scheme,
 					...tempScheme,
-					minDomain: tempExtents[0],
-					maxDomain: tempExtents[1],
+					minDomain,
+					maxDomain,
+					colorDomain,
 					active: true,
 					ordinary: false,
 				};

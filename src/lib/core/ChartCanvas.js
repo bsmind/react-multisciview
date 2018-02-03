@@ -444,9 +444,11 @@ class ChartCanvas extends React.Component {
 			beginY = initialYScale.domain()[0],
 			endY = initialYScale.domain()[1];
 
+		//console.log(centerX, beginX, endX, xOrdinary)
+
 		const newDomainX = [
-			Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]),
-			Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])
+			centerX - (centerX - beginX) * zoomFactor,
+			centerX + (endX - centerX) * zoomFactor
 		];
 		if (xOrdinary) {
 			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
@@ -458,8 +460,8 @@ class ChartCanvas extends React.Component {
 			: Math.abs(newScaleX(0) - newScaleX(1));
 
 		const newDomainY = [
-			Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]),
-			Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])
+			centerY - (centerY - beginY) * zoomFactor,
+			centerY + (endY - centerY) * zoomFactor
 		];
 		if (yOrdinary) {
 			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line

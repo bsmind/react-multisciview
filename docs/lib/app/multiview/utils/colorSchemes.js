@@ -31,9 +31,6 @@ import {
 } from 'd3-scale-chromatic';
 
 export const colorInterpolators = [
-    // For sample, (discrete)
-    "Sample",
-
     // These are from d3-scale.
     "Viridis",
     "Inferno",

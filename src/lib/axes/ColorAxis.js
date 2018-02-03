@@ -7,7 +7,7 @@ import {
     scaleSequential,
     interpolateViridis
 } from 'd3-scale';
-
+import { format as d3Format } from 'd3-format';
 import { select, mouse } from 'd3-selection';
 import { d3Window, mousePosition, cursorStyle } from '../utils';
 
@@ -18,10 +18,23 @@ class ColorAxis extends React.Component {
         this.state = {
             id: uniqueId('colorAxis-'),
             initSite: null,
-
-            barLeftPos: 0,
-            barRightPos: this.getBarWidth(props),
+            width: null
         };
+    }
+
+    componentDidMount(){
+        window.addEventListener('resize', this.handleResize);
+        const el = this.container;
+        this.setState({width: el.clientWidth});
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+    }
+
+    handleResize = () => {
+        const el = this.container;
+        this.setState({width: el.clientWidth});        
     }
 
     getCursor = () => {
@@ -36,7 +49,9 @@ class ColorAxis extends React.Component {
     }
 
     getBarWidth = (props = this.props) => {
-        const { width, margin } = props;
+        const { width: widthProp, margin } = props;
+        const { width: widthState } = this.state;
+        const width = widthState || widthProp;
         return Math.floor(Math.max(width - margin.left - margin.right, 0));
     }
 
@@ -184,6 +199,17 @@ class ColorAxis extends React.Component {
                 fill={'red'}
                 onMouseDown={e => this.handleMouseDown(e, 'right')}
             />            
+            <line 
+                x1={barLeftPos}
+                y1={0}
+                x2={barRightPos}
+                y2={0}
+                style={{
+                    stroke: 'red',
+                    strokeWidth: 1,
+                    fill: 'none'
+                }}
+            />
         </g>;
     }
 
@@ -193,6 +219,7 @@ class ColorAxis extends React.Component {
         const { colorBarHeight, minDomain, maxDomain } = this.props;
         const { tickSize, numTicks, fontSize, fontFamily } = this.props;
 
+        const formatSI = d3Format(".3s");
         const scale = this.getScale();
         const ticks = [], labels = [];
         for (let i=0; i<numTicks+2; ++i) {
@@ -215,7 +242,7 @@ class ColorAxis extends React.Component {
                     textAnchor: 'middle'
                 }}
             >
-                {scale.invert(pos)}
+                {formatSI(scale.invert(pos))}
             </text>);
         }
 
@@ -237,8 +264,9 @@ class ColorAxis extends React.Component {
     }
     
     render () {
-        const { id } = this.state;
-        const { height, margin, interpolator, colorOpacity, reverse } = this.props;
+        const { id, width: widthState } = this.state;
+        const { height, width: widthProp, margin, interpolator, colorOpacity, reverse } = this.props;
+        const width = widthState || widthProp;
 
         const colorStops = [];
         const nSamples = 20;
@@ -251,10 +279,10 @@ class ColorAxis extends React.Component {
         }
 
         return (
-            <div>
+            <div ref={node => this.container = node}>
                 <svg 
                     ref={node => this.node = node}
-                    width={this.props.width} 
+                    width={width} 
                     height={height}
                 >
                     <defs>

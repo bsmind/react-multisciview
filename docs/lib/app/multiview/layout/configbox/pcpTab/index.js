@@ -5,6 +5,7 @@ import Autocomplete from "react-toolbox/lib/autocomplete";
 import Dropdown from "react-toolbox/lib/dropdown";
 import { ParallelCoordinateChart } from "../../../charts";
 import { scaleSequential, interpolateViridis } from "d3-scale";
+import { getColorInterpolator } from '../../../utils';
 
 
 class PcpTab extends React.Component {
@@ -89,14 +90,17 @@ class PcpTab extends React.Component {
     		data, dimension, dimOrder,
     		attrFormat,
     		zAttr, colorsBySampleNames,
-    		onPCPAxisSelect,
+			onPCPAxisSelect,
+			colorScheme
     		// pcpAttrSelect
-    	} = this.props;
-
-    	const colorExtents = dimension[zAttr];
+		} = this.props;
+		
+		const colorExtents = dimension[zAttr];
+		const {type, colorDomain} = colorScheme;
+		const interpolator = getColorInterpolator(type);
     	const colorScale = zAttr === "sample" || colorExtents == null
     		? d => colorsBySampleNames[d[zAttr]]
-    		: scaleSequential(interpolateViridis).domain(colorExtents);
+    		: scaleSequential(interpolator).domain(colorDomain).clamp(true);
 
     	const colorAccessor = zAttr === "sample" || colorExtents == null
     		? d => colorScale(d)

@@ -10,7 +10,7 @@ import { ScatterSeries } from "react-multiview/lib/series";
 import { DataBox, MousePathTracker } from "react-multiview/lib/indicators";
 
 import get from "lodash.get";
-import { sortAlphaNum } from "../utils";
+import { sortAlphaNum, getColorInterpolator } from "../utils";
 
 import { scaleSequential, 
 	interpolateViridis, interpolateInferno, interpolatePlasma,
@@ -33,10 +33,10 @@ class ScatterChart extends React.Component {
 			ratio,
 			opacity,
 			data,
-			dimension
+			dimension,
+			colorScheme
 		} = props;
 
-		// todo: shape go to vis reducer
 		const shape = {
 			type: "square",
 			width: 6,
@@ -47,15 +47,11 @@ class ScatterChart extends React.Component {
 				opacity
 			}
 		};
-		const interpolate = interpolateViridis; //interpolateRainbow;
+		const {type, colorDomain} = colorScheme;
+		const interpolate = getColorInterpolator(type); //interpolateRainbow;
 		const colorScale = zAttr === "sample"
 			? d => colorsByGroup[d]
-			: dimension[zAttr]
-				// ? scaleLinear().domain(dimension[zAttr]).range(['red', 'yellow'])
-				// : scaleLinear().domain([0, 1]).range(['red', 'black']);
-				//? scaleSequential(interpolate).domain(dimension[zAttr])
-				? scaleSequential(interpolate).domain([dimension[zAttr][0], dimension[zAttr][1]/3])
-				: scaleSequential(interpolate).domain([0, 1]);
+			: scaleSequential(interpolate).domain(colorDomain).clamp(true)
 
 		const mProvider = markerProvider(d => get(d, zAttr), shape, ratio);
 		mProvider.colorScale(colorScale);
@@ -147,7 +143,7 @@ class ScatterChart extends React.Component {
     					minImageSize={minImageSize}
     				/>
     			</Series>
-    			<ColorLegend
+    			{/* <ColorLegend
     				orient={"vertical"}
     				tickOrient={"right"}
     				legendWidth={35}
@@ -160,7 +156,7 @@ class ScatterChart extends React.Component {
     					fontFamily: "Roboto, sans-serif",
     					tickLabelFill: "#000000"
     				}}
-    			/>
+    			/> */}
     			<DataBox
     				origin={{
     					x: Math.round((width - margin.left - margin.right) / 6) * 4,

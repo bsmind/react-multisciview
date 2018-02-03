@@ -47,7 +47,8 @@ class ScatterTab extends React.Component {
     		minImageSize,
     		onSwitchChange,
 			onSliderChange,
-			onColorSchemeChange
+			onColorSchemeChange,
+			width
 		} = this.props;
 
 		const attrz = this.props.attr['z'];
@@ -77,8 +78,10 @@ class ScatterTab extends React.Component {
 					onChange={(value) => onColorSchemeChange(attrz, value)}
 					suggestionMatch="anywhere"
 					theme={theme}					
+					disabled={!zColorScheme.active}
 				/>
 				<ColorAxis 
+					//width={width - 10}
 					minDomain={zColorScheme.minDomain}
 					maxDomain={zColorScheme.maxDomain}
 					colorBarDomain={zColorScheme.colorDomain}

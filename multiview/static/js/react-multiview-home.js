@@ -18990,10 +18990,37 @@ var getColorScheme = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelect
 		reverse: false
 	};
 	var tempExtents = extents[attrz];
+	var minDomain = tempExtents && attrz !== 'sample' ? tempExtents[0] : 0;
+	var maxDomain = tempExtents && attrz !== 'sample' ? tempExtents[1] : 10;
+
 	var tempScheme = colorSchemes[attrz] ? colorSchemes[attrz] : {};
-	//console.log(tempScheme, tempExtents)
-	if (tempExtents == null) {
-		return _extends({}, scheme, tempScheme);
+
+	var colorDomain = tempScheme.colorDomain;
+	if (colorDomain != null) {
+		var left = colorDomain[0];
+		if (left < minDomain || left > maxDomain) left = minDomain;
+
+		var right = colorDomain[1];
+		if (right < minDomain || right > maxDomain) right = maxDomain;
+
+		if (left > right) {
+			var temp = left;
+			left = right;
+			right = temp;
+		}
+
+		colorDomain = [left, right];
+	} else {
+		colorDomain = [minDomain, maxDomain];
+	}
+
+	//console.log(tempExtents)
+	if (tempExtents == null || attrz === 'sample') {
+		return _extends({}, scheme, tempScheme, {
+			minDomain: minDomain,
+			maxDomain: maxDomain,
+			colorDomain: colorDomain
+		});
 	} else {
 		if (attrz === 'sample') {
 			return _extends({}, scheme, tempScheme, {
@@ -19006,8 +19033,9 @@ var getColorScheme = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelect
 			});
 		} else {
 			return _extends({}, scheme, tempScheme, {
-				minDomain: tempExtents[0],
-				maxDomain: tempExtents[1],
+				minDomain: minDomain,
+				maxDomain: maxDomain,
+				colorDomain: colorDomain,
 				active: true,
 				ordinary: false
 			});
@@ -39907,7 +39935,7 @@ var MultiViewApp = function (_React$Component) {
 
 
       var scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
-      //const configBoxWidth = Math.floor(width - scatterBoxWidth);
+      var configBoxWidth = Math.floor(width - scatterBoxWidth);
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Layout"],
         null,
@@ -39934,6 +39962,7 @@ var MultiViewApp = function (_React$Component) {
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["a" /* ConfigBox */], {
               ref: "ConfigBoxRef" // eslint-disable-line
               , height: height,
+              width: configBoxWidth,
               onPCPAxisSelect: this.handlePCPAxisSelect
               // pcpAttrSelect={this.pcpAttrSelect}
               , dataExtents: this.__dataExtents
@@ -41286,8 +41315,9 @@ var ConfigBox = function (_React$Component) {
 				),
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 					__WEBPACK_IMPORTED_MODULE_7_react_toolbox__["Tab"],
-					{ label: "SCATTER" },
+					{ label: "AXIS" },
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__ScatterTab__["a" /* default */], {
+						width: this.props.width,
 						attrKinds: this.props.attrKinds,
 						attr: this.props.attr,
 						attrFormat: this.props.attrFormat,
@@ -41314,6 +41344,7 @@ var ConfigBox = function (_React$Component) {
 						attrFormat: this.props.attrFormat,
 						zAttr: this.props.attr.z,
 						colorsBySampleNames: this.props.sampleColors,
+						colorScheme: this.props.zColorScheme,
 						onColorAttrChange: this.handleAttrChange,
 						onAttrSelectChange: this.props.updateAttrSelect,
 						onPCPAxisSelect: this.props.onPCPAxisSelect
@@ -45242,7 +45273,9 @@ var _initialiseProps = function _initialiseProps() {
 		    beginY = initialYScale.domain()[0],
 		    endY = initialYScale.domain()[1];
 
-		var newDomainX = [Math.max(centerX - (centerX - beginX) * zoomFactor, xExtents[0]), Math.min(centerX + (endX - centerX) * zoomFactor, xExtents[1])];
+		//console.log(centerX, beginX, endX, xOrdinary)
+
+		var newDomainX = [centerX - (centerX - beginX) * zoomFactor, centerX + (endX - centerX) * zoomFactor];
 		if (xOrdinary) {
 			newDomainX[0] = Math.max(xExtents[0], newDomainX[0]); // eslint-disable-line
 			newDomainX[1] = Math.min(xExtents[1], newDomainX[1]); // eslint-disable-line
@@ -45250,7 +45283,7 @@ var _initialiseProps = function _initialiseProps() {
 		var newScaleX = initialXScale.copy().domain(newDomainX);
 		var stepX = !xOrdinary ? 0 : Math.abs(newScaleX(0) - newScaleX(1));
 
-		var newDomainY = [Math.max(centerY - (centerY - beginY) * zoomFactor, yExtents[0]), Math.min(centerY + (endY - centerY) * zoomFactor, yExtents[1])];
+		var newDomainY = [centerY - (centerY - beginY) * zoomFactor, centerY + (endY - centerY) * zoomFactor];
 		if (yOrdinary) {
 			newDomainY[0] = Math.max(yExtents[0], newDomainY[0]); // eslint-disable-line
 			newDomainY[1] = Math.min(yExtents[1], newDomainY[1]); // eslint-disable-line
@@ -54753,7 +54786,8 @@ var ScatterTab = function (_React$Component) {
 			    minImageSize = _props.minImageSize,
 			    onSwitchChange = _props.onSwitchChange,
 			    onSliderChange = _props.onSliderChange,
-			    onColorSchemeChange = _props.onColorSchemeChange;
+			    onColorSchemeChange = _props.onColorSchemeChange,
+			    width = _props.width;
 
 
 			var attrz = this.props.attr['z'];
@@ -54789,10 +54823,12 @@ var ScatterTab = function (_React$Component) {
 							return onColorSchemeChange(attrz, value);
 						},
 						suggestionMatch: "anywhere",
-						theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a
+						theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
+						disabled: !zColorScheme.active
 					}),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_axes__["a" /* ColorAxis */], {
-						minDomain: zColorScheme.minDomain,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_axes__["a" /* ColorAxis */]
+					//width={width - 10}
+					, { minDomain: zColorScheme.minDomain,
 						maxDomain: zColorScheme.maxDomain,
 						colorBarDomain: zColorScheme.colorDomain,
 						colorOpacity: zColorScheme.opacity,
@@ -54874,6 +54910,7 @@ ScatterTab.propTypes = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_dropdown___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_dropdown__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__charts__ = __webpack_require__(/*! ../../../charts */ 269);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_d3_scale__ = __webpack_require__(/*! d3-scale */ 27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ../../../utils */ 79);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54890,155 +54927,161 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+
 var PcpTab = function (_React$Component) {
-    _inherits(PcpTab, _React$Component);
+  _inherits(PcpTab, _React$Component);
 
-    function PcpTab() {
-        var _ref;
+  function PcpTab() {
+    var _ref;
 
-        var _temp, _this, _ret;
+    var _temp, _this, _ret;
 
-        _classCallCheck(this, PcpTab);
+    _classCallCheck(this, PcpTab);
 
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PcpTab.__proto__ || Object.getPrototypeOf(PcpTab)).call.apply(_ref, [this].concat(args))), _this), _this.handleColorAttrChange = function (value) {
-            if (_this.props.onColorAttrChange) _this.props.onColorAttrChange("z", value);
-        }, _this.handleAttrSelectChange = function (value) {
-            var dimOrder = _this.props.dimOrder;
-
-            var dimOrderCopy = dimOrder.slice();
-            if (value.length < dimOrderCopy.length) {
-                // deleted
-                dimOrderCopy.forEach(function (dimName, i) {
-                    var index = value.indexOf(dimName);
-                    if (index === -1) {
-                        dimOrderCopy.splice(i, 1);
-                    }
-                });
-            } else if (value.length > dimOrderCopy.length) {
-                // added
-                value.forEach(function (dimName) {
-                    var index = dimOrderCopy.indexOf(dimName);
-                    if (index === -1) {
-                        dimOrderCopy.push(dimName);
-                    }
-                });
-            } else {
-                // maybe re-ordred
-                dimOrderCopy = value.slice();
-            }
-
-            if (_this.props.onAttrSelectChange) {
-                _this.props.onAttrSelectChange(dimOrderCopy);
-            }
-        }, _this.handleUpdateDimOrder = function (dimOrder) {
-            if (_this.props.onAttrSelectChange) {
-                _this.props.onAttrSelectChange(dimOrder);
-            }
-        }, _this.renderOptions = function () {
-            var _this$props = _this.props,
-                dimKindsProp = _this$props.dimKinds,
-                zAttr = _this$props.zAttr,
-                attrFormat = _this$props.attrFormat,
-                dimOrder = _this$props.dimOrder;
-
-
-            var dimKindsFormatted = {},
-                dimKinds = [];
-            Object.keys(dimKindsProp).map(function (key) {
-                var value = dimKindsProp[key];
-                var valueFormatted = attrFormat(value);
-                dimKinds.push({ value: key, label: valueFormatted });
-                dimKindsFormatted[key] = valueFormatted; // eslint-disable-line
-            });
-
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                "div",
-                null,
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_dropdown___default.a, {
-                    label: "Color by ... ",
-                    source: dimKinds,
-                    value: zAttr,
-                    onChange: _this.handleColorAttrChange
-                }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default.a, {
-                    direction: "up",
-                    selectedPosition: "below",
-                    label: "Select an attribute to add ... ",
-                    source: dimKindsFormatted,
-                    value: dimOrder,
-                    suggestionMatch: "anywhere",
-                    onChange: _this.handleAttrSelectChange
-                })
-            );
-        }, _temp), _possibleConstructorReturn(_this, _ret);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
-    _createClass(PcpTab, [{
-        key: "render",
-        value: function render() {
-            var _props = this.props,
-                data = _props.data,
-                dimension = _props.dimension,
-                dimOrder = _props.dimOrder,
-                attrFormat = _props.attrFormat,
-                zAttr = _props.zAttr,
-                colorsBySampleNames = _props.colorsBySampleNames,
-                onPCPAxisSelect = _props.onPCPAxisSelect;
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PcpTab.__proto__ || Object.getPrototypeOf(PcpTab)).call.apply(_ref, [this].concat(args))), _this), _this.handleColorAttrChange = function (value) {
+      if (_this.props.onColorAttrChange) _this.props.onColorAttrChange("z", value);
+    }, _this.handleAttrSelectChange = function (value) {
+      var dimOrder = _this.props.dimOrder;
+
+      var dimOrderCopy = dimOrder.slice();
+      if (value.length < dimOrderCopy.length) {
+        // deleted
+        dimOrderCopy.forEach(function (dimName, i) {
+          var index = value.indexOf(dimName);
+          if (index === -1) {
+            dimOrderCopy.splice(i, 1);
+          }
+        });
+      } else if (value.length > dimOrderCopy.length) {
+        // added
+        value.forEach(function (dimName) {
+          var index = dimOrderCopy.indexOf(dimName);
+          if (index === -1) {
+            dimOrderCopy.push(dimName);
+          }
+        });
+      } else {
+        // maybe re-ordred
+        dimOrderCopy = value.slice();
+      }
+
+      if (_this.props.onAttrSelectChange) {
+        _this.props.onAttrSelectChange(dimOrderCopy);
+      }
+    }, _this.handleUpdateDimOrder = function (dimOrder) {
+      if (_this.props.onAttrSelectChange) {
+        _this.props.onAttrSelectChange(dimOrder);
+      }
+    }, _this.renderOptions = function () {
+      var _this$props = _this.props,
+          dimKindsProp = _this$props.dimKinds,
+          zAttr = _this$props.zAttr,
+          attrFormat = _this$props.attrFormat,
+          dimOrder = _this$props.dimOrder;
 
 
-            var colorExtents = dimension[zAttr];
-            var colorScale = zAttr === "sample" || colorExtents == null ? function (d) {
-                return colorsBySampleNames[d[zAttr]];
-            } : Object(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["k" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["g" /* interpolateViridis */]).domain(colorExtents);
+      var dimKindsFormatted = {},
+          dimKinds = [];
+      Object.keys(dimKindsProp).map(function (key) {
+        var value = dimKindsProp[key];
+        var valueFormatted = attrFormat(value);
+        dimKinds.push({ value: key, label: valueFormatted });
+        dimKindsFormatted[key] = valueFormatted; // eslint-disable-line
+      });
 
-            var colorAccessor = zAttr === "sample" || colorExtents == null ? function (d) {
-                return colorScale(d);
-            } : function (d) {
-                var value = __WEBPACK_IMPORTED_MODULE_2_lodash_get___default()(d, zAttr);
-                if (value == null) return "#FF0000";
-                return colorScale(value);
-            };
+      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        "div",
+        null,
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_dropdown___default.a, {
+          label: "Color by ... ",
+          source: dimKinds,
+          value: zAttr,
+          onChange: _this.handleColorAttrChange
+        }),
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default.a, {
+          direction: "up",
+          selectedPosition: "below",
+          label: "Select an attribute to add ... ",
+          source: dimKindsFormatted,
+          value: dimOrder,
+          suggestionMatch: "anywhere",
+          onChange: _this.handleAttrSelectChange
+        })
+      );
+    }, _temp), _possibleConstructorReturn(_this, _ret);
+  }
 
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                "div",
-                null,
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__charts__["a" /* ParallelCoordinateChart */], {
-                    ref: "PCPChartRef" // eslint-disable-line
-                    , height: 250,
-                    data: data,
-                    dimOrder: dimOrder,
-                    dimension: dimension,
-                    colorAccessor: colorAccessor,
-                    titleFormat: attrFormat,
-                    updateDimOrder: this.handleUpdateDimOrder,
-                    onPCPAxisSelect: onPCPAxisSelect
-                    // pcpAttrSelect={pcpAttrSelect}
-                    , dataExtents: this.props.dataExtents
-                }),
-                this.renderOptions()
-            );
-        }
-    }]);
+  _createClass(PcpTab, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          data = _props.data,
+          dimension = _props.dimension,
+          dimOrder = _props.dimOrder,
+          attrFormat = _props.attrFormat,
+          zAttr = _props.zAttr,
+          colorsBySampleNames = _props.colorsBySampleNames,
+          onPCPAxisSelect = _props.onPCPAxisSelect,
+          colorScheme = _props.colorScheme;
 
-    return PcpTab;
+
+      var colorExtents = dimension[zAttr];
+      var type = colorScheme.type,
+          colorDomain = colorScheme.colorDomain;
+
+      var interpolator = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["d" /* getColorInterpolator */])(type);
+      var colorScale = zAttr === "sample" || colorExtents == null ? function (d) {
+        return colorsBySampleNames[d[zAttr]];
+      } : Object(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["k" /* scaleSequential */])(interpolator).domain(colorDomain).clamp(true);
+
+      var colorAccessor = zAttr === "sample" || colorExtents == null ? function (d) {
+        return colorScale(d);
+      } : function (d) {
+        var value = __WEBPACK_IMPORTED_MODULE_2_lodash_get___default()(d, zAttr);
+        if (value == null) return "#FF0000";
+        return colorScale(value);
+      };
+
+      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        "div",
+        null,
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__charts__["a" /* ParallelCoordinateChart */], {
+          ref: "PCPChartRef" // eslint-disable-line
+          , height: 250,
+          data: data,
+          dimOrder: dimOrder,
+          dimension: dimension,
+          colorAccessor: colorAccessor,
+          titleFormat: attrFormat,
+          updateDimOrder: this.handleUpdateDimOrder,
+          onPCPAxisSelect: onPCPAxisSelect
+          // pcpAttrSelect={pcpAttrSelect}
+          , dataExtents: this.props.dataExtents
+        }),
+        this.renderOptions()
+      );
+    }
+  }]);
+
+  return PcpTab;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 PcpTab.propTypes = {
-    onColorAttrChange: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    dimOrder: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.array,
-    onAttrSelectChange: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    dimKinds: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
-    zAttr: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
-    attrFormat: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    data: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.array,
-    dimension: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
-    colorsBySampleNames: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
-    onPCPAxisSelect: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    dataExtents: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object
+  onColorAttrChange: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+  dimOrder: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.array,
+  onAttrSelectChange: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+  dimKinds: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
+  zAttr: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string,
+  attrFormat: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+  data: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.array,
+  dimension: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
+  colorsBySampleNames: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
+  onPCPAxisSelect: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+  dataExtents: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (PcpTab);
@@ -55129,9 +55172,9 @@ var ScatterChart = function (_React$Component) {
           ratio = props.ratio,
           opacity = props.opacity,
           data = props.data,
-          dimension = props.dimension;
+          dimension = props.dimension,
+          colorScheme = props.colorScheme;
 
-      // todo: shape go to vis reducer
 
       var shape = {
         type: "square",
@@ -55143,14 +55186,13 @@ var ScatterChart = function (_React$Component) {
           opacity: opacity
         }
       };
-      var interpolate = __WEBPACK_IMPORTED_MODULE_10_d3_scale__["g" /* interpolateViridis */]; //interpolateRainbow;
+      var type = colorScheme.type,
+          colorDomain = colorScheme.colorDomain;
+
+      var interpolate = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["d" /* getColorInterpolator */])(type); //interpolateRainbow;
       var colorScale = zAttr === "sample" ? function (d) {
         return colorsByGroup[d];
-      } : dimension[zAttr]
-      // ? scaleLinear().domain(dimension[zAttr]).range(['red', 'yellow'])
-      // : scaleLinear().domain([0, 1]).range(['red', 'black']);
-      //? scaleSequential(interpolate).domain(dimension[zAttr])
-      ? Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["k" /* scaleSequential */])(interpolate).domain([dimension[zAttr][0], dimension[zAttr][1] / 3]) : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["k" /* scaleSequential */])(interpolate).domain([0, 1]);
+      } : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["k" /* scaleSequential */])(interpolate).domain(colorDomain).clamp(true);
 
       var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* markerProvider */])(function (d) {
         return __WEBPACK_IMPORTED_MODULE_8_lodash_get___default()(d, zAttr);
@@ -55257,20 +55299,6 @@ var ScatterChart = function (_React$Component) {
             minImageSize: minImageSize
           })
         ),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_multiview_lib_legends__["a" /* ColorLegend */], {
-          orient: "vertical",
-          tickOrient: "right",
-          legendWidth: 35,
-          legendHeight: 150,
-          outerTickSize: 0,
-          innerTickSize: 4,
-          numTicks: 3,
-          labelStyle: {
-            fontSize: 6,
-            fontFamily: "Roboto, sans-serif",
-            tickLabelFill: "#000000"
-          }
-        }),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["a" /* DataBox */], {
           origin: {
             x: Math.round((width - margin.left - margin.right) / 6) * 4,
@@ -55913,7 +55941,8 @@ function mapStateToProps(state) {
 		opacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getSampleColorOpacity */])(state),
 		showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["o" /* getShowImageSwitch */])(state),
 		minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["h" /* getMinPoints */])(state),
-		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getMinImageSize */])(state)
+		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getMinImageSize */])(state),
+		colorScheme: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["e" /* getColorScheme */])(state)
 	};
 }
 
@@ -56114,8 +56143,9 @@ module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMoAAABQCAQAAADy
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid__ = __webpack_require__(/*! lodash.uniqueid */ 58);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_scale__ = __webpack_require__(/*! d3-scale */ 27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_selection__ = __webpack_require__(/*! d3-selection */ 81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_format__ = __webpack_require__(/*! d3-format */ 56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_selection__ = __webpack_require__(/*! d3-selection */ 81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../utils */ 8);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -56146,26 +56176,40 @@ var ColorAxis = function (_React$Component) {
         _this.state = {
             id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()('colorAxis-'),
             initSite: null,
-
-            barLeftPos: 0,
-            barRightPos: _this.getBarWidth(props)
+            width: null
         };
         return _this;
     }
 
     _createClass(ColorAxis, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            window.addEventListener('resize', this.handleResize);
+            var el = this.container;
+            this.setState({ width: el.clientWidth });
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            window.removeEventListener('resize', this.handleResize);
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
 
-            var id = this.state.id;
+            var _state = this.state,
+                id = _state.id,
+                widthState = _state.width;
             var _props = this.props,
                 height = _props.height,
+                widthProp = _props.width,
                 margin = _props.margin,
                 interpolator = _props.interpolator,
                 colorOpacity = _props.colorOpacity,
                 reverse = _props.reverse;
 
+            var width = widthState || widthProp;
 
             var colorStops = [];
             var nSamples = 20;
@@ -56177,14 +56221,16 @@ var ColorAxis = function (_React$Component) {
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
-                null,
+                { ref: function ref(node) {
+                        return _this2.container = node;
+                    } },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'svg',
                     {
                         ref: function ref(node) {
                             return _this2.node = node;
                         },
-                        width: this.props.width,
+                        width: width,
                         height: height
                     },
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -56196,7 +56242,7 @@ var ColorAxis = function (_React$Component) {
                             colorStops
                         )
                     ),
-                    Object(__WEBPACK_IMPORTED_MODULE_5__utils__["a" /* cursorStyle */])(true),
+                    Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* cursorStyle */])(true),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'g',
                         { transform: 'translate(' + margin.left + ',' + margin.top + ')',
@@ -56217,6 +56263,11 @@ var ColorAxis = function (_React$Component) {
 var _initialiseProps = function _initialiseProps() {
     var _this3 = this;
 
+    this.handleResize = function () {
+        var el = _this3.container;
+        _this3.setState({ width: el.clientWidth });
+    };
+
     this.getCursor = function () {
         var cursor = void 0;
         switch (_this3.state.initSite) {
@@ -56233,9 +56284,11 @@ var _initialiseProps = function _initialiseProps() {
 
     this.getBarWidth = function () {
         var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
-        var width = props.width,
+        var widthProp = props.width,
             margin = props.margin;
+        var widthState = _this3.state.width;
 
+        var width = widthState || widthProp;
         return Math.floor(Math.max(width - margin.left - margin.right, 0));
     };
 
@@ -56251,12 +56304,12 @@ var _initialiseProps = function _initialiseProps() {
 
     this.handleMouseDown = function (e, handleType) {
         e.preventDefault();
-        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_5__utils__["f" /* mousePosition */])(e);
+        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["f" /* mousePosition */])(e);
         var scale = _this3.getScale();
         var colorBarDomain = _this3.props.colorBarDomain;
 
 
-        Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', _this3.handleHandleDrag, false).on('mouseup', _this3.handleHandleDragEnd, false);
+        Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', _this3.handleHandleDrag, false).on('mouseup', _this3.handleHandleDragEnd, false);
 
         _this3.setState({
             startX: mouseXY[0] + scale(colorBarDomain[0]),
@@ -56271,14 +56324,14 @@ var _initialiseProps = function _initialiseProps() {
             margin = _props3.margin,
             onColorDomainChange = _props3.onColorDomainChange,
             colorBarDomain = _props3.colorBarDomain;
-        var _state = _this3.state,
-            initScale = _state.initScale,
-            initSite = _state.initSite,
-            startX = _state.startX,
-            initColorBarDomain = _state.initColorBarDomain;
+        var _state2 = _this3.state,
+            initScale = _state2.initScale,
+            initSite = _state2.initSite,
+            startX = _state2.startX,
+            initColorBarDomain = _state2.initColorBarDomain;
 
 
-        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["b" /* mouse */])(_this3.node);
+        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["b" /* mouse */])(_this3.node);
         var width = _this3.getBarWidth();
         var domain = initScale.domain();
         var x = Math.min(Math.max(mouseXY[0] - margin.left, 0), width);
@@ -56305,7 +56358,7 @@ var _initialiseProps = function _initialiseProps() {
     };
 
     this.handleHandleDragEnd = function () {
-        Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', null).on('mouseup', null);
+        Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', null).on('mouseup', null);
 
         _this3.setState({
             initScale: null,
@@ -56406,6 +56459,17 @@ var _initialiseProps = function _initialiseProps() {
                 onMouseDown: function onMouseDown(e) {
                     return _this3.handleMouseDown(e, 'right');
                 }
+            }),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', {
+                x1: barLeftPos,
+                y1: 0,
+                x2: barRightPos,
+                y2: 0,
+                style: {
+                    stroke: 'red',
+                    strokeWidth: 1,
+                    fill: 'none'
+                }
             })
         );
     };
@@ -56424,6 +56488,7 @@ var _initialiseProps = function _initialiseProps() {
             fontFamily = _props6.fontFamily;
 
 
+        var formatSI = Object(__WEBPACK_IMPORTED_MODULE_4_d3_format__["a" /* format */])(".3s");
         var scale = _this3.getScale();
         var ticks = [],
             labels = [];
@@ -56449,7 +56514,7 @@ var _initialiseProps = function _initialiseProps() {
                         textAnchor: 'middle'
                     }
                 },
-                scale.invert(pos)
+                formatSI(scale.invert(pos))
             ));
         }
 
@@ -56570,9 +56635,6 @@ ColorAxis.defaultProps = {
 
 
 var colorInterpolators = [
-// For sample, (discrete)
-"Sample",
-
 // These are from d3-scale.
 "Viridis", "Inferno", "Magma", "Plasma", "Warm", "Cool", "Rainbow", "CubehelixDefault",
 

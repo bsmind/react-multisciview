@@ -89,8 +89,9 @@ class ConfigBox extends React.Component {
     					onSampleDel={this.props.delSelectedSamples}
     				/>
     			</Tab>
-    			<Tab label="SCATTER">
+    			<Tab label="AXIS">
     				<ScatterTab
+						width={this.props.width}
     					attrKinds={this.props.attrKinds}
     					attr={this.props.attr}
 						attrFormat={this.props.attrFormat}
@@ -114,7 +115,8 @@ class ConfigBox extends React.Component {
     					data={this.props.data}
     					attrFormat={this.props.attrFormat}
     					zAttr={this.props.attr.z}
-    					colorsBySampleNames={this.props.sampleColors}
+						colorsBySampleNames={this.props.sampleColors}
+						colorScheme={this.props.zColorScheme}
     					onColorAttrChange={this.handleAttrChange}
     					onAttrSelectChange={this.props.updateAttrSelect}
     					onPCPAxisSelect={this.props.onPCPAxisSelect}

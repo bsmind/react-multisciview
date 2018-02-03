@@ -14,7 +14,8 @@ import {
 	getSampleColorOpacity,
 	getShowImageSwitch,
 	getMinPoints,
-	getMinImageSize
+	getMinImageSize,
+	getColorScheme
 } from "../../selectors";
 
 import {
@@ -69,6 +70,7 @@ function mapStateToProps(state) {
 		showImage: getShowImageSwitch(state),
 		minPoints: getMinPoints(state),
 		minImageSize: getMinImageSize(state),
+		colorScheme: getColorScheme(state)
 	};
 }
 
