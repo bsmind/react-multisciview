@@ -42,5 +42,9 @@ export default (useCrossHairStyleCursor = true) => {
     .react-multiview-ew-resize-cursor {
         cursor: ew-resize;
     }`;
-	return (<style type="text/css">{useCrossHairStyleCursor ? style + tooltipStyle : tooltipStyle}</style>);
+	return (
+        <style type="text/css">
+            {useCrossHairStyleCursor ? style + tooltipStyle : tooltipStyle}
+        </style>
+    );
 };

@@ -2,6 +2,10 @@
 @import 'variables.css';
 @import 'app_bar/config.css';
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 :root {
     --unit: '6.5px';
     --appbar-color: var(--palette-grey-400);

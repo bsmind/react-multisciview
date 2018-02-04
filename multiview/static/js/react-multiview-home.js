@@ -6794,17 +6794,20 @@ var PRIORITY = {
 /*!*********************************!*\
   !*** ./src/lib/series/index.js ***!
   \*********************************/
-/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider */
-/*! exports used: PCPPolyLineSeries, ScatterSeries, markerProvider */
+/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider, ImgViewer */
+/*! exports used: ImgViewer, PCPPolyLineSeries, ScatterSeries, markerProvider */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ScatterSeries__ = __webpack_require__(/*! ./ScatterSeries */ 596);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__ScatterSeries__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_0__ScatterSeries__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__PCPPolyLineSeries__ = __webpack_require__(/*! ./PCPPolyLineSeries */ 664);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__PCPPolyLineSeries__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__PCPPolyLineSeries__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__MarkerProvider__ = __webpack_require__(/*! ./MarkerProvider */ 665);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_2__MarkerProvider__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_2__MarkerProvider__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ImgViewer__ = __webpack_require__(/*! ./ImgViewer */ 663);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__ImgViewer__["a"]; });
+
 
 
 
@@ -41230,6 +41233,7 @@ var PriorityQueue = function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__DataTab__ = __webpack_require__(/*! ./DataTab */ 667);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__ScatterTab__ = __webpack_require__(/*! ./ScatterTab */ 669);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__pcpTab__ = __webpack_require__(/*! ./pcpTab */ 670);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__ImageTab__ = __webpack_require__(/*! ./ImageTab */ 732);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -41237,6 +41241,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -41331,6 +41336,11 @@ var ConfigBox = function (_React$Component) {
 						onColorSchemeChange: this.props.setZColorScheme,
 						onColorDomainChange: this.props.setZColorDomain
 					})
+				),
+				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+					__WEBPACK_IMPORTED_MODULE_7_react_toolbox__["Tab"],
+					{ label: "IMAGE" },
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_11__ImageTab__["a" /* default */], null)
 				),
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 					__WEBPACK_IMPORTED_MODULE_7_react_toolbox__["Tab"],
@@ -44350,13 +44360,17 @@ var ScatterSeries = function (_React$Component) {
           xAttr = moreProps.xAttr,
           yAttr = moreProps.yAttr,
           dataExtents = moreProps.dataExtents,
-          plotData = moreProps.plotData;
-      var origDataExtents = _this.props.shared.origDataExtents;
+          plotData = moreProps.plotData,
+          enableHitTest = moreProps.enableHitTest;
+      var _this$props$shared3 = _this.props.shared,
+          origDataExtents = _this$props$shared3.origDataExtents,
+          ratio = _this$props$shared3.ratio;
 
+      //console.log(enableHitTest)
 
       _this.preDraw(hitTest);
       var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
-      var hitTestor = null; // this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth);
+      var hitTestor = enableHitTest ? _this.getHitTestor(ratio, _this.__pixelData, _this.__canvasWidth) : null;
       var distComputor = null; // this.getDistanceComputor(xAttr.scale.range(), yAttr.scale.range());
       var xAccessor = _this.getAccessor(xAttr);
       var yAccessor = _this.getAccessor(yAttr);
@@ -44366,9 +44380,9 @@ var ScatterSeries = function (_React$Component) {
     };
 
     _this.postDraw = function () {
-      var _this$props$shared3 = _this.props.shared,
-          ratio = _this$props$shared3.ratio,
-          margin = _this$props$shared3.margin;
+      var _this$props$shared4 = _this.props.shared,
+          ratio = _this$props$shared4.ratio,
+          margin = _this$props$shared4.margin;
 
 
       if (_this.__pixelData && _this.__pixel) {
@@ -44538,9 +44552,9 @@ var ScatterSeries = function (_React$Component) {
       }
 
       var imageSet = [];
-      var _this$props$shared4 = _this.props.shared,
-          imgPool = _this$props$shared4.imgPool,
-          handleImageRequest = _this$props$shared4.handleImageRequest;
+      var _this$props$shared5 = _this.props.shared,
+          imgPool = _this$props$shared5.imgPool,
+          handleImageRequest = _this$props$shared5.handleImageRequest;
       var markerProvider = _this.props.markerProvider;
 
       var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
@@ -44683,11 +44697,12 @@ ScatterSeries.defaultProps = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__CanvasContainer__ = __webpack_require__(/*! ./CanvasContainer */ 598);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__EventHandler__ = __webpack_require__(/*! ./EventHandler */ 599);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__legends__ = __webpack_require__(/*! ../legends */ 263);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ./utils */ 264);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 644);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils__ = __webpack_require__(/*! ../utils */ 8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_d3_format__ = __webpack_require__(/*! d3-format */ 56);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_d3_array__ = __webpack_require__(/*! d3-array */ 12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__indicators__ = __webpack_require__(/*! ../indicators */ 673);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__utils__ = __webpack_require__(/*! ./utils */ 264);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__scatterUtils__ = __webpack_require__(/*! ./scatterUtils */ 644);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_d3_format__ = __webpack_require__(/*! d3-format */ 56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_d3_array__ = __webpack_require__(/*! d3-array */ 12);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44699,6 +44714,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -44730,7 +44746,9 @@ var ChartCanvas = function (_React$Component) {
 		_this.state = _extends({
 			id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()("chartcanvas-")
 		}, initialState, {
-			zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true,
+			selected: []
 		});
 		_this.subscriptions = [];
 		_this.panInProgress = false;
@@ -44799,7 +44817,7 @@ var ChartCanvas = function (_React$Component) {
 				position: "absolute",
 				zIndex: this.props.zIndex + 5
 			};
-			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(this.props);
+			var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(this.props);
 			var shared = _extends({
 				canvasDim: canvasDim,
 				margin: margin,
@@ -44828,14 +44846,17 @@ var ChartCanvas = function (_React$Component) {
 				}
 			}, this.state);
 
-			var cursor = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["a" /* cursorStyle */])(true);
+			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["a" /* cursorStyle */])(true);
 
 			var children = [],
-			    childrenWithHandler = [];
+			    childrenWithHandler = [],
+			    childrenWithDiv = [];
 			__WEBPACK_IMPORTED_MODULE_0_react___default.a.Children.forEach(this.props.children, function (child) {
 				if (!__WEBPACK_IMPORTED_MODULE_0_react___default.a.isValidElement(child)) return;
 				if (child.type === __WEBPACK_IMPORTED_MODULE_5__legends__["a" /* ColorLegend */]) {
 					childrenWithHandler.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
+				} else if (child.type === __WEBPACK_IMPORTED_MODULE_6__indicators__["b" /* DraggableDataBox */]) {
+					childrenWithDiv.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 				} else children.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 			});
 
@@ -44845,6 +44866,7 @@ var ChartCanvas = function (_React$Component) {
 					style: divStyle,
 					className: this.props.className
 				},
+				childrenWithDiv,
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__CanvasContainer__["a" /* default */], {
 					ref: function ref(node) {
 						return _this2.canvasContainerNode = node;
@@ -44891,7 +44913,8 @@ var ChartCanvas = function (_React$Component) {
 							onPan: this.handlePan,
 							onPanEnd: this.handlePanEnd,
 							onMouseTrack: this.handleMouseTrack,
-							onMouseTrackEnd: this.handleMouseTrackEnd
+							onMouseTrackEnd: this.handleMouseTrackEnd,
+							onClick: this.handleMouseClick
 						}),
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
@@ -44929,17 +44952,17 @@ var _initialiseProps = function _initialiseProps() {
 	this.clearAxisAndChartOnCanvas = function () {
 		var canvases = _this3.getCanvasContexts();
 		if (canvases && canvases.axes && canvases.chartOn) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.axes, canvases.chartOn], _this3.props.ratio);
 		}
 		if (_this3.hitCtx) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([_this3.hitCtx], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([_this3.hitCtx], _this3.props.ratio);
 		}
 	};
 
 	this.clearMouseCoordCanvas = function () {
 		var canvases = _this3.getCanvasContexts();
 		if (canvases && canvases.mouseCoord) {
-			Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* clearCanvas */])([canvases.mouseCoord], _this3.props.ratio);
+			Object(__WEBPACK_IMPORTED_MODULE_7__utils__["a" /* clearCanvas */])([canvases.mouseCoord], _this3.props.ratio);
 		}
 	};
 
@@ -44995,16 +45018,16 @@ var _initialiseProps = function _initialiseProps() {
 		    yAttrProp = props.yAttr,
 		    zAttrProp = props.zAttr;
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp
 		}, [canvasDim.height, 0]);
@@ -45039,7 +45062,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		var dataExtents = {};
 		dimName.forEach(function (name) {
-			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(dataExtentsProp[name]) // eslint-disable-line
+			dataExtents[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(dataExtentsProp[name]) // eslint-disable-line
 			? [0, dataExtentsProp[name].length] : dataExtentsProp[name].slice();
 		});
 
@@ -45067,7 +45090,7 @@ var _initialiseProps = function _initialiseProps() {
 		    zAttrProp = props.zAttr;
 
 
-		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* dimension */])(props);
+		var canvasDim = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["b" /* dimension */])(props);
 
 		var _state = _this3.state,
 		    dataExtentsState = _state.dataExtents,
@@ -45082,14 +45105,14 @@ var _initialiseProps = function _initialiseProps() {
 			var extentsState = dataExtentsState[name];
 			if (extentsState == null) {
 				// new field
-				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
 				? [0, extentsProps.length] : extentsProps.slice();
 			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
-				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
+				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
 				? [0, extentsProps.length] : extentsProps.slice();
 			} else {
 				// expand one but ordinary
-				if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
+				if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
 					extentsState[0] = 0; // eslint-disable-line
 					extentsState[1] = extentsProps.length; // eslint-disable-line
 				}
@@ -45102,14 +45125,14 @@ var _initialiseProps = function _initialiseProps() {
 		// console.log(dataExtentsProp, dataExtentsState)
 
 		// xScale
-		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var xAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: xAttrProp,
 			dataExtentsPrev: dataExtentsState
 		}, [0, canvasDim.width]);
 
 		// yScale
-		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_7__scatterUtils__["a" /* getScale */])({
+		var yAttr = Object(__WEBPACK_IMPORTED_MODULE_8__scatterUtils__["a" /* getScale */])({
 			dataExtents: dataExtentsProp,
 			attribute: yAttrProp,
 			dataExtentsPrev: dataExtentsState
@@ -45122,7 +45145,7 @@ var _initialiseProps = function _initialiseProps() {
 			name: dataExtentsProp[zAttrProp] ? zAttrProp : "unknown",
 			extents: dataExtentsProp[zAttrProp] ? dataExtentsProp[zAttrProp].slice() : [0, 1],
 			select: null,
-			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
+			selectDomain: dataExtentsProp[zAttrProp] && Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(dataExtentsProp[zAttrProp]) ? null : dataExtentsState[zAttrProp] ? dataExtentsState[zAttrProp].slice() : null
 		};
 
 		// flatten data to plot
@@ -45211,7 +45234,8 @@ var _initialiseProps = function _initialiseProps() {
 				scale: scale.copy().domain(newDomain)
 			}),
 			dataExtents: newDataExtents,
-			zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom(newDataExtents, false);
@@ -45239,7 +45263,8 @@ var _initialiseProps = function _initialiseProps() {
 				scale: scale.copy().domain(newDomain)
 			}),
 			dataExtents: newDataExtents,
-			zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom(false, newDataExtents);
@@ -45303,7 +45328,8 @@ var _initialiseProps = function _initialiseProps() {
 				step: stepY
 			}),
 			dataExtents: newDataExtents,
-			zoomFactor: zoomFactor
+			zoomFactor: zoomFactor,
+			enableHitTest: true
 		}));
 		if (_this3.props.onScatterPanZoom) {
 			_this3.props.onScatterPanZoom(newDataExtents, false);
@@ -45377,7 +45403,8 @@ var _initialiseProps = function _initialiseProps() {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					dataExtents: newDataExtents,
-					zoomFactor: 1
+					zoomFactor: 1,
+					enableHitTest: true
 				}));
 				if (_this3.props.onScatterPanZoom) {
 					_this3.props.onScatterPanZoom(newDataExtents, false);
@@ -45387,7 +45414,9 @@ var _initialiseProps = function _initialiseProps() {
 				// this.__dataExtents = null;
 			} else {
 				_this3.panInProgress = true;
-				_this3.triggerEvent("pan", state, e);
+				_this3.triggerEvent("pan", _extends({}, state, {
+					enableHitTest: false
+				}), e);
 				requestAnimationFrame(function () {
 					_this3.waitingForPanAnimationFrame = false;
 					_this3.clearAxisAndChartOnCanvas();
@@ -45418,7 +45447,8 @@ var _initialiseProps = function _initialiseProps() {
 			_this3.setState(_extends({}, _this3.state, {
 				xAttr: newXAttr,
 				yAttr: newYAttr,
-				dataExtents: newDataExtents
+				dataExtents: newDataExtents,
+				enableHitTest: true
 			}));
 			if (_this3.props.onScatterPanZoom) {
 				_this3.props.onScatterPanZoom(newDataExtents, false);
@@ -45431,7 +45461,8 @@ var _initialiseProps = function _initialiseProps() {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					dataExtents: newDataExtents,
-					zoomFactor: 1
+					zoomFactor: 1,
+					enableHitTest: true
 				}));
 				if (_this3.props.onScatterPanZoom) {
 					_this3.props.onScatterPanZoom(newDataExtents, false);
@@ -45449,7 +45480,7 @@ var _initialiseProps = function _initialiseProps() {
 			select: selectRange.slice(),
 			selectDomain: selectDomain.slice()
 		});
-		if (!Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
+		if (!Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extents) && initialDataExtents[name]) {
 			return {
 				zAttr: newZAttr,
 				dataExtents: _extends({}, initialDataExtents, _defineProperty({}, name, selectDomain.slice()))
@@ -45536,7 +45567,7 @@ var _initialiseProps = function _initialiseProps() {
 		});
 
 		_this3.clearAxisAndChartOnCanvas();
-		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extents)) {
+		if (_this3.state.dataExtents[name] && !Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extents)) {
 			var newDataExtents = _extends({}, _this3.state.dataExtents, _defineProperty({}, name, extents.slice()));
 			_this3.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
@@ -45567,7 +45598,7 @@ var _initialiseProps = function _initialiseProps() {
 		var name = initialZAttr.name,
 		    extents = initialZAttr.extents;
 
-		if (Object(__WEBPACK_IMPORTED_MODULE_8__utils__["e" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
+		if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extents) || dataExtents[name] == null) return initialZAttr;
 
 		return _extends({}, initialZAttr, {
 			selectDomain: dataExtents[name].slice()
@@ -45682,7 +45713,7 @@ var _initialiseProps = function _initialiseProps() {
 
 		var dataID = _this3.dataHashIDByColor[colorID];
 		if (dataID) {
-			var formatSI = Object(__WEBPACK_IMPORTED_MODULE_9_d3_format__["a" /* format */])(".3s");
+			var formatSI = Object(__WEBPACK_IMPORTED_MODULE_10_d3_format__["a" /* format */])(".3s");
 			var dataIndex = _this3.dataHashIndexByID[dataID];
 			var _data = _this3.state.plotData[dataIndex];
 			var info = [];
@@ -45708,6 +45739,8 @@ var _initialiseProps = function _initialiseProps() {
 
 	this.handleMouseMove = function (mouseXY, e) {
 		return;
+		if (!_this3.state.enableHitTest) return;
+
 		if (!_this3.waitingForAnimationFrame) {
 			// eslint-disable-line
 			_this3.waitingForAnimationFrame = true;
@@ -45747,7 +45780,7 @@ var _initialiseProps = function _initialiseProps() {
 		var pixelData = hitCtx.getImageData(0, 0, canvasWidth, canvasHeight).data;
 
 		var timestamp = Date.now();
-		var points = Object(__WEBPACK_IMPORTED_MODULE_10_d3_array__["e" /* range */])(11).map(function (i) {
+		var points = Object(__WEBPACK_IMPORTED_MODULE_11_d3_array__["e" /* range */])(11).map(function (i) {
 			var t = i / 10;
 			return {
 				x: Math.floor(startX * (1 - t) + endX * t),
@@ -45810,6 +45843,26 @@ var _initialiseProps = function _initialiseProps() {
 		requestAnimationFrame(function () {
 			_this3.clearMouseCoordCanvas();
 		});
+	};
+
+	this.handleMouseClick = function (mouseXY, e) {
+		var state = _this3.getHoveredDataItem(mouseXY);
+		if (state.id == null || state.info == null) return;
+
+		var selectedCopy = _this3.state.selected.slice();
+		var index = selectedCopy.findIndex(function (d) {
+			return d.id === state.id;
+		});
+		if (index === -1) {
+			selectedCopy.splice(0, 0, state);
+			//selectedCopy.push(state);
+		} else {
+			selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+		}
+
+		//console.log(selectedCopy)
+		_this3.setState({ selected: selectedCopy });
+		//console.log(state)
 	};
 };
 
@@ -46028,9 +46081,7 @@ var EventHandler = function (_React$Component) {
 
         _this.setState({
           panInProgress: true,
-          panStart: {
-            panOrigin: mouseXY
-          }
+          panStart: { panOrigin: mouseXY }
         });
 
         Object(__WEBPACK_IMPORTED_MODULE_2_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* d3Window */])(_this.node)).on("mousemove", _this.handlePan).on("mouseup", _this.handlePanEnd);
@@ -46099,6 +46150,10 @@ var EventHandler = function (_React$Component) {
           delete _this.dx;
           delete _this.dy;
           _this.props.onPanEnd(_this.lastNewPos, { dx: dx, dy: dy }, e);
+        } else if (_this.props.onClick) {
+          var panOrigin = _this.state.panStart.panOrigin;
+
+          _this.props.onClick(panOrigin, e);
         }
 
         _this.setState({
@@ -47997,230 +48052,233 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 var SubscriberExt = function (_React$Component) {
-  _inherits(SubscriberExt, _React$Component);
+	_inherits(SubscriberExt, _React$Component);
 
-  function SubscriberExt() {
-    _classCallCheck(this, SubscriberExt);
+	function SubscriberExt() {
+		_classCallCheck(this, SubscriberExt);
 
-    var _this = _possibleConstructorReturn(this, (SubscriberExt.__proto__ || Object.getPrototypeOf(SubscriberExt)).call(this));
+		var _this = _possibleConstructorReturn(this, (SubscriberExt.__proto__ || Object.getPrototypeOf(SubscriberExt)).call(this));
 
-    _this.updateMoreProps = function (moreProps) {
-      Object.keys(moreProps).forEach(function (key) {
-        _this.moreProps[key] = moreProps[key];
-      });
-    };
+		_this.updateMoreProps = function (moreProps) {
+			Object.keys(moreProps).forEach(function (key) {
+				_this.moreProps[key] = moreProps[key];
+			});
+		};
 
-    _this.listener = function (type, moreProps /* , state , e*/) {
-      if (moreProps) {
-        _this.updateMoreProps(moreProps);
-      }
-    };
+		_this.listener = function (type, moreProps /* , state , e*/) {
+			if (moreProps) {
+				_this.updateMoreProps(moreProps);
+			}
+		};
 
-    _this.draw = function () {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { force: false },
-          trigger = _ref.trigger,
-          force = _ref.force;
+		_this.draw = function () {
+			var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { force: false },
+			    trigger = _ref.trigger,
+			    force = _ref.force;
 
-      var type = trigger;
-      var proceed = _this.props.drawOn.indexOf(type) > -1;
+			var type = trigger;
+			var proceed = _this.props.drawOn.indexOf(type) > -1;
 
-      if (proceed || force) {
-        _this.handleDraw();
-      }
-    };
+			if (proceed || force) {
+				_this.handleDraw();
+			}
+		};
 
-    _this.getMoreProps = function () {
-      var shared = _this.props.shared;
-      var xAttr = shared.xAttr,
-          yAttr = shared.yAttr,
-          zAttr = shared.zAttr,
-          plotData = shared.plotData,
-          dataExtents = shared.dataExtents,
-          hitTest = shared.hitTest,
-          zoomFactor = shared.zoomFactor;
-
-
-      return _extends({
-        xAttr: xAttr,
-        yAttr: yAttr,
-        zAttr: zAttr,
-        plotData: plotData,
-        dataExtents: dataExtents,
-        hitTest: hitTest,
-        zoomFactor: zoomFactor
-      }, _this.moreProps);
-    };
-
-    _this.handleDraw = function () {
-      var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props;
-      var draw = props.draw,
-          canvas = props.canvas;
-      var getCanvasContexts = props.shared.getCanvasContexts;
+		_this.getMoreProps = function () {
+			var shared = _this.props.shared;
+			var xAttr = shared.xAttr,
+			    yAttr = shared.yAttr,
+			    zAttr = shared.zAttr,
+			    plotData = shared.plotData,
+			    dataExtents = shared.dataExtents,
+			    hitTest = shared.hitTest,
+			    zoomFactor = shared.zoomFactor,
+			    enableHitTest = shared.enableHitTest;
 
 
-      var moreProps = _this.getMoreProps();
-      var ctx = canvas(getCanvasContexts());
-      _this.preDraw(ctx, moreProps);
-      if (draw) draw(ctx, moreProps);
-      _this.postDraw(ctx, moreProps);
-    };
+			return _extends({
+				xAttr: xAttr,
+				yAttr: yAttr,
+				zAttr: zAttr,
+				plotData: plotData,
+				dataExtents: dataExtents,
+				hitTest: hitTest,
+				zoomFactor: zoomFactor,
+				enableHitTest: enableHitTest
+			}, _this.moreProps);
+		};
 
-    _this.preDraw = function (ctx) {
-      ctx.save();
-
-      var _this$props = _this.props,
-          edgeClip = _this$props.edgeClip,
-          clip = _this$props.clip;
-      var _this$props$shared = _this.props.shared,
-          margin = _this$props$shared.margin,
-          ratio = _this$props$shared.ratio,
-          _this$props$shared$ca = _this$props$shared.canvasDim,
-          width = _this$props$shared$ca.width,
-          height = _this$props$shared$ca.height;
+		_this.handleDraw = function () {
+			var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props;
+			var draw = props.draw,
+			    canvas = props.canvas;
+			var getCanvasContexts = props.shared.getCanvasContexts;
 
 
-      var canvasOriginX = margin.left;
-      var canvasOriginY = margin.top;
+			var moreProps = _this.getMoreProps();
+			var ctx = canvas(getCanvasContexts());
+			_this.preDraw(ctx, moreProps);
+			if (draw) draw(ctx, moreProps);
+			_this.postDraw(ctx, moreProps);
+		};
 
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(ratio, ratio);
-      if (edgeClip) {
-        console.log("SubscriberExt::preDraw::edgeClip");
-      }
-      ctx.translate(canvasOriginX, canvasOriginY);
-      if (clip) {
-        ctx.beginPath();
-        ctx.rect(0, 0, width, height);
-        ctx.clip();
-      }
-    };
+		_this.preDraw = function (ctx) {
+			ctx.save();
 
-    _this.postDraw = function (ctx) {
-      ctx.restore();
-    };
-
-    _this.state = {
-      id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()("subscriber-")
-    };
-    _this.moreProps = {};
-    return _this;
-  }
-
-  _createClass(SubscriberExt, [{
-    key: "componentWillMount",
-    value: function componentWillMount() {
-      var subscribe = this.props.shared.subscribe;
-      var _props = this.props,
-          clip = _props.clip,
-          edgeClip = _props.edgeClip;
+			var _this$props = _this.props,
+			    edgeClip = _this$props.edgeClip,
+			    clip = _this$props.clip;
+			var _this$props$shared = _this.props.shared,
+			    margin = _this$props$shared.margin,
+			    ratio = _this$props$shared.ratio,
+			    _this$props$shared$ca = _this$props$shared.canvasDim,
+			    width = _this$props$shared$ca.width,
+			    height = _this$props$shared$ca.height;
 
 
-      subscribe(this.state.id, {
-        clip: clip,
-        edgeClip: edgeClip,
-        listener: this.listener,
-        draw: this.draw
-      });
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      var unsubscribe = this.props.shared.unsubscribe;
+			var canvasOriginX = margin.left;
+			var canvasOriginY = margin.top;
 
-      unsubscribe(this.state.id);
-    }
-  }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.handleDraw();
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      this.handleDraw();
-    }
-  }, {
-    key: "componentWillReceiveProps",
-    value: function componentWillReceiveProps(nextProps) {
-      var _nextProps$shared = nextProps.shared,
-          plotData = _nextProps$shared.plotData,
-          xAttr = _nextProps$shared.xAttr,
-          yAttr = _nextProps$shared.yAttr,
-          zAttr = _nextProps$shared.zAttr,
-          dataExtents = _nextProps$shared.dataExtents,
-          hitTest = _nextProps$shared.hitTest,
-          zoomFactor = _nextProps$shared.zoomFactor;
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.scale(ratio, ratio);
+			if (edgeClip) {
+				console.log("SubscriberExt::preDraw::edgeClip");
+			}
+			ctx.translate(canvasOriginX, canvasOriginY);
+			if (clip) {
+				ctx.beginPath();
+				ctx.rect(0, 0, width, height);
+				ctx.clip();
+			}
+		};
 
+		_this.postDraw = function (ctx) {
+			ctx.restore();
+		};
 
-      this.moreProps = _extends({}, this.moreProps, {
-        xAttr: xAttr,
-        yAttr: yAttr,
-        zAttr: zAttr,
-        plotData: plotData,
-        dataExtents: dataExtents,
-        hitTest: hitTest,
-        zoomFactor: zoomFactor
-      });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _props2 = this.props,
-          drawSVG = _props2.drawSVG,
-          useSVG = _props2.useSVG;
+		_this.state = {
+			id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()("subscriber-")
+		};
+		_this.moreProps = {};
+		return _this;
+	}
+
+	_createClass(SubscriberExt, [{
+		key: "componentWillMount",
+		value: function componentWillMount() {
+			var subscribe = this.props.shared.subscribe;
+			var _props = this.props,
+			    clip = _props.clip,
+			    edgeClip = _props.edgeClip;
 
 
-      if (drawSVG && useSVG) {
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          "g",
-          { style: { clipPath: "url(#chart-area-clip)" } },
-          drawSVG(this.getMoreProps())
-        );
-      } else {
-        return null;
-      }
-    }
-  }]);
+			subscribe(this.state.id, {
+				clip: clip,
+				edgeClip: edgeClip,
+				listener: this.listener,
+				draw: this.draw
+			});
+		}
+	}, {
+		key: "componentWillUnmount",
+		value: function componentWillUnmount() {
+			var unsubscribe = this.props.shared.unsubscribe;
 
-  return SubscriberExt;
+			unsubscribe(this.state.id);
+		}
+	}, {
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			this.handleDraw();
+		}
+	}, {
+		key: "componentDidUpdate",
+		value: function componentDidUpdate() {
+			this.handleDraw();
+		}
+	}, {
+		key: "componentWillReceiveProps",
+		value: function componentWillReceiveProps(nextProps) {
+			var _nextProps$shared = nextProps.shared,
+			    plotData = _nextProps$shared.plotData,
+			    xAttr = _nextProps$shared.xAttr,
+			    yAttr = _nextProps$shared.yAttr,
+			    zAttr = _nextProps$shared.zAttr,
+			    dataExtents = _nextProps$shared.dataExtents,
+			    hitTest = _nextProps$shared.hitTest,
+			    enableHitTest = _nextProps$shared.enableHitTest,
+			    zoomFactor = _nextProps$shared.zoomFactor;
+
+
+			this.moreProps = _extends({}, this.moreProps, {
+				xAttr: xAttr,
+				yAttr: yAttr,
+				zAttr: zAttr,
+				plotData: plotData,
+				dataExtents: dataExtents,
+				hitTest: hitTest, enableHitTest: enableHitTest,
+				zoomFactor: zoomFactor
+			});
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			var _props2 = this.props,
+			    drawSVG = _props2.drawSVG,
+			    useSVG = _props2.useSVG;
+
+
+			if (drawSVG && useSVG) {
+				return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+					"g",
+					{ style: { clipPath: "url(#chart-area-clip)" } },
+					drawSVG(this.getMoreProps())
+				);
+			} else {
+				return null;
+			}
+		}
+	}]);
+
+	return SubscriberExt;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 SubscriberExt.propTypes = {
-  clip: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  edgeClip: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  selected: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  disablePan: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+	clip: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+	edgeClip: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+	selected: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+	disablePan: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
 
-  drawSVG: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  shared: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-    subscribe: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    unsubscribe: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    getCanvasContexts: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-    margin: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-      left: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-      right: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-      top: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-      bottom: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-    }),
-    ratio: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    canvasDim: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-      width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-      height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-    })
-  }),
-  drawOn: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string),
-  draw: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  canvas: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  useSVG: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool
+	drawSVG: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	shared: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+		subscribe: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+		unsubscribe: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+		getCanvasContexts: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+		margin: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+			left: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+			right: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+			top: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+			bottom: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
+		}),
+		ratio: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+		canvasDim: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+			width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+			height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
+		})
+	}),
+	drawOn: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string),
+	draw: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	canvas: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	useSVG: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool
 };
 
 SubscriberExt.defaultProps = {
-  clip: false,
-  edgeClip: false,
-  selected: false,
-  disablePan: false,
+	clip: false,
+	edgeClip: false,
+	selected: false,
+	disablePan: false,
 
-  drawSVG: null
+	drawSVG: null
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (SubscriberExt);
@@ -51092,13 +51150,24 @@ var ImgViewer = function (_React$Component) {
       var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
       var imgSide = Math.min(imgWidth, imgHeight);
       if (_this.state.img == null || _this.state.id == null) {
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
-          key: "imgViewer-empty-" + id,
-          x: x - imgSide / 2,
-          y: y - imgSide / 2,
-          width: imgSide,
-          height: imgSide / 2
-        });
+        if (backgroundRectRef) {
+          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+            key: "imgViewer-empty-" + id,
+            x: x - imgSide / 2,
+            y: y - imgSide / 2,
+            width: imgSide,
+            height: imgSide
+          });
+        } else {
+          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
+            x: x - imgSide / 2,
+            y: y - imgSide / 2,
+            width: imgSide,
+            height: imgSide,
+            fill: "#000000",
+            fillOpacity: 0.3
+          });
+        }
       }
 
       var _this$getImgSize = _this.getImgSize(imgSide),
@@ -51108,7 +51177,7 @@ var ImgViewer = function (_React$Component) {
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         "g",
         null,
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+        backgroundRectRef && __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
           key: "imgViewer-bg-" + id,
           x: x - width / 2 - 1,
           y: y - height / 2 - 1,
@@ -55194,7 +55263,7 @@ var ScatterChart = function (_React$Component) {
         return colorsByGroup[d];
       } : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["k" /* scaleSequential */])(interpolate).domain(colorDomain).clamp(true);
 
-      var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* markerProvider */])(function (d) {
+      var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["d" /* markerProvider */])(function (d) {
         return __WEBPACK_IMPORTED_MODULE_8_lodash_get___default()(d, zAttr);
       }, shape, ratio);
       mProvider.colorScale(colorScale);
@@ -55293,7 +55362,7 @@ var ScatterChart = function (_React$Component) {
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["d" /* Series */],
           null,
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["b" /* ScatterSeries */], {
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["c" /* ScatterSeries */], {
             markerProvider: markerProvider,
             minPoints: minPoints,
             minImageSize: minImageSize
@@ -55307,7 +55376,12 @@ var ScatterChart = function (_React$Component) {
           infoSortor: databoxSortor,
           hint: ["sample", "annealing_temperature", "annealing_time", "fit_peaks_alpha", "fit_peaks_b", "fit_peaks_chi_squared", "fit_peaks_d0", "fit_peaks_sigma1", "sequence_ID"]
         }),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["b" /* MousePathTracker */], null)
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["b" /* DraggableDataBox */], {
+          initialPos: {
+            x: margin.left + 5,
+            y: margin.top + 5
+          }
+        })
       );
     }
   }]);
@@ -55449,15 +55523,18 @@ function fitWidth(WrappedComponent) {
 /*!*************************************!*\
   !*** ./src/lib/indicators/index.js ***!
   \*************************************/
-/*! exports provided: DataBox, MousePathTracker */
-/*! exports used: DataBox, MousePathTracker */
+/*! exports provided: DataBox, DraggableDataBox, MousePathTracker */
+/*! exports used: DataBox, DraggableDataBox */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dataBox__ = __webpack_require__(/*! ./dataBox */ 674);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__dataBox__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MousePathTracker__ = __webpack_require__(/*! ./MousePathTracker */ 675);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__MousePathTracker__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__draggableDataBox__ = __webpack_require__(/*! ./draggableDataBox */ 733);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__draggableDataBox__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__MousePathTracker__ = __webpack_require__(/*! ./MousePathTracker */ 675);
+/* unused harmony reexport MousePathTracker */
+
 
 
 
@@ -55527,6 +55604,7 @@ var DataBox = function (_React$Component) {
       }
 
       /*eslint-disable */
+      console.log(imgData);
       var img = new Image();
       img.onload = function () {
         ctx.drawImage(img, x, y, 100, 100);
@@ -55613,7 +55691,6 @@ DataBox.propTypes = {
   !*** ./src/lib/indicators/MousePathTracker.js ***!
   \************************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55707,7 +55784,7 @@ MousePathTracker.propTypes = {
     shared: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object
 };
 
-/* harmony default export */ __webpack_exports__["a"] = (MousePathTracker);
+/* unused harmony default export */ var _unused_webpack_default_export = (MousePathTracker);
 
 /***/ }),
 /* 676 */
@@ -55820,7 +55897,7 @@ var ParallelCoordinateChart = function (_React$Component) {
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["d" /* Series */],
                     null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__["a" /* PCPPolyLineSeries */], {
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__["b" /* PCPPolyLineSeries */], {
                         opacity: 0.3,
                         strokeWidth: 1
                     })
@@ -56009,7 +56086,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,mBAAmB;IACnB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,wDAAwD;IACxD,kBAAkB;CACrB","file":"index.css","sourcesContent":[".appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}"],"sourceRoot":""}]);
+exports.push([module.i, "::-webkit-scrollbar {\n    display: none;\n}\n._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,cAAc;CACjB;AACD;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,mBAAmB;IACnB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,wDAAwD;IACxD,kBAAkB;CACrB","file":"index.css","sourcesContent":["::-webkit-scrollbar {\n    display: none;\n}\n.appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}"],"sourceRoot":""}]);
 
 // exports
 exports.locals = {
@@ -57867,6 +57944,390 @@ var inferno = ramp(Object(__WEBPACK_IMPORTED_MODULE_0__colors__["a" /* default *
 
 var plasma = ramp(Object(__WEBPACK_IMPORTED_MODULE_0__colors__["a" /* default */])("0d088710078813078916078a19068c1b068d1d068e20068f2206902406912605912805922a05932c05942e05952f059631059733059735049837049938049a3a049a3c049b3e049c3f049c41049d43039e44039e46039f48039f4903a04b03a14c02a14e02a25002a25102a35302a35502a45601a45801a45901a55b01a55c01a65e01a66001a66100a76300a76400a76600a76700a86900a86a00a86c00a86e00a86f00a87100a87201a87401a87501a87701a87801a87a02a87b02a87d03a87e03a88004a88104a78305a78405a78606a68707a68808a68a09a58b0aa58d0ba58e0ca48f0da4910ea3920fa39410a29511a19613a19814a099159f9a169f9c179e9d189d9e199da01a9ca11b9ba21d9aa31e9aa51f99a62098a72197a82296aa2395ab2494ac2694ad2793ae2892b02991b12a90b22b8fb32c8eb42e8db52f8cb6308bb7318ab83289ba3388bb3488bc3587bd3786be3885bf3984c03a83c13b82c23c81c33d80c43e7fc5407ec6417dc7427cc8437bc9447aca457acb4679cc4778cc4977cd4a76ce4b75cf4c74d04d73d14e72d24f71d35171d45270d5536fd5546ed6556dd7566cd8576bd9586ada5a6ada5b69db5c68dc5d67dd5e66de5f65de6164df6263e06363e16462e26561e26660e3685fe4695ee56a5de56b5de66c5ce76e5be76f5ae87059e97158e97257ea7457eb7556eb7655ec7754ed7953ed7a52ee7b51ef7c51ef7e50f07f4ff0804ef1814df1834cf2844bf3854bf3874af48849f48948f58b47f58c46f68d45f68f44f79044f79143f79342f89441f89540f9973ff9983ef99a3efa9b3dfa9c3cfa9e3bfb9f3afba139fba238fca338fca537fca636fca835fca934fdab33fdac33fdae32fdaf31fdb130fdb22ffdb42ffdb52efeb72dfeb82cfeba2cfebb2bfebd2afebe2afec029fdc229fdc328fdc527fdc627fdc827fdca26fdcb26fccd25fcce25fcd025fcd225fbd324fbd524fbd724fad824fada24f9dc24f9dd25f8df25f8e125f7e225f7e425f6e626f6e826f5e926f5eb27f4ed27f3ee27f3f027f2f227f1f426f1f525f0f724f0f921"));
 
+
+/***/ }),
+/* 732 */
+/*!*************************************************************!*\
+  !*** ./docs/lib/app/multiview/layout/configbox/ImageTab.js ***!
+  \*************************************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete__ = __webpack_require__(/*! react-toolbox/lib/autocomplete */ 65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider__ = __webpack_require__(/*! react-toolbox/lib/slider */ 184);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__index_css__ = __webpack_require__(/*! ./index.css */ 268);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__index_css__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+
+
+var ImageTab = function (_React$Component) {
+    _inherits(ImageTab, _React$Component);
+
+    function ImageTab() {
+        _classCallCheck(this, ImageTab);
+
+        return _possibleConstructorReturn(this, (ImageTab.__proto__ || Object.getPrototypeOf(ImageTab)).apply(this, arguments));
+    }
+
+    _createClass(ImageTab, [{
+        key: 'render',
+        value: function render() {
+            var showImage = false,
+                minPoints = 20,
+                minImageSize = 10;
+            var onSwitchChange = function onSwitchChange() {};
+            var onSliderChange = function onSliderChange() {};
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', accent: showImage,
+                        onClick: function onClick() {
+                            return onSwitchChange("showImage", !showImage);
+                        } }),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'p',
+                        null,
+                        'MIN. # POINTS:'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 100, step: 5, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_5__index_css___default.a,
+                        onChange: function onChange(value) {
+                            return onSliderChange("minPoints", value);
+                        } }),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'p',
+                        null,
+                        'MIN. IMAGE SIDE:'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 40, step: 5, value: minImageSize, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_5__index_css___default.a,
+                        onChange: function onChange(value) {
+                            return onSliderChange("minImageSize", value);
+                        } })
+                )
+            );
+        }
+    }]);
+
+    return ImageTab;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+/* harmony default export */ __webpack_exports__["a"] = (ImageTab);
+
+/***/ }),
+/* 733 */
+/*!************************************************!*\
+  !*** ./src/lib/indicators/draggableDataBox.js ***!
+  \************************************************/
+/*! exports provided: default */
+/*! exports used: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__series__ = __webpack_require__(/*! ../series */ 80);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_selection__ = __webpack_require__(/*! d3-selection */ 81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_scale__ = __webpack_require__(/*! d3-scale */ 27);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+
+
+
+
+var DraggableDataBox = function (_React$Component) {
+    _inherits(DraggableDataBox, _React$Component);
+
+    function DraggableDataBox(props) {
+        _classCallCheck(this, DraggableDataBox);
+
+        var _this = _possibleConstructorReturn(this, (DraggableDataBox.__proto__ || Object.getPrototypeOf(DraggableDataBox)).call(this, props));
+
+        _this.handleMouseDown = function (e) {
+            if (e.button !== 0) return;
+            e.stopPropagation();
+            e.preventDefault();
+
+            document.addEventListener('mousemove', _this.handleMouseMove);
+            document.addEventListener('mouseup', _this.handleMouseUp);
+
+            _this.setState({
+                dragging: true,
+                rel: {
+                    x: e.pageX - _this.node.offsetLeft,
+                    y: e.pageY - _this.node.offsetTop
+                }
+            });
+        };
+
+        _this.handleMouseUp = function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            document.removeEventListener('mousemove', _this.handleMouseMove);
+            document.removeEventListener('mouseup', _this.handleMouseUp);
+            _this.setState({
+                dragging: false
+            });
+        };
+
+        _this.handleMouseMove = function (e) {
+            if (!_this.state.dragging) return;
+            e.stopPropagation();
+            e.preventDefault();
+
+            _this.setState({
+                pos: {
+                    x: e.pageX - _this.state.rel.x,
+                    y: e.pageY - _this.state.rel.y
+                }
+            });
+        };
+
+        _this.handleMouseDownImgViewer = function (e) {
+            if (e.button !== 0) return;
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('mousedown:imgviewer');
+        };
+
+        _this.handleWheelImgViewer = function (e) {
+            e.preventDefault();
+            var _this$state = _this.state,
+                imgRefWidth = _this$state.imgRefWidth,
+                imgRefHeight = _this$state.imgRefHeight,
+                imgCenterX = _this$state.imgCenterX,
+                imgCenterY = _this$state.imgCenterY,
+                xScale = _this$state.xScale,
+                yScale = _this$state.yScale;
+
+
+            var SCALE_FACTOR = 0.001;
+            var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["f" /* mousePosition */])(e);
+            var centerX = xScale.invert(mouseXY[0]),
+                beginX = xScale.domain()[0],
+                endX = xScale.domain()[1];
+            var newDomainX = [centerX - (centerX - beginX) * zoomFactor, centerX + (endX - centerX) * zoomFactor];
+
+            var centerY = yScale.invert(mouseXY[1]),
+                beginY = yScale.domain()[0],
+                endY = yScale.domain()[1];
+            var newDomainY = [centerY - (centerY - beginY) * zoomFactor, centerY + (endY - centerY) * zoomFactor];
+
+            _this.setState({
+                imgRefWidth: imgRefWidth * (1 / zoomFactor),
+                imgRefHeight: imgRefHeight * (1 / zoomFactor),
+                imgFocusX: mouseXY[0] - imgCenterX,
+                imgFocusY: mouseXY[1] - imgCenterY,
+                xScale: xScale.copy().domain(newDomainX),
+                yScale: yScale.copy().domain(newDomainY)
+                //imgCenterX: mouseXY[0],
+                //imgCenterY: mouseXY[1]
+            });
+        };
+
+        _this.renderInfo = function (info) {
+            var tableContents = info.map(function (d) {
+                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'tr',
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'td',
+                        null,
+                        ' ',
+                        d.key,
+                        ' '
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'td',
+                        null,
+                        ' ',
+                        d.value,
+                        ' '
+                    )
+                );
+            });
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'table',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'tbody',
+                    null,
+                    tableContents
+                )
+            );
+        };
+
+        _this.state = {
+            pos: props.initialPos,
+            dragging: false,
+            rel: null,
+            imgFocusX: 0,
+            imgFocusY: 0,
+            imgCenterX: (196 - 2) / 2,
+            imgCenterY: 100 / 2,
+            imgRefWidth: 196 - 2,
+            imgRefHeight: 100,
+            xScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, 194]).range([0, 194]),
+            yScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, 100]).range([0, 100])
+
+            //this.xScale = scaleLinear().domain([0, 194]).range([0, 194]);
+        };return _this;
+    }
+
+    _createClass(DraggableDataBox, [{
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var _props$shared = this.props.shared,
+                selected = _props$shared.selected,
+                imgPool = _props$shared.imgPool,
+                handleImageRequest = _props$shared.handleImageRequest;
+
+            if (selected.length === 0) return null;
+
+            var divStyle = {
+                position: 'absolute',
+                left: this.state.pos.x,
+                top: this.state.pos.y,
+                cursor: 'pointer',
+                width: 200,
+                height: 250,
+                backgroundColor: '#FFFFFF',
+                border: '1px dotted #707070',
+                borderRadius: 5,
+                padding: 2,
+                zIndex: 100
+            };
+
+            var _selected$ = selected[0],
+                id = _selected$.id,
+                info = _selected$.info;
+            var _state = this.state,
+                imgRefWidth = _state.imgRefWidth,
+                imgRefHeight = _state.imgRefHeight,
+                imgCenterX = _state.imgCenterX,
+                imgCenterY = _state.imgCenterY,
+                imgFocusX = _state.imgFocusX,
+                imgFocusY = _state.imgFocusY,
+                xScale = _state.xScale,
+                yScale = _state.yScale;
+
+            var x = xScale(imgCenterX);
+            var y = yScale(imgCenterY);
+
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { ref: function ref(node) {
+                        return _this2.node = node;
+                    },
+                    onMouseDown: this.handleMouseDown,
+                    style: divStyle
+                },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { style: {
+                            height: 100
+                        } },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'svg',
+                        { width: 200 - 4, height: 100 },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__series__["a" /* ImgViewer */], {
+                            x: x,
+                            y: y,
+                            imgRefWidth: imgRefWidth,
+                            imgRefHeight: imgRefHeight,
+                            id: id,
+                            imgPool: imgPool,
+                            onImageRequest: handleImageRequest,
+                            showGrid: false,
+                            svgDim: { width: 196, height: 100 }
+                        }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
+                            ref: function ref(node) {
+                                return _this2.ImgViewerEventHandler = node;
+                            },
+                            x: 0,
+                            y: 0,
+                            width: 196 - 2,
+                            height: 196,
+                            fill: '#000000',
+                            fillOpacity: 0.,
+                            onMouseDown: this.handleMouseDownImgViewer,
+                            onWheel: this.handleWheelImgViewer
+                        })
+                    )
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { style: {
+                            height: 100,
+                            overflow: 'auto'
+                        } },
+                    this.renderInfo(info)
+                )
+            );
+        }
+    }]);
+
+    return DraggableDataBox;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+DraggableDataBox.propTypes = {
+    initialPos: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+        x: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+        y: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
+    })
+};
+
+DraggableDataBox.defaultProps = {
+    initialPos: {
+        x: 0,
+        y: 0
+    }
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (DraggableDataBox);
 
 /***/ })
 /******/ ]);

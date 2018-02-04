@@ -43,7 +43,7 @@ class SubscriberExt extends React.Component {
 		const {
 			plotData,
 			xAttr, yAttr, zAttr,
-			dataExtents, hitTest,
+			dataExtents, hitTest, enableHitTest,
 			zoomFactor
 		} = nextProps.shared;
 
@@ -54,7 +54,7 @@ class SubscriberExt extends React.Component {
 			zAttr,
 			plotData,
 			dataExtents,
-			hitTest,
+			hitTest, enableHitTest,
 			zoomFactor
 		};
 	}
@@ -90,7 +90,8 @@ class SubscriberExt extends React.Component {
     		plotData,
     		dataExtents,
     		hitTest,
-    		zoomFactor
+			zoomFactor,
+			enableHitTest
     	} = shared;
 
     	return {
@@ -100,7 +101,8 @@ class SubscriberExt extends React.Component {
     		plotData,
     		dataExtents,
     		hitTest,
-    		zoomFactor,
+			zoomFactor,
+			enableHitTest,
     		...this.moreProps
     	};
     }

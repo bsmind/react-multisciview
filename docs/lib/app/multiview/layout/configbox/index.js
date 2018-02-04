@@ -41,6 +41,7 @@ import { Tab, Tabs } from "react-toolbox";
 import DataTab from "./DataTab";
 import ScatterTab from "./ScatterTab";
 import PcpTab from "./pcpTab";
+import ImageTab from "./ImageTab";
 
 
 class ConfigBox extends React.Component {
@@ -106,6 +107,10 @@ class ConfigBox extends React.Component {
 						onColorDomainChange={this.props.setZColorDomain}
     				/>
     			</Tab>
+				<Tab label="IMAGE">
+					<ImageTab
+					/>
+				</Tab>
     			<Tab label="PCP">
     				<PcpTab
     					ref={"PCPTabRef"} // eslint-disable-line

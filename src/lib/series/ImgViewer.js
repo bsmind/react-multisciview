@@ -57,23 +57,35 @@ class ImgViewer extends React.Component {
     	const imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
     	const imgSide = Math.min(imgWidth, imgHeight);
     	if (this.state.img == null || this.state.id == null) {
-    		return React.cloneElement(backgroundRectRef, {
-    			key: `imgViewer-empty-${id}`,
-    			x: x - imgSide / 2,
-    			y: y - imgSide / 2,
-    			width: imgSide,
-    			height: imgSide / 2
-    		});
+			if (backgroundRectRef) {
+				return React.cloneElement(backgroundRectRef, {
+					key: `imgViewer-empty-${id}`,
+					x: x - imgSide / 2,
+					y: y - imgSide / 2,
+					width: imgSide,
+					height: imgSide
+				});
+			} else {
+				return <rect 
+					x={x - imgSide/2}
+					y={y - imgSide/2}
+					width={imgSide}
+					height={imgSide}
+					fill='#000000'
+					fillOpacity={0.3}
+				/>;
+			}
     	}
 
     	const { width, height } = this.getImgSize(imgSide);
     	return <g>
-    		{React.cloneElement(backgroundRectRef, {
-    			key: `imgViewer-bg-${id}`,
-    			x: x - width / 2 - 1,
-    			y: y - height / 2 - 1,
-    			width: width + 2,
-    			height: height + 2
+			{backgroundRectRef && 
+				React.cloneElement(backgroundRectRef, {
+					key: `imgViewer-bg-${id}`,
+					x: x - width / 2 - 1,
+					y: y - height / 2 - 1,
+					width: width + 2,
+					height: height + 2
     		})}
     		<image
     			ref={node => this.node = node}

@@ -289,12 +289,14 @@ class ScatterSeries extends React.Component {
     		return;
     	}
 
-    	const { hitTest, xAttr, yAttr, dataExtents, plotData } = moreProps;
-    	const { shared: { origDataExtents } } = this.props;
+    	const { hitTest, xAttr, yAttr, dataExtents, plotData, enableHitTest } = moreProps;
+		const { shared: { origDataExtents, ratio } } = this.props;
+		
+		//console.log(enableHitTest)
 
     	this.preDraw(hitTest);
     	const dataFilter = this.getDataFilter(dataExtents, origDataExtents);
-    	const hitTestor = null;// this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth);
+    	const hitTestor = enableHitTest ? this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth): null;
     	const distComputor = null; // this.getDistanceComputor(xAttr.scale.range(), yAttr.scale.range());
     	const xAccessor = this.getAccessor(xAttr);
     	const yAccessor = this.getAccessor(yAttr);

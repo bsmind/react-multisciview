@@ -27,7 +27,8 @@ class DataBox extends React.Component {
     		return;
     	}
 
-    	/*eslint-disable */
+		/*eslint-disable */
+		console.log(imgData)
     	const img = new Image; 
     	img.onload = () => {
     		ctx.drawImage(img, x, y, 100, 100);

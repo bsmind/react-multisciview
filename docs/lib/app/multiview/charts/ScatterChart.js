@@ -7,7 +7,7 @@ import { ChartCanvas, Chart, Series } from "react-multiview/lib/core";
 import { ColorLegend } from "react-multiview/lib/legends";
 import { XAxis, YAxis } from "react-multiview/lib/axes";
 import { ScatterSeries } from "react-multiview/lib/series";
-import { DataBox, MousePathTracker } from "react-multiview/lib/indicators";
+import { DataBox, MousePathTracker, DraggableDataBox } from "react-multiview/lib/indicators";
 
 import get from "lodash.get";
 import { sortAlphaNum, getColorInterpolator } from "../utils";
@@ -175,8 +175,13 @@ class ScatterChart extends React.Component {
     					"sequence_ID"
     				]}
     			/>
-    			<MousePathTracker
-    			/>
+				{/* <MousePathTracker /> */}
+				<DraggableDataBox 
+					initialPos={{
+						x: margin.left + 5,
+						y: margin.top + 5
+					}}
+				/>
     		</ChartCanvas>
     	);
     }

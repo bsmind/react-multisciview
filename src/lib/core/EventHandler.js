@@ -95,9 +95,7 @@ class EventHandler extends React.Component {
 
     		this.setState({
     			panInProgress: true,
-    			panStart: {
-    				panOrigin: mouseXY,
-    			}
+    			panStart: { panOrigin: mouseXY }
     		});
 
     		select(d3Window(this.node))
@@ -172,13 +170,14 @@ class EventHandler extends React.Component {
     			.on("mouseup", null);
 
     		if (this.panHappened && this.props.onPanEnd) {
-    			const { dx, dy } = this;
+				const { dx, dy } = this;
     			delete this.dx;
     			delete this.dy;
-    			this.props.onPanEnd(
-    				this.lastNewPos,
-    				{ dx, dy }, e);
-    		}
+    			this.props.onPanEnd(this.lastNewPos, { dx, dy }, e);
+    		} else if (this.props.onClick) {
+				const { panOrigin } = this.state.panStart;
+				this.props.onClick(panOrigin, e);
+			}
 
     		this.setState({
     			panInProgress: false,

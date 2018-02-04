@@ -6,6 +6,7 @@ import uniqueId from "lodash.uniqueid";
 import CanvasContainer from "./CanvasContainer";
 import EventHandler from "./EventHandler";
 import { ColorLegend } from "../legends";
+import { DraggableDataBox } from "../indicators";
 
 import { dimension as getCanvasDimension, clearCanvas } from "./utils";
 import { getScale } from "./scatterUtils";
@@ -21,7 +22,9 @@ class ChartCanvas extends React.Component {
 		this.state = {
 			id: uniqueId("chartcanvas-"),
 			...initialState,
-			zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true,
+			selected: []
 		};
 		this.subscriptions = [];
 		this.panInProgress = false;
@@ -391,7 +394,8 @@ class ChartCanvas extends React.Component {
 				scale: scale.copy().domain(newDomain)
 			},
 			dataExtents: newDataExtents,
-			zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true,
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(newDataExtents, false);
@@ -420,7 +424,8 @@ class ChartCanvas extends React.Component {
     			scale: scale.copy().domain(newDomain)
     		},
     		dataExtents: newDataExtents,
-    		zoomFactor: 1
+			zoomFactor: 1,
+			enableHitTest: true,
     	});
     	if (this.props.onScatterPanZoom) {
     		this.props.onScatterPanZoom(false, newDataExtents);
@@ -491,7 +496,8 @@ class ChartCanvas extends React.Component {
 				step: stepY
 			},
 			dataExtents: newDataExtents,
-			zoomFactor
+			zoomFactor,
+			enableHitTest: true
 		});
 		if (this.props.onScatterPanZoom) {
 			this.props.onScatterPanZoom(newDataExtents, false);
@@ -573,7 +579,8 @@ class ChartCanvas extends React.Component {
     				xAttr: newXAttr,
     				yAttr: newYAttr,
     				dataExtents: newDataExtents,
-    				zoomFactor: 1
+					zoomFactor: 1,
+					enableHitTest: true,
     			});
     			if (this.props.onScatterPanZoom) {
     				this.props.onScatterPanZoom(newDataExtents, false);
@@ -584,7 +591,10 @@ class ChartCanvas extends React.Component {
 
     		} else {
     			this.panInProgress = true;
-    			this.triggerEvent("pan", state, e);
+    			this.triggerEvent("pan", {
+					...state,
+					enableHitTest: false
+				}, e);
     			requestAnimationFrame(() => {
     				this.waitingForPanAnimationFrame = false;
     				this.clearAxisAndChartOnCanvas();
@@ -617,7 +627,8 @@ class ChartCanvas extends React.Component {
     			...this.state,
     			xAttr: newXAttr,
     			yAttr: newYAttr,
-    			dataExtents: newDataExtents
+				dataExtents: newDataExtents,
+				enableHitTest: true
     		});
     		if (this.props.onScatterPanZoom) {
     			this.props.onScatterPanZoom(newDataExtents, false);
@@ -631,7 +642,8 @@ class ChartCanvas extends React.Component {
     				xAttr: newXAttr,
     				yAttr: newYAttr,
     				dataExtents: newDataExtents,
-    				zoomFactor: 1
+					zoomFactor: 1,
+					enableHitTest: true
     			});
     			if (this.props.onScatterPanZoom) {
     				this.props.onScatterPanZoom(newDataExtents, false);
@@ -751,7 +763,6 @@ class ChartCanvas extends React.Component {
 			this.setState({ zAttr: newZAttr });
 		}
 	}
-
 
 	updateAttr = (attr, initialAttr, dataExtents) => {
 		const domain = dataExtents[attr];
@@ -904,6 +915,8 @@ class ChartCanvas extends React.Component {
 
 	handleMouseMove = (mouseXY, e) => {
 		return;
+		if (!this.state.enableHitTest) return; 
+
 		if (!this.waitingForAnimationFrame) { // eslint-disable-line
 			this.waitingForAnimationFrame = true;
 			const state = this.getHoveredDataItem(mouseXY);
@@ -1002,6 +1015,25 @@ class ChartCanvas extends React.Component {
 		});
 	}
 
+	handleMouseClick = (mouseXY, e) => {
+		const state = this.getHoveredDataItem(mouseXY);
+		if (state.id == null || state.info == null) 
+			return;
+
+		const selectedCopy = this.state.selected.slice();
+		const index = selectedCopy.findIndex(d => d.id === state.id);
+		if (index === -1) {
+			selectedCopy.splice(0, 0, state);
+			//selectedCopy.push(state);
+		} else {
+			selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+		}
+
+		//console.log(selectedCopy)
+		this.setState({selected: selectedCopy});
+		//console.log(state)
+	}
+
 	render() {
 		const { margin } = this.props;
     	const divStyle = {
@@ -1046,12 +1078,15 @@ class ChartCanvas extends React.Component {
 
 		const cursor = cursorStyle(true);
 
-		const children = [], childrenWithHandler = [];
+		const children = [], childrenWithHandler = [], childrenWithDiv = [];
 		React.Children.forEach(this.props.children, child => {
 			if (!React.isValidElement(child)) return;
 			if (child.type === ColorLegend) {
 				childrenWithHandler.push(React.cloneElement(child, { shared }));
-			} else
+			} else if ( child.type === DraggableDataBox){
+				childrenWithDiv.push(React.cloneElement(child, { shared }));
+			}
+			else
 				children.push(React.cloneElement(child, { shared }));
 		});
 
@@ -1060,6 +1095,7 @@ class ChartCanvas extends React.Component {
 				style={divStyle}
 				className={this.props.className}
 			>
+				{childrenWithDiv}			
 				<CanvasContainer
 					ref={node => this.canvasContainerNode = node}
 					width={this.props.width}
@@ -1093,6 +1129,7 @@ class ChartCanvas extends React.Component {
 							onPanEnd={this.handlePanEnd}
 							onMouseTrack={this.handleMouseTrack}
 							onMouseTrackEnd={this.handleMouseTrackEnd}
+							onClick={this.handleMouseClick}
 						/>
 						<g>
 							{childrenWithHandler}
