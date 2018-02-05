@@ -19,7 +19,9 @@ class PCPPolyLineSeries extends React.Component {
     		.key(d => d.stroke)
     		.entries(plotData);
 
-    	const dimOrder = xScale.domain();
+    	const dimOrder = xScale.domain().map(name => {
+			if (dimConfig[name]) return name;
+		}).filter(d => d != null);
 
     	const yAccessor = (d, config) => {
     		const { ordinary, scale, accessor, extents, step, nullPositionY } = config;
@@ -43,8 +45,9 @@ class PCPPolyLineSeries extends React.Component {
     		group.forEach(d => {
     			d.__in = true;
     			for (let i = 0; i < dimOrder.length; ++i) {
-    				const config = dimConfig[dimOrder[i]];
-    				if (config.select == null) continue;
+					const config = dimConfig[dimOrder[i]];
+					//console.log(config)
+    				if (config == null || config.select == null) continue;
 
     				const py = yAccessor(d, config);
     				let [start, end] = config.select.slice();

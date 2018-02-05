@@ -51,7 +51,7 @@ class ImgViewer extends React.Component {
     }
 
     renderImage = () => {
-    	const { imgRefWidth, imgRefHeight, x, y, id } = this.props;
+		const { imgRefWidth, imgRefHeight, x, y, id, imageFilter } = this.props;
     	const { backgroundRectRef } = this.props;
     	const imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
     	const imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
@@ -77,6 +77,7 @@ class ImgViewer extends React.Component {
 			}
     	}
 
+		//console.log(imageFilter)
     	const { width, height } = this.getImgSize(imgSide);
     	return <g>
 			{backgroundRectRef && 
@@ -88,7 +89,8 @@ class ImgViewer extends React.Component {
 					height: height + 2
     		})}
     		<image
-    			ref={node => this.node = node}
+				ref={node => this.node = node}
+				filter={`url(#${imageFilter})`}
     			xlinkHref={this.state.img.url}
     			x={x - width / 2}
     			y={y - height / 2}

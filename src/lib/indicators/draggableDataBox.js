@@ -252,7 +252,12 @@ class DraggableDataBox extends React.Component {
     }
 
     render() {
-        const { selected, currSelectedIndex, imgPool, handleImageRequest, showDataBox } = this.props.shared;
+        const { 
+            selected, currSelectedIndex, 
+            imgPool, handleImageRequest, 
+            showDataBox,
+            imageFilter 
+        } = this.props.shared;
         const { width, height } = this.props;
         if (selected.length === 0 || !showDataBox)
             return null;
@@ -323,6 +328,7 @@ class DraggableDataBox extends React.Component {
                             onImageRequest={handleImageRequest}
                             showGrid={showGrid}
                             svgDim={{width: width, height: height/2}}
+                            imageFilter={imageFilter}
                         />
                         <rect
                             ref={node => this.ImgViewerEventHandler = node}

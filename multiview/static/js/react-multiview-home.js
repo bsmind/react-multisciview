@@ -36725,6 +36725,7 @@ function getTiff(state, payload) {
 
 	if (state.imgPool[id] == null) {
 		var img = _defineProperty({}, id, _extends({
+			// url: raw2gray(data),
 			url: state.imgColorMap ? raw2color(data, state.imgColorMap) : raw2gray(data)
 		}, data));
 		// console.log(img)
@@ -44499,7 +44500,9 @@ var ScatterSeries = function (_React$Component) {
           dataExtents = moreProps.dataExtents,
           zoomFactor = moreProps.zoomFactor;
       var origDataExtents = _this.props.shared.origDataExtents;
-      var canvasDim = _this.props.shared.canvasDim;
+      var _this$props$shared5 = _this.props.shared,
+          canvasDim = _this$props$shared5.canvasDim,
+          imageFilter = _this$props$shared5.imageFilter;
 
 
       if (plotData.length === 0) return;
@@ -44552,9 +44555,9 @@ var ScatterSeries = function (_React$Component) {
       }
 
       var imageSet = [];
-      var _this$props$shared5 = _this.props.shared,
-          imgPool = _this$props$shared5.imgPool,
-          handleImageRequest = _this$props$shared5.handleImageRequest;
+      var _this$props$shared6 = _this.props.shared,
+          imgPool = _this$props$shared6.imgPool,
+          handleImageRequest = _this$props$shared6.handleImageRequest;
       var markerProvider = _this.props.markerProvider;
 
       var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
@@ -44579,7 +44582,8 @@ var ScatterSeries = function (_React$Component) {
           onImageRequest: handleImageRequest,
           showGrid: showGrid,
           svgDim: canvasDim,
-          backgroundRectRef: markerProvider.getSVGRef(d.markerID)
+          backgroundRectRef: markerProvider.getSVGRef(d.markerID),
+          imageFilter: imageFilter
         }));
       });
       return imageSet;
@@ -44849,7 +44853,8 @@ var ChartCanvas = function (_React$Component) {
 				handleCurrSelectedIndexChange: this.handleCurrSelectedIndexChange,
 				handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
 				handleShowDataBox: this.handleShowDataBox,
-				handlePivotSelect: this.handlePivotSelect
+				handlePivotSelect: this.handlePivotSelect,
+				imageFilter: "linear"
 			}, this.state);
 
 			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["a" /* cursorStyle */])(true);
@@ -44897,6 +44902,21 @@ var ChartCanvas = function (_React$Component) {
 							"clipPath",
 							{ id: "chart-area-clip" },
 							__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", { x: 0, y: 0, width: canvasDim.width, height: canvasDim.height })
+						)
+					),
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						"defs",
+						null,
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+							"filter",
+							{ id: "linear", colorInterpolationFilters: "sRGB" },
+							__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+								"feComponentTransfer",
+								null,
+								__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("feFuncR", { type: "linear", slope: 1, intercept: 0 }),
+								__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("feFuncG", { type: "linear", slope: 1, intercept: 0 }),
+								__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("feFuncB", { type: "linear", slope: 1, intercept: 0 })
+							)
 						)
 					),
 					cursor,
@@ -45898,7 +45918,8 @@ var _initialiseProps = function _initialiseProps() {
 	};
 
 	this.handlePivotSelect = function (index) {
-		_this3.setState({ currSelectedIndex: index });
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState({ currSelectedIndex: index, showDataBox: true });
 	};
 };
 
@@ -51179,7 +51200,8 @@ var ImgViewer = function (_React$Component) {
           imgRefHeight = _this$props.imgRefHeight,
           x = _this$props.x,
           y = _this$props.y,
-          id = _this$props.id;
+          id = _this$props.id,
+          imageFilter = _this$props.imageFilter;
       var backgroundRectRef = _this.props.backgroundRectRef;
 
       var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
@@ -51206,6 +51228,8 @@ var ImgViewer = function (_React$Component) {
         }
       }
 
+      //console.log(imageFilter)
+
       var _this$getImgSize = _this.getImgSize(imgSide),
           width = _this$getImgSize.width,
           height = _this$getImgSize.height;
@@ -51224,6 +51248,7 @@ var ImgViewer = function (_React$Component) {
           ref: function ref(node) {
             return _this.node = node;
           },
+          filter: "url(#" + imageFilter + ")",
           xlinkHref: _this.state.img.url,
           x: x - width / 2,
           y: y - height / 2,
@@ -51441,132 +51466,137 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 var PCPPolyLineSeries = function (_React$Component) {
-    _inherits(PCPPolyLineSeries, _React$Component);
+  _inherits(PCPPolyLineSeries, _React$Component);
 
-    function PCPPolyLineSeries() {
-        var _ref;
+  function PCPPolyLineSeries() {
+    var _ref;
 
-        var _temp, _this, _ret;
+    var _temp, _this, _ret;
 
-        _classCallCheck(this, PCPPolyLineSeries);
+    _classCallCheck(this, PCPPolyLineSeries);
 
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPPolyLineSeries.__proto__ || Object.getPrototypeOf(PCPPolyLineSeries)).call.apply(_ref, [this].concat(args))), _this), _this.draw = function (ctx, moreProps) {
-            var plotData = moreProps.plotData,
-                xScale = moreProps.xScale,
-                dimConfig = moreProps.dimConfig;
-            var _this$props = _this.props,
-                opacity = _this$props.opacity,
-                strokeWidth = _this$props.strokeWidth;
-
-
-            var nest = Object(__WEBPACK_IMPORTED_MODULE_4_d3_collection__["b" /* nest */])().key(function (d) {
-                return d.stroke;
-            }).entries(plotData);
-
-            var dimOrder = xScale.domain();
-
-            var yAccessor = function yAccessor(d, config) {
-                var ordinary = config.ordinary,
-                    scale = config.scale,
-                    accessor = config.accessor,
-                    extents = config.extents,
-                    step = config.step,
-                    nullPositionY = config.nullPositionY;
-
-                var yValue = accessor(d);
-                if (yValue == null) {
-                    return nullPositionY;
-                }
-                return ordinary ? scale(extents.indexOf(yValue)) - step / 2 : scale(yValue);
-            };
-
-            var xAccessor = function xAccessor(config) {
-                return config.position;
-            };
-
-            ctx.save();
-            nest.forEach(function (groupByStroke) {
-                var stroke = groupByStroke.key,
-                    group = groupByStroke.values;
-
-
-                group.forEach(function (d) {
-                    d.__in = true;
-                    for (var i = 0; i < dimOrder.length; ++i) {
-                        var config = dimConfig[dimOrder[i]];
-                        if (config.select == null) continue;
-
-                        var py = yAccessor(d, config);
-
-                        var _config$select$slice = config.select.slice(),
-                            _config$select$slice2 = _slicedToArray(_config$select$slice, 2),
-                            start = _config$select$slice2[0],
-                            end = _config$select$slice2[1];
-
-                        if (start > end) {
-                            var temp = start;
-                            start = end;
-                            end = temp;
-                        }
-                        if (start <= py && py <= end) continue;
-
-                        d.__in = false;
-                        break;
-                    }
-                });
-
-                ctx.strokeStyle = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* hexToRGBA */])(stroke, opacity);
-                ctx.lineWidth = strokeWidth;
-                ctx.beginPath();
-                group.forEach(function (d) {
-                    if (!d.__in) return;
-
-                    var p1Config = dimConfig[dimOrder[0]];
-                    var p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
-
-                    ctx.moveTo(p1[0], p1[1]);
-                    for (var i = 1; i < dimOrder.length; ++i) {
-                        var p2Config = dimConfig[dimOrder[i]];
-                        var p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
-                        ctx.lineTo(p2[0], p2[1]);
-                    }
-                });
-                ctx.stroke();
-            });
-            ctx.restore();
-        }, _temp), _possibleConstructorReturn(_this, _ret);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
-    _createClass(PCPPolyLineSeries, [{
-        key: "render",
-        value: function render() {
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__core__["c" /* PCPSubscriberExt */], {
-                canvas: function canvas(contexts) {
-                    return contexts.pcpOn;
-                },
-                clip: false,
-                edgeClip: false,
-                draw: this.draw,
-                drawOn: ["moveaxis", "selectrange"],
-                shared: this.props.shared,
-                dimConfig: this.props.dimConfig,
-                useAllDim: true
-            });
-        }
-    }]);
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PCPPolyLineSeries.__proto__ || Object.getPrototypeOf(PCPPolyLineSeries)).call.apply(_ref, [this].concat(args))), _this), _this.draw = function (ctx, moreProps) {
+      var plotData = moreProps.plotData,
+          xScale = moreProps.xScale,
+          dimConfig = moreProps.dimConfig;
+      var _this$props = _this.props,
+          opacity = _this$props.opacity,
+          strokeWidth = _this$props.strokeWidth;
 
-    return PCPPolyLineSeries;
+
+      var nest = Object(__WEBPACK_IMPORTED_MODULE_4_d3_collection__["b" /* nest */])().key(function (d) {
+        return d.stroke;
+      }).entries(plotData);
+
+      var dimOrder = xScale.domain().map(function (name) {
+        if (dimConfig[name]) return name;
+      }).filter(function (d) {
+        return d != null;
+      });
+
+      var yAccessor = function yAccessor(d, config) {
+        var ordinary = config.ordinary,
+            scale = config.scale,
+            accessor = config.accessor,
+            extents = config.extents,
+            step = config.step,
+            nullPositionY = config.nullPositionY;
+
+        var yValue = accessor(d);
+        if (yValue == null) {
+          return nullPositionY;
+        }
+        return ordinary ? scale(extents.indexOf(yValue)) - step / 2 : scale(yValue);
+      };
+
+      var xAccessor = function xAccessor(config) {
+        return config.position;
+      };
+
+      ctx.save();
+      nest.forEach(function (groupByStroke) {
+        var stroke = groupByStroke.key,
+            group = groupByStroke.values;
+
+
+        group.forEach(function (d) {
+          d.__in = true;
+          for (var i = 0; i < dimOrder.length; ++i) {
+            var config = dimConfig[dimOrder[i]];
+            //console.log(config)
+            if (config == null || config.select == null) continue;
+
+            var py = yAccessor(d, config);
+
+            var _config$select$slice = config.select.slice(),
+                _config$select$slice2 = _slicedToArray(_config$select$slice, 2),
+                start = _config$select$slice2[0],
+                end = _config$select$slice2[1];
+
+            if (start > end) {
+              var temp = start;
+              start = end;
+              end = temp;
+            }
+            if (start <= py && py <= end) continue;
+
+            d.__in = false;
+            break;
+          }
+        });
+
+        ctx.strokeStyle = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["d" /* hexToRGBA */])(stroke, opacity);
+        ctx.lineWidth = strokeWidth;
+        ctx.beginPath();
+        group.forEach(function (d) {
+          if (!d.__in) return;
+
+          var p1Config = dimConfig[dimOrder[0]];
+          var p1 = [xAccessor(p1Config), yAccessor(d, p1Config)];
+
+          ctx.moveTo(p1[0], p1[1]);
+          for (var i = 1; i < dimOrder.length; ++i) {
+            var p2Config = dimConfig[dimOrder[i]];
+            var p2 = [xAccessor(p2Config), yAccessor(d, p2Config)];
+            ctx.lineTo(p2[0], p2[1]);
+          }
+        });
+        ctx.stroke();
+      });
+      ctx.restore();
+    }, _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(PCPPolyLineSeries, [{
+    key: "render",
+    value: function render() {
+      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__core__["c" /* PCPSubscriberExt */], {
+        canvas: function canvas(contexts) {
+          return contexts.pcpOn;
+        },
+        clip: false,
+        edgeClip: false,
+        draw: this.draw,
+        drawOn: ["moveaxis", "selectrange"],
+        shared: this.props.shared,
+        dimConfig: this.props.dimConfig,
+        useAllDim: true
+      });
+    }
+  }]);
+
+  return PCPPolyLineSeries;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 PCPPolyLineSeries.propTypes = {
-    opacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    strokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    shared: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
-    dimConfig: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object
+  opacity: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+  strokeWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+  shared: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
+  dimConfig: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (PCPPolyLineSeries);
@@ -58172,7 +58202,8 @@ var DraggableDataBox = function (_React$Component) {
                 currSelectedIndex = _props$shared.currSelectedIndex,
                 imgPool = _props$shared.imgPool,
                 handleImageRequest = _props$shared.handleImageRequest,
-                showDataBox = _props$shared.showDataBox;
+                showDataBox = _props$shared.showDataBox,
+                imageFilter = _props$shared.imageFilter;
             var _props = this.props,
                 width = _props.width,
                 height = _props.height;
@@ -58258,7 +58289,8 @@ var DraggableDataBox = function (_React$Component) {
                                 imgPool: imgPool,
                                 onImageRequest: handleImageRequest,
                                 showGrid: showGrid,
-                                svgDim: { width: width, height: height / 2 }
+                                svgDim: { width: width, height: height / 2 },
+                                imageFilter: imageFilter
                             }),
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
                                 ref: function ref(node) {
@@ -58818,7 +58850,11 @@ var Pivots = function (_React$Component) {
                             fill: '#ffffff',
                             textAnchor: 'middle',
                             fontFamily: 'Roboto, sans-serif',
-                            fontSize: 6
+                            fontSize: 6,
+                            onClick: function onClick() {
+                                return clickCallback(index);
+                            },
+                            cursor: 'pointer'
                         },
                         index + 1
                     )

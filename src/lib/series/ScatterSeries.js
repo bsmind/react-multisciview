@@ -427,7 +427,7 @@ class ScatterSeries extends React.Component {
     drawImage = (moreProps, ctx) => {
     	const { plotData, xAttr, yAttr, dataExtents, zoomFactor } = moreProps;
     	const { shared: { origDataExtents } } = this.props;
-    	const { canvasDim } = this.props.shared;
+    	const { canvasDim, imageFilter } = this.props.shared;
 
     	if (plotData.length === 0) return;
 
@@ -503,7 +503,8 @@ class ScatterSeries extends React.Component {
     			onImageRequest={handleImageRequest}
     			showGrid={showGrid}
     			svgDim={canvasDim}
-    			backgroundRectRef={markerProvider.getSVGRef(d.markerID)}
+				backgroundRectRef={markerProvider.getSVGRef(d.markerID)}
+				imageFilter={imageFilter}
     		/>);
     	});
     	return imageSet;

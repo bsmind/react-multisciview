@@ -1064,7 +1064,8 @@ class ChartCanvas extends React.Component {
 	}
 
 	handlePivotSelect = (index) => {
-		this.setState({currSelectedIndex: index});
+		this.clearAxisAndChartOnCanvas();
+		this.setState({currSelectedIndex: index, showDataBox: true});
 	}
 
 	render() {
@@ -1110,6 +1111,7 @@ class ChartCanvas extends React.Component {
 			handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
 			handleShowDataBox: this.handleShowDataBox,
 			handlePivotSelect: this.handlePivotSelect,
+			imageFilter: `linear`,
 			...this.state
 		};
 
@@ -1133,7 +1135,7 @@ class ChartCanvas extends React.Component {
 			<div
 				style={divStyle}
 				className={this.props.className}
-			>
+			>			
 				{childrenWithDiv}			
 				<CanvasContainer
 					ref={node => this.canvasContainerNode = node}
@@ -1153,6 +1155,16 @@ class ChartCanvas extends React.Component {
 							<rect x={0} y={0} width={canvasDim.width} height={canvasDim.height} />
 						</clipPath>
 					</defs>
+					<defs>
+						<filter id={`linear`} colorInterpolationFilters="sRGB">
+							<feComponentTransfer>
+								<feFuncR type="linear" slope={1} intercept={0} />
+								<feFuncG type="linear" slope={1} intercept={0} />
+								<feFuncB type="linear" slope={1} intercept={0} />
+							</feComponentTransfer>
+						</filter>						
+					</defs>
+					
 					{cursor}
 					<g transform={`translate(${margin.left},${margin.top})`}>
 						<g>

@@ -84,6 +84,8 @@ class Pivots extends React.Component {
                     textAnchor={'middle'}
                     fontFamily={'Roboto, sans-serif'}
                     fontSize={6}
+                    onClick={() => clickCallback(index)}
+                    cursor={'pointer'}
                 >
                     {index+1}
                 </text>

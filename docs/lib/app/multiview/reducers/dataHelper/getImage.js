@@ -98,6 +98,7 @@ export function getTiff(state, payload) {
 
 	if (state.imgPool[id] == null) {
 		const img = { [id]: {
+			// url: raw2gray(data),
 			url: state.imgColorMap
 				? raw2color(data, state.imgColorMap)
 				: raw2gray(data),
