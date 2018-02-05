@@ -6,7 +6,7 @@ import uniqueId from "lodash.uniqueid";
 import CanvasContainer from "./CanvasContainer";
 import EventHandler from "./EventHandler";
 import { ColorLegend } from "../legends";
-import { DraggableDataBox } from "../indicators";
+import { DraggableDataBox, Pivots } from "../indicators";
 
 import { dimension as getCanvasDimension, clearCanvas } from "./utils";
 import { getScale } from "./scatterUtils";
@@ -910,9 +910,9 @@ class ChartCanvas extends React.Component {
 					value: formattedValue
 				});
 			});
-			return { x, y, info, id: dataID };
+			return { x, y, info, id: dataID, data };
 		}
-		return { x, y, info: null, id: null };
+		return { x, y, info: null, id: null, data: null };
 	}
 
 	handleMouseMove = (mouseXY, e) => {
@@ -1063,7 +1063,9 @@ class ChartCanvas extends React.Component {
 		this.setState({showDataBox: bShow});
 	}
 
-	
+	handlePivotSelect = (index) => {
+		this.setState({currSelectedIndex: index});
+	}
 
 	render() {
 		const { margin } = this.props;
@@ -1107,6 +1109,7 @@ class ChartCanvas extends React.Component {
 			handleCurrSelectedIndexChange: this.handleCurrSelectedIndexChange,
 			handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
 			handleShowDataBox: this.handleShowDataBox,
+			handlePivotSelect: this.handlePivotSelect,
 			...this.state
 		};
 
@@ -1115,7 +1118,7 @@ class ChartCanvas extends React.Component {
 		const children = [], childrenWithHandler = [], childrenWithDiv = [];
 		React.Children.forEach(this.props.children, child => {
 			if (!React.isValidElement(child)) return;
-			if (child.type === ColorLegend) {
+			if (child.type === ColorLegend || child.type === Pivots) {
 				childrenWithHandler.push(React.cloneElement(child, { shared }));
 			} else if ( child.type === DraggableDataBox){
 				childrenWithDiv.push(React.cloneElement(child, { shared }));

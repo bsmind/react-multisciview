@@ -7,7 +7,7 @@ import { ChartCanvas, Chart, Series } from "react-multiview/lib/core";
 import { ColorLegend } from "react-multiview/lib/legends";
 import { XAxis, YAxis } from "react-multiview/lib/axes";
 import { ScatterSeries } from "react-multiview/lib/series";
-import { DataBox, MousePathTracker, DraggableDataBox } from "react-multiview/lib/indicators";
+import { DraggableDataBox, Pivots } from "react-multiview/lib/indicators";
 
 import get from "lodash.get";
 import { sortAlphaNum, getColorInterpolator } from "../utils";
@@ -102,7 +102,9 @@ class ScatterChart extends React.Component {
     		const index = sorted.findIndex(d => d.key === "sample");
     		sorted.splice(0, 0, sorted.splice(index, 1)[0]);
     		return sorted;
-    	};
+		};
+		
+        const pivot = 'M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z';		
 
     	return (
     		<ChartCanvas
@@ -143,39 +145,13 @@ class ScatterChart extends React.Component {
     					minImageSize={minImageSize}
     				/>
     			</Series>
-    			{/* <ColorLegend
-    				orient={"vertical"}
-    				tickOrient={"right"}
-    				legendWidth={35}
-    				legendHeight={150}
-    				outerTickSize={0}
-    				innerTickSize={4}
-    				numTicks={3}
-    				labelStyle={{
-    					fontSize: 6,
-    					fontFamily: "Roboto, sans-serif",
-    					tickLabelFill: "#000000"
-    				}}
-    			/> */}
-    			<DataBox
-    				origin={{
-    					x: Math.round((width - margin.left - margin.right) / 6) * 4,
-    					y: Math.round((height - margin.top - margin.bottom) / 10) * 3
-    				}}
-    				infoSortor={databoxSortor}
-    				hint={[
-    					"sample",
-    					"annealing_temperature",
-    					"annealing_time",
-    					"fit_peaks_alpha",
-    					"fit_peaks_b",
-    					"fit_peaks_chi_squared",
-    					"fit_peaks_d0",
-    					"fit_peaks_sigma1",
-    					"sequence_ID"
-    				]}
-    			/>
-				{/* <MousePathTracker /> */}
+				<Pivots 
+					pivot={pivot}
+					normal={'#000000'}
+					accent={'#ff0000'}
+					opacity={0.7}
+					scale={0.25}
+				/>				
 				<DraggableDataBox 
 					initialPos={{
 						x: margin.left + 5,

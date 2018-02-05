@@ -6794,7 +6794,7 @@ var PRIORITY = {
 /*!*********************************!*\
   !*** ./src/lib/series/index.js ***!
   \*********************************/
-/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider, ImgViewer, PivotSeries */
+/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider, ImgViewer */
 /*! exports used: ImgViewer, PCPPolyLineSeries, ScatterSeries, markerProvider */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6807,9 +6807,6 @@ var PRIORITY = {
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_2__MarkerProvider__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ImgViewer__ = __webpack_require__(/*! ./ImgViewer */ 663);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__ImgViewer__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__PivotSeries__ = __webpack_require__(/*! ./PivotSeries */ 736);
-/* unused harmony reexport PivotSeries */
-
 
 
 
@@ -44851,7 +44848,8 @@ var ChartCanvas = function (_React$Component) {
 				},
 				handleCurrSelectedIndexChange: this.handleCurrSelectedIndexChange,
 				handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
-				handleShowDataBox: this.handleShowDataBox
+				handleShowDataBox: this.handleShowDataBox,
+				handlePivotSelect: this.handlePivotSelect
 			}, this.state);
 
 			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["a" /* cursorStyle */])(true);
@@ -44861,9 +44859,9 @@ var ChartCanvas = function (_React$Component) {
 			    childrenWithDiv = [];
 			__WEBPACK_IMPORTED_MODULE_0_react___default.a.Children.forEach(this.props.children, function (child) {
 				if (!__WEBPACK_IMPORTED_MODULE_0_react___default.a.isValidElement(child)) return;
-				if (child.type === __WEBPACK_IMPORTED_MODULE_5__legends__["a" /* ColorLegend */]) {
+				if (child.type === __WEBPACK_IMPORTED_MODULE_5__legends__["a" /* ColorLegend */] || child.type === __WEBPACK_IMPORTED_MODULE_6__indicators__["b" /* Pivots */]) {
 					childrenWithHandler.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
-				} else if (child.type === __WEBPACK_IMPORTED_MODULE_6__indicators__["b" /* DraggableDataBox */]) {
+				} else if (child.type === __WEBPACK_IMPORTED_MODULE_6__indicators__["a" /* DraggableDataBox */]) {
 					childrenWithDiv.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 				} else children.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 			});
@@ -45740,9 +45738,9 @@ var _initialiseProps = function _initialiseProps() {
 					value: formattedValue
 				});
 			});
-			return { x: x, y: y, info: info, id: dataID };
+			return { x: x, y: y, info: info, id: dataID, data: _data };
 		}
-		return { x: x, y: y, info: null, id: null };
+		return { x: x, y: y, info: null, id: null, data: null };
 	};
 
 	this.handleMouseMove = function (mouseXY, e) {
@@ -45897,6 +45895,10 @@ var _initialiseProps = function _initialiseProps() {
 	this.handleShowDataBox = function (bShow) {
 		_this3.clearAxisAndChartOnCanvas();
 		_this3.setState({ showDataBox: bShow });
+	};
+
+	this.handlePivotSelect = function (index) {
+		_this3.setState({ currSelectedIndex: index });
 	};
 };
 
@@ -55356,6 +55358,8 @@ var ScatterChart = function (_React$Component) {
         return sorted;
       };
 
+      var pivot = 'M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z';
+
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         __WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_core__["a" /* ChartCanvas */],
         {
@@ -55402,15 +55406,14 @@ var ScatterChart = function (_React$Component) {
             minImageSize: minImageSize
           })
         ),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["a" /* DataBox */], {
-          origin: {
-            x: Math.round((width - margin.left - margin.right) / 6) * 4,
-            y: Math.round((height - margin.top - margin.bottom) / 10) * 3
-          },
-          infoSortor: databoxSortor,
-          hint: ["sample", "annealing_temperature", "annealing_time", "fit_peaks_alpha", "fit_peaks_b", "fit_peaks_chi_squared", "fit_peaks_d0", "fit_peaks_sigma1", "sequence_ID"]
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["b" /* Pivots */], {
+          pivot: pivot,
+          normal: '#000000',
+          accent: '#ff0000',
+          opacity: 0.7,
+          scale: 0.25
         }),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["b" /* DraggableDataBox */], {
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_multiview_lib_indicators__["a" /* DraggableDataBox */], {
           initialPos: {
             x: margin.left + 5,
             y: margin.top + 5
@@ -55559,17 +55562,20 @@ function fitWidth(WrappedComponent) {
 /*!*************************************!*\
   !*** ./src/lib/indicators/index.js ***!
   \*************************************/
-/*! exports provided: DataBox, DraggableDataBox, MousePathTracker */
-/*! exports used: DataBox, DraggableDataBox */
+/*! exports provided: DataBox, DraggableDataBox, MousePathTracker, Pivots */
+/*! exports used: DraggableDataBox, Pivots */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dataBox__ = __webpack_require__(/*! ./dataBox */ 674);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__dataBox__["a"]; });
+/* unused harmony reexport DataBox */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__draggableDataBox__ = __webpack_require__(/*! ./draggableDataBox */ 733);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__draggableDataBox__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__draggableDataBox__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__MousePathTracker__ = __webpack_require__(/*! ./MousePathTracker */ 675);
 /* unused harmony reexport MousePathTracker */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Pivots__ = __webpack_require__(/*! ./Pivots */ 737);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_3__Pivots__["a"]; });
+
 
 
 
@@ -55580,7 +55586,6 @@ function fitWidth(WrappedComponent) {
   !*** ./src/lib/indicators/dataBox.js ***!
   \***************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55719,7 +55724,7 @@ DataBox.propTypes = {
   })
 };
 
-/* harmony default export */ __webpack_exports__["a"] = (DataBox);
+/* unused harmony default export */ var _unused_webpack_default_export = (DataBox);
 
 /***/ }),
 /* 675 */
@@ -58678,11 +58683,13 @@ exports.locals = {
 };
 
 /***/ }),
-/* 736 */
-/*!***************************************!*\
-  !*** ./src/lib/series/PivotSeries.js ***!
-  \***************************************/
+/* 736 */,
+/* 737 */
+/*!**************************************!*\
+  !*** ./src/lib/indicators/Pivots.js ***!
+  \**************************************/
 /*! exports provided: default */
+/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -58701,33 +58708,147 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var PivotSeries = function (_React$Component) {
-    _inherits(PivotSeries, _React$Component);
+var Pivots = function (_React$Component) {
+    _inherits(Pivots, _React$Component);
 
-    function PivotSeries() {
-        _classCallCheck(this, PivotSeries);
+    function Pivots() {
+        var _ref;
 
-        return _possibleConstructorReturn(this, (PivotSeries.__proto__ || Object.getPrototypeOf(PivotSeries)).apply(this, arguments));
+        var _temp, _this, _ret;
+
+        _classCallCheck(this, Pivots);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Pivots.__proto__ || Object.getPrototypeOf(Pivots)).call.apply(_ref, [this].concat(args))), _this), _this.getAccessor = function (attr) {
+            var ordinary = attr.ordinary,
+                name = attr.name,
+                step = attr.step,
+                scale = attr.scale,
+                origExtents = attr.origExtents;
+
+            return function (d) {
+                var value = d[name];
+                if (value == null) return null;
+                var scaledValue = void 0;
+                if (ordinary) {
+                    var index = origExtents.indexOf(value);
+                    var range = scale.range();
+                    var sign = range[0] < range[1] ? 1 : -1;
+                    scaledValue = scale(index) + sign * step / 2;
+                } else {
+                    scaledValue = scale(value);
+                }
+                return scaledValue;
+            };
+        }, _this.getDataFilter = function (dataExtents, origDataExtents) {
+            var dataKeys = Object.keys(dataExtents);
+            return function (d) {
+                return dataKeys.map(function (key) {
+                    var extents = dataExtents[key];
+                    var value = d[key];
+                    if (value == null) return true;
+                    if (typeof value === "string") {
+                        var tempExtents = origDataExtents[key];
+                        value = tempExtents.indexOf(value) + 0.5;
+                    }
+                    return extents[0] <= value && value <= extents[1];
+                }).every(function (each) {
+                    return each;
+                });
+            };
+        }, _this.renderPivot = function () {
+            var _this$props$shared = _this.props.shared,
+                selected = _this$props$shared.selected,
+                currSelectedIndex = _this$props$shared.currSelectedIndex,
+                xAttr = _this$props$shared.xAttr,
+                yAttr = _this$props$shared.yAttr,
+                origDataExtents = _this$props$shared.origDataExtents,
+                dataExtents = _this$props$shared.dataExtents,
+                handlePivotSelect = _this$props$shared.handlePivotSelect;
+            var _this$props = _this.props,
+                pivot = _this$props.pivot,
+                normal = _this$props.normal,
+                accent = _this$props.accent,
+                opacity = _this$props.opacity,
+                scale = _this$props.scale;
+
+
+            var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
+            var xAccessor = _this.getAccessor(xAttr);
+            var yAccessor = _this.getAccessor(yAttr);
+
+            var clickCallback = handlePivotSelect ? handlePivotSelect : function () {};
+
+            var pivots = selected.map(function (d, index) {
+                var data = d.data;
+
+                var x = xAccessor(data);
+                var y = yAccessor(data);
+                var color = index === currSelectedIndex ? accent : normal;
+
+                if (x == null || y == null) return;
+                if (!dataFilter(data)) return;
+
+                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'g',
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'g',
+                        { transform: 'translate(' + x + ',' + y + ') scale(' + scale + ')' },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('path', {
+                            key: 'pivot-' + d.id,
+                            d: pivot,
+                            fill: color,
+                            opacity: opacity,
+                            stroke: color,
+                            strokeWidth: 1,
+                            onClick: function onClick() {
+                                return clickCallback(index);
+                            }
+                        })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'text',
+                        {
+                            x: x,
+                            y: y - 5,
+                            fill: '#ffffff',
+                            textAnchor: 'middle',
+                            fontFamily: 'Roboto, sans-serif',
+                            fontSize: 6
+                        },
+                        index + 1
+                    )
+                );
+            }).filter(function (d) {
+                return d != null;
+            });
+
+            return pivots;
+        }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
-    _createClass(PivotSeries, [{
+    _createClass(Pivots, [{
         key: 'render',
         value: function render() {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'div',
+                'g',
                 null,
-                'PivotSeries'
+                this.renderPivot()
             );
         }
     }]);
 
-    return PivotSeries;
+    return Pivots;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
-PivotSeries.propTypes = {};
-PivotSeries.defaultProps = {};
+Pivots.propTypes = {};
+Pivots.defaultProps = {};
 
-/* unused harmony default export */ var _unused_webpack_default_export = (PivotSeries);
+/* harmony default export */ __webpack_exports__["a"] = (Pivots);
 
 /***/ })
 /******/ ]);
