@@ -24,7 +24,9 @@ class ChartCanvas extends React.Component {
 			...initialState,
 			zoomFactor: 1,
 			enableHitTest: true,
-			selected: []
+			selected: [],
+			currSelectedIndex: 0,
+			showDataBox: true,
 		};
 		this.subscriptions = [];
 		this.panInProgress = false;
@@ -1021,18 +1023,47 @@ class ChartCanvas extends React.Component {
 			return;
 
 		const selectedCopy = this.state.selected.slice();
-		const index = selectedCopy.findIndex(d => d.id === state.id);
+		let index = selectedCopy.findIndex(d => d.id === state.id);
 		if (index === -1) {
-			selectedCopy.splice(0, 0, state);
-			//selectedCopy.push(state);
+			//selectedCopy.splice(0, 0, state);
+			selectedCopy.push(state);
+			index = selectedCopy.length - 1;
 		} else {
-			selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+			//selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
 		}
 
 		//console.log(selectedCopy)
-		this.setState({selected: selectedCopy});
+		this.clearAxisAndChartOnCanvas();
+		this.setState({selected: selectedCopy, currSelectedIndex: index, showDataBox: true});
 		//console.log(state)
 	}
+
+	handleCurrSelectedIndexChange = (newIndex) => {
+		this.clearAxisAndChartOnCanvas();
+		this.setState({currSelectedIndex: newIndex});
+	}
+
+	handleCurrSelectedIndexDelete = (index) => {
+		let selectedCopy = this.state.selected.slice();
+		let currSelectedIndex = this.state.currSelectedIndex;
+		if (selectedCopy.length === 0 || index < 0 || index > selectedCopy.length-1) 
+			return;
+
+		selectedCopy.splice(index, 1);
+		currSelectedIndex = currSelectedIndex - 1;
+		if (currSelectedIndex < 0) currSelectedIndex = selectedCopy.length - 1;
+		if (currSelectedIndex > selectedCopy.length-1) currSelectedIndex = 0;
+		
+		this.clearAxisAndChartOnCanvas();
+		this.setState({selected: selectedCopy, currSelectedIndex});
+	}
+
+	handleShowDataBox = (bShow) => {
+		this.clearAxisAndChartOnCanvas();
+		this.setState({showDataBox: bShow});
+	}
+
+	
 
 	render() {
 		const { margin } = this.props;
@@ -1073,6 +1104,9 @@ class ChartCanvas extends React.Component {
 				canvas: this.hitCanvas,
 				ctx: this.hitCtx
 			},
+			handleCurrSelectedIndexChange: this.handleCurrSelectedIndexChange,
+			handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
+			handleShowDataBox: this.handleShowDataBox,
 			...this.state
 		};
 
@@ -1089,6 +1123,8 @@ class ChartCanvas extends React.Component {
 			else
 				children.push(React.cloneElement(child, { shared }));
 		});
+
+
 
 		return (
 			<div

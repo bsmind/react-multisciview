@@ -181,6 +181,8 @@ class ScatterChart extends React.Component {
 						x: margin.left + 5,
 						y: margin.top + 5
 					}}
+					width={150}
+					height={200}
 				/>
     		</ChartCanvas>
     	);

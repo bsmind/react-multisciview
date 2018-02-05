@@ -6794,7 +6794,7 @@ var PRIORITY = {
 /*!*********************************!*\
   !*** ./src/lib/series/index.js ***!
   \*********************************/
-/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider, ImgViewer */
+/*! exports provided: ScatterSeries, PCPPolyLineSeries, markerProvider, ImgViewer, PivotSeries */
 /*! exports used: ImgViewer, PCPPolyLineSeries, ScatterSeries, markerProvider */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6807,6 +6807,9 @@ var PRIORITY = {
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_2__MarkerProvider__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ImgViewer__ = __webpack_require__(/*! ./ImgViewer */ 663);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__ImgViewer__["a"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__PivotSeries__ = __webpack_require__(/*! ./PivotSeries */ 736);
+/* unused harmony reexport PivotSeries */
+
 
 
 
@@ -44748,7 +44751,9 @@ var ChartCanvas = function (_React$Component) {
 		}, initialState, {
 			zoomFactor: 1,
 			enableHitTest: true,
-			selected: []
+			selected: [],
+			currSelectedIndex: 0,
+			showDataBox: true
 		});
 		_this.subscriptions = [];
 		_this.panInProgress = false;
@@ -44843,7 +44848,10 @@ var ChartCanvas = function (_React$Component) {
 				hitTest: {
 					canvas: this.hitCanvas,
 					ctx: this.hitCtx
-				}
+				},
+				handleCurrSelectedIndexChange: this.handleCurrSelectedIndexChange,
+				handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
+				handleShowDataBox: this.handleShowDataBox
 			}, this.state);
 
 			var cursor = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["a" /* cursorStyle */])(true);
@@ -45854,15 +45862,41 @@ var _initialiseProps = function _initialiseProps() {
 			return d.id === state.id;
 		});
 		if (index === -1) {
-			selectedCopy.splice(0, 0, state);
-			//selectedCopy.push(state);
-		} else {
-			selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
-		}
+			//selectedCopy.splice(0, 0, state);
+			selectedCopy.push(state);
+			index = selectedCopy.length - 1;
+		} else {}
+		//selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+
 
 		//console.log(selectedCopy)
-		_this3.setState({ selected: selectedCopy });
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState({ selected: selectedCopy, currSelectedIndex: index, showDataBox: true });
 		//console.log(state)
+	};
+
+	this.handleCurrSelectedIndexChange = function (newIndex) {
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState({ currSelectedIndex: newIndex });
+	};
+
+	this.handleCurrSelectedIndexDelete = function (index) {
+		var selectedCopy = _this3.state.selected.slice();
+		var currSelectedIndex = _this3.state.currSelectedIndex;
+		if (selectedCopy.length === 0 || index < 0 || index > selectedCopy.length - 1) return;
+
+		selectedCopy.splice(index, 1);
+		currSelectedIndex = currSelectedIndex - 1;
+		if (currSelectedIndex < 0) currSelectedIndex = selectedCopy.length - 1;
+		if (currSelectedIndex > selectedCopy.length - 1) currSelectedIndex = 0;
+
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState({ selected: selectedCopy, currSelectedIndex: currSelectedIndex });
+	};
+
+	this.handleShowDataBox = function (bShow) {
+		_this3.clearAxisAndChartOnCanvas();
+		_this3.setState({ showDataBox: bShow });
 	};
 };
 
@@ -55380,7 +55414,9 @@ var ScatterChart = function (_React$Component) {
           initialPos: {
             x: margin.left + 5,
             y: margin.top + 5
-          }
+          },
+          width: 150,
+          height: 200
         })
       );
     }
@@ -58057,6 +58093,14 @@ var ImageTab = function (_React$Component) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils__ = __webpack_require__(/*! ../utils */ 8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_selection__ = __webpack_require__(/*! d3-selection */ 81);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_scale__ = __webpack_require__(/*! d3-scale */ 27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid__ = __webpack_require__(/*! lodash.uniqueid */ 58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css__ = __webpack_require__(/*! ./draggableDataBox.css */ 734);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css__);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -58064,6 +58108,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
 
 
 
@@ -58081,137 +58129,32 @@ var DraggableDataBox = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (DraggableDataBox.__proto__ || Object.getPrototypeOf(DraggableDataBox)).call(this, props));
 
-        _this.handleMouseDown = function (e) {
-            if (e.button !== 0) return;
-            e.stopPropagation();
-            e.preventDefault();
+        _initialiseProps.call(_this);
 
-            document.addEventListener('mousemove', _this.handleMouseMove);
-            document.addEventListener('mouseup', _this.handleMouseUp);
+        var initialPos = props.initialPos;
 
-            _this.setState({
-                dragging: true,
-                rel: {
-                    x: e.pageX - _this.node.offsetLeft,
-                    y: e.pageY - _this.node.offsetTop
-                }
-            });
-        };
+        var state = _this.resetImage(props);
 
-        _this.handleMouseUp = function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            document.removeEventListener('mousemove', _this.handleMouseMove);
-            document.removeEventListener('mouseup', _this.handleMouseUp);
-            _this.setState({
-                dragging: false
-            });
-        };
+        _this.state = _extends({
+            id: __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid___default()('draggable-databox-'),
 
-        _this.handleMouseMove = function (e) {
-            if (!_this.state.dragging) return;
-            e.stopPropagation();
-            e.preventDefault();
-
-            _this.setState({
-                pos: {
-                    x: e.pageX - _this.state.rel.x,
-                    y: e.pageY - _this.state.rel.y
-                }
-            });
-        };
-
-        _this.handleMouseDownImgViewer = function (e) {
-            if (e.button !== 0) return;
-            e.stopPropagation();
-            e.preventDefault();
-            console.log('mousedown:imgviewer');
-        };
-
-        _this.handleWheelImgViewer = function (e) {
-            e.preventDefault();
-            var _this$state = _this.state,
-                imgRefWidth = _this$state.imgRefWidth,
-                imgRefHeight = _this$state.imgRefHeight,
-                imgCenterX = _this$state.imgCenterX,
-                imgCenterY = _this$state.imgCenterY,
-                xScale = _this$state.xScale,
-                yScale = _this$state.yScale;
-
-
-            var SCALE_FACTOR = 0.001;
-            var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
-
-            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["f" /* mousePosition */])(e);
-            var centerX = xScale.invert(mouseXY[0]),
-                beginX = xScale.domain()[0],
-                endX = xScale.domain()[1];
-            var newDomainX = [centerX - (centerX - beginX) * zoomFactor, centerX + (endX - centerX) * zoomFactor];
-
-            var centerY = yScale.invert(mouseXY[1]),
-                beginY = yScale.domain()[0],
-                endY = yScale.domain()[1];
-            var newDomainY = [centerY - (centerY - beginY) * zoomFactor, centerY + (endY - centerY) * zoomFactor];
-
-            _this.setState({
-                imgRefWidth: imgRefWidth * (1 / zoomFactor),
-                imgRefHeight: imgRefHeight * (1 / zoomFactor),
-                imgFocusX: mouseXY[0] - imgCenterX,
-                imgFocusY: mouseXY[1] - imgCenterY,
-                xScale: xScale.copy().domain(newDomainX),
-                yScale: yScale.copy().domain(newDomainY)
-                //imgCenterX: mouseXY[0],
-                //imgCenterY: mouseXY[1]
-            });
-        };
-
-        _this.renderInfo = function (info) {
-            var tableContents = info.map(function (d) {
-                return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'tr',
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'td',
-                        null,
-                        ' ',
-                        d.key,
-                        ' '
-                    ),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'td',
-                        null,
-                        ' ',
-                        d.value,
-                        ' '
-                    )
-                );
-            });
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'table',
-                null,
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'tbody',
-                    null,
-                    tableContents
-                )
-            );
-        };
-
-        _this.state = {
-            pos: props.initialPos,
+            pos: initialPos,
             dragging: false,
-            rel: null,
-            imgFocusX: 0,
-            imgFocusY: 0,
-            imgCenterX: (196 - 2) / 2,
-            imgCenterY: 100 / 2,
-            imgRefWidth: 196 - 2,
-            imgRefHeight: 100,
-            xScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, 194]).range([0, 194]),
-            yScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, 100]).range([0, 100])
+            rel: null
 
-            //this.xScale = scaleLinear().domain([0, 194]).range([0, 194]);
-        };return _this;
+        }, state, {
+            // imgCenterX: width/2,
+            // imgCenterY: height/4,
+            // imgRefWidth: width,
+            // imgRefHeight: height/2,
+
+            // xScale: scaleLinear().domain([0, width]).range([0, width]),
+            // yScale: scaleLinear().domain([0, height/2]).range([0, height/2]),
+
+            panInProgress: false,
+            panStart: null
+        });
+        return _this;
     }
 
     _createClass(DraggableDataBox, [{
@@ -58221,40 +58164,56 @@ var DraggableDataBox = function (_React$Component) {
 
             var _props$shared = this.props.shared,
                 selected = _props$shared.selected,
+                currSelectedIndex = _props$shared.currSelectedIndex,
                 imgPool = _props$shared.imgPool,
-                handleImageRequest = _props$shared.handleImageRequest;
+                handleImageRequest = _props$shared.handleImageRequest,
+                showDataBox = _props$shared.showDataBox;
+            var _props = this.props,
+                width = _props.width,
+                height = _props.height;
 
-            if (selected.length === 0) return null;
+            if (selected.length === 0 || !showDataBox) return null;
 
             var divStyle = {
                 position: 'absolute',
                 left: this.state.pos.x,
                 top: this.state.pos.y,
                 cursor: 'pointer',
-                width: 200,
-                height: 250,
+                width: width,
+                height: height,
                 backgroundColor: '#FFFFFF',
                 border: '1px dotted #707070',
-                borderRadius: 5,
-                padding: 2,
-                zIndex: 100
+                borderRadius: 0,
+                //padding: 2,
+                zIndex: 100,
+                boxShadow: '3px 3px 6px #888888'
             };
 
-            var _selected$ = selected[0],
-                id = _selected$.id,
-                info = _selected$.info;
+            var _selected$currSelecte = selected[currSelectedIndex],
+                id = _selected$currSelecte.id,
+                info = _selected$currSelecte.info;
             var _state = this.state,
                 imgRefWidth = _state.imgRefWidth,
                 imgRefHeight = _state.imgRefHeight,
                 imgCenterX = _state.imgCenterX,
                 imgCenterY = _state.imgCenterY,
-                imgFocusX = _state.imgFocusX,
-                imgFocusY = _state.imgFocusY,
                 xScale = _state.xScale,
                 yScale = _state.yScale;
 
             var x = xScale(imgCenterX);
             var y = yScale(imgCenterY);
+
+            var imageRatio = Math.max(imgRefWidth / width || 0.1, imgRefHeight / (height / 2) || 0.1);
+            var showGrid = imageRatio > 50;
+
+            var infoStyle = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'style',
+                { type: 'text/css' },
+                'td {\n                font-family: Roboto, sans-serif;\n                font-size: 7px;\n            }'
+            );
+
+            var leftTrianglePath = 'M 0 0 L 6 -6 L 6 6 z';
+            var rightTrianglePath = 'M 0 0 L -6 -6 L -6 6 z';
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
@@ -58264,6 +58223,7 @@ var DraggableDataBox = function (_React$Component) {
                     onMouseDown: this.handleMouseDown,
                     style: divStyle
                 },
+                infoStyle,
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'div',
                     { style: {
@@ -58271,41 +58231,92 @@ var DraggableDataBox = function (_React$Component) {
                         } },
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                         'svg',
-                        { width: 200 - 4, height: 100 },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__series__["a" /* ImgViewer */], {
-                            x: x,
-                            y: y,
-                            imgRefWidth: imgRefWidth,
-                            imgRefHeight: imgRefHeight,
-                            id: id,
-                            imgPool: imgPool,
-                            onImageRequest: handleImageRequest,
-                            showGrid: false,
-                            svgDim: { width: 196, height: 100 }
-                        }),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
-                            ref: function ref(node) {
-                                return _this2.ImgViewerEventHandler = node;
-                            },
-                            x: 0,
-                            y: 0,
-                            width: 196 - 2,
-                            height: 196,
-                            fill: '#000000',
-                            fillOpacity: 0.,
-                            onMouseDown: this.handleMouseDownImgViewer,
-                            onWheel: this.handleWheelImgViewer
-                        })
+                        { width: width, height: height / 2 },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'defs',
+                            null,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'clipPath',
+                                { id: this.state.id + '-img-area-clip' },
+                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', { x: 0, y: 0, width: Math.floor(width) - 2, height: height / 2 })
+                            )
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'g',
+                            { style: { clipPath: 'url(#' + this.state.id + '-img-area-clip)' } },
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__series__["a" /* ImgViewer */], {
+                                x: x,
+                                y: y,
+                                imgRefWidth: imgRefWidth,
+                                imgRefHeight: imgRefHeight,
+                                id: id,
+                                imgPool: imgPool,
+                                onImageRequest: handleImageRequest,
+                                showGrid: showGrid,
+                                svgDim: { width: width, height: height / 2 }
+                            }),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
+                                ref: function ref(node) {
+                                    return _this2.ImgViewerEventHandler = node;
+                                },
+                                x: 0,
+                                y: 0,
+                                width: width,
+                                height: height / 2,
+                                fill: '#000000',
+                                fillOpacity: 0.,
+                                onMouseDown: this.handleMouseDownImgViewer,
+                                onWheel: this.handleWheelImgViewer
+                            }),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'g',
+                                { transform: 'translate(' + 1 + ',' + height / 4 + ')' },
+                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('path', {
+                                    d: leftTrianglePath,
+                                    fill: "#000000",
+                                    stroke: "#ffffff",
+                                    strokeWidth: 1,
+                                    onClick: function onClick(e) {
+                                        return _this2.handleCurrSelectedIndex('left', e);
+                                    }
+                                })
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'g',
+                                { transform: 'translate(' + (width - 3) + ',' + height / 4 + ')' },
+                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('path', {
+                                    d: rightTrianglePath,
+                                    fill: "#000000",
+                                    stroke: "#ffffff",
+                                    strokeWidth: 1,
+                                    onClick: function onClick(e) {
+                                        return _this2.handleCurrSelectedIndex('right', e);
+                                    }
+                                })
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'text',
+                                {
+                                    x: 3,
+                                    y: 10,
+                                    textAnchor: 'start',
+                                    fontFamily: 'Roboto, sans-serif',
+                                    fontSize: 7
+                                },
+                                currSelectedIndex + 1 + '/' + selected.length
+                            )
+                        )
                     )
                 ),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'div',
                     { style: {
-                            height: 100,
+                            height: height / 2 - 20,
                             overflow: 'auto'
                         } },
                     this.renderInfo(info)
-                )
+                ),
+                this.renderButtons()
             );
         }
     }]);
@@ -58313,21 +58324,410 @@ var DraggableDataBox = function (_React$Component) {
     return DraggableDataBox;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
+var _initialiseProps = function _initialiseProps() {
+    var _this3 = this;
+
+    this.resetImage = function () {
+        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
+        var width = props.width,
+            height = props.height;
+
+        return {
+            imgCenterX: width / 2,
+            imgCenterY: height / 4,
+            imgRefWidth: width,
+            imgRefHeight: height / 2,
+
+            xScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, width]).range([0, width]),
+            yScale: Object(__WEBPACK_IMPORTED_MODULE_5_d3_scale__["i" /* scaleLinear */])().domain([0, height / 2]).range([0, height / 2])
+        };
+    };
+
+    this.handleMouseDown = function (e) {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        e.preventDefault();
+
+        document.addEventListener('mousemove', _this3.handleMouseMove);
+        document.addEventListener('mouseup', _this3.handleMouseUp);
+
+        _this3.setState({
+            dragging: true,
+            rel: {
+                x: e.pageX - _this3.node.offsetLeft,
+                y: e.pageY - _this3.node.offsetTop
+            }
+        });
+    };
+
+    this.handleMouseUp = function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        document.removeEventListener('mousemove', _this3.handleMouseMove);
+        document.removeEventListener('mouseup', _this3.handleMouseUp);
+        _this3.setState({
+            dragging: false
+        });
+    };
+
+    this.handleMouseMove = function (e) {
+        if (!_this3.state.dragging) return;
+        e.stopPropagation();
+        e.preventDefault();
+
+        _this3.setState({
+            pos: {
+                x: e.pageX - _this3.state.rel.x,
+                y: e.pageY - _this3.state.rel.y
+            }
+        });
+    };
+
+    this.handleMouseDownImgViewer = function (e) {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        e.preventDefault();
+
+        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["f" /* mousePosition */])(e);
+        _this3.panHappened = false;
+        if (!_this3.state.panInProgress) {
+            _this3.setState({
+                panInProgress: true,
+                panStart: {
+                    pos: mouseXY,
+                    xScale: _this3.state.xScale.copy(),
+                    yScale: _this3.state.yScale.copy()
+                }
+            });
+            Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* d3Window */])(_this3.ImgViewerEventHandler)).on('mousemove', _this3.handlePan).on('mouseup', _this3.handlePanEnd);
+        }
+    };
+
+    this.handlePan = function () {
+        var e = __WEBPACK_IMPORTED_MODULE_4_d3_selection__["a" /* event */];
+        if (_this3.state.panStart) {
+            _this3.panHappened = true;
+            var _state$panStart = _this3.state.panStart,
+                pos = _state$panStart.pos,
+                xScale = _state$panStart.xScale,
+                yScale = _state$panStart.yScale;
+
+            var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["b" /* mouse */])(_this3.ImgViewerEventHandler);
+            _this3.lastNewPos = mouseXY;
+            var dx = mouseXY[0] - pos[0];
+            var dy = mouseXY[1] - pos[1];
+            _this3.dx = dx;
+            _this3.dy = dy;
+
+            var newDomainX = xScale.range().map(function (x) {
+                return x - dx;
+            }).map(xScale.invert);
+            var newDomainY = yScale.range().map(function (y) {
+                return y - dy;
+            }).map(yScale.invert);
+
+            _this3.setState({
+                xScale: xScale.copy().domain(newDomainX),
+                yScale: yScale.copy().domain(newDomainY)
+            });
+        }
+    };
+
+    this.handlePanEnd = function () {
+        if (_this3.state.panStart) {
+            Object(__WEBPACK_IMPORTED_MODULE_4_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_3__utils__["b" /* d3Window */])(_this3.ImgViewerEventHandler)).on('mousemove', null).on('mouseup', null);
+
+            if (_this3.panHappened) {
+                var dx = _this3.dx,
+                    dy = _this3.dy;
+
+                delete _this3.dx;
+                delete _this3.dy;
+            }
+
+            _this3.setState({
+                panInProgress: false,
+                panStart: null
+            });
+        }
+    };
+
+    this.handleWheelImgViewer = function (e) {
+        e.preventDefault();
+        var _state2 = _this3.state,
+            imgRefWidth = _state2.imgRefWidth,
+            imgRefHeight = _state2.imgRefHeight,
+            imgCenterX = _state2.imgCenterX,
+            imgCenterY = _state2.imgCenterY,
+            xScale = _state2.xScale,
+            yScale = _state2.yScale;
+
+
+        var SCALE_FACTOR = 0.001;
+        var zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
+
+        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_3__utils__["f" /* mousePosition */])(e);
+        var centerX = xScale.invert(mouseXY[0]),
+            beginX = xScale.domain()[0],
+            endX = xScale.domain()[1];
+        var newDomainX = [centerX - (centerX - beginX) * zoomFactor, centerX + (endX - centerX) * zoomFactor];
+
+        var centerY = yScale.invert(mouseXY[1]),
+            beginY = yScale.domain()[0],
+            endY = yScale.domain()[1];
+        var newDomainY = [centerY - (centerY - beginY) * zoomFactor, centerY + (endY - centerY) * zoomFactor];
+
+        _this3.setState({
+            imgRefWidth: imgRefWidth * (1 / zoomFactor),
+            imgRefHeight: imgRefHeight * (1 / zoomFactor),
+            xScale: xScale.copy().domain(newDomainX),
+            yScale: yScale.copy().domain(newDomainY)
+        });
+    };
+
+    this.handleCurrSelectedIndex = function (dir, e) {
+        var _props$shared2 = _this3.props.shared,
+            selected = _props$shared2.selected,
+            currSelectedIndex = _props$shared2.currSelectedIndex,
+            handleCurrSelectedIndexChange = _props$shared2.handleCurrSelectedIndexChange;
+
+        if (selected.length < 2) return;
+
+        var newIndex = dir === 'left' ? currSelectedIndex - 1 : currSelectedIndex + 1;
+
+        if (newIndex < 0) newIndex = selected.length - 1;
+        if (newIndex > selected.length - 1) newIndex = 0;
+
+        if (handleCurrSelectedIndexChange && newIndex !== currSelectedIndex) {
+            handleCurrSelectedIndexChange(newIndex);
+        }
+    };
+
+    this.renderInfo = function (info) {
+        var tableContents = info.map(function (d) {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'tr',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'td',
+                    null,
+                    ' ',
+                    d.key,
+                    ' '
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'td',
+                    null,
+                    ' ',
+                    d.value,
+                    ' '
+                )
+            );
+        });
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'table',
+            null,
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'tbody',
+                null,
+                tableContents
+            )
+        );
+    };
+
+    this.renderButtons = function () {
+        var _props$shared3 = _this3.props.shared,
+            handleCurrSelectedIndexDelete = _props$shared3.handleCurrSelectedIndexDelete,
+            currSelectedIndex = _props$shared3.currSelectedIndex,
+            handleShowDataBox = _props$shared3.handleShowDataBox;
+
+
+        var deleteCallback = handleCurrSelectedIndexDelete ? handleCurrSelectedIndexDelete : function () {};
+
+        var resetCallback = function resetCallback() {
+            var state = _this3.resetImage();
+            _this3.setState(_extends({}, state));
+        };
+
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'table',
+            { style: { width: '100%', textAlign: 'center' } },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'tbody',
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'tr',
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'td',
+                        null,
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__["Button"], { label: 'RESET', primary: true, theme: __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css___default.a,
+                            onClick: resetCallback
+                        })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'td',
+                        null,
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__["Button"], { label: 'DELETE', primary: true, theme: __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css___default.a,
+                            onClick: function onClick() {
+                                return deleteCallback(currSelectedIndex);
+                            }
+                        })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'td',
+                        null,
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__["Button"], { label: 'CLOSE', primary: true, theme: __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css___default.a,
+                            onClick: function onClick() {
+                                return handleShowDataBox(false);
+                            }
+                        })
+                    )
+                )
+            )
+        );
+    };
+};
+
 DraggableDataBox.propTypes = {
     initialPos: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
         x: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
         y: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-    })
+    }),
+    currSelectedIndex: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
 };
 
 DraggableDataBox.defaultProps = {
     initialPos: {
         x: 0,
         y: 0
-    }
+    },
+    currSelectedIndex: 0
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (DraggableDataBox);
+
+/***/ }),
+/* 734 */
+/*!*************************************************!*\
+  !*** ./src/lib/indicators/draggableDataBox.css ***!
+  \*************************************************/
+/*! dynamic exports provided */
+/*! exports used: default */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--5-1!../../../node_modules/postcss-loader/lib!./draggableDataBox.css */ 735);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {"hmr":true}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ 6)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js??ref--5-1!../../../node_modules/postcss-loader/lib/index.js!./draggableDataBox.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js??ref--5-1!../../../node_modules/postcss-loader/lib/index.js!./draggableDataBox.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 735 */
+/*!**********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader?{"modules":true,"sourceMap":true,"importLoaders":1,"localIndentName":"[name]--[local]--[hash:base64:8]"}!./node_modules/postcss-loader/lib!./src/lib/indicators/draggableDataBox.css ***!
+  \**********************************************************************************************************************************************************************************************************************/
+/*! dynamic exports provided */
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ 5)(true);
+// imports
+
+
+// module
+exports.push([module.i, "._31g8Ob1KzWaLnAWWth5XsB {\n  -ms-flex-line-pack: center;\n      align-content: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  border: 0;\n  cursor: pointer;\n  display: inline-block;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  font-size: 9.1px;\n  font-weight: 500;\n  height: 23.4px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  letter-spacing: 0;\n  line-height: 23.4px;\n  outline: none;\n  padding: 0;\n  position: relative;\n  text-align: center;\n  text-decoration: none;\n  text-transform: uppercase;\n  -webkit-transition:\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  transition:\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  transition:\n    box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1),\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);\n  transition:\n    box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1),\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  white-space: nowrap;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n._31g8Ob1KzWaLnAWWth5XsB *,\n    ._31g8Ob1KzWaLnAWWth5XsB *::after,\n    ._31g8Ob1KzWaLnAWWth5XsB *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n._31g8Ob1KzWaLnAWWth5XsB > input {\n  height: 0.1px;\n  margin: 0;\n  opacity: 0;\n  overflow: hidden;\n  padding: 0;\n  position: absolute;\n  width: 0.1px;\n  z-index: 0;\n}\n._31g8Ob1KzWaLnAWWth5XsB::-moz-focus-inner {\n  border: 0;\n}\n._31g8Ob1KzWaLnAWWth5XsB > span:not([data-react-toolbox='tooltip']) {\n  display: inline-block;\n  line-height: 23.4px;\n  vertical-align: middle;\n}\n._31g8Ob1KzWaLnAWWth5XsB > svg {\n  display: inline-block;\n  fill: currentColor;\n  font-size: 120%;\n  height: 23.4px;\n  vertical-align: top;\n  width: 1em;\n}\n._31g8Ob1KzWaLnAWWth5XsB > * {\n  pointer-events: none;\n}\n._31g8Ob1KzWaLnAWWth5XsB > ._3G9RCRIODFWNUUnZTP337q {\n  overflow: hidden;\n}\n._31g8Ob1KzWaLnAWWth5XsB[disabled] {\n  color: rgba(0, 0, 0, 0.26);\n  cursor: auto;\n  pointer-events: none;\n}\n.taI0a9NU2mqcEKSRSPAHi {\n  border-radius: 1.3px;\n  min-width: 58.5px;\n  padding: 0 7.8px\n}\n.taI0a9NU2mqcEKSRSPAHi ._2HpAsgf-agiDGKx6L8yh0H {\n  font-size: 120%;\n  margin-right: 3.9px;\n  vertical-align: middle;\n}\n.taI0a9NU2mqcEKSRSPAHi > svg {\n  margin-right: 3.25px;\n}\n._38a_atYYwPi8CPS1y4Vh_E[disabled] {\n  background-color: rgba(0, 0, 0, 0.12);\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n}\n._38a_atYYwPi8CPS1y4Vh_E:active {\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n}\n._38a_atYYwPi8CPS1y4Vh_E:focus:not(:active) {\n  -webkit-box-shadow:\n      0 0 8px rgba(0, 0, 0, .18),\n      0 8px 16px rgba(0, 0, 0, .36);\n          box-shadow:\n      0 0 8px rgba(0, 0, 0, .18),\n      0 8px 16px rgba(0, 0, 0, .36);\n}\n._33BWmXdo14kgBhYIei05AH {\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n}\n.RuyCF5p25xi-MAbz5VlMV {\n  background: transparent;\n}\n._25Hh6AWWCv8KER_IgZ_lLp {\n  border-radius: 50%;\n  -webkit-box-shadow:\n    0 1px 1.5px 0 rgba(0, 0, 0, .12),\n    0 1px 1px 0 rgba(0, 0, 0, .24);\n          box-shadow:\n    0 1px 1.5px 0 rgba(0, 0, 0, .12),\n    0 1px 1px 0 rgba(0, 0, 0, .24);\n  font-size: 15.6px;\n  height: 36.4px;\n  width: 36.4px\n}\n._25Hh6AWWCv8KER_IgZ_lLp ._2HpAsgf-agiDGKx6L8yh0H:not([data-react-toolbox='tooltip']) {\n  line-height: 36.4px;\n}\n._25Hh6AWWCv8KER_IgZ_lLp > ._3G9RCRIODFWNUUnZTP337q {\n  border-radius: 50%;\n}\n._25Hh6AWWCv8KER_IgZ_lLp._3IPPBjQkbOVE_9lhZ5DaMi {\n  font-size: 11.55556px;\n  height: 26px;\n  width: 26px;\n}\n._25Hh6AWWCv8KER_IgZ_lLp._3IPPBjQkbOVE_9lhZ5DaMi ._2HpAsgf-agiDGKx6L8yh0H {\n  font-size: 11.55556px;\n  line-height: 26px;\n}\n._1bLAmgYE5o8H9zMy17Vqxy {\n  background: transparent;\n  border-radius: 50%;\n  vertical-align: middle;\n  width: 23.4px\n}\n._1bLAmgYE5o8H9zMy17Vqxy > ._2HpAsgf-agiDGKx6L8yh0H,\n  ._1bLAmgYE5o8H9zMy17Vqxy svg {\n  font-size: 13px;\n  line-height: 23.4px;\n  vertical-align: top;\n}\n._1bLAmgYE5o8H9zMy17Vqxy > ._3G9RCRIODFWNUUnZTP337q {\n  border-radius: 50%;\n}\n.wJMT4GuAtuCLOmsUqzxig:not([disabled])._33BWmXdo14kgBhYIei05AH,\n  .wJMT4GuAtuCLOmsUqzxig:not([disabled])._25Hh6AWWCv8KER_IgZ_lLp {\n  background: rgb(63, 81, 181);\n  color: rgb(255, 255, 255);\n}\n.wJMT4GuAtuCLOmsUqzxig:not([disabled]).RuyCF5p25xi-MAbz5VlMV,\n  .wJMT4GuAtuCLOmsUqzxig:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy {\n  color: rgb(63, 81, 181);\n}\n.wJMT4GuAtuCLOmsUqzxig:not([disabled]).RuyCF5p25xi-MAbz5VlMV:focus:not(:active), .wJMT4GuAtuCLOmsUqzxig:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy:focus:not(:active) {\n  background: rgba(63, 81, 181, 0.2);\n}\n.wJMT4GuAtuCLOmsUqzxig:not([disabled]).RuyCF5p25xi-MAbz5VlMV:hover {\n  background: rgba(63, 81, 181, 0.2);\n}\n._2D6kin51kd5VHy1swf5QWs:not([disabled])._33BWmXdo14kgBhYIei05AH,\n  ._2D6kin51kd5VHy1swf5QWs:not([disabled])._25Hh6AWWCv8KER_IgZ_lLp {\n  background: rgb(255, 64, 129);\n  color: rgb(255, 255, 255);\n}\n._2D6kin51kd5VHy1swf5QWs:not([disabled]).RuyCF5p25xi-MAbz5VlMV,\n  ._2D6kin51kd5VHy1swf5QWs:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy {\n  color: rgb(255, 64, 129);\n}\n._2D6kin51kd5VHy1swf5QWs:not([disabled]).RuyCF5p25xi-MAbz5VlMV:focus:not(:active), ._2D6kin51kd5VHy1swf5QWs:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy:focus:not(:active) {\n  background: rgba(255, 64, 129, 0.2);\n}\n._2D6kin51kd5VHy1swf5QWs:not([disabled]).RuyCF5p25xi-MAbz5VlMV:hover {\n  background: rgba(255, 64, 129, 0.2);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._33BWmXdo14kgBhYIei05AH,\n  ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._25Hh6AWWCv8KER_IgZ_lLp {\n  background-color: rgb(255, 255, 255);\n  color: rgb(33, 33, 33);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled]).RuyCF5p25xi-MAbz5VlMV,\n  ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy {\n  color: rgb(33, 33, 33);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled]).RuyCF5p25xi-MAbz5VlMV:focus:not(:active), ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._1bLAmgYE5o8H9zMy17Vqxy:focus:not(:active) {\n  background: rgba(33, 33, 33, 0.2);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled]).RuyCF5p25xi-MAbz5VlMV:hover {\n  background: rgba(33, 33, 33, 0.2);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv._33BWmXdo14kgBhYIei05AH,\n    ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv._25Hh6AWWCv8KER_IgZ_lLp {\n  background-color: rgb(33, 33, 33);\n  color: rgb(255, 255, 255);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv.RuyCF5p25xi-MAbz5VlMV,\n    ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv._1bLAmgYE5o8H9zMy17Vqxy {\n  color: rgb(255, 255, 255);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv.RuyCF5p25xi-MAbz5VlMV:focus:not(:active), ._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv._1bLAmgYE5o8H9zMy17Vqxy:focus:not(:active) {\n  background: rgba(33, 33, 33, 0.2);\n}\n._1wo2uxMhDg5imN1jYqMB3n:not([disabled])._3fQeGSpTCeSxVVRdzcpxjv.RuyCF5p25xi-MAbz5VlMV:hover {\n  background: rgba(33, 33, 33, 0.2);\n}\n._1wo2uxMhDg5imN1jYqMB3n._3fQeGSpTCeSxVVRdzcpxjv[disabled] {\n  background-color: rgba(0, 0, 0, 0.08);\n  color: rgba(0, 0, 0, 0.54);\n}\n._31g8Ob1KzWaLnAWWth5XsB {\n    font-size: 7px;\n    height: 15px;\n    line-height: 15px;\n}\n.taI0a9NU2mqcEKSRSPAHi {\n    padding: 0;\n    min-width: 30px;\n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/src/lib/indicators/draggableDataBox.css"],"names":[],"mappings":"AAAA;EACE,2BAA2B;MACvB,sBAAsB;EAC1B,0BAA0B;MACtB,uBAAuB;UACnB,oBAAoB;EAC5B,UAAU;EACV,gBAAgB;EAChB,sBAAsB;EACtB,+BAA+B;EAC/B,8BAA8B;MAC1B,wBAAwB;UACpB,oBAAoB;EAC5B,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,yBAAyB;MACrB,sBAAsB;UAClB,wBAAwB;EAChC,kBAAkB;EAClB,oBAAoB;EACpB,cAAc;EACd,WAAW;EACX,mBAAmB;EACnB,mBAAmB;EACnB,sBAAsB;EACtB,0BAA0B;EAC1B;;;uDAGqD;EACrD;;;uDAGqD;EACrD;;;4CAG0C;EAC1C;;;;uDAIqD;EACrD,oBAAoB;EACpB,+BAA+B;UACvB,uBAAuB;EAC/B,wDAAwD;EACxD,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,sBAAsB;CAC/B;AACD;;;EAGE,+BAA+B;UACvB,uBAAuB;EAC/B,oCAAoC;EACpC,4BAA4B;EAC5B,+BAA+B;KAC5B,4BAA4B;MAC3B,2BAA2B;UACvB,uBAAuB;EAC/B,4BAA4B;CAC7B;AACD;EACE,cAAc;EACd,UAAU;EACV,WAAW;EACX,iBAAiB;EACjB,WAAW;EACX,mBAAmB;EACnB,aAAa;EACb,WAAW;CACZ;AACD;EACE,UAAU;CACX;AACD;EACE,sBAAsB;EACtB,oBAAoB;EACpB,uBAAuB;CACxB;AACD;EACE,sBAAsB;EACtB,mBAAmB;EACnB,gBAAgB;EAChB,eAAe;EACf,oBAAoB;EACpB,WAAW;CACZ;AACD;EACE,qBAAqB;CACtB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,2BAA2B;EAC3B,aAAa;EACb,qBAAqB;CACtB;AACD;EACE,qBAAqB;EACrB,kBAAkB;EAClB,gBAAgB;CACjB;AACD;EACE,gBAAgB;EAChB,oBAAoB;EACpB,uBAAuB;CACxB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,sCAAsC;EACtC;;mCAEiC;UACzB;;mCAEyB;CAClC;AACD;EACE;;mCAEiC;UACzB;;mCAEyB;CAClC;AACD;EACE;;oCAEkC;UAC1B;;oCAE0B;CACnC;AACD;EACE;;mCAEiC;UACzB;;mCAEyB;CAIlC;AACD;EACE,wBAAwB;CAGzB;AACD;EACE,mBAAmB;EACnB;;mCAEiC;UACzB;;mCAEyB;EAGjC,kBAAkB;EAClB,eAAe;EACf,aAAa;CACd;AACD;EACE,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,aAAa;EACb,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,kBAAkB;CACnB;AACD;EACE,wBAAwB;EACxB,mBAAmB;EAEnB,uBAAuB;EACvB,aAAa;CACd;AACD;;EAEE,gBAAgB;EAChB,oBAAoB;EACpB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;;EAEE,6BAA6B;EAC7B,0BAA0B;CAC3B;AACD;;EAEE,wBAAwB;CACzB;AACD;EACE,mCAAmC;CACpC;AACD;EACE,mCAAmC;CACpC;AACD;;EAEE,8BAA8B;EAC9B,0BAA0B;CAC3B;AACD;;EAEE,yBAAyB;CAC1B;AACD;EACE,oCAAoC;CACrC;AACD;EACE,oCAAoC;CACrC;AACD;;EAEE,qCAAqC;EACrC,uBAAuB;CACxB;AACD;;EAEE,uBAAuB;CACxB;AACD;EACE,kCAAkC;CACnC;AACD;EACE,kCAAkC;CACnC;AACD;;EAEE,kCAAkC;EAClC,0BAA0B;CAC3B;AACD;;EAEE,0BAA0B;CAC3B;AACD;EACE,kCAAkC;CACnC;AACD;EACE,kCAAkC;CACnC;AACD;EACE,sCAAsC;EACtC,2BAA2B;CAC5B;AACD;IACI,eAAe;IACf,aAAa;IACb,kBAAkB;CACrB;AACD;IACI,WAAW;IACX,gBAAgB;CACnB","file":"draggableDataBox.css","sourcesContent":[".button {\n  -ms-flex-line-pack: center;\n      align-content: center;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  border: 0;\n  cursor: pointer;\n  display: inline-block;\n  -webkit-box-orient: horizontal;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: row;\n          flex-direction: row;\n  font-size: 9.1px;\n  font-weight: 500;\n  height: 23.4px;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  letter-spacing: 0;\n  line-height: 23.4px;\n  outline: none;\n  padding: 0;\n  position: relative;\n  text-align: center;\n  text-decoration: none;\n  text-transform: uppercase;\n  -webkit-transition:\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  transition:\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  transition:\n    box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1),\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);\n  transition:\n    box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1),\n    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    -webkit-box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1);\n  white-space: nowrap;\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%\n}\n.button *,\n    .button *::after,\n    .button *::before {\n  -webkit-box-sizing: border-box;\n          box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  font-smoothing: antialiased;\n  -webkit-text-size-adjust: 100%;\n     -moz-text-size-adjust: 100%;\n      -ms-text-size-adjust: 100%;\n          text-size-adjust: 100%;\n  -webkit-touch-callout: none;\n}\n.button > input {\n  height: 0.1px;\n  margin: 0;\n  opacity: 0;\n  overflow: hidden;\n  padding: 0;\n  position: absolute;\n  width: 0.1px;\n  z-index: 0;\n}\n.button::-moz-focus-inner {\n  border: 0;\n}\n.button > span:not([data-react-toolbox='tooltip']) {\n  display: inline-block;\n  line-height: 23.4px;\n  vertical-align: middle;\n}\n.button > svg {\n  display: inline-block;\n  fill: currentColor;\n  font-size: 120%;\n  height: 23.4px;\n  vertical-align: top;\n  width: 1em;\n}\n.button > * {\n  pointer-events: none;\n}\n.button > .rippleWrapper {\n  overflow: hidden;\n}\n.button[disabled] {\n  color: rgba(0, 0, 0, 0.26);\n  cursor: auto;\n  pointer-events: none;\n}\n.squared {\n  border-radius: 1.3px;\n  min-width: 58.5px;\n  padding: 0 7.8px\n}\n.squared .icon {\n  font-size: 120%;\n  margin-right: 3.9px;\n  vertical-align: middle;\n}\n.squared > svg {\n  margin-right: 3.25px;\n}\n.solid[disabled] {\n  background-color: rgba(0, 0, 0, 0.12);\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n}\n.solid:active {\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n}\n.solid:focus:not(:active) {\n  -webkit-box-shadow:\n      0 0 8px rgba(0, 0, 0, .18),\n      0 8px 16px rgba(0, 0, 0, .36);\n          box-shadow:\n      0 0 8px rgba(0, 0, 0, .18),\n      0 8px 16px rgba(0, 0, 0, .36);\n}\n.raised {\n  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),\n    0 3px 1px -2px rgba(0, 0, 0, .2),\n    0 1px 5px 0 rgba(0, 0, 0, .12);\n  composes: button;\n  composes: squared;\n  composes: solid;\n}\n.flat {\n  background: transparent;\n  composes: button;\n  composes: squared;\n}\n.floating {\n  border-radius: 50%;\n  -webkit-box-shadow:\n    0 1px 1.5px 0 rgba(0, 0, 0, .12),\n    0 1px 1px 0 rgba(0, 0, 0, .24);\n          box-shadow:\n    0 1px 1.5px 0 rgba(0, 0, 0, .12),\n    0 1px 1px 0 rgba(0, 0, 0, .24);\n  composes: button;\n  composes: solid;\n  font-size: 15.6px;\n  height: 36.4px;\n  width: 36.4px\n}\n.floating .icon:not([data-react-toolbox='tooltip']) {\n  line-height: 36.4px;\n}\n.floating > .rippleWrapper {\n  border-radius: 50%;\n}\n.floating.mini {\n  font-size: 11.55556px;\n  height: 26px;\n  width: 26px;\n}\n.floating.mini .icon {\n  font-size: 11.55556px;\n  line-height: 26px;\n}\n.toggle {\n  background: transparent;\n  border-radius: 50%;\n  composes: button;\n  vertical-align: middle;\n  width: 23.4px\n}\n.toggle > .icon,\n  .toggle svg {\n  font-size: 13px;\n  line-height: 23.4px;\n  vertical-align: top;\n}\n.toggle > .rippleWrapper {\n  border-radius: 50%;\n}\n.primary:not([disabled]).raised,\n  .primary:not([disabled]).floating {\n  background: rgb(63, 81, 181);\n  color: rgb(255, 255, 255);\n}\n.primary:not([disabled]).flat,\n  .primary:not([disabled]).toggle {\n  color: rgb(63, 81, 181);\n}\n.primary:not([disabled]).flat:focus:not(:active), .primary:not([disabled]).toggle:focus:not(:active) {\n  background: rgba(63, 81, 181, 0.2);\n}\n.primary:not([disabled]).flat:hover {\n  background: rgba(63, 81, 181, 0.2);\n}\n.accent:not([disabled]).raised,\n  .accent:not([disabled]).floating {\n  background: rgb(255, 64, 129);\n  color: rgb(255, 255, 255);\n}\n.accent:not([disabled]).flat,\n  .accent:not([disabled]).toggle {\n  color: rgb(255, 64, 129);\n}\n.accent:not([disabled]).flat:focus:not(:active), .accent:not([disabled]).toggle:focus:not(:active) {\n  background: rgba(255, 64, 129, 0.2);\n}\n.accent:not([disabled]).flat:hover {\n  background: rgba(255, 64, 129, 0.2);\n}\n.neutral:not([disabled]).raised,\n  .neutral:not([disabled]).floating {\n  background-color: rgb(255, 255, 255);\n  color: rgb(33, 33, 33);\n}\n.neutral:not([disabled]).flat,\n  .neutral:not([disabled]).toggle {\n  color: rgb(33, 33, 33);\n}\n.neutral:not([disabled]).flat:focus:not(:active), .neutral:not([disabled]).toggle:focus:not(:active) {\n  background: rgba(33, 33, 33, 0.2);\n}\n.neutral:not([disabled]).flat:hover {\n  background: rgba(33, 33, 33, 0.2);\n}\n.neutral:not([disabled]).inverse.raised,\n    .neutral:not([disabled]).inverse.floating {\n  background-color: rgb(33, 33, 33);\n  color: rgb(255, 255, 255);\n}\n.neutral:not([disabled]).inverse.flat,\n    .neutral:not([disabled]).inverse.toggle {\n  color: rgb(255, 255, 255);\n}\n.neutral:not([disabled]).inverse.flat:focus:not(:active), .neutral:not([disabled]).inverse.toggle:focus:not(:active) {\n  background: rgba(33, 33, 33, 0.2);\n}\n.neutral:not([disabled]).inverse.flat:hover {\n  background: rgba(33, 33, 33, 0.2);\n}\n.neutral.inverse[disabled] {\n  background-color: rgba(0, 0, 0, 0.08);\n  color: rgba(0, 0, 0, 0.54);\n}\n.button {\n    font-size: 7px;\n    height: 15px;\n    line-height: 15px;\n}\n.squared {\n    padding: 0;\n    min-width: 30px;\n}"],"sourceRoot":""}]);
+
+// exports
+exports.locals = {
+	"button": "_31g8Ob1KzWaLnAWWth5XsB",
+	"rippleWrapper": "_3G9RCRIODFWNUUnZTP337q",
+	"squared": "taI0a9NU2mqcEKSRSPAHi",
+	"icon": "_2HpAsgf-agiDGKx6L8yh0H",
+	"solid": "_38a_atYYwPi8CPS1y4Vh_E",
+	"raised": "_33BWmXdo14kgBhYIei05AH _31g8Ob1KzWaLnAWWth5XsB taI0a9NU2mqcEKSRSPAHi _38a_atYYwPi8CPS1y4Vh_E",
+	"flat": "RuyCF5p25xi-MAbz5VlMV _31g8Ob1KzWaLnAWWth5XsB taI0a9NU2mqcEKSRSPAHi",
+	"floating": "_25Hh6AWWCv8KER_IgZ_lLp _31g8Ob1KzWaLnAWWth5XsB _38a_atYYwPi8CPS1y4Vh_E",
+	"mini": "_3IPPBjQkbOVE_9lhZ5DaMi",
+	"toggle": "_1bLAmgYE5o8H9zMy17Vqxy _31g8Ob1KzWaLnAWWth5XsB",
+	"primary": "wJMT4GuAtuCLOmsUqzxig",
+	"accent": "_2D6kin51kd5VHy1swf5QWs",
+	"neutral": "_1wo2uxMhDg5imN1jYqMB3n",
+	"inverse": "_3fQeGSpTCeSxVVRdzcpxjv"
+};
+
+/***/ }),
+/* 736 */
+/*!***************************************!*\
+  !*** ./src/lib/series/PivotSeries.js ***!
+  \***************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+var PivotSeries = function (_React$Component) {
+    _inherits(PivotSeries, _React$Component);
+
+    function PivotSeries() {
+        _classCallCheck(this, PivotSeries);
+
+        return _possibleConstructorReturn(this, (PivotSeries.__proto__ || Object.getPrototypeOf(PivotSeries)).apply(this, arguments));
+    }
+
+    _createClass(PivotSeries, [{
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                null,
+                'PivotSeries'
+            );
+        }
+    }]);
+
+    return PivotSeries;
+}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
+
+PivotSeries.propTypes = {};
+PivotSeries.defaultProps = {};
+
+/* unused harmony default export */ var _unused_webpack_default_export = (PivotSeries);
 
 /***/ })
 /******/ ]);
