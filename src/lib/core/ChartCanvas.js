@@ -832,7 +832,8 @@ class ChartCanvas extends React.Component {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					zAttr: newZAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				});
 				requestAnimationFrame(() => {
 					this.waitingForAnimationFrame = false;
@@ -861,7 +862,8 @@ class ChartCanvas extends React.Component {
 				xAttr: newXAttr,
 				yAttr: newYAttr,
 				zAttr: newZAttr,
-				dataExtents: newDataExtents
+				dataExtents: newDataExtents,
+				zoomFactor: 1
 			});
 			requestAnimationFrame(() => {
 				this.clearAxisAndChartOnCanvas();
@@ -869,7 +871,8 @@ class ChartCanvas extends React.Component {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					zAttr: newZAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				});
 			});
 		}
@@ -1034,13 +1037,50 @@ class ChartCanvas extends React.Component {
 
 		//console.log(selectedCopy)
 		this.clearAxisAndChartOnCanvas();
-		this.setState({selected: selectedCopy, currSelectedIndex: index, showDataBox: true});
+		this.setState({selected: selectedCopy, currSelectedIndex: index, showDataBox: true, zoomFactor: 1});
 		//console.log(state)
+	}
+
+	handleImageClick = (id, e) => {
+		const dataIndex = this.dataHashIndexByID[id];
+		const data = this.state.plotData[dataIndex];
+		if (data) {
+			const selectedCopy = this.state.selected.slice();
+			let index = selectedCopy.findIndex(d => d.id === id);
+			if (index === -1) {
+				//selectedCopy.splice(0, 0, state);
+				const formatSI = d3Format(".3s");
+				const info = [];
+				Object.keys(data).forEach(key => {
+					if (key === "_id" || key === "colorID" || key === "markerID") return;
+	
+					const value = data[key];
+					if (value == null) return;
+	
+					const keyTokens = key.split(".");
+					const shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1] : keyTokens[0];
+					const formattedValue = typeof value === "string" ? value : formatSI(value);
+	
+					info.push({
+						key: shortKey,
+						value: formattedValue
+					});
+				});
+				//return { x, y, info, id: dataID, data };
+					
+				selectedCopy.push({info, id, data});
+				index = selectedCopy.length - 1;
+			} else {
+				//selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+			}				
+			this.clearAxisAndChartOnCanvas();
+			this.setState({selected: selectedCopy, currSelectedIndex: index, showDataBox: true, zoomFactor: 1});				
+		}
 	}
 
 	handleCurrSelectedIndexChange = (newIndex) => {
 		this.clearAxisAndChartOnCanvas();
-		this.setState({currSelectedIndex: newIndex});
+		this.setState({currSelectedIndex: newIndex, zoomFactor: 1});
 	}
 
 	handleCurrSelectedIndexDelete = (index) => {
@@ -1055,17 +1095,17 @@ class ChartCanvas extends React.Component {
 		if (currSelectedIndex > selectedCopy.length-1) currSelectedIndex = 0;
 		
 		this.clearAxisAndChartOnCanvas();
-		this.setState({selected: selectedCopy, currSelectedIndex});
+		this.setState({selected: selectedCopy, currSelectedIndex, zoomFactor: 1});
 	}
 
 	handleShowDataBox = (bShow) => {
 		this.clearAxisAndChartOnCanvas();
-		this.setState({showDataBox: bShow});
+		this.setState({showDataBox: bShow, zoomFactor: 1});
 	}
 
 	handlePivotSelect = (index) => {
 		this.clearAxisAndChartOnCanvas();
-		this.setState({currSelectedIndex: index, showDataBox: true});
+		this.setState({currSelectedIndex: index, showDataBox: true, zoomFactor: 1});
 	}
 
 	render() {
@@ -1111,6 +1151,7 @@ class ChartCanvas extends React.Component {
 			handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
 			handleShowDataBox: this.handleShowDataBox,
 			handlePivotSelect: this.handlePivotSelect,
+			handleImageClick: this.handleImageClick,
 			imageFilter: `linear`,
 			...this.state
 		};
@@ -1128,6 +1169,19 @@ class ChartCanvas extends React.Component {
 			else
 				children.push(React.cloneElement(child, { shared }));
 		});
+
+		const eventHandler = <EventHandler
+			ref={node => this.eventHandlerNode = node}
+			width={canvasDim.width}
+			height={canvasDim.height}
+			onZoom={this.handleZoom}
+			onMouseMove={this.handleMouseMove}
+			onPan={this.handlePan}
+			onPanEnd={this.handlePanEnd}
+			onMouseTrack={this.handleMouseTrack}
+			onMouseTrackEnd={this.handleMouseTrackEnd}
+			onClick={this.handleMouseClick}
+		/>;
 
 		return (
 			<div
@@ -1170,21 +1224,10 @@ class ChartCanvas extends React.Component {
 					
 					{cursor}
 					<g transform={`translate(${margin.left},${margin.top})`}>
+						{eventHandler}
 						<g>
 							{children}
 						</g>
-						<EventHandler
-							ref={node => this.eventHandlerNode = node}
-							width={canvasDim.width}
-							height={canvasDim.height}
-							onZoom={this.handleZoom}
-							onMouseMove={this.handleMouseMove}
-							onPan={this.handlePan}
-							onPanEnd={this.handlePanEnd}
-							onMouseTrack={this.handleMouseTrack}
-							onMouseTrackEnd={this.handleMouseTrackEnd}
-							onClick={this.handleMouseClick}
-						/>
 						<g>
 							{childrenWithHandler}
 						</g>

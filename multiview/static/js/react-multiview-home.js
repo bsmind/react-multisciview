@@ -20302,260 +20302,316 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 var ImgViewer = function (_React$Component) {
-  _inherits(ImgViewer, _React$Component);
+	_inherits(ImgViewer, _React$Component);
 
-  function ImgViewer() {
-    _classCallCheck(this, ImgViewer);
+	function ImgViewer() {
+		_classCallCheck(this, ImgViewer);
 
-    var _this = _possibleConstructorReturn(this, (ImgViewer.__proto__ || Object.getPrototypeOf(ImgViewer)).call(this));
+		var _this = _possibleConstructorReturn(this, (ImgViewer.__proto__ || Object.getPrototypeOf(ImgViewer)).call(this));
 
-    _this.getImgSize = function (side) {
-      var img = _this.state.img;
+		_this.getImgSize = function (side) {
+			var img = _this.state.img;
 
-      var width = void 0,
-          height = void 0;
-      if (img.width >= img.height) {
-        width = side;
-        height = img.height / img.width * side;
-      } else {
-        height = side;
-        width = img.width / img.height * side;
-      }
-      return { width: width, height: height };
-    };
+			var width = void 0,
+			    height = void 0;
+			if (img.width >= img.height) {
+				width = side;
+				height = img.height / img.width * side;
+			} else {
+				height = side;
+				width = img.width / img.height * side;
+			}
+			return { width: width, height: height };
+		};
 
-    _this.renderImage = function () {
-      var _this$props = _this.props,
-          imgRefWidth = _this$props.imgRefWidth,
-          imgRefHeight = _this$props.imgRefHeight,
-          x = _this$props.x,
-          y = _this$props.y,
-          id = _this$props.id,
-          imageFilter = _this$props.imageFilter;
-      var backgroundRectRef = _this.props.backgroundRectRef;
+		_this.renderImage = function () {
+			var _this$props = _this.props,
+			    imgRefWidth = _this$props.imgRefWidth,
+			    imgRefHeight = _this$props.imgRefHeight,
+			    x = _this$props.x,
+			    y = _this$props.y,
+			    id = _this$props.id,
+			    imageFilter = _this$props.imageFilter,
+			    onImageClick = _this$props.onImageClick;
+			var backgroundRectRef = _this.props.backgroundRectRef;
 
-      var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
-      var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
-      var imgSide = Math.min(imgWidth, imgHeight);
-      if (_this.state.img == null || _this.state.id == null) {
-        if (backgroundRectRef) {
-          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
-            key: "imgViewer-empty-" + id,
-            x: x - imgSide / 2,
-            y: y - imgSide / 2,
-            width: imgSide,
-            height: imgSide
-          });
-        } else {
-          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
-            x: x - imgSide / 2,
-            y: y - imgSide / 2,
-            width: imgSide,
-            height: imgSide,
-            fill: "#000000",
-            fillOpacity: 0.3
-          });
-        }
-      }
+			var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
+			var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
+			var imgSide = Math.min(imgWidth, imgHeight);
+			var clickCallback = onImageClick ? onImageClick : function () {};
 
-      //console.log(imageFilter)
+			if (_this.state.img == null || _this.state.img.url == null || _this.state.id == null) {
+				if (backgroundRectRef) {
+					return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						"g",
+						null,
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+							key: "imgViewer-empty-" + id,
+							x: x - imgSide / 2,
+							y: y - imgSide / 2,
+							width: imgSide,
+							height: imgSide,
+							onClick: function onClick(e) {
+								return clickCallback(id, e);
+							}
+						}),
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", {
+							x1: x - imgSide / 2 + 5,
+							y1: y - imgSide / 2 + 5,
+							x2: x + imgSide / 2 - 5,
+							y2: y + imgSide / 2 - 5,
+							stroke: '#000000',
+							strokeWidth: 5,
+							strokeLinecap: 'round'
+						}),
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", {
+							x1: x - imgSide / 2 + 5,
+							y1: y - imgSide / 2 + 5,
+							x2: x + imgSide / 2 - 5,
+							y2: y + imgSide / 2 - 5,
+							stroke: '#ffffff',
+							strokeWidth: 2,
+							strokeLinecap: 'round'
+						})
+					);
+				} else {
+					return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						"g",
+						null,
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
+							x: x - imgSide / 2,
+							y: y - imgSide / 2,
+							width: imgSide,
+							height: imgSide,
+							fill: "#000000",
+							fillOpacity: 0.3,
+							onClick: function onClick(e) {
+								return clickCallback(id, e);
+							}
+						}),
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", {
+							x1: x - imgSide / 2 + 5,
+							y1: y - imgSide / 2 + 5,
+							x2: x + imgSide / 2 - 5,
+							y2: y + imgSide / 2 - 5,
+							stroke: '#000000',
+							strokeWidth: 5,
+							strokeLinecap: 'round'
+						}),
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", {
+							x1: x - imgSide / 2 + 5,
+							y1: y - imgSide / 2 + 5,
+							x2: x + imgSide / 2 - 5,
+							y2: y + imgSide / 2 - 5,
+							stroke: '#ffffff',
+							strokeWidth: 2,
+							strokeLinecap: 'round'
+						})
+					);
+				}
+			}
 
-      var _this$getImgSize = _this.getImgSize(imgSide),
-          width = _this$getImgSize.width,
-          height = _this$getImgSize.height;
+			//console.log(imageFilter)
 
-      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-        "g",
-        null,
-        backgroundRectRef && __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
-          key: "imgViewer-bg-" + id,
-          x: x - width / 2 - 1,
-          y: y - height / 2 - 1,
-          width: width + 2,
-          height: height + 2
-        }),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("image", {
-          ref: function ref(node) {
-            return _this.node = node;
-          },
-          filter: "url(#" + imageFilter + ")",
-          xlinkHref: _this.state.img.url,
-          x: x - width / 2,
-          y: y - height / 2,
-          width: width,
-          height: height,
-          imageRendering: "pixelated"
-        })
-      );
-    };
+			var _this$getImgSize = _this.getImgSize(imgSide),
+			    width = _this$getImgSize.width,
+			    height = _this$getImgSize.height;
 
-    _this.renderGrid = function () {
-      if (!_this.props.showGrid || _this.state.img == null) return;
+			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+				"g",
+				null,
+				backgroundRectRef && __WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(backgroundRectRef, {
+					key: "imgViewer-bg-" + id,
+					x: x - width / 2 - 1,
+					y: y - height / 2 - 1,
+					width: width + 2,
+					height: height + 2
+				}),
+				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("image", {
+					ref: function ref(node) {
+						return _this.node = node;
+					},
+					filter: "url(#" + imageFilter + ")",
+					xlinkHref: _this.state.img.url,
+					x: x - width / 2,
+					y: y - height / 2,
+					width: width,
+					height: height,
+					imageRendering: "pixelated",
+					onClick: function onClick(e) {
+						return clickCallback(id, e);
+					}
+				})
+			);
+		};
 
-      var _this$props2 = _this.props,
-          imgRefWidth = _this$props2.imgRefWidth,
-          imgRefHeight = _this$props2.imgRefHeight,
-          x = _this$props2.x,
-          y = _this$props2.y,
-          svgDim = _this$props2.svgDim;
+		_this.renderGrid = function () {
+			if (!_this.props.showGrid || _this.state.img == null) return;
 
-      var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
-      var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
-      var imgSide = Math.min(imgWidth, imgHeight);
+			var _this$props2 = _this.props,
+			    imgRefWidth = _this$props2.imgRefWidth,
+			    imgRefHeight = _this$props2.imgRefHeight,
+			    x = _this$props2.x,
+			    y = _this$props2.y,
+			    svgDim = _this$props2.svgDim;
 
-      var _this$getImgSize2 = _this.getImgSize(imgSide),
-          width = _this$getImgSize2.width,
-          height = _this$getImgSize2.height;
+			var imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
+			var imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
+			var imgSide = Math.min(imgWidth, imgHeight);
 
-      var _this$state = _this.state,
-          img = _this$state.img,
-          id = _this$state.id;
+			var _this$getImgSize2 = _this.getImgSize(imgSide),
+			    width = _this$getImgSize2.width,
+			    height = _this$getImgSize2.height;
+
+			var _this$state = _this.state,
+			    img = _this$state.img,
+			    id = _this$state.id;
 
 
-      var xScale = Object(__WEBPACK_IMPORTED_MODULE_2_d3_scale__["i" /* scaleLinear */])().domain([0, img.width]).range([0, width]);
-      var cx = x;
-      var dx = xScale(1);
-      var sx = cx - width / 2;
-      var ex = cx + width / 2;
-      var boundX = [Math.max(sx, 0), Math.min(ex, svgDim.width)];
-      var start_ix = Math.floor((boundX[0] - sx) / dx);
-      var end_ix = img.width - Math.ceil((ex - boundX[1]) / dx);
+			var xScale = Object(__WEBPACK_IMPORTED_MODULE_2_d3_scale__["i" /* scaleLinear */])().domain([0, img.width]).range([0, width]);
+			var cx = x;
+			var dx = xScale(1);
+			var sx = cx - width / 2;
+			var ex = cx + width / 2;
+			var boundX = [Math.max(sx, 0), Math.min(ex, svgDim.width)];
+			var start_ix = Math.floor((boundX[0] - sx) / dx);
+			var end_ix = img.width - Math.ceil((ex - boundX[1]) / dx);
 
-      var yScale = Object(__WEBPACK_IMPORTED_MODULE_2_d3_scale__["i" /* scaleLinear */])().domain([0, img.height]).range([0, height]);
-      var cy = y;
-      var dy = yScale(1);
-      var sy = cy - height / 2;
-      var ey = cy + height / 2;
-      var boundY = [Math.max(sy, 0), Math.min(ey, svgDim.height)];
-      var start_iy = Math.floor((boundY[0] - sy) / dy);
-      var end_iy = img.height - Math.ceil((ey - boundY[1]) / dy);
+			var yScale = Object(__WEBPACK_IMPORTED_MODULE_2_d3_scale__["i" /* scaleLinear */])().domain([0, img.height]).range([0, height]);
+			var cy = y;
+			var dy = yScale(1);
+			var sy = cy - height / 2;
+			var ey = cy + height / 2;
+			var boundY = [Math.max(sy, 0), Math.min(ey, svgDim.height)];
+			var start_iy = Math.floor((boundY[0] - sy) / dy);
+			var end_iy = img.height - Math.ceil((ey - boundY[1]) / dy);
 
-      var lineStyleVertical = {
-        stroke: "#000000",
-        strokeWidth: 1,
-        y1: boundY[0],
-        y2: boundY[1]
-      };
-      var lineStyleHorizontal = {
-        stroke: "#000000",
-        strokeWidth: 1,
-        x1: boundX[0],
-        x2: boundX[1]
-      };
-      var textStyle = {
-        fontFamily: "Roboto, sans-serif",
-        fontSize: Math.min(dx, dy) / 5,
-        textAnchor: "start",
-        fill: "black"
-      };
+			var lineStyleVertical = {
+				stroke: "#000000",
+				strokeWidth: 1,
+				y1: boundY[0],
+				y2: boundY[1]
+			};
+			var lineStyleHorizontal = {
+				stroke: "#000000",
+				strokeWidth: 1,
+				x1: boundX[0],
+				x2: boundX[1]
+			};
+			var textStyle = {
+				fontFamily: "Roboto, sans-serif",
+				fontSize: Math.min(dx, dy) / 5,
+				textAnchor: "start",
+				fill: "black"
+			};
 
-      var grids = [];
-      var needToDrawVerticalLine = true;
-      for (var iy = start_iy; iy <= end_iy; ++iy) {
-        var yy = sy + iy * dy;
-        grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", _extends({
-          key: id + "-h-" + iy,
-          y1: yy,
-          y2: yy
-        }, lineStyleHorizontal)));
+			var grids = [];
+			var needToDrawVerticalLine = true;
+			for (var iy = start_iy; iy <= end_iy; ++iy) {
+				var yy = sy + iy * dy;
+				grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", _extends({
+					key: id + "-h-" + iy,
+					y1: yy,
+					y2: yy
+				}, lineStyleHorizontal)));
 
-        for (var ix = start_ix; ix <= end_ix; ++ix) {
-          var xx = sx + ix * dx;
+				for (var ix = start_ix; ix <= end_ix; ++ix) {
+					var xx = sx + ix * dx;
 
-          if (iy < img.height && ix < img.width) {
-            grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-              "text",
-              _extends({
-                key: id + "-text-" + ix + "-" + iy,
-                x: xx + dx / 6,
-                y: yy + dy / 3
-              }, textStyle),
-              img.data[iy][ix]
-            ));
-          }
+					if (iy < img.height && ix < img.width) {
+						grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+							"text",
+							_extends({
+								key: id + "-text-" + ix + "-" + iy,
+								x: xx + dx / 6,
+								y: yy + dy / 3
+							}, textStyle),
+							img.data[iy][ix]
+						));
+					}
 
-          if (needToDrawVerticalLine) grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", _extends({
-            key: id + "-v-" + ix,
-            x1: xx,
-            x2: xx
-          }, lineStyleVertical)));
-        }
-        needToDrawVerticalLine = false;
-      }
+					if (needToDrawVerticalLine) grids.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("line", _extends({
+						key: id + "-v-" + ix,
+						x1: xx,
+						x2: xx
+					}, lineStyleVertical)));
+				}
+				needToDrawVerticalLine = false;
+			}
 
-      return grids;
-    };
+			return grids;
+		};
 
-    _this.state = {
-      img: null,
-      id: null
-    };
-    return _this;
-  }
+		_this.state = {
+			img: null,
+			id: null
+		};
+		return _this;
+	}
 
-  _createClass(ImgViewer, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _props = this.props,
-          imgPool = _props.imgPool,
-          id = _props.id;
+	_createClass(ImgViewer, [{
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			var _props = this.props,
+			    imgPool = _props.imgPool,
+			    id = _props.id;
 
-      if (imgPool && imgPool[id]) {
-        this.setState({ id: id, img: imgPool[id] });
-      }
-      if (this.props.onImageRequest) {
-        this.props.onImageRequest(id, 5);
-      }
-    }
-  }, {
-    key: "componentWillReceiveProps",
-    value: function componentWillReceiveProps(nextProps) {
-      var imgPool = nextProps.imgPool,
-          id = nextProps.id,
-          onImageRequest = nextProps.onImageRequest;
+			if (imgPool && imgPool[id]) {
+				this.setState({ id: id, img: imgPool[id] });
+			}
+			if (this.props.onImageRequest) {
+				this.props.onImageRequest(id, 5);
+			}
+		}
+	}, {
+		key: "componentWillReceiveProps",
+		value: function componentWillReceiveProps(nextProps) {
+			var imgPool = nextProps.imgPool,
+			    id = nextProps.id,
+			    onImageRequest = nextProps.onImageRequest;
 
-      var oldId = this.state.id;
-      if (oldId && id === oldId) {
-        return;
-      }
-      if (imgPool && imgPool[id]) {
-        this.setState({ id: id, img: imgPool[id] });
-        return;
-      }
-      if (onImageRequest) {
-        onImageRequest(id, 5);
-      }
-      this.setState({ id: null, img: null });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-        "g",
-        null,
-        this.renderImage(),
-        this.renderGrid()
-      );
-    }
-  }]);
+			var oldId = this.state.id;
+			if (oldId && id === oldId) {
+				return;
+			}
+			if (imgPool && imgPool[id]) {
+				this.setState({ id: id, img: imgPool[id] });
+				return;
+			}
+			if (onImageRequest) {
+				onImageRequest(id, 5);
+			}
+			this.setState({ id: null, img: null });
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+				"g",
+				null,
+				this.renderImage(),
+				this.renderGrid()
+			);
+		}
+	}]);
 
-  return ImgViewer;
+	return ImgViewer;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 ImgViewer.propTypes = {
-  imgPool: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
-  id: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number]),
-  onImageRequest: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  imgRefHeight: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  imgRefWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  x: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  y: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-  backgroundRectRef: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.node,
-  showGrid: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
-  svgDim: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-    width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-  })
+	imgPool: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.object,
+	id: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.oneOfType([__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string, __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number]),
+	onImageRequest: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	imgRefHeight: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+	imgRefWidth: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+	x: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+	y: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+	backgroundRectRef: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.node,
+	showGrid: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.bool,
+	svgDim: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
+		width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
+		height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
+	})
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (ImgViewer);
@@ -36257,7 +36313,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 
-var ATTRS_TO_EXCLUDES = ["circular_average.time", "linecut_qr.data.time", "linecut_qr.time", "metadata_extract.data.time", "metadata_extract.time"];
+var ATTRS_TO_EXCLUDES = ["circular_average.time", "linecut_qr.data.time", "linecut_qr.time", "metadata_extract.data.time", "metadata_extract.time", "calibration_generated.time", "calibration_check.data.time", "calibration_check.time", "calibration_generated.data.image_height", "calibration_generated.data.image_width", "circular_average.data.time", "circular_average_q2I.time", "main_peak.data.time", "thumbnails.data", "thumbnails.time", "main_peak.time", "tag_generated.time"];
 
 function getSampleAttr(state, payload) {
 
@@ -36288,6 +36344,8 @@ function getSampleAttr(state, payload) {
 		attrMinMax[attr] = minmax; // eslint-disable-line
 		attrTypes[attr] = type; // eslint-disable-line
 	});
+
+	//console.log(attrKinds)
 
 	return _extends({}, state, {
 		attrKinds: attrKinds,
@@ -36415,6 +36473,8 @@ var calculateDataStatAll = function calculateDataStatAll(data, types, attrs) {
 	if (numQueried === total) numQueried = 0;
 
 	// console.log('so far: ', numQueried, total)
+
+	//console.log(dataBySamples)
 
 	return _extends({}, state, {
 		dataBySamples: _extends({}, state.dataBySamples, dataBySamples),
@@ -37132,28 +37192,87 @@ function raw2color(raw, colorMap) {
 	return cvs.toDataURL();
 }
 
+function raw2gray255(raw) {
+	var width = raw.width,
+	    height = raw.height,
+	    data = raw.data;
+
+
+	var cvs = document.createElement("canvas");
+	var ctx = cvs.getContext("2d");
+
+	cvs.width = width; // eslint-disable-line
+	cvs.height = height; // eslint-disable-line
+
+	var imageData = ctx.getImageData(0, 0, width, height);
+	var pData = imageData.data;
+
+	// const imgScale = scaleLinear().domain([minv, maxv]).range([0, 255]);
+	//const imgScale = scaleLinear().domain([Math.log(minv), Math.log(maxv)]).range([0, 255]);
+
+	for (var i = 0; i < pData.length; i += 4) {
+		var index = i / 4;
+		var row = Math.floor(index / width);
+		var col = index - row * width;
+
+		var value = data[row][col];
+		value = Math.round(value);
+		//if (value < 1) value = 1;
+		//value = Math.log(value);
+
+		pData[i] = pData[i + 1] = pData[i + 2] = value; // eslint-disable-line
+		pData[i + 3] = 255; // eslint-disable-line
+	}
+
+	ctx.putImageData(imageData, 0, 0);
+	return cvs.toDataURL();
+}
+
 function getTiff(state, payload) {
 	var id = payload.id,
 	    data = payload.data;
 
 
-	if (state.imgPool[id] == null) {
-		var img = _defineProperty({}, id, _extends({
-			url: raw2gray(data)
-		}, data));
-
-		var imgMinDomain = Math.log(Math.max(Math.min(data.min, state.imgMinDomain), 1));
-		var imgMaxDomain = Math.log(Math.max(data.max, state.imgMaxDomain));
-
+	if (typeof data.data === "string") {
+		//console.log('no tiff for ', id, data);
+		var img = _defineProperty({}, id, { url: null });
 		return _extends({}, state, {
-			imgPool: _extends({}, state.imgPool, img),
-			imgMinDomain: imgMinDomain,
-			imgMaxDomain: imgMaxDomain,
-			imgDomain: state.imgDomain == null ? [imgMinDomain, imgMaxDomain] : state.imgDomain,
-			getOrigImgValue: function getOrigImgValue(v) {
-				return Math.exp(v);
-			}
+			imgPool: _extends({}, state.imgPool, img)
 		});
+	}
+
+	if (state.imgPool[id] == null) {
+		if (data.channel === 3) {
+			var _img2 = _defineProperty({}, id, _extends({
+				url: raw2gray255(data)
+			}, data));
+			var imgMinDomain = 0;
+			var imgMaxDomain = 255;
+			return _extends({}, state, {
+				imgPool: _extends({}, state.imgPool, _img2),
+				imgMinDomain: imgMinDomain,
+				imgMaxDomain: imgMaxDomain,
+				imgDomain: state.imgDomain == null ? [imgMinDomain, imgMaxDomain] : state.imgDomain,
+				getOrigImgValue: null
+			});
+		} else {
+			var _img4 = _defineProperty({}, id, _extends({
+				url: raw2gray(data)
+			}, data));
+
+			var _imgMinDomain = Math.log(Math.max(Math.min(data.min, state.imgMinDomain), 1));
+			var _imgMaxDomain = Math.log(Math.max(data.max, state.imgMaxDomain));
+
+			return _extends({}, state, {
+				imgPool: _extends({}, state.imgPool, _img4),
+				imgMinDomain: _imgMinDomain,
+				imgMaxDomain: _imgMaxDomain,
+				imgDomain: state.imgDomain == null ? [_imgMinDomain, _imgMaxDomain] : state.imgDomain,
+				getOrigImgValue: function getOrigImgValue(v) {
+					return Math.exp(v);
+				}
+			});
+		}
 	}
 
 	return state;
@@ -41646,6 +41765,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 function setAttr(state, payload) {
 	var dim = payload.dim,
 	    value = payload.value;
+	//console.log(dim, value)
 
 	switch (dim) {
 		case "x":case "X":
@@ -46285,10 +46405,12 @@ var ScatterSeries = function (_React$Component) {
           yAttr = moreProps.yAttr,
           dataExtents = moreProps.dataExtents,
           zoomFactor = moreProps.zoomFactor;
-      var origDataExtents = _this.props.shared.origDataExtents;
       var _this$props$shared5 = _this.props.shared,
-          canvasDim = _this$props$shared5.canvasDim,
-          imageFilter = _this$props$shared5.imageFilter;
+          origDataExtents = _this$props$shared5.origDataExtents,
+          handleImageClick = _this$props$shared5.handleImageClick;
+      var _this$props$shared6 = _this.props.shared,
+          canvasDim = _this$props$shared6.canvasDim,
+          imageFilter = _this$props$shared6.imageFilter;
 
 
       if (plotData.length === 0) return;
@@ -46341,9 +46463,9 @@ var ScatterSeries = function (_React$Component) {
       }
 
       var imageSet = [];
-      var _this$props$shared6 = _this.props.shared,
-          imgPool = _this$props$shared6.imgPool,
-          handleImageRequest = _this$props$shared6.handleImageRequest;
+      var _this$props$shared7 = _this.props.shared,
+          imgPool = _this$props$shared7.imgPool,
+          handleImageRequest = _this$props$shared7.handleImageRequest;
       var markerProvider = _this.props.markerProvider;
 
       var pointSetToUse = pointSet.length ? pointSet : [_this.__cache];
@@ -46369,7 +46491,8 @@ var ScatterSeries = function (_React$Component) {
           showGrid: showGrid,
           svgDim: canvasDim,
           backgroundRectRef: markerProvider.getSVGRef(d.markerID),
-          imageFilter: imageFilter
+          imageFilter: imageFilter,
+          onImageClick: handleImageClick
         }));
       });
       return imageSet;
@@ -46645,6 +46768,7 @@ var ChartCanvas = function (_React$Component) {
 				handleCurrSelectedIndexDelete: this.handleCurrSelectedIndexDelete,
 				handleShowDataBox: this.handleShowDataBox,
 				handlePivotSelect: this.handlePivotSelect,
+				handleImageClick: this.handleImageClick,
 				imageFilter: "linear"
 			}, this.state);
 
@@ -46660,6 +46784,21 @@ var ChartCanvas = function (_React$Component) {
 				} else if (child.type === __WEBPACK_IMPORTED_MODULE_6__indicators__["a" /* DraggableDataBox */]) {
 					childrenWithDiv.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
 				} else children.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.cloneElement(child, { shared: shared }));
+			});
+
+			var eventHandler = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__EventHandler__["a" /* default */], {
+				ref: function ref(node) {
+					return _this2.eventHandlerNode = node;
+				},
+				width: canvasDim.width,
+				height: canvasDim.height,
+				onZoom: this.handleZoom,
+				onMouseMove: this.handleMouseMove,
+				onPan: this.handlePan,
+				onPanEnd: this.handlePanEnd,
+				onMouseTrack: this.handleMouseTrack,
+				onMouseTrackEnd: this.handleMouseTrackEnd,
+				onClick: this.handleMouseClick
 			});
 
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -46721,25 +46860,12 @@ var ChartCanvas = function (_React$Component) {
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						"g",
 						{ transform: "translate(" + margin.left + "," + margin.top + ")" },
+						eventHandler,
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
 							children
 						),
-						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__EventHandler__["a" /* default */], {
-							ref: function ref(node) {
-								return _this2.eventHandlerNode = node;
-							},
-							width: canvasDim.width,
-							height: canvasDim.height,
-							onZoom: this.handleZoom,
-							onMouseMove: this.handleMouseMove,
-							onPan: this.handlePan,
-							onPanEnd: this.handlePanEnd,
-							onMouseTrack: this.handleMouseTrack,
-							onMouseTrackEnd: this.handleMouseTrackEnd,
-							onClick: this.handleMouseClick
-						}),
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
@@ -47476,7 +47602,8 @@ var _initialiseProps = function _initialiseProps() {
 					xAttr: newXAttr,
 					yAttr: newYAttr,
 					zAttr: newZAttr,
-					dataExtents: newDataExtents
+					dataExtents: newDataExtents,
+					zoomFactor: 1
 				});
 				requestAnimationFrame(function () {
 					_this3.waitingForAnimationFrame = false;
@@ -47505,7 +47632,8 @@ var _initialiseProps = function _initialiseProps() {
 				xAttr: _newXAttr,
 				yAttr: _newYAttr,
 				zAttr: _newZAttr,
-				dataExtents: _newDataExtents
+				dataExtents: _newDataExtents,
+				zoomFactor: 1
 			});
 			requestAnimationFrame(function () {
 				_this3.clearAxisAndChartOnCanvas();
@@ -47513,7 +47641,8 @@ var _initialiseProps = function _initialiseProps() {
 					xAttr: _newXAttr,
 					yAttr: _newYAttr,
 					zAttr: _newZAttr,
-					dataExtents: _newDataExtents
+					dataExtents: _newDataExtents,
+					zoomFactor: 1
 				}));
 			});
 		}
@@ -47687,13 +47816,52 @@ var _initialiseProps = function _initialiseProps() {
 
 		//console.log(selectedCopy)
 		_this3.clearAxisAndChartOnCanvas();
-		_this3.setState({ selected: selectedCopy, currSelectedIndex: index, showDataBox: true });
+		_this3.setState({ selected: selectedCopy, currSelectedIndex: index, showDataBox: true, zoomFactor: 1 });
 		//console.log(state)
+	};
+
+	this.handleImageClick = function (id, e) {
+		var dataIndex = _this3.dataHashIndexByID[id];
+		var data = _this3.state.plotData[dataIndex];
+		if (data) {
+			var selectedCopy = _this3.state.selected.slice();
+			var index = selectedCopy.findIndex(function (d) {
+				return d.id === id;
+			});
+			if (index === -1) {
+				//selectedCopy.splice(0, 0, state);
+				var formatSI = Object(__WEBPACK_IMPORTED_MODULE_10_d3_format__["a" /* format */])(".3s");
+				var info = [];
+				Object.keys(data).forEach(function (key) {
+					if (key === "_id" || key === "colorID" || key === "markerID") return;
+
+					var value = data[key];
+					if (value == null) return;
+
+					var keyTokens = key.split(".");
+					var shortKey = keyTokens.length > 1 ? keyTokens[keyTokens.length - 1] : keyTokens[0];
+					var formattedValue = typeof value === "string" ? value : formatSI(value);
+
+					info.push({
+						key: shortKey,
+						value: formattedValue
+					});
+				});
+				//return { x, y, info, id: dataID, data };
+
+				selectedCopy.push({ info: info, id: id, data: data });
+				index = selectedCopy.length - 1;
+			} else {
+				//selectedCopy.splice(0, 0, selectedCopy.splice(index, 1)[0]);
+			}
+			_this3.clearAxisAndChartOnCanvas();
+			_this3.setState({ selected: selectedCopy, currSelectedIndex: index, showDataBox: true, zoomFactor: 1 });
+		}
 	};
 
 	this.handleCurrSelectedIndexChange = function (newIndex) {
 		_this3.clearAxisAndChartOnCanvas();
-		_this3.setState({ currSelectedIndex: newIndex });
+		_this3.setState({ currSelectedIndex: newIndex, zoomFactor: 1 });
 	};
 
 	this.handleCurrSelectedIndexDelete = function (index) {
@@ -47707,17 +47875,17 @@ var _initialiseProps = function _initialiseProps() {
 		if (currSelectedIndex > selectedCopy.length - 1) currSelectedIndex = 0;
 
 		_this3.clearAxisAndChartOnCanvas();
-		_this3.setState({ selected: selectedCopy, currSelectedIndex: currSelectedIndex });
+		_this3.setState({ selected: selectedCopy, currSelectedIndex: currSelectedIndex, zoomFactor: 1 });
 	};
 
 	this.handleShowDataBox = function (bShow) {
 		_this3.clearAxisAndChartOnCanvas();
-		_this3.setState({ showDataBox: bShow });
+		_this3.setState({ showDataBox: bShow, zoomFactor: 1 });
 	};
 
 	this.handlePivotSelect = function (index) {
 		_this3.clearAxisAndChartOnCanvas();
-		_this3.setState({ currSelectedIndex: index, showDataBox: true });
+		_this3.setState({ currSelectedIndex: index, showDataBox: true, zoomFactor: 1 });
 	};
 };
 
@@ -50035,7 +50203,7 @@ var DraggableDataBox = function (_React$Component) {
             var infoStyle = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'style',
                 { type: 'text/css' },
-                'td {\n                font-family: Roboto, sans-serif;\n                font-size: 7px;\n            }'
+                'td {\n                font-family: Roboto, sans-serif;\n                font-size: 7px;\n                word-wrap: break-word;\n            }'
             );
 
             var leftTrianglePath = 'M 0 0 L 6 -6 L 6 6 z';
@@ -50337,14 +50505,14 @@ var _initialiseProps = function _initialiseProps() {
                 null,
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'td',
-                    null,
+                    { width: '60%' },
                     ' ',
                     d.key,
                     ' '
                 ),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'td',
-                    null,
+                    { width: '40%', align: 'center' },
                     ' ',
                     d.value,
                     ' '
@@ -50353,7 +50521,7 @@ var _initialiseProps = function _initialiseProps() {
         });
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'table',
-            null,
+            { style: { width: '100%', tableLayout: 'fixed' } },
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'tbody',
                 null,
@@ -57893,6 +58061,8 @@ var ScatterTab = function (_React$Component) {
 			    attrFormat = _this$props.attrFormat,
 			    onAttrChange = _this$props.onAttrChange;
 
+			//console.log(attrKinds)
+			//console.log(attrFormat(this.props.attr[axis]))
 
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default.a, {
 				direction: "down",
@@ -57940,6 +58110,7 @@ var ScatterTab = function (_React$Component) {
 				return attrFormat(attrKindsProp[attrKey]);
 			}).sort(__WEBPACK_IMPORTED_MODULE_6__utils__["h" /* sortAlphaNum */]);
 
+			//console.log(attrKinds)
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 				"div",
 				{ tabIndex: -1 },
@@ -58775,7 +58946,7 @@ var ImageTab = function (_React$Component) {
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 					'div',
 					{ style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', primary: true, accent: showImage,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', accent: showImage,
 						onClick: function onClick() {
 							return onSwitchChange("showImage", !showImage);
 						} }),

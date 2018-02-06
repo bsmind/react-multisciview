@@ -5,7 +5,19 @@ const ATTRS_TO_EXCLUDES = [
 	"linecut_qr.data.time",
 	"linecut_qr.time",
 	"metadata_extract.data.time",
-	"metadata_extract.time"
+	"metadata_extract.time",
+	"calibration_generated.time",
+	"calibration_check.data.time",
+	"calibration_check.time",
+	"calibration_generated.data.image_height",
+	"calibration_generated.data.image_width",
+	"circular_average.data.time",
+	"circular_average_q2I.time",
+	"main_peak.data.time",
+	"thumbnails.data",
+	"thumbnails.time",
+	"main_peak.time",
+	"tag_generated.time",
 ];
 
 export default function getSampleAttr(state, payload) {
@@ -34,6 +46,8 @@ export default function getSampleAttr(state, payload) {
 		attrMinMax[attr] = minmax; // eslint-disable-line
 		attrTypes[attr] = type; // eslint-disable-line
 	});
+
+	//console.log(attrKinds)
 
 	return { ...state,
 		attrKinds,

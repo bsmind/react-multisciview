@@ -1,5 +1,6 @@
 export default function setAttr(state, payload) {
 	const { dim, value } = payload;
+	//console.log(dim, value)
 	switch (dim) {
 	case "x": case "X": return { ...state, attrx: value };
 	case "y": case "Y": return { ...state, attry: value };

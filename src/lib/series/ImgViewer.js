@@ -51,29 +51,72 @@ class ImgViewer extends React.Component {
     }
 
     renderImage = () => {
-		const { imgRefWidth, imgRefHeight, x, y, id, imageFilter } = this.props;
+		const { imgRefWidth, imgRefHeight, x, y, id, imageFilter, onImageClick } = this.props;
     	const { backgroundRectRef } = this.props;
     	const imgWidth = imgRefWidth ? imgRefWidth : imgRefHeight;
     	const imgHeight = imgRefHeight ? imgRefHeight : imgRefWidth;
-    	const imgSide = Math.min(imgWidth, imgHeight);
-    	if (this.state.img == null || this.state.id == null) {
+		const imgSide = Math.min(imgWidth, imgHeight);
+		const clickCallback = onImageClick ? onImageClick: () => {};
+
+    	if (this.state.img == null || this.state.img.url == null || this.state.id == null) {
 			if (backgroundRectRef) {
-				return React.cloneElement(backgroundRectRef, {
+				return <g> 
+					{React.cloneElement(backgroundRectRef, {
 					key: `imgViewer-empty-${id}`,
 					x: x - imgSide / 2,
 					y: y - imgSide / 2,
 					width: imgSide,
-					height: imgSide
-				});
+					height: imgSide,
+					onClick: e => clickCallback(id, e)
+				})} 
+					<line 
+						x1={x - imgSide / 2 + 5} 
+						y1={y - imgSide / 2 + 5} 
+						x2={x + imgSide / 2 - 5} 
+						y2={y + imgSide / 2 - 5} 
+						stroke={'#000000'}
+						strokeWidth={5}
+						strokeLinecap={'round'}
+					/>
+					<line 
+						x1={x - imgSide / 2 + 5} 
+						y1={y - imgSide / 2 + 5} 
+						x2={x + imgSide / 2 - 5} 
+						y2={y + imgSide / 2 - 5} 
+						stroke={'#ffffff'}
+						strokeWidth={2}
+						strokeLinecap={'round'}
+					/>					
+				</g>
 			} else {
-				return <rect 
+				return <g><rect 
 					x={x - imgSide/2}
 					y={y - imgSide/2}
 					width={imgSide}
 					height={imgSide}
 					fill='#000000'
 					fillOpacity={0.3}
-				/>;
+					onClick={e => clickCallback(id, e)}
+				/>
+					<line 
+						x1={x - imgSide / 2 + 5} 
+						y1={y - imgSide / 2 + 5} 
+						x2={x + imgSide / 2 - 5} 
+						y2={y + imgSide / 2 - 5} 
+						stroke={'#000000'}
+						strokeWidth={5}
+						strokeLinecap={'round'}
+					/>
+					<line 
+						x1={x - imgSide / 2 + 5} 
+						y1={y - imgSide / 2 + 5} 
+						x2={x + imgSide / 2 - 5} 
+						y2={y + imgSide / 2 - 5} 
+						stroke={'#ffffff'}
+						strokeWidth={2}
+						strokeLinecap={'round'}
+					/>									
+				</g>;
 			}
     	}
 
@@ -96,7 +139,8 @@ class ImgViewer extends React.Component {
     			y={y - height / 2}
     			width={width}
     			height={height}
-    			imageRendering={"pixelated"}
+				imageRendering={"pixelated"}
+				onClick={e => clickCallback(id, e)}
     		/>
     	</g>;
     }

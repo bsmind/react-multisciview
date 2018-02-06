@@ -75,6 +75,8 @@ export default (state, payload) => {
 
 	// console.log('so far: ', numQueried, total)
 
+	//console.log(dataBySamples)
+
 	return {
 		...state,
 		dataBySamples: { ...state.dataBySamples, ...dataBySamples },

@@ -15,6 +15,8 @@ class ScatterTab extends React.Component {
     renderAttrSelector = (axis, attrKinds) => {
     	const { attrFormat, onAttrChange } = this.props;
 
+		//console.log(attrKinds)
+		//console.log(attrFormat(this.props.attr[axis]))
     	return <Autocomplete
     		direction="down"
     		selectedPosition="none"
@@ -58,6 +60,7 @@ class ScatterTab extends React.Component {
     		return attrFormat(attrKindsProp[attrKey]);
     	}).sort(sortAlphaNum);
 
+		//console.log(attrKinds)
     	return (<div tabIndex={-1}>
 			<div  style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
 				{this.renderAttrSelector("x", attrKinds)}

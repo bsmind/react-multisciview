@@ -205,11 +205,11 @@ class DraggableDataBox extends React.Component {
     renderInfo = (info) => {
         const tableContents = info.map(d => {
             return <tr>
-                <td> {d.key} </td>
-                <td> {d.value} </td>
+                <td width={'60%'}> {d.key} </td>
+                <td width={'40%'} align={'center'}> {d.value} </td>
             </tr>;
         });
-        return <table>
+        return <table style={{width: '100%', tableLayout: 'fixed'}}>
             <tbody>
                 {tableContents}
             </tbody>
@@ -296,6 +296,7 @@ class DraggableDataBox extends React.Component {
             {`td {
                 font-family: Roboto, sans-serif;
                 font-size: 7px;
+                word-wrap: break-word;
             }`}
         </style>;
 
