@@ -22,6 +22,7 @@ import {
 	getColorScheme,
 	// for image
 	getImageDomain,
+	getImageColorInterpolator
 	//getImageColorTable
 } from "../../selectors";
 
@@ -118,6 +119,7 @@ class ConfigBox extends React.Component {
 						imgMaxDomain={this.props.imgMaxDomain}
 						imgDomain={this.props.imgDomain}
 						imgColorScheme={this.props.imgColorScheme}
+						imgColorInterpolator={this.props.imgColorInterpolator}
 						postProcessor={this.props.getOrigImgValue}
 						onImageDomainChange={this.props.setImageDomain}
 						onImgColorSchemeChange={this.props.changeImgColorScheme}
@@ -151,6 +153,7 @@ function mapStateToProps(state) {
 	const pcpDimension = getPCPSelectedDimension(state);
 
 	//console.log(getImageColorTable(state));
+	//getImageColorInterpolator(state);
 
 	return {
 		sampleKinds: getSampleKinds(state),
@@ -173,6 +176,7 @@ function mapStateToProps(state) {
 		imgMaxDomain: state.data.imgMaxDomain,
 		imgDomain: getImageDomain(state),
 		imgColorScheme: state.data.imgColorScheme,
+		imgColorInterpolator: getImageColorInterpolator(state),
 		getOrigImgValue: state.data.getOrigImgValue,
 
 		// for pcp

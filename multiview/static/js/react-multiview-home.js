@@ -18917,30 +18917,31 @@ function setZColorDomain(attr, newDomain) {
 /*!***************************************************!*\
   !*** ./docs/lib/app/multiview/selectors/index.js ***!
   \***************************************************/
-/*! exports provided: getShowImageSwitch, getMinPoints, getMinImageSize, getSampleKinds, getSelectedSampleKeys, getSelectedSampleColors, getSampleColorOpacity, getSelectedDataItemList, getAttrX, getAttrY, getAttrZ, getAttrKinds, getImgPool, getSelectedSampleNames, getSelectedDataArray, getPCPSelectedDimension, getColorScheme, getImageDomain, getImageColorTable */
-/*! exports used: getAttrKinds, getAttrX, getAttrY, getAttrZ, getColorScheme, getImageColorTable, getImageDomain, getImgPool, getMinImageSize, getMinPoints, getPCPSelectedDimension, getSampleColorOpacity, getSampleKinds, getSelectedDataArray, getSelectedSampleColors, getSelectedSampleKeys, getShowImageSwitch */
+/*! exports provided: getShowImageSwitch, getMinPoints, getMinImageSize, getSampleKinds, getSelectedSampleKeys, getSelectedSampleColors, getSampleColorOpacity, getSelectedDataItemList, getAttrX, getAttrY, getAttrZ, getAttrKinds, getImgPool, getSelectedSampleNames, getSelectedDataArray, getPCPSelectedDimension, getColorScheme, getImageDomain, getImageColorInterpolator, getImageColorTable */
+/*! exports used: getAttrKinds, getAttrX, getAttrY, getAttrZ, getColorScheme, getImageColorInterpolator, getImageColorTable, getImageDomain, getImgPool, getMinImageSize, getMinPoints, getPCPSelectedDimension, getSampleColorOpacity, getSampleKinds, getSelectedDataArray, getSelectedSampleColors, getSelectedSampleKeys, getShowImageSwitch */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return getShowImageSwitch; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getMinPoints; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getMinImageSize; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return getSampleKinds; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return getSelectedSampleKeys; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return getSelectedSampleColors; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getSampleColorOpacity; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return getShowImageSwitch; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getMinPoints; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return getMinImageSize; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return getSampleKinds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return getSelectedSampleKeys; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return getSelectedSampleColors; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return getSampleColorOpacity; });
 /* unused harmony export getSelectedDataItemList */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return getAttrX; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getAttrY; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getAttrZ; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getAttrKinds; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getImgPool; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return getImgPool; });
 /* unused harmony export getSelectedSampleNames */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return getSelectedDataArray; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getPCPSelectedDimension; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return getSelectedDataArray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return getPCPSelectedDimension; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getColorScheme; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getImageDomain; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getImageColorTable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return getImageDomain; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getImageColorInterpolator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getImageColorTable; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_reselect__ = __webpack_require__(/*! reselect */ 639);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_reselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_reselect__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_foreach__ = __webpack_require__(/*! lodash.foreach */ 259);
@@ -19144,15 +19145,30 @@ var getImageDomain = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelect
 	return domain;
 });
 
+var getImageColorInterpolator = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"])([function (state) {
+	return state.data.imgColorScheme;
+}, function (state) {
+	return state.data.imgColorMap;
+}], function (colorScheme, colorMap) {
+	if (colorScheme === 'Custom') {
+		var interpolator = colorMap == null ? Object(__WEBPACK_IMPORTED_MODULE_7__utils__["d" /* getColorInterpolator */])('Viridis') : function (t) {
+			return colorMap(t * 255);
+		};
+		return interpolator;
+	} else {
+		return Object(__WEBPACK_IMPORTED_MODULE_7__utils__["d" /* getColorInterpolator */])(colorScheme);
+	}
+});
+
 var getImageColorTable = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSelector"])([function (state) {
 	return state.data.imgMinDomain;
 }, function (state) {
 	return state.data.imgMaxDomain;
 }, function (state) {
 	return state.data.imgDomain;
-}, function (state) {
-	return state.data.imgColorScheme;
-}], function (minDomain, maxDomain, domain, colorScheme) {
+},
+//state => state.data.imgColorScheme
+getImageColorInterpolator], function (minDomain, maxDomain, domain, imageColorInterpolator) {
 	var R = Object(__WEBPACK_IMPORTED_MODULE_6_d3_array__["e" /* range */])(256),
 	    G = Object(__WEBPACK_IMPORTED_MODULE_6_d3_array__["e" /* range */])(256),
 	    B = Object(__WEBPACK_IMPORTED_MODULE_6_d3_array__["e" /* range */])(256);
@@ -19174,7 +19190,7 @@ var getImageColorTable = Object(__WEBPACK_IMPORTED_MODULE_0_reselect__["createSe
 		return Math.floor(imgScale(v));
 	});
 	var iDomainWidth = iDomain[1] - iDomain[0];
-	var interpolator = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["d" /* getColorInterpolator */])(colorScheme);
+	var interpolator = imageColorInterpolator; //getColorInterpolator(colorScheme);
 
 	for (var i = 0; i < 256; ++i) {
 		var t = void 0;
@@ -36145,7 +36161,7 @@ var INITIAL_STATE = {
 	imgMinDomain: 0,
 	imgMaxDomain: 1,
 	imgDomain: null,
-	imgColorScheme: 'Cool',
+	imgColorScheme: 'Custom',
 	getOrigImgValue: null,
 
 	selectedItemList: []
@@ -43067,6 +43083,7 @@ var ConfigBox = function (_React$Component) {
 						imgMaxDomain: this.props.imgMaxDomain,
 						imgDomain: this.props.imgDomain,
 						imgColorScheme: this.props.imgColorScheme,
+						imgColorInterpolator: this.props.imgColorInterpolator,
 						postProcessor: this.props.getOrigImgValue,
 						onImageDomainChange: this.props.setImageDomain,
 						onImgColorSchemeChange: this.props.changeImgColorScheme
@@ -43100,19 +43117,20 @@ var ConfigBox = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 function mapStateToProps(state) {
-	var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["n" /* getSelectedDataArray */])(state),
+	var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["o" /* getSelectedDataArray */])(state),
 	    data = _getSelectedDataArray.data,
 	    dimension = _getSelectedDataArray.extents;
 
-	var pcpDimension = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["k" /* getPCPSelectedDimension */])(state);
+	var pcpDimension = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["l" /* getPCPSelectedDimension */])(state);
 
 	//console.log(getImageColorTable(state));
+	//getImageColorInterpolator(state);
 
 	return {
-		sampleKinds: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["m" /* getSampleKinds */])(state),
-		sampleColors: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["o" /* getSelectedSampleColors */])(state),
-		sampleColorOpacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["l" /* getSampleColorOpacity */])(state),
-		sampleSelected: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["p" /* getSelectedSampleKeys */])(state),
+		sampleKinds: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["n" /* getSampleKinds */])(state),
+		sampleColors: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["p" /* getSelectedSampleColors */])(state),
+		sampleColorOpacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["m" /* getSampleColorOpacity */])(state),
+		sampleSelected: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["q" /* getSelectedSampleKeys */])(state),
 
 		attrKinds: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["a" /* getAttrKinds */])(state),
 		attr: {
@@ -43122,13 +43140,14 @@ function mapStateToProps(state) {
 		},
 		attrFormat: state.data.attrFormat,
 
-		showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["q" /* getShowImageSwitch */])(state),
-		minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getMinPoints */])(state),
-		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["i" /* getMinImageSize */])(state),
+		showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["r" /* getShowImageSwitch */])(state),
+		minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["k" /* getMinPoints */])(state),
+		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getMinImageSize */])(state),
 		imgMinDomain: state.data.imgMinDomain,
 		imgMaxDomain: state.data.imgMaxDomain,
-		imgDomain: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getImageDomain */])(state),
+		imgDomain: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["h" /* getImageDomain */])(state),
 		imgColorScheme: state.data.imgColorScheme,
+		imgColorInterpolator: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["f" /* getImageColorInterpolator */])(state),
 		getOrigImgValue: state.data.getOrigImgValue,
 
 		// for pcp
@@ -58701,6 +58720,8 @@ ParallelCoordinateChart = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__index_css__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -58738,6 +58759,7 @@ var ImageTab = function (_React$Component) {
 			    minImageSize = 10;
 			var onSwitchChange = function onSwitchChange() {};
 			var onSliderChange = function onSliderChange() {};
+
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 				'div',
 				null,
@@ -58776,7 +58798,7 @@ var ImageTab = function (_React$Component) {
 						label: 'Select image color scheme',
 						hint: 'Choose color scheme...',
 						multiple: false,
-						source: __WEBPACK_IMPORTED_MODULE_6__utils__["c" /* colorInterpolators */],
+						source: [].concat(_toConsumableArray(__WEBPACK_IMPORTED_MODULE_6__utils__["c" /* colorInterpolators */]), ['Custom']),
 						value: this.props.imgColorScheme,
 						showSuggestionsWhenValueIsSet: true,
 						onChange: function onChange(value) {
@@ -58792,7 +58814,7 @@ var ImageTab = function (_React$Component) {
 						colorBarDomain: this.props.imgDomain,
 						colorOpaticy: 1,
 						reverse: false,
-						interpolator: Object(__WEBPACK_IMPORTED_MODULE_6__utils__["d" /* getColorInterpolator */])(this.props.imgColorScheme),
+						interpolator: this.props.imgColorInterpolator,
 						postProcessor: this.props.postProcessor,
 						onColorDomainChange: this.props.onImageDomainChange
 					})
@@ -58892,7 +58914,7 @@ var ScatterBox = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 function mapStateToProps(state) {
-	var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["n" /* getSelectedDataArray */])(state),
+	var _getSelectedDataArray = Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["o" /* getSelectedDataArray */])(state),
 	    id = _getSelectedDataArray.id,
 	    samples = _getSelectedDataArray.samples,
 	    data = _getSelectedDataArray.data,
@@ -58904,18 +58926,18 @@ function mapStateToProps(state) {
 		xAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["b" /* getAttrX */])(state),
 		yAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["c" /* getAttrY */])(state),
 		zAttr: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["d" /* getAttrZ */])(state),
-		colorsByGroup: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["o" /* getSelectedSampleColors */])(state),
+		colorsByGroup: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["p" /* getSelectedSampleColors */])(state),
 		seriesName: id,
 		samples: samples,
 		data: data,
 		dimension: dimension,
-		imgPool: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["h" /* getImgPool */])(state),
-		opacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["l" /* getSampleColorOpacity */])(state),
-		showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["q" /* getShowImageSwitch */])(state),
-		minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getMinPoints */])(state),
-		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["i" /* getMinImageSize */])(state),
+		imgPool: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["i" /* getImgPool */])(state),
+		opacity: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["m" /* getSampleColorOpacity */])(state),
+		showImage: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["r" /* getShowImageSwitch */])(state),
+		minPoints: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["k" /* getMinPoints */])(state),
+		minImageSize: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["j" /* getMinImageSize */])(state),
 		colorScheme: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["e" /* getColorScheme */])(state),
-		imageColorTable: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["f" /* getImageColorTable */])(state)
+		imageColorTable: Object(__WEBPACK_IMPORTED_MODULE_4__selectors__["g" /* getImageColorTable */])(state)
 	};
 }
 

@@ -188,18 +188,41 @@ export const getImageDomain = createSelector(
 	}
 );
 
+export const getImageColorInterpolator = createSelector(
+	[
+		state => state.data.imgColorScheme,
+		state => state.data.imgColorMap
+	],
+	(
+		colorScheme,
+		colorMap
+	 ) => {
+		if (colorScheme === 'Custom') {
+			const interpolator = colorMap == null
+				? getColorInterpolator('Viridis')
+				: t => {
+					return colorMap(t * 255);
+				}
+			return interpolator;
+		} else {
+			return getColorInterpolator(colorScheme);
+		}
+	}
+);
+
 export const getImageColorTable = createSelector(
 	[
 		state => state.data.imgMinDomain,
 		state => state.data.imgMaxDomain,
 		state => state.data.imgDomain,
-		state => state.data.imgColorScheme
+		//state => state.data.imgColorScheme
+		getImageColorInterpolator
 	],
 	(
 		minDomain,
 		maxDomain,
 		domain,
-		colorScheme
+		imageColorInterpolator
 	) => {
 		const R = d3Range(256), G = d3Range(256), B = d3Range(256);
 		if (domain == null) {
@@ -214,7 +237,7 @@ export const getImageColorTable = createSelector(
 			return Math.floor(imgScale(v));
 		});
 		const iDomainWidth = iDomain[1] - iDomain[0];
-		const interpolator = getColorInterpolator(colorScheme);
+		const interpolator = imageColorInterpolator;//getColorInterpolator(colorScheme);
 
 		for (let i=0; i< 256; ++i) {
 			let t;

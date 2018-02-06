@@ -14,7 +14,8 @@ class ImageTab extends React.Component {
     render() {
         const showImage = false, minPoints=20, minImageSize=10;
         const onSwitchChange = () => {};
-        const onSliderChange = () => {};
+		const onSliderChange = () => {};
+		
         return (<div>
     		<div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
 				<Button icon="photo" label="Show Image" accent={showImage}
@@ -33,7 +34,7 @@ class ImageTab extends React.Component {
 					label={`Select image color scheme`}
 					hint="Choose color scheme..."
 					multiple={false}
-					source={colorInterpolators}
+					source={[...colorInterpolators, 'Custom']}
 					value={this.props.imgColorScheme}
 					showSuggestionsWhenValueIsSet
 					onChange={(value) => this.props.onImgColorSchemeChange(value)}
@@ -47,7 +48,7 @@ class ImageTab extends React.Component {
 					colorBarDomain={this.props.imgDomain}
 					colorOpaticy={1}
 					reverse={false}
-					interpolator={getColorInterpolator(this.props.imgColorScheme)}
+					interpolator={this.props.imgColorInterpolator}
 					postProcessor={this.props.postProcessor}
 					onColorDomainChange={this.props.onImageDomainChange}
 				/>

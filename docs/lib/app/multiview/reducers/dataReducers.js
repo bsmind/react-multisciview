@@ -31,7 +31,7 @@ const INITIAL_STATE = {
 	imgMinDomain: 0,
 	imgMaxDomain: 1,
 	imgDomain: null,
-	imgColorScheme: 'Cool',
+	imgColorScheme: 'Custom',
 	getOrigImgValue: null,
 
 	selectedItemList: [],
