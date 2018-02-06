@@ -138,7 +138,7 @@ class DataTab extends React.Component {
     render() {
     	const ListHeight = this.props.height - 180;
     	return (
-    		<div>
+    		<div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
     			{this.renderTwoButtons()}
     			<Autocomplete
     				direction="down"

@@ -1268,19 +1268,19 @@ function newInterval(floori, offseti, count, field) {
   !*** ./node_modules/d3-scale/index.js ***!
   \****************************************/
 /*! exports provided: scaleBand, scalePoint, scaleIdentity, scaleLinear, scaleLog, scaleOrdinal, scaleImplicit, scalePow, scaleSqrt, scaleQuantile, scaleQuantize, scaleThreshold, scaleTime, scaleUtc, schemeCategory10, schemeCategory20b, schemeCategory20c, schemeCategory20, interpolateCubehelixDefault, interpolateRainbow, interpolateWarm, interpolateCool, interpolateViridis, interpolateMagma, interpolateInferno, interpolatePlasma, scaleSequential */
-/*! exports used: interpolateCool, interpolateCubehelixDefault, interpolateInferno, interpolateMagma, interpolatePlasma, interpolateRainbow, interpolateViridis, interpolateWarm, scaleLinear, scaleLog, scalePoint, scaleSequential */
+/*! exports used: interpolateCool, interpolateCubehelixDefault, interpolateInferno, interpolateMagma, interpolatePlasma, interpolateRainbow, interpolateViridis, interpolateWarm, scaleLinear, scalePoint, scaleSequential */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_band__ = __webpack_require__(/*! ./src/band */ 495);
 /* unused harmony reexport scaleBand */
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return __WEBPACK_IMPORTED_MODULE_0__src_band__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return __WEBPACK_IMPORTED_MODULE_0__src_band__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_identity__ = __webpack_require__(/*! ./src/identity */ 517);
 /* unused harmony reexport scaleIdentity */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_linear__ = __webpack_require__(/*! ./src/linear */ 61);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return __WEBPACK_IMPORTED_MODULE_2__src_linear__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_log__ = __webpack_require__(/*! ./src/log */ 540);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return __WEBPACK_IMPORTED_MODULE_3__src_log__["a"]; });
+/* unused harmony reexport scaleLog */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_ordinal__ = __webpack_require__(/*! ./src/ordinal */ 233);
 /* unused harmony reexport scaleOrdinal */
 /* unused harmony reexport scaleImplicit */
@@ -1317,7 +1317,7 @@ function newInterval(floori, offseti, count, field) {
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_17__src_viridis__["b"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_17__src_viridis__["d"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__src_sequential__ = __webpack_require__(/*! ./src/sequential */ 568);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return __WEBPACK_IMPORTED_MODULE_18__src_sequential__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return __WEBPACK_IMPORTED_MODULE_18__src_sequential__["a"]; });
 
 
 
@@ -6944,7 +6944,7 @@ function continuous(deinterpolate, reinterpolate) {
 /*!*******************************!*\
   !*** ./src/lib/axes/index.js ***!
   \*******************************/
-/*! exports provided: XAxis, YAxis, PCPYAxis, ColorAxis, ColorAxisLog */
+/*! exports provided: XAxis, YAxis, PCPYAxis, ColorAxis */
 /*! exports used: ColorAxis, PCPYAxis, XAxis, YAxis */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6957,9 +6957,6 @@ function continuous(deinterpolate, reinterpolate) {
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__PCPYAxis__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ColorAxis__ = __webpack_require__(/*! ./ColorAxis */ 708);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__ColorAxis__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__ColorAxisLog__ = __webpack_require__(/*! ./ColorAxisLog */ 736);
-/* unused harmony reexport ColorAxisLog */
-
 
 
 
@@ -38879,11 +38876,10 @@ function defaultLocale(definition) {
   !*** ./node_modules/d3-scale/src/log.js ***!
   \******************************************/
 /*! exports provided: default */
-/*! exports used: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = log;
+/* unused harmony export default */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_array__ = __webpack_require__(/*! d3-array */ 15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_format__ = __webpack_require__(/*! d3-format */ 50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constant__ = __webpack_require__(/*! ./constant */ 125);
@@ -40188,11 +40184,15 @@ function setAttr(state, payload) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__ = __webpack_require__(/*! react-toolbox/lib/app_bar */ 92);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__layout__ = __webpack_require__(/*! ./layout */ 637);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css__ = __webpack_require__(/*! ./index.css */ 727);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__index_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get__ = __webpack_require__(/*! lodash.get */ 59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation__ = __webpack_require__(/*! react-toolbox/lib/navigation */ 401);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__ = __webpack_require__(/*! react-toolbox/lib/link */ 175);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__layout__ = __webpack_require__(/*! ./layout */ 637);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__index_css__ = __webpack_require__(/*! ./index.css */ 727);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__index_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_get__ = __webpack_require__(/*! lodash.get */ 59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12_lodash_get__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -40202,6 +40202,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
 
 
 
@@ -40255,7 +40257,7 @@ var MultiViewApp = function (_React$Component) {
           attrKinds = _this$props.attrKinds;
 
 
-      var oldAttr = attrFormat(__WEBPACK_IMPORTED_MODULE_10_lodash_get___default()(attr, dim));
+      var oldAttr = attrFormat(__WEBPACK_IMPORTED_MODULE_12_lodash_get___default()(attr, dim));
       if (value !== oldAttr && _this.props.setAttr) {
         var attrKeys = Object.keys(attrKinds);
         var index = attrKeys.findIndex(function (key) {
@@ -40374,15 +40376,39 @@ var MultiViewApp = function (_React$Component) {
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Panel"],
           null,
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"], { title: "React-MultiView", leftIcon: "menu", onLeftIconClick: null, theme: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a, fixed: true, flat: true })
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"],
+            { title: "React-MultiView",
+              leftIcon: "menu", onLeftIconClick: null,
+              theme: __WEBPACK_IMPORTED_MODULE_11__index_css___default.a, fixed: true, flat: true
+            },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default.a,
+              { type: "horizontal" },
+              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "ul",
+                { style: { listStyle: 'none' } },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                  "li",
+                  { style: { fontFamily: 'Roboto,Helvetica,Arial,sans-serif', fontSize: '11px' } },
+                  __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "a",
+                    { style: { textDecoration: 'none' },
+                      href: "https://github.com/ComputationalScienceInitiative/react-multiview", target: "_blank" },
+                    "Github"
+                  )
+                )
+              )
+            )
+          )
         ),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           "div",
-          { className: __WEBPACK_IMPORTED_MODULE_9__index_css___default.a.chartbox },
+          { className: __WEBPACK_IMPORTED_MODULE_11__index_css___default.a.chartbox },
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "div",
             { style: { width: scatterBoxWidth, float: "left" } },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["b" /* ScatterBox */], {
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10__layout__["b" /* ScatterBox */], {
               ref: "ScatterBoxRef" // eslint-disable-line
               , width: scatterBoxWidth, height: scatterBoxWidth,
               onScatterPanZoom: this.handleScatterPanZoom
@@ -40391,7 +40417,7 @@ var MultiViewApp = function (_React$Component) {
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "div",
             { style: { marginLeft: scatterBoxWidth } },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__layout__["a" /* ConfigBox */], {
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10__layout__["a" /* ConfigBox */], {
               ref: "ConfigBoxRef" // eslint-disable-line
               , height: height,
               width: configBoxWidth,
@@ -43065,9 +43091,6 @@ var ConfigBox = function (_React$Component) {
 						attr: this.props.attr,
 						attrFormat: this.props.attrFormat,
 						zColorScheme: this.props.zColorScheme,
-						showImage: this.props.showImage,
-						minPoints: this.props.minPoints,
-						minImageSize: this.props.minImageSize,
 						onAttrChange: this.handleAttrChange,
 						onSwitchChange: this.props.setSwitch,
 						onSliderChange: this.props.setSlider,
@@ -43079,6 +43102,12 @@ var ConfigBox = function (_React$Component) {
 					__WEBPACK_IMPORTED_MODULE_7_react_toolbox__["Tab"],
 					{ label: "IMAGE" },
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_11__ImageTab__["a" /* default */], {
+						showImage: this.props.showImage,
+						minPoints: this.props.minPoints,
+						minImageSize: this.props.minImageSize,
+						onSwitchChange: this.props.setSwitch,
+						onSliderChange: this.props.setSlider,
+
 						imgMinDomain: this.props.imgMinDomain,
 						imgMaxDomain: this.props.imgMaxDomain,
 						imgDomain: this.props.imgDomain,
@@ -49581,7 +49610,7 @@ var _initialiseProps = function _initialiseProps() {
 
     if (Object(__WEBPACK_IMPORTED_MODULE_3__utils__["e" /* isArrayOfString */])(zAttr.extents)) return;
 
-    var legendScale = orient === "hrizontal" ? Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["l" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["g" /* interpolateViridis */]).domain([0, barWidth]) : Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["l" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["g" /* interpolateViridis */]).domain([barHeight, 0]);
+    var legendScale = orient === "hrizontal" ? Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["k" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["g" /* interpolateViridis */]).domain([0, barWidth]) : Object(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["k" /* scaleSequential */])(__WEBPACK_IMPORTED_MODULE_4_d3_scale__["g" /* interpolateViridis */]).domain([barHeight, 0]);
 
     var ticks = _this3.getTicks(barWidth, barHeight, zAttr.extents);
 
@@ -54154,7 +54183,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 	var dimName = _ref.dimName;
 	var padding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-	return Object(__WEBPACK_IMPORTED_MODULE_0_d3_scale__["k" /* scalePoint */])().domain(dimName).range([0, innerWidth]).padding(padding);
+	return Object(__WEBPACK_IMPORTED_MODULE_0_d3_scale__["j" /* scalePoint */])().domain(dimName).range([0, innerWidth]).padding(padding);
 });
 
 /***/ }),
@@ -57696,7 +57725,7 @@ var DataTab = function (_React$Component) {
       var ListHeight = this.props.height - 180;
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         "div",
-        null,
+        { style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
         this.renderTwoButtons(),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete___default.a, {
           direction: "down",
@@ -57950,32 +57979,6 @@ var ScatterTab = function (_React$Component) {
 						interpolator: Object(__WEBPACK_IMPORTED_MODULE_6__utils__["d" /* getColorInterpolator */])(zColorScheme.type),
 						onColorDomainChange: this.handleColorDomainChange
 					})
-				),
-				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-					"div",
-					{ style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__["Button"], { icon: "photo", label: "Show Image", accent: showImage,
-						onClick: function onClick() {
-							return onSwitchChange("showImage", !showImage);
-						} }),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-						"p",
-						null,
-						"MIN. # POINTS:"
-					),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 100, step: 5, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
-						onChange: function onChange(value) {
-							return onSliderChange("minPoints", value);
-						} }),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-						"p",
-						null,
-						"MIN. IMAGE SIDE:"
-					),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 40, step: 5, value: minImageSize, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
-						onChange: function onChange(value) {
-							return onSliderChange("minImageSize", value);
-						} })
 				)
 			);
 		}
@@ -58109,7 +58112,7 @@ var PcpTab = function (_React$Component) {
 
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         "div",
-        null,
+        { style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_dropdown___default.a, {
           label: "Color by ... ",
           source: dimKinds,
@@ -58150,7 +58153,7 @@ var PcpTab = function (_React$Component) {
       var interpolator = Object(__WEBPACK_IMPORTED_MODULE_7__utils__["d" /* getColorInterpolator */])(type);
       var colorScale = zAttr === "sample" || colorExtents == null ? function (d) {
         return colorsBySampleNames[d[zAttr]];
-      } : Object(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["l" /* scaleSequential */])(interpolator).domain(colorDomain).clamp(true);
+      } : Object(__WEBPACK_IMPORTED_MODULE_6_d3_scale__["k" /* scaleSequential */])(interpolator).domain(colorDomain).clamp(true);
 
       var colorAccessor = zAttr === "sample" || colorExtents == null ? function (d) {
         return colorScale(d);
@@ -58306,7 +58309,7 @@ var ScatterChart = function (_React$Component) {
       var interpolate = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["d" /* getColorInterpolator */])(type); //interpolateRainbow;
       var colorScale = zAttr === "sample" ? function (d) {
         return colorsByGroup[d];
-      } : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["l" /* scaleSequential */])(interpolate).domain(colorDomain).clamp(true);
+      } : Object(__WEBPACK_IMPORTED_MODULE_10_d3_scale__["k" /* scaleSequential */])(interpolate).domain(colorDomain).clamp(true);
 
       var mProvider = Object(__WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_series__["d" /* markerProvider */])(function (d) {
         return __WEBPACK_IMPORTED_MODULE_8_lodash_get___default()(d, zAttr);
@@ -58612,83 +58615,87 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 var ParallelCoordinateChart = function (_React$Component) {
-    _inherits(ParallelCoordinateChart, _React$Component);
+  _inherits(ParallelCoordinateChart, _React$Component);
 
-    function ParallelCoordinateChart() {
-        var _ref;
+  function ParallelCoordinateChart() {
+    var _ref;
 
-        var _temp, _this, _ret;
+    var _temp, _this, _ret;
 
-        _classCallCheck(this, ParallelCoordinateChart);
+    _classCallCheck(this, ParallelCoordinateChart);
 
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ParallelCoordinateChart.__proto__ || Object.getPrototypeOf(ParallelCoordinateChart)).call.apply(_ref, [this].concat(args))), _this), _this.getPCPCanvasNode = function () {
-            if (_this.PCPCanvasNode) return _this.PCPCanvasNode;
-        }, _this.handleUnmountPCP = function (dimOrder) {
-            if (_this.props.updateDimOrder) _this.props.updateDimOrder(dimOrder);
-        }, _temp), _possibleConstructorReturn(_this, _ret);
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
-    _createClass(ParallelCoordinateChart, [{
-        key: "render",
-        value: function render() {
-            var margin = { left: 60, right: 40, top: 20, bottom: 10 };
-            var _props = this.props,
-                width = _props.width,
-                height = _props.height,
-                ratio = _props.ratio,
-                dimension = _props.dimension,
-                data = _props.data,
-                dimOrder = _props.dimOrder,
-                colorAccessor = _props.colorAccessor,
-                titleFormat = _props.titleFormat,
-                onPCPAxisSelect = _props.onPCPAxisSelect,
-                pcpAttrSelect = _props.pcpAttrSelect;
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ParallelCoordinateChart.__proto__ || Object.getPrototypeOf(ParallelCoordinateChart)).call.apply(_ref, [this].concat(args))), _this), _this.getPCPCanvasNode = function () {
+      if (_this.PCPCanvasNode) return _this.PCPCanvasNode;
+    }, _this.handleUnmountPCP = function (dimOrder) {
+      if (_this.props.updateDimOrder) _this.props.updateDimOrder(dimOrder);
+    }, _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(ParallelCoordinateChart, [{
+    key: "render",
+    value: function render() {
+      var margin = { left: 60, right: 40, top: 20, bottom: 10 };
+      var _props = this.props,
+          width = _props.width,
+          height = _props.height,
+          ratio = _props.ratio,
+          dimension = _props.dimension,
+          data = _props.data,
+          dimOrder = _props.dimOrder,
+          colorAccessor = _props.colorAccessor,
+          titleFormat = _props.titleFormat,
+          onPCPAxisSelect = _props.onPCPAxisSelect,
+          pcpAttrSelect = _props.pcpAttrSelect;
 
 
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["b" /* PCPCanvas */],
-                {
-                    ref: "PCPCanvasRef",
-                    width: width,
-                    height: height,
-                    ratio: ratio,
-                    margin: margin,
-                    zIndex: 1,
+      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        "div",
+        { style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["b" /* PCPCanvas */],
+          {
+            ref: "PCPCanvasRef",
+            width: width,
+            height: height,
+            ratio: ratio,
+            margin: margin,
+            zIndex: 1,
 
-                    dimName: dimOrder,
-                    dimExtents: dimension,
-                    dimAccessor: function dimAccessor(d, name) {
-                        return __WEBPACK_IMPORTED_MODULE_6_lodash_get___default()(d, name);
-                    },
-                    data: data,
+            dimName: dimOrder,
+            dimExtents: dimension,
+            dimAccessor: function dimAccessor(d, name) {
+              return __WEBPACK_IMPORTED_MODULE_6_lodash_get___default()(d, name);
+            },
+            data: data,
 
-                    colorAccessor: colorAccessor,
-                    axisWidth: 26,
+            colorAccessor: colorAccessor,
+            axisWidth: 26,
 
-                    titleFormat: titleFormat,
+            titleFormat: titleFormat,
 
-                    onPCPAxisSelect: onPCPAxisSelect
-                    // pcpAttrSelect={pcpAttrSelect}
-                    , dataExtents: this.props.dataExtents,
-                    onUnmount: this.handleUnmountPCP
-                },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["d" /* Series */],
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__["b" /* PCPPolyLineSeries */], {
-                        opacity: 0.3,
-                        strokeWidth: 1
-                    })
-                )
-            );
-        }
-    }]);
+            onPCPAxisSelect: onPCPAxisSelect
+            // pcpAttrSelect={pcpAttrSelect}
+            , dataExtents: this.props.dataExtents,
+            onUnmount: this.handleUnmountPCP
+          },
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            __WEBPACK_IMPORTED_MODULE_3_react_multiview_lib_core__["d" /* Series */],
+            null,
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_multiview_lib_series__["b" /* PCPPolyLineSeries */], {
+              opacity: 0.3,
+              strokeWidth: 1
+            })
+          )
+        )
+      );
+    }
+  }]);
 
-    return ParallelCoordinateChart;
+  return ParallelCoordinateChart;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 ParallelCoordinateChart = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_helper__["a" /* fitWidth */])(ParallelCoordinateChart);
@@ -58754,11 +58761,13 @@ var ImageTab = function (_React$Component) {
 		value: function render() {
 			var _this2 = this;
 
-			var showImage = false,
-			    minPoints = 20,
-			    minImageSize = 10;
-			var onSwitchChange = function onSwitchChange() {};
-			var onSliderChange = function onSliderChange() {};
+			var _props = this.props,
+			    showImage = _props.showImage,
+			    minPoints = _props.minPoints,
+			    minImageSize = _props.minImageSize,
+			    onSwitchChange = _props.onSwitchChange,
+			    onSliderChange = _props.onSliderChange;
+
 
 			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 				'div',
@@ -58766,23 +58775,23 @@ var ImageTab = function (_React$Component) {
 				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 					'div',
 					{ style: { borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px' } },
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', accent: showImage,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__["Button"], { icon: 'photo', label: 'Show Image', primary: true, accent: showImage,
 						onClick: function onClick() {
 							return onSwitchChange("showImage", !showImage);
 						} }),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						'p',
 						null,
-						'MIN. # POINTS:'
+						'MIN. # POINTS (on scatter plot to show images):'
 					),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 100, step: 5, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 200, step: 20, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
 						onChange: function onChange(value) {
 							return onSliderChange("minPoints", value);
 						} }),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						'p',
 						null,
-						'MIN. IMAGE SIDE:'
+						'MIN. IMAGE SIDE (initial):'
 					),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 40, step: 5, value: minImageSize, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
 						onChange: function onChange(value) {
@@ -59117,471 +59126,6 @@ module.exports = function escape(url) {
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
-
-/***/ }),
-/* 734 */,
-/* 735 */,
-/* 736 */
-/*!**************************************!*\
-  !*** ./src/lib/axes/ColorAxisLog.js ***!
-  \**************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(/*! react */ 0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(/*! prop-types */ 1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid__ = __webpack_require__(/*! lodash.uniqueid */ 42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_scale__ = __webpack_require__(/*! d3-scale */ 14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_d3_format__ = __webpack_require__(/*! d3-format */ 50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_selection__ = __webpack_require__(/*! d3-selection */ 51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(/*! ../utils */ 10);
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-
-
-
-
-
-
-
-var ColorAxisLog = function (_React$Component) {
-    _inherits(ColorAxisLog, _React$Component);
-
-    function ColorAxisLog(props) {
-        _classCallCheck(this, ColorAxisLog);
-
-        var _this = _possibleConstructorReturn(this, (ColorAxisLog.__proto__ || Object.getPrototypeOf(ColorAxisLog)).call(this, props));
-
-        _initialiseProps.call(_this);
-
-        _this.state = {
-            id: __WEBPACK_IMPORTED_MODULE_2_lodash_uniqueid___default()('ColorAxisLog-'),
-            initSite: null,
-            width: null
-        };
-        return _this;
-    }
-
-    _createClass(ColorAxisLog, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-            window.addEventListener('resize', this.handleResize);
-            var el = this.container;
-            this.setState({ width: el.clientWidth });
-        }
-    }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {
-            window.removeEventListener('resize', this.handleResize);
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var _this2 = this;
-
-            var _state = this.state,
-                id = _state.id,
-                widthState = _state.width;
-            var _props = this.props,
-                height = _props.height,
-                widthProp = _props.width,
-                margin = _props.margin,
-                interpolator = _props.interpolator,
-                colorOpacity = _props.colorOpacity,
-                reverse = _props.reverse;
-
-            var width = widthState || widthProp;
-
-            var colorStops = [];
-            var nSamples = 20;
-            for (var i = 0; i <= nSamples; ++i) {
-                var offset = i / nSamples;
-                var stopColor = interpolator(reverse ? 1 - offset : offset);
-                colorStops.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('stop', { offset: offset * 100 + '%', stopColor: stopColor, stopOpacity: colorOpacity }));
-            }
-
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'div',
-                { ref: function ref(node) {
-                        return _this2.container = node;
-                    } },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'svg',
-                    {
-                        ref: function ref(node) {
-                            return _this2.node = node;
-                        },
-                        width: width,
-                        height: height
-                    },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'defs',
-                        null,
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'linearGradient',
-                            { id: id },
-                            colorStops
-                        )
-                    ),
-                    Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* cursorStyle */])(true),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'g',
-                        { transform: 'translate(' + margin.left + ',' + margin.top + ')',
-                            className: this.getCursor()
-                        },
-                        this.renderAxis()
-                    )
-                )
-            );
-        }
-    }]);
-
-    return ColorAxisLog;
-}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
-
-var _initialiseProps = function _initialiseProps() {
-    var _this3 = this;
-
-    this.handleResize = function () {
-        var el = _this3.container;
-        _this3.setState({ width: el.clientWidth });
-    };
-
-    this.getCursor = function () {
-        var cursor = void 0;
-        switch (_this3.state.initSite) {
-            case 'right':
-            case 'left':
-                cursor = 'react-multiview-ew-resize-cursor';break;
-            case 'center':
-                cursor = 'react-multiview-grabbing-cursor';break;
-            default:
-                cursor = 'react-multiview-crosshair-cursor';
-        }
-        return cursor;
-    };
-
-    this.getBarWidth = function () {
-        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
-        var widthProp = props.width,
-            margin = props.margin;
-        var widthState = _this3.state.width;
-
-        var width = widthState || widthProp;
-        return Math.floor(Math.max(width - margin.left - margin.right, 0));
-    };
-
-    this.getScale = function () {
-        var _props2 = _this3.props,
-            minDomain = _props2.minDomain,
-            maxDomain = _props2.maxDomain;
-        //console.log(minDomain, maxDomain)
-
-        var width = _this3.getBarWidth();
-        var scale = Object(__WEBPACK_IMPORTED_MODULE_3_d3_scale__["j" /* scaleLog */])().base(Math.E).domain([Math.max(minDomain, 1), maxDomain]).range([0, width]);
-        return scale;
-    };
-
-    this.handleMouseDown = function (e, handleType) {
-        e.preventDefault();
-        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_6__utils__["f" /* mousePosition */])(e);
-        var scale = _this3.getScale();
-        var colorBarDomain = _this3.props.colorBarDomain;
-
-
-        Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', _this3.handleHandleDrag, false).on('mouseup', _this3.handleHandleDragEnd, false);
-
-        _this3.setState({
-            startX: mouseXY[0] + scale(colorBarDomain[0]),
-            initScale: scale.copy(),
-            initSite: handleType,
-            initColorBarDomain: colorBarDomain.slice()
-        });
-    };
-
-    this.handleHandleDrag = function () {
-        var _props3 = _this3.props,
-            margin = _props3.margin,
-            onColorDomainChange = _props3.onColorDomainChange,
-            colorBarDomain = _props3.colorBarDomain;
-        var _state2 = _this3.state,
-            initScale = _state2.initScale,
-            initSite = _state2.initSite,
-            startX = _state2.startX,
-            initColorBarDomain = _state2.initColorBarDomain;
-
-
-        var mouseXY = Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["b" /* mouse */])(_this3.node);
-        var width = _this3.getBarWidth();
-        var domain = initScale.domain();
-        var x = Math.min(Math.max(mouseXY[0] - margin.left, 0), width);
-        var left = void 0,
-            right = void 0,
-            tx = void 0;
-
-        if (initSite === 'left') {
-            left = initScale.invert(x);
-            right = colorBarDomain[1];
-        } else if (initSite === 'right') {
-            left = colorBarDomain[0];
-            right = initScale.invert(x);
-        } else {
-            // center
-            tx = x - startX;
-            left = Math.min(Math.max(initScale(initColorBarDomain[0]) + tx, 0), width);
-            right = Math.min(Math.max(initScale(initColorBarDomain[1]) + tx, 0), width);
-            left = initScale.invert(left);
-            right = initScale.invert(right);
-        }
-
-        if (onColorDomainChange) onColorDomainChange([left, right]);
-    };
-
-    this.handleHandleDragEnd = function () {
-        Object(__WEBPACK_IMPORTED_MODULE_5_d3_selection__["c" /* select */])(Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* d3Window */])(_this3.node)).on('mousemove', null).on('mouseup', null);
-
-        _this3.setState({
-            initScale: null,
-            initSite: null
-        });
-    };
-
-    this.renderOverlay = function () {
-        var cursor = _this3.getCursor();
-        var width = _this3.getBarWidth();
-        var height = _this3.props.colorBarHeight;
-
-        var OverlayStyle = {
-            fill: '#000000',
-            opacity: 0.3,
-            cursor: cursor
-        };
-
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
-            ref: function ref(c) {
-                return _this3.colorBar = c;
-            },
-            x: 0,
-            y: 0,
-            width: width,
-            height: height,
-            style: OverlayStyle,
-            onMouseDown: _this3.handleOverlayMouseDown
-        });
-    };
-
-    this.renderColorBar = function () {
-        var id = _this3.state.id;
-        var _props4 = _this3.props,
-            colorBarDomain = _props4.colorBarDomain,
-            height = _props4.colorBarHeight,
-            interpolator = _props4.interpolator;
-
-        var scale = _this3.getScale();
-        var width = _this3.getBarWidth();
-        var barLeftPos = scale(colorBarDomain[0]);
-        var barRightPos = scale(colorBarDomain[1]);
-
-        var colorBarStyle = {
-            fill: 'url(#' + id + ')'
-        };
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'g',
-            null,
-            barLeftPos > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
-                x: 0,
-                y: 0,
-                width: barLeftPos + 1,
-                height: height,
-                fill: interpolator(0)
-            }),
-            barRightPos < width && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
-                x: barRightPos - 1,
-                y: 0,
-                width: width - barRightPos,
-                height: height,
-                fill: interpolator(1)
-            }),
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('rect', {
-                x: barLeftPos,
-                y: 0,
-                width: barRightPos - barLeftPos,
-                height: height,
-                style: colorBarStyle,
-                onMouseDown: function onMouseDown(e) {
-                    return _this3.handleMouseDown(e, 'center');
-                }
-            })
-        );
-    };
-
-    this.renderHandles = function () {
-        var handleSize = _this3.props.handleSize;
-        var colorBarDomain = _this3.props.colorBarDomain;
-
-        var scale = _this3.getScale();
-        var barLeftPos = scale(colorBarDomain[0]);
-        var barRightPos = scale(colorBarDomain[1]);
-
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'g',
-            null,
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('path', {
-                d: 'M' + barLeftPos + ' 0 L' + (barLeftPos + handleSize / 2) + ' ' + -handleSize + ' L' + (barLeftPos - handleSize / 2) + ' ' + -handleSize + ' Z',
-                fill: 'red',
-                onMouseDown: function onMouseDown(e) {
-                    return _this3.handleMouseDown(e, 'left');
-                }
-            }),
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('path', {
-                d: 'M' + barRightPos + ' 0 L' + (barRightPos + handleSize / 2) + ' ' + -handleSize + ' L' + (barRightPos - handleSize / 2) + ' ' + -handleSize + ' Z',
-                fill: 'red',
-                onMouseDown: function onMouseDown(e) {
-                    return _this3.handleMouseDown(e, 'right');
-                }
-            }),
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', {
-                x1: barLeftPos,
-                y1: 0,
-                x2: barRightPos,
-                y2: 0,
-                style: {
-                    stroke: 'red',
-                    strokeWidth: 1,
-                    fill: 'none'
-                }
-            })
-        );
-    };
-
-    this.renderAxis = function () {
-        var width = _this3.getBarWidth();
-        var id = _this3.state.id;
-        var _props5 = _this3.props,
-            colorBarHeight = _props5.colorBarHeight,
-            minDomain = _props5.minDomain,
-            maxDomain = _props5.maxDomain,
-            margin = _props5.margin;
-        var _props6 = _this3.props,
-            tickSize = _props6.tickSize,
-            numTicks = _props6.numTicks,
-            fontSize = _props6.fontSize,
-            fontFamily = _props6.fontFamily;
-
-
-        var formatSI = Object(__WEBPACK_IMPORTED_MODULE_4_d3_format__["a" /* format */])(".3s");
-        var scale = _this3.getScale();
-        var format = scale.tickFormat(numTicks, ".2f");
-        //console.log(scale.tickFormat(numTicks))
-
-        var ticks = [],
-            labels = [];
-        scale.ticks(numTicks).map(function (value, index) {
-            var pos = scale(value);
-            // console.log(value, pos)
-            ticks.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', {
-                key: id + '-tick-' + index,
-                x1: pos,
-                y1: 0,
-                x2: pos,
-                y2: tickSize,
-                style: { stroke: '#000000', strokeWidth: 1 }
-            }));
-
-            labels.push(__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'text',
-                {
-                    x: pos,
-                    y: tickSize + 1.5 * fontSize,
-                    style: {
-                        fontFamily: fontFamily,
-                        fontSize: fontSize,
-                        textAnchor: 'middle'
-                    }
-                },
-                format(value)
-            ));
-        });
-        // for (let i=0; i<numTicks+2; ++i) {
-        //     const pos = i / (numTicks + 1) * width;
-
-        // }
-
-
-        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'g',
-            { transform: 'translate(' + 0 + ',' + colorBarHeight + ')' },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('line', {
-                x1: 0 - margin.left / 2,
-                y1: 0,
-                x2: width + margin.left / 2,
-                y2: 0,
-                style: {
-                    stroke: '#000000',
-                    strokeWidth: 1
-                }
-            }),
-            ticks,
-            labels
-        );
-    };
-};
-
-ColorAxisLog.propTypes = {
-    height: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number.isRequired,
-    width: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    colorBarHeight: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    margin: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.shape({
-        left: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-        right: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-        top: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-        bottom: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number
-    }),
-    handleSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    minDomain: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    maxDomain: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    colorBarDomain: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.arrayOf(__WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.numTicks),
-    interpolator: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-
-    numTicks: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    tickSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    fontSize: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.number,
-    fontFamily: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.string
-};
-ColorAxisLog.defaultProps = {
-    height: 50,
-    width: 280,
-    colorBarHeight: 20,
-    margin: {
-        left: 20,
-        right: 20,
-        top: 5,
-        bottom: 0
-    },
-    handleSize: 5,
-    minDomain: 0,
-    maxDomain: 10,
-    colorBarDomain: [0, 10],
-
-    numTicks: 4,
-    tickSize: 5,
-    fontSize: 6,
-    fontFamily: 'Roboto, sans-serif'
-};
-
-/* unused harmony default export */ var _unused_webpack_default_export = (ColorAxisLog);
 
 /***/ })
 /******/ ]);

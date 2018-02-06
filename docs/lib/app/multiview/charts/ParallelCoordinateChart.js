@@ -38,6 +38,7 @@ class ParallelCoordinateChart extends React.Component {
     	} = this.props;
 
     	return (
+			<div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
     		<PCPCanvas
     			ref={"PCPCanvasRef"}
     			width={width}
@@ -68,6 +69,7 @@ class ParallelCoordinateChart extends React.Component {
     				/>
     			</Series>
     		</PCPCanvas>
+			</div>
     	);
     }
 }

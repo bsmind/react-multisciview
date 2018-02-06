@@ -18,16 +18,14 @@ import {
 
 import { Layout, Panel } from "react-toolbox/lib/layout";
 import { AppBar } from "react-toolbox/lib/app_bar";
+import Navigation from "react-toolbox/lib/navigation";
+import Link from "react-toolbox/lib/link";
 
-
-import {
-	ConfigBox,
-	ScatterBox
-} from "./layout";
-
+import { ConfigBox, ScatterBox } from "./layout";
 
 import theme from "./index.css";
 import get from "lodash.get";
+
 
 class MultiViewApp extends React.Component {
 	constructor() {
@@ -152,7 +150,21 @@ class MultiViewApp extends React.Component {
     	return (
     		<Layout>
     			<Panel>
-    				<AppBar title="React-MultiView" leftIcon="menu" onLeftIconClick={null} theme={theme} fixed flat />
+					<AppBar title="React-MultiView" 
+						leftIcon="menu" onLeftIconClick={null} 
+						theme={theme} fixed flat 
+					>
+						<Navigation type="horizontal">
+							<ul style={{listStyle: 'none'}}>
+								<li style={{fontFamily: 'Roboto,Helvetica,Arial,sans-serif', fontSize: '11px'}}>
+									<a style={{textDecoration: 'none'}}
+										href="https://github.com/ComputationalScienceInitiative/react-multiview" target="_blank">
+										Github
+									</a>
+								</li>
+							</ul>
+						</Navigation>
+					</AppBar>
     			</Panel>
 
     			<div className={theme.chartbox}>

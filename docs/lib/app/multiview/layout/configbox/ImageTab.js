@@ -12,18 +12,19 @@ import theme from './index.css';
 
 class ImageTab extends React.Component {
     render() {
-        const showImage = false, minPoints=20, minImageSize=10;
-        const onSwitchChange = () => {};
-		const onSliderChange = () => {};
+		const { 
+			showImage, minPoints, minImageSize,
+			onSwitchChange, onSliderChange 
+		} = this.props;
 		
         return (<div>
     		<div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
-				<Button icon="photo" label="Show Image" accent={showImage}
+				<Button icon="photo" label="Show Image" primary accent={showImage}
 					onClick={() => onSwitchChange("showImage", !showImage)} />				
-    			<p>MIN. # POINTS:</p>
-    			<Slider pinned min={5} max={100} step={5} value={minPoints} disabled={!showImage} theme={theme}
+    			<p>MIN. # POINTS (on scatter plot to show images):</p>
+    			<Slider pinned min={5} max={200} step={20} value={minPoints} disabled={!showImage} theme={theme}
     				onChange={value => onSliderChange("minPoints", value)} />
-    			<p>MIN. IMAGE SIDE:</p>
+    			<p>MIN. IMAGE SIDE (initial):</p>
     			<Slider pinned min={5} max={40} step={5} value={minImageSize} disabled={!showImage} theme={theme}
     				onChange={value => onSliderChange("minImageSize", value)} />
     		</div>

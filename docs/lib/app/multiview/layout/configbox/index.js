@@ -103,9 +103,6 @@ class ConfigBox extends React.Component {
     					attr={this.props.attr}
 						attrFormat={this.props.attrFormat}
 						zColorScheme={this.props.zColorScheme}
-    					showImage={this.props.showImage}
-    					minPoints={this.props.minPoints}
-    					minImageSize={this.props.minImageSize}
     					onAttrChange={this.handleAttrChange}
     					onSwitchChange={this.props.setSwitch}
 						onSliderChange={this.props.setSlider}
@@ -115,6 +112,12 @@ class ConfigBox extends React.Component {
     			</Tab>
 				<Tab label="IMAGE">
 					<ImageTab
+    					showImage={this.props.showImage}
+    					minPoints={this.props.minPoints}
+    					minImageSize={this.props.minImageSize}
+    					onSwitchChange={this.props.setSwitch}
+						onSliderChange={this.props.setSlider}
+					
 						imgMinDomain={this.props.imgMinDomain}
 						imgMaxDomain={this.props.imgMaxDomain}
 						imgDomain={this.props.imgDomain}

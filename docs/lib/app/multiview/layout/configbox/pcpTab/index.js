@@ -66,7 +66,7 @@ class PcpTab extends React.Component {
     		dimKindsFormatted[key] = valueFormatted; // eslint-disable-line
     	});
 
-    	return <div>
+    	return <div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
     		<Dropdown
     			label={"Color by ... "}
     			source={dimKinds}
