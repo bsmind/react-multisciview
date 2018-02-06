@@ -15,7 +15,8 @@ import {
 	getShowImageSwitch,
 	getMinPoints,
 	getMinImageSize,
-	getColorScheme
+	getColorScheme,
+	getImageColorTable
 } from "../../selectors";
 
 import {
@@ -55,7 +56,6 @@ class ScatterBox extends React.Component {
 function mapStateToProps(state) {
 	const { id, samples, data, extents: dimension } = getSelectedDataArray(state);
 	// const markerProvider = getMarkerProvider(state);
-
 	return {
 		xAttr: getAttrX(state),
 		yAttr: getAttrY(state),
@@ -70,7 +70,8 @@ function mapStateToProps(state) {
 		showImage: getShowImageSwitch(state),
 		minPoints: getMinPoints(state),
 		minImageSize: getMinImageSize(state),
-		colorScheme: getColorScheme(state)
+		colorScheme: getColorScheme(state),
+		imageColorTable: getImageColorTable(state)
 	};
 }
 

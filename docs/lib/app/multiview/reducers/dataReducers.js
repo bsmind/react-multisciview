@@ -28,6 +28,11 @@ const INITIAL_STATE = {
 
 	imgPool: {},
 	imgColorMap: null,
+	imgMinDomain: 0,
+	imgMaxDomain: 1,
+	imgDomain: null,
+	imgColorScheme: 'Cool',
+	getOrigImgValue: null,
 
 	selectedItemList: [],
 };
@@ -51,6 +56,8 @@ export function dataReducers(state = INITIAL_STATE, action) {
 
 	case "GET_TIFF": return getTiff(state, payload);
 	case "GET_COLORMAP": return getColorMap(state, payload);
+	case "SET_IMAGE_DOMAIN": return {...state, imgDomain: payload};
+	case "CHANGE_IMAGE_COLOR_SCHEME": return {...state, imgColorScheme: payload};
 
 	case "ADD_SELECTED_DATA_LIST": return addSelectedDataItemList(state, payload);
 	default: return state;

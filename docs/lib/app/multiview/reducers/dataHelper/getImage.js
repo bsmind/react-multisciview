@@ -1,21 +1,10 @@
 import { scaleLinear } from "d3-scale";
 import { interpolateRgb } from "d3-interpolate";
+import { rgbToHex } from '../../utils';
 
-function hexToRgb(hex) { // eslint-disable-line
-	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-	return result ? {
-		r: parseInt(result[1], 16),
-		g: parseInt(result[2], 16),
-		b: parseInt(result[3], 16)
-	} : { r: 0, g: 0, b: 0 };
-}
-
-function rgbToHex(r, g, b) {
-	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
 
 function raw2gray(raw) {
-	// const minv = raw.min;
+	const minv = Math.max(raw.min, 1);
 	const maxv = raw.max;
 	const { width, height, data } = raw;
 
@@ -29,7 +18,7 @@ function raw2gray(raw) {
 	const pData = imageData.data;
 
 	// const imgScale = scaleLinear().domain([minv, maxv]).range([0, 255]);
-	const imgScale = scaleLinear().domain([0, Math.log(maxv)]).range([0, 255]);
+	const imgScale = scaleLinear().domain([Math.log(minv), Math.log(maxv)]).range([0, 255]);
 
 	for (let i = 0; i < pData.length; i += 4) {
 		const index = i / 4;
@@ -98,14 +87,25 @@ export function getTiff(state, payload) {
 
 	if (state.imgPool[id] == null) {
 		const img = { [id]: {
-			// url: raw2gray(data),
-			url: state.imgColorMap
-				? raw2color(data, state.imgColorMap)
-				: raw2gray(data),
+			url: raw2gray(data),
+			// url: state.imgColorMap
+			// 	? raw2color(data, state.imgColorMap)
+			// 	: raw2gray(data),
 			...data
 		} };
-		// console.log(img)
-		return { ...state, imgPool: { ...state.imgPool, ...img } };
+		
+		const imgMinDomain = Math.log(Math.max(Math.min(data.min, state.imgMinDomain), 1));
+		const imgMaxDomain = Math.log(Math.max(data.max, state.imgMaxDomain));
+
+		return { ...state, 
+			imgPool: { ...state.imgPool, ...img },
+			imgMinDomain: imgMinDomain,
+			imgMaxDomain: imgMaxDomain,
+			imgDomain: state.imgDomain == null 
+				? [imgMinDomain, imgMaxDomain]
+				: state.imgDomain,
+			getOrigImgValue: v => Math.exp(v), 
+		};
 	}
 
 	return state;

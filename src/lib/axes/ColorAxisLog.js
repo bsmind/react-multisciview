@@ -12,12 +12,12 @@ import { format as d3Format } from 'd3-format';
 import { select, mouse } from 'd3-selection';
 import { d3Window, mousePosition, cursorStyle } from '../utils';
 
-class ColorAxis extends React.Component {
+class ColorAxisLog extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            id: uniqueId('colorAxis-'),
+            id: uniqueId('ColorAxisLog-'),
             initSite: null,
             width: null
         };
@@ -57,11 +57,12 @@ class ColorAxis extends React.Component {
     }
 
     getScale = () => {
-        const { minDomain, maxDomain, scaleType } = this.props;
+        const { minDomain, maxDomain } = this.props;
+        //console.log(minDomain, maxDomain)
         const width = this.getBarWidth();
-        //const scale = scaleType === 'linear' ? scaleLinear(): scaleLog();
-        const scale = scaleLinear().domain([minDomain, maxDomain]).range([0, width]);
-        //scale.domain([minDomain, maxDomain]).range([0, width]);
+        const scale = scaleLog().base(Math.E)
+                        .domain([Math.max(minDomain,1), maxDomain])
+                        .range([0, width]);
         return scale;
     }
 
@@ -219,16 +220,20 @@ class ColorAxis extends React.Component {
     renderAxis = () => {
         const width = this.getBarWidth();
         const { id } = this.state;
-        const { colorBarHeight, minDomain, maxDomain, postProcessor } = this.props;
+        const { colorBarHeight, minDomain, maxDomain, margin } = this.props;
         const { tickSize, numTicks, fontSize, fontFamily } = this.props;
 
         const formatSI = d3Format(".3s");
         const scale = this.getScale();
+        const format = scale.tickFormat(numTicks, ".2f");
+        //console.log(scale.tickFormat(numTicks))
+
         const ticks = [], labels = [];
-        for (let i=0; i<numTicks+2; ++i) {
-            const pos = i / (numTicks + 1) * width;
+        scale.ticks(numTicks).map((value,index) => {
+            const pos = scale(value);
+            // console.log(value, pos)
             ticks.push(<line
-                key={`${id}-tick-${i}`}
+                key={`${id}-tick-${index}`}
                 x1={pos}
                 y1={0}
                 x2={pos}
@@ -236,7 +241,6 @@ class ColorAxis extends React.Component {
                 style={{stroke: '#000000', strokeWidth: 1}}
             />);
 
-            const value = scale.invert(pos);
             labels.push(<text
                 x={pos}
                 y={tickSize + 1.5*fontSize}
@@ -246,30 +250,21 @@ class ColorAxis extends React.Component {
                     textAnchor: 'middle'
                 }}
             >
-                {formatSI(value)}
+                {format(value)}
             </text>);
+            
+        });
+        // for (let i=0; i<numTicks+2; ++i) {
+        //     const pos = i / (numTicks + 1) * width;
 
-            if (postProcessor) {
-                labels.push(<text
-                    x={pos}
-                    y={tickSize + 2.6*fontSize}
-                    style={{
-                        fontFamily,
-                        fontSize,
-                        textAnchor: 'middle'
-                    }}
-                >
-                    {`(${formatSI(postProcessor(value))})`}
-                </text>);          
-            }
-        }
+        // }
 
 
         return <g transform={`translate(${0},${colorBarHeight})`}>
             <line 
-                x1={0}
+                x1={0 - margin.left/2}
                 y1={0}
-                x2={width}
+                x2={width + margin.left/2}
                 y2={0}
                 style={{
                     stroke: '#000000',
@@ -312,8 +307,8 @@ class ColorAxis extends React.Component {
                     <g transform={`translate(${margin.left},${margin.top})`}
                         className={this.getCursor()}
                     >
-                        {this.renderColorBar()}
-                        {this.renderHandles()}
+                        {/* {this.renderColorBar()} */}
+                        {/* {this.renderHandles()} */}
                         {this.renderAxis()}
                     </g>
                 </svg>
@@ -322,7 +317,7 @@ class ColorAxis extends React.Component {
     }
 }
 
-ColorAxis.propTypes = {
+ColorAxisLog.propTypes = {
     height: PropTypes.number.isRequired,
     width: PropTypes.number,
     colorBarHeight: PropTypes.number,
@@ -343,13 +338,13 @@ ColorAxis.propTypes = {
     fontSize: PropTypes.number,
     fontFamily: PropTypes.string
 };
-ColorAxis.defaultProps = {
+ColorAxisLog.defaultProps = {
     height: 50,
     width: 280,
     colorBarHeight: 20,
     margin: {
-        left: 10,
-        right: 10,
+        left: 20,
+        right: 20,
         top: 5, 
         bottom: 0
     },
@@ -364,4 +359,4 @@ ColorAxis.defaultProps = {
     fontFamily: 'Roboto, sans-serif'
 };
 
-export default ColorAxis;
+export default ColorAxisLog;

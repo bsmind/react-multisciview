@@ -1069,7 +1069,7 @@ class ChartCanvas extends React.Component {
 	}
 
 	render() {
-		const { margin } = this.props;
+		const { margin, imageColorTable: {R, G, B} } = this.props;
     	const divStyle = {
     		position: "relative",
     		width: this.props.width,
@@ -1129,8 +1129,6 @@ class ChartCanvas extends React.Component {
 				children.push(React.cloneElement(child, { shared }));
 		});
 
-
-
 		return (
 			<div
 				style={divStyle}
@@ -1157,10 +1155,15 @@ class ChartCanvas extends React.Component {
 					</defs>
 					<defs>
 						<filter id={`linear`} colorInterpolationFilters="sRGB">
-							<feComponentTransfer>
+							<feComponentTransfer in="source" result="window">
 								<feFuncR type="linear" slope={1} intercept={0} />
 								<feFuncG type="linear" slope={1} intercept={0} />
 								<feFuncB type="linear" slope={1} intercept={0} />
+							</feComponentTransfer>
+							<feComponentTransfer in="window" result="final">
+								<feFuncR type="table" tableValues={R} />
+								<feFuncG type="table" tableValues={G} />
+								<feFuncB type="table" tableValues={B} />
 							</feComponentTransfer>
 						</filter>						
 					</defs>

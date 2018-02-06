@@ -20,12 +20,17 @@ import {
 	getPCPSelectedDimension,
 	// for colorScheme
 	getColorScheme,
+	// for image
+	getImageDomain,
+	//getImageColorTable
 } from "../../selectors";
 
 import {
 	addSelectedSamples,
 	delSelectedSamples,
-	changeSelectedSampleColors
+	changeSelectedSampleColors,
+	setImageDomain,
+	changeImgColorScheme
 } from "../../actions/dataActions";
 
 import {
@@ -34,7 +39,7 @@ import {
 	setSlider,
 	updateAttrSelect,
 	setZColorScheme,
-	setZColorDomain
+	setZColorDomain,
 } from "../../actions/visActions";
 
 import { Tab, Tabs } from "react-toolbox";
@@ -48,7 +53,7 @@ class ConfigBox extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			index: 0,
+			index: 2,
 		};
 	}
 
@@ -109,6 +114,13 @@ class ConfigBox extends React.Component {
     			</Tab>
 				<Tab label="IMAGE">
 					<ImageTab
+						imgMinDomain={this.props.imgMinDomain}
+						imgMaxDomain={this.props.imgMaxDomain}
+						imgDomain={this.props.imgDomain}
+						imgColorScheme={this.props.imgColorScheme}
+						postProcessor={this.props.getOrigImgValue}
+						onImageDomainChange={this.props.setImageDomain}
+						onImgColorSchemeChange={this.props.changeImgColorScheme}
 					/>
 				</Tab>
     			<Tab label="PCP">
@@ -138,6 +150,8 @@ function mapStateToProps(state) {
 	const { data, extents: dimension } = getSelectedDataArray(state);
 	const pcpDimension = getPCPSelectedDimension(state);
 
+	//console.log(getImageColorTable(state));
+
 	return {
 		sampleKinds: getSampleKinds(state),
 		sampleColors: getSelectedSampleColors(state),
@@ -155,6 +169,11 @@ function mapStateToProps(state) {
 		showImage: getShowImageSwitch(state),
 		minPoints: getMinPoints(state),
 		minImageSize: getMinImageSize(state),
+		imgMinDomain: state.data.imgMinDomain,
+		imgMaxDomain: state.data.imgMaxDomain,
+		imgDomain: getImageDomain(state),
+		imgColorScheme: state.data.imgColorScheme,
+		getOrigImgValue: state.data.getOrigImgValue,
 
 		// for pcp
 		dimOrder: pcpDimension,
@@ -162,7 +181,7 @@ function mapStateToProps(state) {
 		data,
 
 		// color Scheme
-		zColorScheme: getColorScheme(state)
+		zColorScheme: getColorScheme(state),
 	};
 }
 
@@ -177,6 +196,8 @@ function mapDispatchToProps(dispatch) {
 		updateAttrSelect,
 		setZColorScheme,
 		setZColorDomain,
+		setImageDomain,
+		changeImgColorScheme
 	}, dispatch);
 }
 

@@ -62,8 +62,6 @@ export const colorInterpolators = [
     "YlOrRd"    
 ];
 
-
-
 export const getColorInterpolator = (name) => {
     switch(name) {
         case "Viridis": return interpolateViridis;
@@ -96,3 +94,28 @@ export const getColorInterpolator = (name) => {
         default: return interpolateViridis;
     }
 };
+
+export function hexToRgb(hex) { // eslint-disable-line
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	return result ? {
+		r: parseInt(result[1], 16),
+		g: parseInt(result[2], 16),
+		b: parseInt(result[3], 16)
+	} : { r: 0, g: 0, b: 0 };
+}
+
+export function rgbToHex(r, g, b) {
+	return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+export function rgbToDigit(rgbString) {
+    const rgbDigits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(rgbString);
+    if (rgbDigits == null) {
+        return null;
+    }
+    return [
+        parseInt(rgbDigits[2]),
+        parseInt(rgbDigits[3]),
+        parseInt(rgbDigits[4])
+    ];
+}

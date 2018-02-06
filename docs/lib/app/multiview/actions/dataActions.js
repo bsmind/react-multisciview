@@ -263,3 +263,17 @@ export function addSelectedDataList(list) {
 		payload: list
 	};
 }
+
+export function setImageDomain(newDomain) {
+	return {
+		type: "SET_IMAGE_DOMAIN",
+		payload: newDomain
+	};
+}
+
+export function changeImgColorScheme(newScheme) {
+	return {
+		type: "CHANGE_IMAGE_COLOR_SCHEME",
+		payload: newScheme
+	};
+}

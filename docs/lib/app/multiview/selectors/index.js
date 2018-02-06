@@ -3,7 +3,9 @@ import forEach from "lodash.foreach";
 import uniqBy from "lodash.uniqby";
 import uniqueId from "lodash.uniqueid";
 import { markerProvider } from "react-multiview/lib/series"; // eslint-disable-line
-
+import { scaleLinear } from 'd3-scale';
+import { range as d3Range } from 'd3-array';
+import { getColorInterpolator, hexToRgb, rgbToDigit } from '../utils';
 
 export const getShowImageSwitch = state => state.vis.showImage;
 export const getMinPoints = state => state.vis.minPoints;
@@ -175,3 +177,64 @@ export const getColorScheme = createSelector(
 		}
 	}
 )
+
+export const getImageDomain = createSelector(
+	[
+		state => state.data.imgDomain
+	],
+	(domain) => {
+		if (domain == null) return [0, 1];
+		return domain;
+	}
+);
+
+export const getImageColorTable = createSelector(
+	[
+		state => state.data.imgMinDomain,
+		state => state.data.imgMaxDomain,
+		state => state.data.imgDomain,
+		state => state.data.imgColorScheme
+	],
+	(
+		minDomain,
+		maxDomain,
+		domain,
+		colorScheme
+	) => {
+		const R = d3Range(256), G = d3Range(256), B = d3Range(256);
+		if (domain == null) {
+			return {
+				R: R.map(v => v/255),
+				G: G.map(v => v/255),
+				B: B.map(v => v/255)
+			}
+		}
+		const imgScale = scaleLinear().domain([minDomain, maxDomain]).range([0, 255]);
+		const iDomain = domain.map(v => {
+			return Math.floor(imgScale(v));
+		});
+		const iDomainWidth = iDomain[1] - iDomain[0];
+		const interpolator = getColorInterpolator(colorScheme);
+
+		for (let i=0; i< 256; ++i) {
+			let t;
+			if (i < iDomain[0]) t = 0; 
+			else if (i > iDomain[1]) t = 1; 
+			else t = (i - iDomain[0]) / iDomainWidth;
+
+			const rgb = interpolator(t);
+			const rgbDigits = rgbToDigit(rgb);
+			if (rgbDigits == null) {
+				const rgbFromHex = hexToRgb(rgb);
+				R[i] = rgbFromHex.r / 255;
+				G[i] = rgbFromHex.g / 255;
+				B[i] = rgbFromHex.b / 255;
+			} else {
+				R[i] = rgbDigits[0] / 255;
+				G[i] = rgbDigits[1] / 255;
+				B[i] = rgbDigits[2] / 255;	
+			}
+		}
+		return {R, G, B};
+	}
+);
