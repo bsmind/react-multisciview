@@ -54,7 +54,7 @@ class ConfigBox extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			index: 2,
+			index: 0,
 		};
 	}
 
