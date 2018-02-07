@@ -157,6 +157,7 @@ class ScatterSeries extends React.Component {
     		.key(d => d.markerID)
     		.entries(pointSet);
 
+		//console.log(pointSet.length)
     	nest.forEach(group => {
     		const { key: markerKey, values } = group;
     		values.forEach(d => {
@@ -434,7 +435,8 @@ class ScatterSeries extends React.Component {
     	const xAccessor = this.getAccessor(xAttr);
     	const yAccessor = this.getAccessor(yAttr);
     	const dataFilter = this.getDataFilter(dataExtents, origDataExtents);
-    	const distComputor = this.getDistanceComputor();
+		const distComputor = this.getDistanceComputor();
+		//console.log('drawImage:dataExtents: ', dataExtents['main_peak.data.peak0_ori2_eta']);
 
     	const pointSet = [], minDist = { x: null, y: null };
     	plotData.forEach(d => {

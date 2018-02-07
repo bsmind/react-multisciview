@@ -103,6 +103,7 @@ class ChartCanvas extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
+		//console.log('new props')
 		const state = this.updateChart(nextProps);
 		this.clearAxisAndChartOnCanvas();
 		this.setState({ ...state });
@@ -256,10 +257,11 @@ class ChartCanvas extends React.Component {
 				dataExtentsState[name] = isArrayOfString(extentsProps) // eslint-disable-line
 					? [0, extentsProps.length]
 					: extentsProps.slice();
+				//console.log('newField: ', name, dataExtentsState[name]);
 			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
 				dataExtentsState[name] = isArrayOfString(extentsProps) // eslint-disable-line
 					? [0, extentsProps.length]
-					: extentsProps.slice();
+					: extentsState;
 			} else {
 				// expand one but ordinary
 				if (isArrayOfString(extentsProps) && (xAttrProp !== name && yAttrProp !== name)) {

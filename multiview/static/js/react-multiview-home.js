@@ -46115,6 +46115,7 @@ var ScatterSeries = function (_React$Component) {
         return d.markerID;
       }).entries(pointSet);
 
+      //console.log(pointSet.length)
       nest.forEach(function (group) {
         var markerKey = group.key,
             values = group.values;
@@ -46419,6 +46420,7 @@ var ScatterSeries = function (_React$Component) {
       var yAccessor = _this.getAccessor(yAttr);
       var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
       var distComputor = _this.getDistanceComputor();
+      //console.log('drawImage:dataExtents: ', dataExtents['main_peak.data.peak0_ori2_eta']);
 
       var pointSet = [],
           minDist = { x: null, y: null };
@@ -46693,6 +46695,7 @@ var ChartCanvas = function (_React$Component) {
 	}, {
 		key: "componentWillReceiveProps",
 		value: function componentWillReceiveProps(nextProps) {
+			//console.log('new props')
 			var state = this.updateChart(nextProps);
 			this.clearAxisAndChartOnCanvas();
 			this.setState(_extends({}, state));
@@ -47057,9 +47060,10 @@ var _initialiseProps = function _initialiseProps() {
 				// new field
 				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
 				? [0, extentsProps.length] : extentsProps.slice();
+				//console.log('newField: ', name, dataExtentsState[name]);
 			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
 				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
-				? [0, extentsProps.length] : extentsProps.slice();
+				? [0, extentsProps.length] : extentsState;
 			} else {
 				// expand one but ordinary
 				if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
