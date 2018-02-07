@@ -210,7 +210,9 @@ class ScatterSeries extends React.Component {
     }
 
     getHitTestor = (ratio, pixelData, width) => {
-    	return (x, y, colorID) => {
+    	return (x, y, colorID, offset) => {
+			if (offset == null) offset = 4;
+			//console.log(x, y, colorID, offset)
     		if (pixelData && colorID) {
     			const rgbDigits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(colorID);
     			const R = parseInt(rgbDigits[2]);
@@ -219,8 +221,8 @@ class ScatterSeries extends React.Component {
     			const px = Math.floor( (x) * ratio );
     			const py = Math.floor( (y) * ratio );
 
-    			for (let ppy = py - 4; ppy <= py + 4; ++ppy) {
-    				for (let ppx = px - 4; ppx <= px + 4; ++ppx) {
+    			for (let ppy = py - offset; ppy <= py + offset; ++ppy) {
+    				for (let ppx = px - offset; ppx <= px + offset; ++ppx) {
     					const pIndex = 4 * (width * ppy + ppx);
     					pixelData[pIndex] = R;
     					pixelData[pIndex + 1] = G;
@@ -426,8 +428,8 @@ class ScatterSeries extends React.Component {
     }
 
     drawImage = (moreProps, ctx) => {
-    	const { plotData, xAttr, yAttr, dataExtents, zoomFactor } = moreProps;
-    	const { shared: { origDataExtents, handleImageClick } } = this.props;
+    	const { plotData, xAttr, yAttr, dataExtents, zoomFactor, hitTest, enableHitTest } = moreProps;
+    	const { shared: { origDataExtents, handleImageClick, ratio } } = this.props;
     	const { canvasDim, imageFilter } = this.props.shared;
 
     	if (plotData.length === 0) return;
@@ -438,7 +440,9 @@ class ScatterSeries extends React.Component {
 		const distComputor = this.getDistanceComputor();
 		//console.log('drawImage:dataExtents: ', dataExtents['main_peak.data.peak0_ori2_eta']);
 
-    	const pointSet = [], minDist = { x: null, y: null };
+		const pointSet = [], minDist = { x: null, y: null };
+		
+
     	plotData.forEach(d => {
     		if (d._id == null) {
     			console.log("unknown error:missing id ", d);
@@ -454,9 +458,9 @@ class ScatterSeries extends React.Component {
 
     		if (distComputor) {
     			distComputor(x, y, minDist, pointSet);
-    		}
+			}
     		pointSet.push({ x, y, ...d });
-    	});
+		});
 
     	// cache
     	if (pointSet.length === 1) {
@@ -471,10 +475,13 @@ class ScatterSeries extends React.Component {
     	if (this.__imgRefWidth == null && this.__imgRefHeight == null) {
     		if (this.SubscriberExtNode == null) return;
     		const { getCanvasContexts } = this.props.shared;
-    		ctx = ctx ? ctx : getCanvasContexts().chartOn;
+			ctx = ctx ? ctx : getCanvasContexts().chartOn;
+			this.preDraw(hitTest);
+			const hitTestor = enableHitTest ? this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth): null;
     		this.SubscriberExtNode.preDraw(ctx);
-    		this.drawOnCanvasForce(ctx, pointSet);
-    		this.SubscriberExtNode.postDraw(ctx);
+    		this.drawOnCanvasForce(ctx, pointSet, hitTestor);
+			this.SubscriberExtNode.postDraw(ctx);
+			this.postDraw();
     		return;
     	}
 
@@ -489,6 +496,11 @@ class ScatterSeries extends React.Component {
 
     	const showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
+		const hitMarkerSize = Math.floor(Math.min(this.__imgRefWidth, this.__imgRefHeight) / 2) || 4;
+		//console.log(hitMarkerSize);
+
+		this.preDraw(hitTest);
+		const hitTestor = enableHitTest ? this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth): null;
     	pointSetToUse.forEach(d => {
     		if (d._id == null) {
     			console.log("error in ", d);
@@ -508,8 +520,15 @@ class ScatterSeries extends React.Component {
 				backgroundRectRef={markerProvider.getSVGRef(d.markerID)}
 				imageFilter={imageFilter}
 				onImageClick={handleImageClick}
-    		/>);
-    	});
+			/>);
+			//console.log(d)
+			if (hitTestor) {
+				const x = xAccessor(d);
+				const y = yAccessor(d);								
+				hitTestor(x, y, d.colorID, hitMarkerSize);
+			}
+		});
+		this.postDraw();
     	return imageSet;
     }
 

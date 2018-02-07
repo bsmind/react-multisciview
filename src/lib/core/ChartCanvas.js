@@ -1024,6 +1024,7 @@ class ChartCanvas extends React.Component {
 
 	handleMouseClick = (mouseXY, e) => {
 		const state = this.getHoveredDataItem(mouseXY);
+		//console.log(state)
 		if (state.id == null || state.info == null) 
 			return;
 
@@ -1226,10 +1227,10 @@ class ChartCanvas extends React.Component {
 					
 					{cursor}
 					<g transform={`translate(${margin.left},${margin.top})`}>
-						{eventHandler}
 						<g>
 							{children}
 						</g>
+						{eventHandler}						
 						<g>
 							{childrenWithHandler}
 						</g>

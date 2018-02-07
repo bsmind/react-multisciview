@@ -46177,7 +46177,9 @@ var ScatterSeries = function (_React$Component) {
     };
 
     _this.getHitTestor = function (ratio, pixelData, width) {
-      return function (x, y, colorID) {
+      return function (x, y, colorID, offset) {
+        if (offset == null) offset = 4;
+        //console.log(x, y, colorID, offset)
         if (pixelData && colorID) {
           var rgbDigits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(colorID);
           var R = parseInt(rgbDigits[2]);
@@ -46186,8 +46188,8 @@ var ScatterSeries = function (_React$Component) {
           var px = Math.floor(x * ratio);
           var py = Math.floor(y * ratio);
 
-          for (var ppy = py - 4; ppy <= py + 4; ++ppy) {
-            for (var ppx = px - 4; ppx <= px + 4; ++ppx) {
+          for (var ppy = py - offset; ppy <= py + offset; ++ppy) {
+            for (var ppx = px - offset; ppx <= px + offset; ++ppx) {
               var pIndex = 4 * (width * ppy + ppx);
               pixelData[pIndex] = R;
               pixelData[pIndex + 1] = G;
@@ -46405,10 +46407,13 @@ var ScatterSeries = function (_React$Component) {
           xAttr = moreProps.xAttr,
           yAttr = moreProps.yAttr,
           dataExtents = moreProps.dataExtents,
-          zoomFactor = moreProps.zoomFactor;
+          zoomFactor = moreProps.zoomFactor,
+          hitTest = moreProps.hitTest,
+          enableHitTest = moreProps.enableHitTest;
       var _this$props$shared5 = _this.props.shared,
           origDataExtents = _this$props$shared5.origDataExtents,
-          handleImageClick = _this$props$shared5.handleImageClick;
+          handleImageClick = _this$props$shared5.handleImageClick,
+          ratio = _this$props$shared5.ratio;
       var _this$props$shared6 = _this.props.shared,
           canvasDim = _this$props$shared6.canvasDim,
           imageFilter = _this$props$shared6.imageFilter;
@@ -46424,6 +46429,7 @@ var ScatterSeries = function (_React$Component) {
 
       var pointSet = [],
           minDist = { x: null, y: null };
+
       plotData.forEach(function (d) {
         if (d._id == null) {
           console.log("unknown error:missing id ", d);
@@ -46458,9 +46464,12 @@ var ScatterSeries = function (_React$Component) {
         var getCanvasContexts = _this.props.shared.getCanvasContexts;
 
         ctx = ctx ? ctx : getCanvasContexts().chartOn;
+        _this.preDraw(hitTest);
+        var _hitTestor = enableHitTest ? _this.getHitTestor(ratio, _this.__pixelData, _this.__canvasWidth) : null;
         _this.SubscriberExtNode.preDraw(ctx);
-        _this.drawOnCanvasForce(ctx, pointSet);
+        _this.drawOnCanvasForce(ctx, pointSet, _hitTestor);
         _this.SubscriberExtNode.postDraw(ctx);
+        _this.postDraw();
         return;
       }
 
@@ -46476,6 +46485,11 @@ var ScatterSeries = function (_React$Component) {
 
       var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
 
+      var hitMarkerSize = Math.floor(Math.min(_this.__imgRefWidth, _this.__imgRefHeight) / 2) || 4;
+      //console.log(hitMarkerSize);
+
+      _this.preDraw(hitTest);
+      var hitTestor = enableHitTest ? _this.getHitTestor(ratio, _this.__pixelData, _this.__canvasWidth) : null;
       pointSetToUse.forEach(function (d) {
         if (d._id == null) {
           console.log("error in ", d);
@@ -46496,7 +46510,14 @@ var ScatterSeries = function (_React$Component) {
           imageFilter: imageFilter,
           onImageClick: handleImageClick
         }));
+        //console.log(d)
+        if (hitTestor) {
+          var x = xAccessor(d);
+          var y = yAccessor(d);
+          hitTestor(x, y, d.colorID, hitMarkerSize);
+        }
       });
+      _this.postDraw();
       return imageSet;
     };
 
@@ -46863,12 +46884,12 @@ var ChartCanvas = function (_React$Component) {
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						"g",
 						{ transform: "translate(" + margin.left + "," + margin.top + ")" },
-						eventHandler,
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
 							children
 						),
+						eventHandler,
 						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 							"g",
 							null,
@@ -47804,6 +47825,7 @@ var _initialiseProps = function _initialiseProps() {
 
 	this.handleMouseClick = function (mouseXY, e) {
 		var state = _this3.getHoveredDataItem(mouseXY);
+		//console.log(state)
 		if (state.id == null || state.info == null) return;
 
 		var selectedCopy = _this3.state.selected.slice();
