@@ -209,7 +209,13 @@ class DraggableDataBox extends React.Component {
                 <td width={'40%'} align={'center'}> {d.value} </td>
             </tr>;
         });
-        return <table style={{width: '100%', tableLayout: 'fixed'}}>
+        return <table style={{width: '100%', tableLayout: 'fixed', 
+                    borderTop: 'solid 1px red',
+                    borderRight: 'solid 5px red',
+                    borderBottom: 'solid 1px red',
+                    borderTopRightRadius: '10px',
+                    borderBottomRightRadius: '10px'
+                }}>
             <tbody>
                 {tableContents}
             </tbody>

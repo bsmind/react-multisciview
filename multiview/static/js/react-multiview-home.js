@@ -50547,7 +50547,13 @@ var _initialiseProps = function _initialiseProps() {
         });
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'table',
-            { style: { width: '100%', tableLayout: 'fixed' } },
+            { style: { width: '100%', tableLayout: 'fixed',
+                    borderTop: 'solid 1px red',
+                    borderRight: 'solid 5px red',
+                    borderBottom: 'solid 1px red',
+                    borderTopRightRadius: '10px',
+                    borderBottomRightRadius: '10px'
+                } },
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'tbody',
                 null,
