@@ -10,6 +10,7 @@ import {
 	AddData,
 	handleColorChange,
 	updateSelectedSamples,
+	imageRequestOnProgress
 } from "./actions/dataActions";
 
 import {
@@ -20,11 +21,13 @@ import { Layout, Panel } from "react-toolbox/lib/layout";
 import { AppBar } from "react-toolbox/lib/app_bar";
 import Navigation from "react-toolbox/lib/navigation";
 import Link from "react-toolbox/lib/link";
+import { Button } from 'react-toolbox/lib/button';
 
 import { ConfigBox, ScatterBox } from "./layout";
 
 import theme from "./index.css";
 import get from "lodash.get";
+
 
 
 class MultiViewApp extends React.Component {
@@ -143,10 +146,13 @@ class MultiViewApp extends React.Component {
 
 
     render() {
-    	const { width, height } = this.state;
+		const { width, height } = this.state;
+		const { showImage } = this.props;
 
 		const scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
 		const configBoxWidth = Math.floor(width - scatterBoxWidth);
+
+		const imgReqOnProgress = imageRequestOnProgress();
     	return (
     		<Layout>
     			<Panel>
@@ -156,7 +162,12 @@ class MultiViewApp extends React.Component {
 					>
 						<Navigation type="horizontal">
 							<ul style={{listStyle: 'none'}}>
-								<li style={{fontFamily: 'Roboto,Helvetica,Arial,sans-serif', fontSize: '11px'}}>
+								{imgReqOnProgress > 0 &&
+									<li className={theme.hLi}>
+										<Button icon='cloud_upload' label={`${imgReqOnProgress}`} accent />
+									</li>									
+								}
+								<li className={theme.hLi}>
 									<a style={{textDecoration: 'none'}}
 										href="https://github.com/ComputationalScienceInitiative/react-multiview" target="_blank">
 										Github
@@ -166,6 +177,13 @@ class MultiViewApp extends React.Component {
 						</Navigation>
 					</AppBar>
     			</Panel>
+
+				{imgReqOnProgress > 0 && showImage &&
+					<div 
+						className={theme.myProgressBarWithAnimation} 
+						style={{position: 'absolute'}} 
+					/>
+				}
 
     			<div className={theme.chartbox}>
     				<div style={{ width: scatterBoxWidth, float: "left" }}>
@@ -207,6 +225,7 @@ function mapStateToProps(state) {
 		},
 
 		isDataLoading: state.data.numQueried > 0,
+		showImage: state.vis.showImage
 	};
 }
 

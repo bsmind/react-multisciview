@@ -11,6 +11,10 @@ class PriorityQueue {
 		this.heap = [null];
 	}
 
+	length() {
+		return this.heap.length - 1;
+	}
+
 	// insert data
 	insert(data, priority) {
 		const newNode = new Node(data, priority);

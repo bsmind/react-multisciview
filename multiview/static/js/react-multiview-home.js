@@ -9549,15 +9549,16 @@ function defaultLocale(definition) {
 /*!*******************************************************!*\
   !*** ./docs/lib/app/multiview/actions/dataActions.js ***!
   \*******************************************************/
-/*! exports provided: getSampleKinds, getAttributes, AddData, updateSelectedSamples, addSelectedSamples, delSelectedSamples, changeSelectedSampleColors, handleColorChange, getTiff, getTiffWithPriority, getColorMap, addSelectedDataList, setImageDomain, changeImgColorScheme */
-/*! exports used: AddData, addSelectedSamples, changeImgColorScheme, changeSelectedSampleColors, delSelectedSamples, getAttributes, getColorMap, getSampleKinds, getTiffWithPriority, handleColorChange, setImageDomain, updateSelectedSamples */
+/*! exports provided: imageRequestOnProgress, getSampleKinds, getAttributes, AddData, updateSelectedSamples, addSelectedSamples, delSelectedSamples, changeSelectedSampleColors, handleColorChange, getTiff, getTiffWithPriority, getColorMap, addSelectedDataList, setImageDomain, changeImgColorScheme */
+/*! exports used: AddData, addSelectedSamples, changeImgColorScheme, changeSelectedSampleColors, delSelectedSamples, getAttributes, getColorMap, getSampleKinds, getTiffWithPriority, handleColorChange, imageRequestOnProgress, setImageDomain, updateSelectedSamples */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return imageRequestOnProgress; });
 /* harmony export (immutable) */ __webpack_exports__["h"] = getSampleKinds;
 /* harmony export (immutable) */ __webpack_exports__["f"] = getAttributes;
 /* harmony export (immutable) */ __webpack_exports__["a"] = AddData;
-/* harmony export (immutable) */ __webpack_exports__["l"] = updateSelectedSamples;
+/* harmony export (immutable) */ __webpack_exports__["m"] = updateSelectedSamples;
 /* harmony export (immutable) */ __webpack_exports__["b"] = addSelectedSamples;
 /* harmony export (immutable) */ __webpack_exports__["e"] = delSelectedSamples;
 /* harmony export (immutable) */ __webpack_exports__["d"] = changeSelectedSampleColors;
@@ -9566,7 +9567,7 @@ function defaultLocale(definition) {
 /* harmony export (immutable) */ __webpack_exports__["i"] = getTiffWithPriority;
 /* harmony export (immutable) */ __webpack_exports__["g"] = getColorMap;
 /* unused harmony export addSelectedDataList */
-/* harmony export (immutable) */ __webpack_exports__["k"] = setImageDomain;
+/* harmony export (immutable) */ __webpack_exports__["l"] = setImageDomain;
 /* harmony export (immutable) */ __webpack_exports__["c"] = changeImgColorScheme;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(/*! axios */ 618);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
@@ -9580,11 +9581,15 @@ var MAX_NUM_SAMPLE_QUERY = 6;
 var SAMPLE_TIMEOUT = 300;
 
 var TIFF_MAX_REQUEST = 5;
-var TIFF_TIMEOUT = 100;
+var TIFF_TIMEOUT = 20;
 
 var tiffRequest = [];
 // const tiffQueue = [];
 var pqTiff = new __WEBPACK_IMPORTED_MODULE_2__utils__["b" /* PriorityQueue */]();
+var imageRequestOnProgress = function imageRequestOnProgress() {
+	//console.log(tiffRequest.length, pqTiff.length())
+	return tiffRequest.length + pqTiff.length();
+};
 
 function getSampleKinds() {
 	return function (dispatch) {
@@ -40204,10 +40209,15 @@ var PriorityQueue = function () {
 		this.heap = [null];
 	}
 
-	// insert data
-
-
 	_createClass(PriorityQueue, [{
+		key: "length",
+		value: function length() {
+			return this.heap.length - 1;
+		}
+
+		// insert data
+
+	}, {
 		key: "insert",
 		value: function insert(data, priority) {
 			var newNode = new Node(data, priority);
@@ -41805,11 +41815,13 @@ function setAttr(state, payload) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__ = __webpack_require__(/*! react-toolbox/lib/link */ 103);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__layout__ = __webpack_require__(/*! ./layout */ 637);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__index_css__ = __webpack_require__(/*! ./index.css */ 727);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__index_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_get__ = __webpack_require__(/*! lodash.get */ 59);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12_lodash_get__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__layout__ = __webpack_require__(/*! ./layout */ 637);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__index_css__ = __webpack_require__(/*! ./index.css */ 727);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__index_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12__index_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_lodash_get__ = __webpack_require__(/*! lodash.get */ 59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13_lodash_get___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13_lodash_get__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -41839,253 +41851,267 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
+
 var MultiViewApp = function (_React$Component) {
-  _inherits(MultiViewApp, _React$Component);
+	_inherits(MultiViewApp, _React$Component);
 
-  function MultiViewApp() {
-    _classCallCheck(this, MultiViewApp);
+	function MultiViewApp() {
+		_classCallCheck(this, MultiViewApp);
 
-    var _this = _possibleConstructorReturn(this, (MultiViewApp.__proto__ || Object.getPrototypeOf(MultiViewApp)).call(this));
+		var _this = _possibleConstructorReturn(this, (MultiViewApp.__proto__ || Object.getPrototypeOf(MultiViewApp)).call(this));
 
-    _this.handleResize = function () {
-      var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-      var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+		_this.handleResize = function () {
+			var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+			var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-      // width = width;
-      height = height - 41.6; // - 56.81;// - 4.15;
+			// width = width;
+			height = height - 41.6; // - 56.81;// - 4.15;
 
-      _this.setState({ width: width, height: height });
-    };
+			_this.setState({ width: width, height: height });
+		};
 
-    _this.handleSampleChange = function (action, keys) {
-      _this.props.AddDelSamples(action, keys);
+		_this.handleSampleChange = function (action, keys) {
+			_this.props.AddDelSamples(action, keys);
 
-      var sampleNames = keys.map(function (key) {
-        return _this.props.sampleKinds[key];
-      });
-      _this.props.AddData(action, sampleNames);
-    };
+			var sampleNames = keys.map(function (key) {
+				return _this.props.sampleKinds[key];
+			});
+			_this.props.AddData(action, sampleNames);
+		};
 
-    _this.handleAttrChange = function (dim, value) {
-      if (value.length === 0) return;
-      var _this$props = _this.props,
-          attr = _this$props.attr,
-          attrFormat = _this$props.attrFormat,
-          attrKinds = _this$props.attrKinds;
-
-
-      var oldAttr = attrFormat(__WEBPACK_IMPORTED_MODULE_12_lodash_get___default()(attr, dim));
-      if (value !== oldAttr && _this.props.setAttr) {
-        var attrKeys = Object.keys(attrKinds);
-        var index = attrKeys.findIndex(function (key) {
-          return key.includes(value);
-        });
-        // console.log(attrKinds[attrKeys[index]])
-        _this.props.setAttr(dim, attrKeys[index]);
-      }
-    };
-
-    _this.handleToolChange = function (toolid) {
-      _this.setState({ toolSelected: toolid });
-    };
-
-    _this.handleSampleUpdate = function (doUpdate, selected, colors) {
-      if (doUpdate && _this.props.updateSelectedSamples) {
-        _this.props.updateSelectedSamples(selected, colors);
-      }
-      _this.setState({ showDataDialog: !_this.state.showDataDialog });
-    };
-
-    _this.onToggleDataDialog = function () {
-      _this.setState({ showDataDialog: !_this.state.showDataDialog });
-    };
-
-    _this.handlePCPAxisSelect = function (axisTitle, domain, inProgress, aux) {
-      var ScatterBoxRef = _this.refs["ScatterBoxRef"].getWrappedInstance(); // eslint-disable-line
-      var ScatterChartRef = ScatterBoxRef.refs["ScatterChartRef"].getWrappedInstance();
-      var ScatterCanvasNode = ScatterChartRef.getScatterChartCanvasNode();
-      ScatterCanvasNode.handleByOther({
-        what: "extents",
-        data: _defineProperty({}, axisTitle, domain.slice()),
-        inProgress: inProgress });
-      _this.pcpAttrSelect[axisTitle] = {
-        domain: domain.slice(),
-        auxiliary: aux ? aux.slice() : null
-      };
-      _this.__dataExtents[axisTitle] = domain.slice();
-    };
-
-    _this.handleScatterPanZoom = function (newDataExtents, inProgress) {
-      Object.keys(newDataExtents).forEach(function (key) {
-        _this.__dataExtents[key] = newDataExtents[key].slice();
-      });
-
-      var ConfigBoxRef = _this.refs["ConfigBoxRef"].getWrappedInstance(); // eslint-disable-line
-      if (ConfigBoxRef.refs["PCPTabRef"]) {
-        var pcpNode = ConfigBoxRef.refs["PCPTabRef"].refs["PCPChartRef"].node.refs["PCPCanvasRef"];
-        pcpNode.handleByOtherFull(_this.__dataExtents, inProgress);
-      }
-    };
-
-    _this.state = {
-      width: 0,
-      height: 0
-    };
-
-    _this.pcpAttrSelect = {};
-    _this.__dataExtents = {};
-    return _this;
-  }
-
-  _createClass(MultiViewApp, [{
-    key: "componentWillMount",
-    value: function componentWillMount() {
-      this.handleResize();
-    }
-  }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      this.props.getSampleKinds();
-      this.props.getAttributes();
-      this.props.getColorMap();
-
-      window.addEventListener("resize", function () {
-        return _this2.handleResize();
-      });
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      var _this3 = this;
-
-      window.removeEventListener("resize", function () {
-        return _this3.handleResize();
-      });
-    }
-  }, {
-    key: "shouldComponentUpdate",
-    value: function shouldComponentUpdate() {
-      // if (nextProps.isDataLoading)
-      //     return false;
-      return true;
-    }
-
-    // update scatter plot by pcp
+		_this.handleAttrChange = function (dim, value) {
+			if (value.length === 0) return;
+			var _this$props = _this.props,
+			    attr = _this$props.attr,
+			    attrFormat = _this$props.attrFormat,
+			    attrKinds = _this$props.attrKinds;
 
 
-    // todo: update pcp by scatter plot
+			var oldAttr = attrFormat(__WEBPACK_IMPORTED_MODULE_13_lodash_get___default()(attr, dim));
+			if (value !== oldAttr && _this.props.setAttr) {
+				var attrKeys = Object.keys(attrKinds);
+				var index = attrKeys.findIndex(function (key) {
+					return key.includes(value);
+				});
+				// console.log(attrKinds[attrKeys[index]])
+				_this.props.setAttr(dim, attrKeys[index]);
+			}
+		};
 
-  }, {
-    key: "render",
-    value: function render() {
-      var _state = this.state,
-          width = _state.width,
-          height = _state.height;
+		_this.handleToolChange = function (toolid) {
+			_this.setState({ toolSelected: toolid });
+		};
+
+		_this.handleSampleUpdate = function (doUpdate, selected, colors) {
+			if (doUpdate && _this.props.updateSelectedSamples) {
+				_this.props.updateSelectedSamples(selected, colors);
+			}
+			_this.setState({ showDataDialog: !_this.state.showDataDialog });
+		};
+
+		_this.onToggleDataDialog = function () {
+			_this.setState({ showDataDialog: !_this.state.showDataDialog });
+		};
+
+		_this.handlePCPAxisSelect = function (axisTitle, domain, inProgress, aux) {
+			var ScatterBoxRef = _this.refs["ScatterBoxRef"].getWrappedInstance(); // eslint-disable-line
+			var ScatterChartRef = ScatterBoxRef.refs["ScatterChartRef"].getWrappedInstance();
+			var ScatterCanvasNode = ScatterChartRef.getScatterChartCanvasNode();
+			ScatterCanvasNode.handleByOther({
+				what: "extents",
+				data: _defineProperty({}, axisTitle, domain.slice()),
+				inProgress: inProgress });
+			_this.pcpAttrSelect[axisTitle] = {
+				domain: domain.slice(),
+				auxiliary: aux ? aux.slice() : null
+			};
+			_this.__dataExtents[axisTitle] = domain.slice();
+		};
+
+		_this.handleScatterPanZoom = function (newDataExtents, inProgress) {
+			Object.keys(newDataExtents).forEach(function (key) {
+				_this.__dataExtents[key] = newDataExtents[key].slice();
+			});
+
+			var ConfigBoxRef = _this.refs["ConfigBoxRef"].getWrappedInstance(); // eslint-disable-line
+			if (ConfigBoxRef.refs["PCPTabRef"]) {
+				var pcpNode = ConfigBoxRef.refs["PCPTabRef"].refs["PCPChartRef"].node.refs["PCPCanvasRef"];
+				pcpNode.handleByOtherFull(_this.__dataExtents, inProgress);
+			}
+		};
+
+		_this.state = {
+			width: 0,
+			height: 0
+		};
+
+		_this.pcpAttrSelect = {};
+		_this.__dataExtents = {};
+		return _this;
+	}
+
+	_createClass(MultiViewApp, [{
+		key: "componentWillMount",
+		value: function componentWillMount() {
+			this.handleResize();
+		}
+	}, {
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			var _this2 = this;
+
+			this.props.getSampleKinds();
+			this.props.getAttributes();
+			this.props.getColorMap();
+
+			window.addEventListener("resize", function () {
+				return _this2.handleResize();
+			});
+		}
+	}, {
+		key: "componentWillUnmount",
+		value: function componentWillUnmount() {
+			var _this3 = this;
+
+			window.removeEventListener("resize", function () {
+				return _this3.handleResize();
+			});
+		}
+	}, {
+		key: "shouldComponentUpdate",
+		value: function shouldComponentUpdate() {
+			// if (nextProps.isDataLoading)
+			//     return false;
+			return true;
+		}
+
+		// update scatter plot by pcp
 
 
-      var scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
-      var configBoxWidth = Math.floor(width - scatterBoxWidth);
-      return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-        __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Layout"],
-        null,
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          __WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Panel"],
-          null,
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"],
-            { title: "React-MultiView",
-              leftIcon: "menu", onLeftIconClick: null,
-              theme: __WEBPACK_IMPORTED_MODULE_11__index_css___default.a, fixed: true, flat: true
-            },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-              __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default.a,
-              { type: "horizontal" },
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                "ul",
-                { style: { listStyle: 'none' } },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                  "li",
-                  { style: { fontFamily: 'Roboto,Helvetica,Arial,sans-serif', fontSize: '11px' } },
-                  __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "a",
-                    { style: { textDecoration: 'none' },
-                      href: "https://github.com/ComputationalScienceInitiative/react-multiview", target: "_blank" },
-                    "Github"
-                  )
-                )
-              )
-            )
-          )
-        ),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          "div",
-          { className: __WEBPACK_IMPORTED_MODULE_11__index_css___default.a.chartbox },
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "div",
-            { style: { width: scatterBoxWidth, float: "left" } },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10__layout__["b" /* ScatterBox */], {
-              ref: "ScatterBoxRef" // eslint-disable-line
-              , width: scatterBoxWidth, height: scatterBoxWidth,
-              onScatterPanZoom: this.handleScatterPanZoom
-            })
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "div",
-            { style: { marginLeft: scatterBoxWidth } },
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10__layout__["a" /* ConfigBox */], {
-              ref: "ConfigBoxRef" // eslint-disable-line
-              , height: height,
-              width: configBoxWidth,
-              onPCPAxisSelect: this.handlePCPAxisSelect
-              // pcpAttrSelect={this.pcpAttrSelect}
-              , dataExtents: this.__dataExtents
-            })
-          )
-        )
-      );
-    }
-  }]);
+		// todo: update pcp by scatter plot
 
-  return MultiViewApp;
+	}, {
+		key: "render",
+		value: function render() {
+			var _state = this.state,
+			    width = _state.width,
+			    height = _state.height;
+			var showImage = this.props.showImage;
+
+
+			var scatterBoxWidth = Math.min(Math.floor(0.6 * width), Math.floor(height));
+			var configBoxWidth = Math.floor(width - scatterBoxWidth);
+
+			var imgReqOnProgress = Object(__WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["k" /* imageRequestOnProgress */])();
+			return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+				__WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Layout"],
+				null,
+				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+					__WEBPACK_IMPORTED_MODULE_6_react_toolbox_lib_layout__["Panel"],
+					null,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_app_bar__["AppBar"],
+						{ title: "React-MultiView",
+							leftIcon: "menu", onLeftIconClick: null,
+							theme: __WEBPACK_IMPORTED_MODULE_12__index_css___default.a, fixed: true, flat: true
+						},
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+							__WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default.a,
+							{ type: "horizontal" },
+							__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+								"ul",
+								{ style: { listStyle: 'none' } },
+								imgReqOnProgress > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+									"li",
+									{ className: __WEBPACK_IMPORTED_MODULE_12__index_css___default.a.hLi },
+									__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__["Button"], { icon: "cloud_upload", label: "" + imgReqOnProgress, accent: true })
+								),
+								__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+									"li",
+									{ className: __WEBPACK_IMPORTED_MODULE_12__index_css___default.a.hLi },
+									__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+										"a",
+										{ style: { textDecoration: 'none' },
+											href: "https://github.com/ComputationalScienceInitiative/react-multiview", target: "_blank" },
+										"Github"
+									)
+								)
+							)
+						)
+					)
+				),
+				imgReqOnProgress > 0 && showImage && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("div", {
+					className: __WEBPACK_IMPORTED_MODULE_12__index_css___default.a.myProgressBarWithAnimation,
+					style: { position: 'absolute' }
+				}),
+				__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+					"div",
+					{ className: __WEBPACK_IMPORTED_MODULE_12__index_css___default.a.chartbox },
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						"div",
+						{ style: { width: scatterBoxWidth, float: "left" } },
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_11__layout__["b" /* ScatterBox */], {
+							ref: "ScatterBoxRef" // eslint-disable-line
+							, width: scatterBoxWidth, height: scatterBoxWidth,
+							onScatterPanZoom: this.handleScatterPanZoom
+						})
+					),
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+						"div",
+						{ style: { marginLeft: scatterBoxWidth } },
+						__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_11__layout__["a" /* ConfigBox */], {
+							ref: "ConfigBoxRef" // eslint-disable-line
+							, height: height,
+							width: configBoxWidth,
+							onPCPAxisSelect: this.handlePCPAxisSelect
+							// pcpAttrSelect={this.pcpAttrSelect}
+							, dataExtents: this.__dataExtents
+						})
+					)
+				)
+			);
+		}
+	}]);
+
+	return MultiViewApp;
 }(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
 
 function mapStateToProps(state) {
-  return {
-    sampleKinds: state.data.sampleKinds,
-    sampleColors: state.data.sampleColors,
-    sampleColorOpacity: state.data.sampleColorOpacity,
-    sampleSelected: state.data.samples,
-    attrKinds: state.data.attrKinds,
-    attrFormat: state.data.attrFormat,
+	return {
+		sampleKinds: state.data.sampleKinds,
+		sampleColors: state.data.sampleColors,
+		sampleColorOpacity: state.data.sampleColorOpacity,
+		sampleSelected: state.data.samples,
+		attrKinds: state.data.attrKinds,
+		attrFormat: state.data.attrFormat,
 
-    attr: {
-      x: state.vis.attrx,
-      y: state.vis.attry,
-      z: state.vis.attrz
-    },
+		attr: {
+			x: state.vis.attrx,
+			y: state.vis.attry,
+			z: state.vis.attrz
+		},
 
-    isDataLoading: state.data.numQueried > 0
-  };
+		isDataLoading: state.data.numQueried > 0,
+		showImage: state.vis.showImage
+	};
 }
 
 function mapDispatchToProps(dispatch) {
-  return Object(__WEBPACK_IMPORTED_MODULE_3_redux__["b" /* bindActionCreators */])({
-    getSampleKinds: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["h" /* getSampleKinds */],
-    getAttributes: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["f" /* getAttributes */],
-    AddData: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["a" /* AddData */],
-    setAttr: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["a" /* setAttr */],
-    handleColorChange: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["j" /* handleColorChange */],
-    updateSelectedSamples: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["l" /* updateSelectedSamples */],
-    getColorMap: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["g" /* getColorMap */]
-  }, dispatch);
+	return Object(__WEBPACK_IMPORTED_MODULE_3_redux__["b" /* bindActionCreators */])({
+		getSampleKinds: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["h" /* getSampleKinds */],
+		getAttributes: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["f" /* getAttributes */],
+		AddData: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["a" /* AddData */],
+		setAttr: __WEBPACK_IMPORTED_MODULE_5__actions_visActions__["a" /* setAttr */],
+		handleColorChange: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["j" /* handleColorChange */],
+		updateSelectedSamples: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["m" /* updateSelectedSamples */],
+		getColorMap: __WEBPACK_IMPORTED_MODULE_4__actions_dataActions__["g" /* getColorMap */]
+	}, dispatch);
 }
 
 MultiViewApp.propTypes = {
-  getSampleKinds: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  getAttributes: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
-  getColorMap: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
+	getSampleKinds: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	getAttributes: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func,
+	getColorMap: __WEBPACK_IMPORTED_MODULE_1_prop_types___default.a.func
 
 };
 
@@ -43320,7 +43346,7 @@ function mapDispatchToProps(dispatch) {
 		updateAttrSelect: __WEBPACK_IMPORTED_MODULE_6__actions_visActions__["f" /* updateAttrSelect */],
 		setZColorScheme: __WEBPACK_IMPORTED_MODULE_6__actions_visActions__["e" /* setZColorScheme */],
 		setZColorDomain: __WEBPACK_IMPORTED_MODULE_6__actions_visActions__["d" /* setZColorDomain */],
-		setImageDomain: __WEBPACK_IMPORTED_MODULE_5__actions_dataActions__["k" /* setImageDomain */],
+		setImageDomain: __WEBPACK_IMPORTED_MODULE_5__actions_dataActions__["l" /* setImageDomain */],
 		changeImgColorScheme: __WEBPACK_IMPORTED_MODULE_5__actions_dataActions__["c" /* changeImgColorScheme */]
 	}, dispatch);
 }
@@ -50271,7 +50297,9 @@ var DraggableDataBox = function (_React$Component) {
                                 imgRefHeight: imgRefHeight,
                                 id: id,
                                 imgPool: imgPool,
-                                onImageRequest: handleImageRequest,
+                                onImageRequest: function onImageRequest(id, priority) {
+                                    return handleImageRequest(id, 2 * priority);
+                                },
                                 showGrid: showGrid,
                                 svgDim: { width: width, height: height / 2 },
                                 imageFilter: imageFilter
@@ -58984,16 +59012,16 @@ var ImageTab = function (_React$Component) {
 						} }),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						'p',
-						null,
+						{ style: { fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px' } },
 						'MIN. # POINTS (on scatter plot to show images):'
 					),
-					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 200, step: 20, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
+					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 20, max: 400, step: 10, value: minPoints, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
 						onChange: function onChange(value) {
 							return onSliderChange("minPoints", value);
 						} }),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
 						'p',
-						null,
+						{ style: { fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px' } },
 						'MIN. IMAGE SIDE (initial):'
 					),
 					__WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default.a, { pinned: true, min: 5, max: 40, step: 5, value: minImageSize, disabled: !showImage, theme: __WEBPACK_IMPORTED_MODULE_7__index_css___default.a,
@@ -59216,7 +59244,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "::-webkit-scrollbar {\n    display: none;\n}\n._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,cAAc;CACjB;AACD;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,mBAAmB;IACnB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,wDAAwD;IACxD,kBAAkB;CACrB","file":"index.css","sourcesContent":["::-webkit-scrollbar {\n    display: none;\n}\n.appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}"],"sourceRoot":""}]);
+exports.push([module.i, "::-webkit-scrollbar {\n    display: none;\n}\n._2rzhT-w0gn0r3XQpoZLWsp {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n._3ZRl1qb7TgQPfxTy7q8_WU {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n._2pJ10qJ5B60IAZsi85PcP6 {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n._2Lp12UyDcdEnWpQFa2U9ZO {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n._2_0blpxwM3DtTPfgVY5eXp {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n._3m4OsXKdZYEFgOzsDdVMiF {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n@-webkit-keyframes _1XGUmJew3mdOf16WumQiEy {\n    from {background-color: rgb(255, 0, 0)}\n    to {background-color: rgb(0, 0, 255)}\n}\n@keyframes _1XGUmJew3mdOf16WumQiEy {\n    from {background-color: rgb(255, 0, 0)}\n    to {background-color: rgb(0, 0, 255)}\n}\n._2EZEBBI8Ofp-e_mAy8_0Gj {\n    position: 'absolute';\n    left: 0%;\n    width: 100%;\n    height: 2px;\n    z-index: 1000;\n    background-color: rgb(255, 0, 0);\n    -webkit-animation-name: _1XGUmJew3mdOf16WumQiEy;\n            animation-name: _1XGUmJew3mdOf16WumQiEy;\n    -webkit-animation-duration: 1s;\n            animation-duration: 1s;\n    -webkit-animation-iteration-count: infinite;\n            animation-iteration-count: infinite;\n    -webkit-animation-timing-function: linear;\n            animation-timing-function: linear;\n}\n._1pKw-bnxcJuyXH78RI7BOT {\n    position: 'absolute';\n    left: 0%;\n    width: 40px;\n    height: 2px;\n    z-index: 1000;\n    background-color: rgba(255, 0, 0, 0);\n}\n._2O3dytLIR9BlZNsYC7uhKq {\n    font-size: 11px;\n    display: inline;\n}\n", "", {"version":3,"sources":["/Users/scott/Documents/Work/bnl/code/app/react-multiview/docs/lib/app/multiview/index.css"],"names":[],"mappings":"AAAA;IACI,cAAc;CACjB;AACD;IACI,+BAA+B;IAC/B,oBAAoB;CACvB;AACD;IACI,+BAA+B;IAC/B,gBAAgB;IAChB,QAAQ;IACR,UAAU;IACV,YAAY;IACZ,eAAe;IACf,aAAa;CAChB;AACD;IACI,wDAAwD;IACxD,kBAAkB;IAClB,gBAAgB;IAChB,YAAY;IACZ,OAAO;IACP,eAAe;IACf,0BAA0B;QACtB,uBAAuB;YACnB,oBAAoB;IAC5B,qBAAqB;IACrB,qBAAqB;IACrB,cAAc;IACd,YAAY;CACf;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,aAAa;IACb,aAAa;IACb,wDAAwD;IACxD,kBAAkB;IAClB,6BAA6B;CAChC;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,gBAAgB;IAChB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,aAAa;IACb,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,+BAA+B;IAC/B,yBAAyB;IACzB,mBAAmB;IACnB,QAAQ;IACR,YAAY;IACZ,YAAY;IACZ,wDAAwD;IACxD,kBAAkB;CACrB;AACD;IACI,MAAM,gCAAgC,CAAC;IACvC,IAAI,gCAAgC,CAAC;CACxC;AACD;IACI,MAAM,gCAAgC,CAAC;IACvC,IAAI,gCAAgC,CAAC;CACxC;AACD;IACI,qBAAqB;IACrB,SAAS;IACT,YAAY;IACZ,YAAY;IACZ,cAAc;IACd,iCAAiC;IACjC,gDAA0C;YAClC,wCAAkC;IAC1C,+BAA+B;YACvB,uBAAuB;IAC/B,4CAA4C;YACpC,oCAAoC;IAC5C,0CAA0C;YAClC,kCAAkC;CAC7C;AACD;IACI,qBAAqB;IACrB,SAAS;IACT,YAAY;IACZ,YAAY;IACZ,cAAc;IACd,qCAAqC;CACxC;AACD;IACI,gBAAgB;IAChB,gBAAgB;CACnB","file":"index.css","sourcesContent":["::-webkit-scrollbar {\n    display: none;\n}\n.appBar {\n    background: rgb(189, 189, 189);\n    color: rgb(0, 0, 0);\n}\n.footer {\n    background: rgb(189, 189, 189);\n    position: fixed;\n    left: 0;\n    bottom: 0;\n    width: 100%;\n    height: 4.16px;\n    z-index: 100;    \n}\n.ctlbox {\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 11.7px;\n    position: fixed;\n    left: 200px;\n    top: 0;\n    height: 41.6px;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    width: 100%;\n}\n.databox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 200px;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;\n    height: calc(100% - 45.76px);\n}\n.toolbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 1px 0px 1px;\n    position: fixed;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    z-index: 100;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n.chartbox {\n    background: rgb(255, 255, 255);\n    padding: 0px 0px 0px 0px;\n    position: absolute;\n    left: 0;\n    top: 41.6px;\n    width: 100%;\n    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;\n    font-size: 10.4px;    \n}\n@-webkit-keyframes progressAnimation {\n    from {background-color: rgb(255, 0, 0)}\n    to {background-color: rgb(0, 0, 255)}\n}\n@keyframes progressAnimation {\n    from {background-color: rgb(255, 0, 0)}\n    to {background-color: rgb(0, 0, 255)}\n}\n.myProgressBarWithAnimation {\n    position: 'absolute';\n    left: 0%;\n    width: 100%;\n    height: 2px;\n    z-index: 1000;\n    background-color: rgb(255, 0, 0);\n    -webkit-animation-name: progressAnimation;\n            animation-name: progressAnimation;\n    -webkit-animation-duration: 1s;\n            animation-duration: 1s;\n    -webkit-animation-iteration-count: infinite;\n            animation-iteration-count: infinite;\n    -webkit-animation-timing-function: linear;\n            animation-timing-function: linear;\n}\n.myProgressBar {\n    position: 'absolute';\n    left: 0%;\n    width: 40px;\n    height: 2px;\n    z-index: 1000;\n    background-color: rgba(255, 0, 0, 0);\n}\n.hLi {\n    font-size: 11px;\n    display: inline;\n}\n"],"sourceRoot":""}]);
 
 // exports
 exports.locals = {
@@ -59225,7 +59253,11 @@ exports.locals = {
 	"ctlbox": "_2pJ10qJ5B60IAZsi85PcP6",
 	"databox": "_2Lp12UyDcdEnWpQFa2U9ZO",
 	"toolbox": "_2_0blpxwM3DtTPfgVY5eXp",
-	"chartbox": "_3m4OsXKdZYEFgOzsDdVMiF"
+	"chartbox": "_3m4OsXKdZYEFgOzsDdVMiF",
+	"myProgressBarWithAnimation": "_2EZEBBI8Ofp-e_mAy8_0Gj",
+	"progressAnimation": "_1XGUmJew3mdOf16WumQiEy",
+	"myProgressBar": "_1pKw-bnxcJuyXH78RI7BOT",
+	"hLi": "_2O3dytLIR9BlZNsYC7uhKq"
 };
 
 /***/ }),

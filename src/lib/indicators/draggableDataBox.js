@@ -332,7 +332,7 @@ class DraggableDataBox extends React.Component {
                             imgRefHeight={imgRefHeight}
                             id={id}  
                             imgPool={imgPool}       
-                            onImageRequest={handleImageRequest}
+                            onImageRequest={ (id, priority) => handleImageRequest(id, 2*priority)}
                             showGrid={showGrid}
                             svgDim={{width: width, height: height/2}}
                             imageFilter={imageFilter}

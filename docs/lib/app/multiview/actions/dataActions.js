@@ -9,13 +9,17 @@ const MAX_NUM_SAMPLE_QUERY = 6;
 const SAMPLE_TIMEOUT = 300;
 
 const TIFF_MAX_REQUEST = 5;
-const TIFF_TIMEOUT = 100;
+const TIFF_TIMEOUT = 20;
 
 
 
 const tiffRequest = [];
 // const tiffQueue = [];
 const pqTiff = new PriorityQueue();
+export const imageRequestOnProgress = () => {
+	//console.log(tiffRequest.length, pqTiff.length())
+	return tiffRequest.length + pqTiff.length();
+}
 
 
 export function getSampleKinds() {

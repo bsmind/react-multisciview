@@ -21,10 +21,10 @@ class ImageTab extends React.Component {
     		<div style={{borderRadius: '10px', border: '1px dotted #707070', padding: '0px 5px 0px 5px', marginBottom: '5px'}}>
 				<Button icon="photo" label="Show Image" accent={showImage}
 					onClick={() => onSwitchChange("showImage", !showImage)} />				
-    			<p>MIN. # POINTS (on scatter plot to show images):</p>
-    			<Slider pinned min={5} max={200} step={20} value={minPoints} disabled={!showImage} theme={theme}
+    			<p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px'}}>MIN. # POINTS (on scatter plot to show images):</p>
+    			<Slider pinned min={20} max={400} step={10} value={minPoints} disabled={!showImage} theme={theme}
     				onChange={value => onSliderChange("minPoints", value)} />
-    			<p>MIN. IMAGE SIDE (initial):</p>
+    			<p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px'}}>MIN. IMAGE SIDE (initial):</p>
     			<Slider pinned min={5} max={40} step={5} value={minImageSize} disabled={!showImage} theme={theme}
     				onChange={value => onSliderChange("minImageSize", value)} />
     		</div>
