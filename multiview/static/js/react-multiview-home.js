@@ -1456,6 +1456,57 @@ function newInterval(floori, offseti, count, field) {
 
 /***/ }),
 /* 16 */
+/*!********************************************************!*\
+  !*** ./node_modules/react-toolbox/lib/button/index.js ***!
+  \********************************************************/
+/*! dynamic exports provided */
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BrowseButton = exports.IconButton = exports.Button = undefined;
+
+var _reactCssThemr = __webpack_require__(/*! react-css-themr */ 2);
+
+var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
+
+var _Button = __webpack_require__(/*! ./Button */ 70);
+
+var _BrowseButton = __webpack_require__(/*! ./BrowseButton */ 316);
+
+var _IconButton = __webpack_require__(/*! ./IconButton */ 67);
+
+var _FontIcon = __webpack_require__(/*! ../font_icon/FontIcon */ 12);
+
+var _ripple = __webpack_require__(/*! ../ripple */ 34);
+
+var _ripple2 = _interopRequireDefault(_ripple);
+
+var _theme = __webpack_require__(/*! ./theme.css */ 320);
+
+var _theme2 = _interopRequireDefault(_theme);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Button = (0, _Button.buttonFactory)((0, _ripple2.default)({ centered: false }), _FontIcon.FontIcon);
+var IconButton = (0, _IconButton.iconButtonFactory)((0, _ripple2.default)({ centered: true }), _FontIcon.FontIcon);
+var BrowseButton = (0, _BrowseButton.browseButtonFactory)((0, _ripple2.default)({ centered: false }), _FontIcon.FontIcon);
+var ThemedButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(Button);
+var ThemedIconButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(IconButton);
+var ThemedBrowseButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(BrowseButton);
+
+exports.default = ThemedButton;
+exports.Button = ThemedButton;
+exports.IconButton = ThemedIconButton;
+exports.BrowseButton = ThemedBrowseButton;
+
+/***/ }),
+/* 17 */
 /*!*****************************************!*\
   !*** ./node_modules/axios/lib/utils.js ***!
   \*****************************************/
@@ -1768,57 +1819,6 @@ module.exports = {
   trim: trim
 };
 
-
-/***/ }),
-/* 17 */
-/*!********************************************************!*\
-  !*** ./node_modules/react-toolbox/lib/button/index.js ***!
-  \********************************************************/
-/*! dynamic exports provided */
-/*! all exports used */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.BrowseButton = exports.IconButton = exports.Button = undefined;
-
-var _reactCssThemr = __webpack_require__(/*! react-css-themr */ 2);
-
-var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
-
-var _Button = __webpack_require__(/*! ./Button */ 70);
-
-var _BrowseButton = __webpack_require__(/*! ./BrowseButton */ 316);
-
-var _IconButton = __webpack_require__(/*! ./IconButton */ 67);
-
-var _FontIcon = __webpack_require__(/*! ../font_icon/FontIcon */ 12);
-
-var _ripple = __webpack_require__(/*! ../ripple */ 34);
-
-var _ripple2 = _interopRequireDefault(_ripple);
-
-var _theme = __webpack_require__(/*! ./theme.css */ 320);
-
-var _theme2 = _interopRequireDefault(_theme);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Button = (0, _Button.buttonFactory)((0, _ripple2.default)({ centered: false }), _FontIcon.FontIcon);
-var IconButton = (0, _IconButton.iconButtonFactory)((0, _ripple2.default)({ centered: true }), _FontIcon.FontIcon);
-var BrowseButton = (0, _BrowseButton.browseButtonFactory)((0, _ripple2.default)({ centered: false }), _FontIcon.FontIcon);
-var ThemedButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(Button);
-var ThemedIconButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(IconButton);
-var ThemedBrowseButton = (0, _reactCssThemr.themr)(_identifiers.BUTTON, _theme2.default)(BrowseButton);
-
-exports.default = ThemedButton;
-exports.Button = ThemedButton;
-exports.IconButton = ThemedIconButton;
-exports.BrowseButton = ThemedBrowseButton;
 
 /***/ }),
 /* 18 */
@@ -7370,7 +7370,7 @@ var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
 
 var _AppBar = __webpack_require__(/*! ./AppBar */ 153);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _theme = __webpack_require__(/*! ./theme.css */ 322);
 
@@ -7999,7 +7999,7 @@ var _Dialog = __webpack_require__(/*! ./Dialog */ 96);
 
 var _overlay = __webpack_require__(/*! ../overlay */ 169);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _theme = __webpack_require__(/*! ./theme.css */ 373);
 
@@ -9883,7 +9883,7 @@ function changeImgColorScheme(newScheme) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(/*! ./utils */ 16);
+var utils = __webpack_require__(/*! ./utils */ 17);
 var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ 622);
 
 var DEFAULT_CONTENT_TYPE = {
@@ -11312,7 +11312,7 @@ Object.defineProperty(exports, 'Avatar', {
   }
 });
 
-var _button = __webpack_require__(/*! ./button */ 17);
+var _button = __webpack_require__(/*! ./button */ 16);
 
 Object.keys(_button).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
@@ -14523,7 +14523,7 @@ var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
 
 var _Navigation = __webpack_require__(/*! ./Navigation */ 402);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _link = __webpack_require__(/*! ../link */ 103);
 
@@ -18618,7 +18618,7 @@ module.exports = function bind(fn, thisArg) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 var settle = __webpack_require__(/*! ./../core/settle */ 623);
 var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ 625);
 var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ 626);
@@ -27104,7 +27104,7 @@ var _Calendar = __webpack_require__(/*! ./Calendar */ 159);
 
 var _Calendar2 = _interopRequireDefault(_Calendar);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _input = __webpack_require__(/*! ../input */ 47);
 
@@ -30772,7 +30772,7 @@ var _reactCssThemr = __webpack_require__(/*! react-css-themr */ 2);
 
 var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _MenuDivider = __webpack_require__(/*! ./MenuDivider */ 397);
 
@@ -32117,7 +32117,7 @@ var _identifiers = __webpack_require__(/*! ../identifiers */ 3);
 
 var _Snackbar = __webpack_require__(/*! ./Snackbar */ 415);
 
-var _button = __webpack_require__(/*! ../button */ 17);
+var _button = __webpack_require__(/*! ../button */ 16);
 
 var _theme = __webpack_require__(/*! ./theme.css */ 416);
 
@@ -37233,6 +37233,8 @@ function raw2gray255(raw) {
 	return cvs.toDataURL();
 }
 
+function raw2grayKevin(raw) {}
+
 function getTiff(state, payload) {
 	var id = payload.id,
 	    data = payload.data;
@@ -37284,6 +37286,11 @@ function getTiff(state, payload) {
 }
 
 function getColorMap(state, payload) {
+
+	//
+	// from file
+	//
+
 	var colors = payload.slice();
 	colors.reverse();
 
@@ -41815,7 +41822,7 @@ function setAttr(state, payload) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_react_toolbox_lib_navigation__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__ = __webpack_require__(/*! react-toolbox/lib/link */ 103);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_react_toolbox_lib_link__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_react_toolbox_lib_button__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__layout__ = __webpack_require__(/*! ./layout */ 637);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__index_css__ = __webpack_require__(/*! ./index.css */ 727);
@@ -42140,7 +42147,7 @@ module.exports = __webpack_require__(/*! ./lib/axios */ 619);
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./utils */ 16);
+var utils = __webpack_require__(/*! ./utils */ 17);
 var bind = __webpack_require__(/*! ./helpers/bind */ 253);
 var Axios = __webpack_require__(/*! ./core/Axios */ 621);
 var defaults = __webpack_require__(/*! ./defaults */ 131);
@@ -42237,7 +42244,7 @@ function isSlowBuffer (obj) {
 
 
 var defaults = __webpack_require__(/*! ./../defaults */ 131);
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ 630);
 var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ 631);
 
@@ -42327,7 +42334,7 @@ module.exports = Axios;
 "use strict";
 
 
-var utils = __webpack_require__(/*! ../utils */ 16);
+var utils = __webpack_require__(/*! ../utils */ 17);
 
 module.exports = function normalizeHeaderName(headers, normalizedName) {
   utils.forEach(headers, function processHeader(value, name) {
@@ -42422,7 +42429,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 function encode(val) {
   return encodeURIComponent(val).
@@ -42502,7 +42509,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
@@ -42567,7 +42574,7 @@ module.exports = function parseHeaders(headers) {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -42695,7 +42702,7 @@ module.exports = btoa;
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -42760,7 +42767,7 @@ module.exports = (
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 function InterceptorManager() {
   this.handlers = [];
@@ -42824,7 +42831,7 @@ module.exports = InterceptorManager;
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 var transformData = __webpack_require__(/*! ./transformData */ 632);
 var isCancel = __webpack_require__(/*! ../cancel/isCancel */ 256);
 var defaults = __webpack_require__(/*! ../defaults */ 131);
@@ -42922,7 +42929,7 @@ module.exports = function dispatchRequest(config) {
 "use strict";
 
 
-var utils = __webpack_require__(/*! ./../utils */ 16);
+var utils = __webpack_require__(/*! ./../utils */ 17);
 
 /**
  * Transform the data for a request or a response
@@ -46117,7 +46124,12 @@ var ScatterSeries = function (_React$Component) {
           var y = yAccessor(d);
 
           if (x == null || y == null) return;
-          if (!dataFilter(d)) return;
+
+          var isFiltered = dataFilter(d);
+          if (!isFiltered) {
+            //console.log(d)
+            return;
+          }
 
           // callback for drawing
           if (ctx) {
@@ -46190,12 +46202,17 @@ var ScatterSeries = function (_React$Component) {
         return dataKeys.map(function (key) {
           var extents = dataExtents[key];
           var value = d[key];
+          if (extents == null) return true;
           if (value == null) return true;
           if (typeof value === "string") {
             var tempExtents = origDataExtents[key];
             value = tempExtents.indexOf(value) + 0.5;
           }
-          return extents[0] <= value && value <= extents[1];
+          var inRange = extents[0] <= value && value <= extents[1];
+          // if (!inRange) {
+          // 	console.log(d.sample, key, extents, value)
+          // }
+          return inRange;
         }).every(function (each) {
           return each;
         });
@@ -46303,6 +46320,9 @@ var ScatterSeries = function (_React$Component) {
           ratio = _this$props$shared3.ratio;
 
       //console.log(enableHitTest)
+      //console.log(plotData)
+      //console.log(origDataExtents)
+      //console.log(dataExtents)
 
       _this.preDraw(hitTest);
       var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
@@ -46447,6 +46467,7 @@ var ScatterSeries = function (_React$Component) {
 
       if (plotData.length === 0) return;
 
+      //console.log(origDataExtents)
       var xAccessor = _this.getAccessor(xAttr);
       var yAccessor = _this.getAccessor(yAttr);
       var dataFilter = _this.getDataFilter(dataExtents, origDataExtents);
@@ -46510,8 +46531,9 @@ var ScatterSeries = function (_React$Component) {
       var imageRatio = Math.max(_this.__imgRefWidth / canvasDim.width || 0.1, _this.__imgRefHeight / canvasDim.height || 0.1);
 
       var showGrid = pointSetToUse.length === 1 && imageRatio > 30;
+      //console.log(showGrid, imageRatio)
 
-      var hitMarkerSize = Math.floor(Math.min(_this.__imgRefWidth, _this.__imgRefHeight) / 2) || 4;
+      var hitMarkerSize = Math.min(10, Math.floor(Math.min(_this.__imgRefWidth, _this.__imgRefHeight) / 2)) || 4;
       //console.log(hitMarkerSize);
 
       _this.preDraw(hitTest);
@@ -47110,7 +47132,8 @@ var _initialiseProps = function _initialiseProps() {
 				//console.log('newField: ', name, dataExtentsState[name]);
 			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
 				dataExtentsState[name] = Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) // eslint-disable-line
-				? [0, extentsProps.length] : extentsState;
+				? [0, extentsProps.length] : [Math.min(extentsState[0], extentsProps[0]), Math.max(extentsState[1], extentsProps[1])];
+				//: extentsState;
 			} else {
 				// expand one but ordinary
 				if (Object(__WEBPACK_IMPORTED_MODULE_9__utils__["e" /* isArrayOfString */])(extentsProps) && xAttrProp !== name && yAttrProp !== name) {
@@ -47119,7 +47142,7 @@ var _initialiseProps = function _initialiseProps() {
 				}
 				// else {
 				// 	extentsState[0] = Math.min(extentsState[0], extentsProps[0]);
-				// 	extentsState[1] = Math.max(extentsState[1], exten[1]);
+				// 	extentsState[1] = Math.max(extentsState[1], extentsProps[1]);
 				// }
 			}
 		});
@@ -47170,6 +47193,8 @@ var _initialiseProps = function _initialiseProps() {
 
 			return flattened;
 		});
+		//console.log(data)
+		//console.log(plotData)
 		/* eslint-enable */
 		var samples = samplesProp.slice();
 		var seriesName = seriesNameProps;
@@ -50140,7 +50165,7 @@ DataBox.propTypes = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_d3_scale__ = __webpack_require__(/*! d3-scale */ 14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid__ = __webpack_require__(/*! lodash.uniqueid */ 42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_react_toolbox_lib_button__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css__ = __webpack_require__(/*! ./draggableDataBox.css */ 689);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__draggableDataBox_css__);
@@ -50176,17 +50201,22 @@ var DraggableDataBox = function (_React$Component) {
 
         _initialiseProps.call(_this);
 
-        var initialPos = props.initialPos;
+        var initialPos = props.initialPos,
+            width = props.width,
+            height = props.height;
 
-        var state = _this.resetImage(props);
+
+        var state = _this.resetImage(width || 150, height || 200);
 
         _this.state = _extends({
             id: __WEBPACK_IMPORTED_MODULE_6_lodash_uniqueid___default()('draggable-databox-'),
 
             pos: initialPos,
             dragging: false,
-            rel: null
+            rel: null,
 
+            width: props.width || 150,
+            height: props.height || 200
         }, state, {
             // imgCenterX: width/2,
             // imgCenterY: height/4,
@@ -50214,9 +50244,9 @@ var DraggableDataBox = function (_React$Component) {
                 handleImageRequest = _props$shared.handleImageRequest,
                 showDataBox = _props$shared.showDataBox,
                 imageFilter = _props$shared.imageFilter;
-            var _props = this.props,
-                width = _props.width,
-                height = _props.height;
+            var _state = this.state,
+                width = _state.width,
+                height = _state.height;
 
             if (selected.length === 0 || !showDataBox) return null;
 
@@ -50238,13 +50268,13 @@ var DraggableDataBox = function (_React$Component) {
             var _selected$currSelecte = selected[currSelectedIndex],
                 id = _selected$currSelecte.id,
                 info = _selected$currSelecte.info;
-            var _state = this.state,
-                imgRefWidth = _state.imgRefWidth,
-                imgRefHeight = _state.imgRefHeight,
-                imgCenterX = _state.imgCenterX,
-                imgCenterY = _state.imgCenterY,
-                xScale = _state.xScale,
-                yScale = _state.yScale;
+            var _state2 = this.state,
+                imgRefWidth = _state2.imgRefWidth,
+                imgRefHeight = _state2.imgRefHeight,
+                imgCenterX = _state2.imgCenterX,
+                imgCenterY = _state2.imgCenterY,
+                xScale = _state2.xScale,
+                yScale = _state2.yScale;
 
             var x = xScale(imgCenterX);
             var y = yScale(imgCenterY);
@@ -50376,11 +50406,8 @@ var DraggableDataBox = function (_React$Component) {
 var _initialiseProps = function _initialiseProps() {
     var _this3 = this;
 
-    this.resetImage = function () {
-        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this3.props;
-        var width = props.width,
-            height = props.height;
-
+    this.resetImage = function (width, height) {
+        //const { width, height } = this.state;
         return {
             imgCenterX: width / 2,
             imgCenterY: height / 4,
@@ -50503,13 +50530,13 @@ var _initialiseProps = function _initialiseProps() {
 
     this.handleWheelImgViewer = function (e) {
         e.preventDefault();
-        var _state2 = _this3.state,
-            imgRefWidth = _state2.imgRefWidth,
-            imgRefHeight = _state2.imgRefHeight,
-            imgCenterX = _state2.imgCenterX,
-            imgCenterY = _state2.imgCenterY,
-            xScale = _state2.xScale,
-            yScale = _state2.yScale;
+        var _state3 = _this3.state,
+            imgRefWidth = _state3.imgRefWidth,
+            imgRefHeight = _state3.imgRefHeight,
+            imgCenterX = _state3.imgCenterX,
+            imgCenterY = _state3.imgCenterY,
+            xScale = _state3.xScale,
+            yScale = _state3.yScale;
 
 
         var SCALE_FACTOR = 0.001;
@@ -50599,8 +50626,13 @@ var _initialiseProps = function _initialiseProps() {
 
         var deleteCallback = handleCurrSelectedIndexDelete ? handleCurrSelectedIndexDelete : function () {};
 
+        var _state4 = _this3.state,
+            width = _state4.width,
+            height = _state4.height;
+
+
         var resetCallback = function resetCallback() {
-            var state = _this3.resetImage();
+            var state = _this3.resetImage(width, height);
             _this3.setState(_extends({}, state));
         };
 
@@ -57740,7 +57772,7 @@ module.exports = sortBy;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_toolbox_lib_autocomplete__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_list__ = __webpack_require__(/*! react-toolbox/lib/list */ 177);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_list___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_list__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(/*! ../../utils */ 33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_react_multiview_lib_utils__ = __webpack_require__(/*! react-multiview/lib/utils */ 10);
@@ -58075,7 +58107,7 @@ exports.locals = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_axes__ = __webpack_require__(/*! react-multiview/lib/axes */ 85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__ = __webpack_require__(/*! react-toolbox/lib/autocomplete */ 53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider__ = __webpack_require__(/*! react-toolbox/lib/slider */ 104);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider__);
@@ -58949,7 +58981,7 @@ ParallelCoordinateChart = Object(__WEBPACK_IMPORTED_MODULE_2_react_multiview_lib
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_multiview_lib_axes__ = __webpack_require__(/*! react-multiview/lib/axes */ 85);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__ = __webpack_require__(/*! react-toolbox/lib/autocomplete */ 53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_toolbox_lib_autocomplete__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__ = __webpack_require__(/*! react-toolbox/lib/button */ 16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_react_toolbox_lib_button__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider__ = __webpack_require__(/*! react-toolbox/lib/slider */ 104);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_react_toolbox_lib_slider__);

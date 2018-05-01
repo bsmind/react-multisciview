@@ -14,8 +14,9 @@ class DraggableDataBox extends React.Component {
     constructor(props) {
         super(props);
 
-        const {initialPos} = props;
-        const state = this.resetImage(props);
+        const {initialPos, width, height} = props;
+
+        const state = this.resetImage(width || 150, height || 200);
 
         this.state = {
             id: uniqueId('draggable-databox-'),
@@ -24,6 +25,8 @@ class DraggableDataBox extends React.Component {
             dragging: false,
             rel: null,
 
+            width: props.width || 150,
+            height: props.height || 200,
             ...state,
             // imgCenterX: width/2,
             // imgCenterY: height/4,
@@ -38,8 +41,8 @@ class DraggableDataBox extends React.Component {
         }
     }
 
-    resetImage = (props = this.props) => {
-        const { width, height } = props;
+    resetImage = (width, height) => {
+        //const { width, height } = this.state;
         return {
             imgCenterX: width/2,
             imgCenterY: height/4,
@@ -229,8 +232,10 @@ class DraggableDataBox extends React.Component {
             ? handleCurrSelectedIndexDelete
             : () => {};
 
+        const {width, height} = this.state;
+
         const resetCallback = () => {
-            const state = this.resetImage();
+            const state = this.resetImage(width, height);
             this.setState({...state});
         };
 
@@ -264,7 +269,7 @@ class DraggableDataBox extends React.Component {
             showDataBox,
             imageFilter 
         } = this.props.shared;
-        const { width, height } = this.props;
+        const { width, height } = this.state;
         if (selected.length === 0 || !showDataBox)
             return null;
 

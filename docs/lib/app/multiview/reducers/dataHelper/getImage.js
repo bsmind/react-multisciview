@@ -114,6 +114,10 @@ function raw2gray255(raw) {
 	return cvs.toDataURL();
 }
 
+function raw2grayKevin(raw) {
+
+}
+
 export function getTiff(state, payload) {
 	const { id, data } = payload;
 
@@ -171,6 +175,12 @@ export function getTiff(state, payload) {
 }
 
 export function getColorMap(state, payload) {
+
+
+	//
+	// from file
+	//
+
 	const colors = payload.slice();
 	colors.reverse();
 

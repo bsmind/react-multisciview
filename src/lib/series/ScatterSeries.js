@@ -133,8 +133,13 @@ class ScatterSeries extends React.Component {
     			const x = xAccessor(d);
     			const y = yAccessor(d);
 
-    			if (x == null || y == null) return;
-    			if (!dataFilter(d)) return;
+				if (x == null || y == null) return;
+				
+				const isFiltered = dataFilter(d)
+				if (!isFiltered) {
+					//console.log(d)
+					return;
+				}
 
     			// callback for drawing
     			if (ctx) {
@@ -198,13 +203,18 @@ class ScatterSeries extends React.Component {
     	return d => {
     		return dataKeys.map(key => {
     			const extents = dataExtents[key];
-    			let value = d[key];
+				let value = d[key];
+				if (extents == null) return true;
     			if (value == null) return true;
     			if (typeof value === "string") {
     				const tempExtents = origDataExtents[key];
     				value = tempExtents.indexOf(value) + 0.5;
-    			}
-    			return extents[0] <= value && value <= extents[1];
+				}
+				const inRange = extents[0] <= value && value <= extents[1];
+				// if (!inRange) {
+				// 	console.log(d.sample, key, extents, value)
+				// }
+    			return inRange
     		}).every(each => each);
     	};
     }
@@ -296,7 +306,9 @@ class ScatterSeries extends React.Component {
 		const { shared: { origDataExtents, ratio } } = this.props;
 		
 		//console.log(enableHitTest)
-
+		//console.log(plotData)
+		//console.log(origDataExtents)
+		//console.log(dataExtents)
     	this.preDraw(hitTest);
     	const dataFilter = this.getDataFilter(dataExtents, origDataExtents);
     	const hitTestor = enableHitTest ? this.getHitTestor(ratio, this.__pixelData, this.__canvasWidth): null;
@@ -434,6 +446,7 @@ class ScatterSeries extends React.Component {
 
     	if (plotData.length === 0) return;
 
+		//console.log(origDataExtents)
     	const xAccessor = this.getAccessor(xAttr);
     	const yAccessor = this.getAccessor(yAttr);
     	const dataFilter = this.getDataFilter(dataExtents, origDataExtents);
@@ -494,9 +507,10 @@ class ScatterSeries extends React.Component {
     		this.__imgRefWidth / canvasDim.width || 0.1,
     		this.__imgRefHeight / canvasDim.height || 0.1);
 
-    	const showGrid = pointSetToUse.length === 1 && imageRatio > 30;
+		const showGrid = pointSetToUse.length === 1 && imageRatio > 30;
+		//console.log(showGrid, imageRatio)
 
-		const hitMarkerSize = Math.floor(Math.min(this.__imgRefWidth, this.__imgRefHeight) / 2) || 4;
+		const hitMarkerSize = Math.min(10, Math.floor(Math.min(this.__imgRefWidth, this.__imgRefHeight) / 2)) || 4;
 		//console.log(hitMarkerSize);
 
 		this.preDraw(hitTest);

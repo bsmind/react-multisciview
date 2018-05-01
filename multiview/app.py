@@ -8,6 +8,8 @@ import re
 
 from bson.objectid import ObjectId
 
+import numpy as np
+
 
 app = Flask(__name__)
 app.config.update(
@@ -110,6 +112,31 @@ class MVTiffAPI(Resource):
 
         result['tiff']['data'] = data.tolist()
         return result['tiff']
+
+def rgb2gray(rgb):
+    r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
+    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+    gray = np.round(gray)
+    return gray
+
+# class MVTiffAPI(Resource):
+#     def get(self, id):
+#         query = {'_id': ObjectId(id)}
+#         fields = {'thumbnails': 1, '_id': 0}
+#
+#         result = mvdb.query(query=query, fields=fields, getarrays=True)
+#         #print(result)
+#
+#         data = result['thumbnails']['data']
+#         if isinstance(data, str):
+#             return result['thumbnails']
+#
+#         data = rgb2gray(data)
+#         #print(data.shape)
+#
+#         result['thumbnails']['data'] = data.tolist()
+#         return result['thumbnails']
+
 
 
 api.add_resource(MVDataSampleKinds, '/api/data/kinds/<string:key>', endpoint='kinds')

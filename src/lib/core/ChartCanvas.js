@@ -208,6 +208,7 @@ class ChartCanvas extends React.Component {
 			return flattened;
 		});
 		/* eslint-enable */
+		
 
 		const dataExtents = {};
 		dimName.forEach(name => {
@@ -261,7 +262,11 @@ class ChartCanvas extends React.Component {
 			} else if (name !== initialXAttr.name && name !== initialYAttr.name) {
 				dataExtentsState[name] = isArrayOfString(extentsProps) // eslint-disable-line
 					? [0, extentsProps.length]
-					: extentsState;
+					: [
+						Math.min(extentsState[0], extentsProps[0]),
+						Math.max(extentsState[1], extentsProps[1])
+					]
+					//: extentsState;
 			} else {
 				// expand one but ordinary
 				if (isArrayOfString(extentsProps) && (xAttrProp !== name && yAttrProp !== name)) {
@@ -270,7 +275,7 @@ class ChartCanvas extends React.Component {
 				}
 				// else {
 				// 	extentsState[0] = Math.min(extentsState[0], extentsProps[0]);
-				// 	extentsState[1] = Math.max(extentsState[1], exten[1]);
+				// 	extentsState[1] = Math.max(extentsState[1], extentsProps[1]);
 				// }
 			}
 		});
@@ -328,6 +333,8 @@ class ChartCanvas extends React.Component {
 
 			return flattened;
 		});
+		//console.log(data)
+		//console.log(plotData)
 		/* eslint-enable */
 		const samples = samplesProp.slice();
 		const seriesName = seriesNameProps;
