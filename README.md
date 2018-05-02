@@ -95,7 +95,8 @@ SERVER_HOST = '0.0.0.0'
 
 ## [Play MultiSciView](#play)
 
-![alt text][overview]
+### Select samplessssssssssssssssssssssssssssssssssssss
+
 
 [overview]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/overview.png
 
