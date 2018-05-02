@@ -13,7 +13,7 @@ import scipy.ndimage
 
 import re
 import pprint
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from datetime import datetime
 

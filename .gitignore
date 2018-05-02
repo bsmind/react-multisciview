@@ -17,3 +17,4 @@ npm-debug.log*
 /multiview/db/data
 /multiview/utils
 /multiview/arch
+__pycache__
