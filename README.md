@@ -102,7 +102,7 @@ The MultiSciView largely consists of two parts. One part is to visualize data in
 ### [Data panel](#data)
 In the data panel, users can select (or query) from the connected database and delete samples from the visualization. All data can be selected or deleted by clicking a button on the top of the panel. Or, users can query specific samples containing user provided keyword using the searching box. Then, matched sample names will appear in the drop-down menu. Selected samples are listed below the searching box with randomly selected colors for each sample (colored rectangle box next to sample names) and the color can be used for any data visualizations in the tool. By clicking the box, users can change colors for each sample and clicking trash icons allows users deleting specific samples and corresponding data points from any data visualizations in the tool. 
 
-![fig:datapanel][img_datapanel]
+<img src="img/data-panel.png" width="200">
 *Data panel*
 
 ### [Axis panel](#axis)
