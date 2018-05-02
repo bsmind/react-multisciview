@@ -94,11 +94,57 @@ SERVER_HOST = '0.0.0.0'
 ```
 
 ## [Play MultiSciView](#play)
+The MultiSciView largely consists of two parts. One part is to visualize data in scatter plot and the other part is a control panel. In the control panel, users can select data to be visualized in the scatter plot with selected two attributes. There are variety of color schemes users can select based on sample name or selected attributes and the range of color scheme can be interactively changed. Data points can be replaced with X-ray images with user interaction and the scatter plot can be zoomed-in until the pixel level of the images. Users also can select a color scheme and control its dynamic ranges, interactively. Finally, MultiSciView provides parallel coordinate plot that is connected with the scatter plot so that users can easily navigate (selected) attribute space and investigate their correlations. Furthermore, the parallel coordinate plot can be utilzed to filter some data points out from the scatter plot so that users can easily concentrate on the regions of interests in each attributes. In the following, we will describe how these functionalities is interactively used by users.  
 
-### Select samplessssssssssssssssssssssssssssssssssssss
+![fig:overview](overview)
+*Overview of MultiSciView*
 
+### [Data panel](#data)
+In the data panel, users can select (or query) from the connected database and delete samples from the visualization. All data can be selected or deleted by clicking a button on the top of the panel. Or, users can query specific samples containing user provided keyword using the searching box. Then, matched sample names will appear in the drop-down menu. Selected samples are listed below the searching box with randomly selected colors for each sample (colored rectangle box next to sample names) and the color can be used for any data visualizations in the tool. By clicking the box, users can change colors for each sample and clicking trash icons allows users deleting specific samples and corresponding data points from any data visualizations in the tool. 
+
+![fig:datapanel](datapanel)
+*Data panel*
+
+### [Axis panel](#axis)
+In the axis panel, users can select three attributes and a color schemes for the scatter. The first two attributes are for the x- and y-axis of the scatter plot and the third attribute is for the color encoding of the plot. For the color encoding, we provide a variaty of color schemes and users can easily control the range of a color scheme by dragging handlers (red colored triangles above the color bar). All attributes and a color scheme can be easily selected using the dropdown menu. Note that the color encoding scheme selected in this panel is also applied to the parallel coordinate plot for the consistency.
+
+![fig:axispanel](axispanel)
+*Axis panel*
+
+### [Image panel](#image)
+In the image panel, using a button labeled 'SHOW IMAGE', users can trigger to show X-ray images instead of data points in the scatter plot. There are one additional control parameter to show the images corresponding each data point in the scatter plot. It is the minimum number of data points appeared in the scatter plot that can be controlled by the slider right below the button. The other slider in the panel can be used to set initial image side. As the size of images is dynamically changing according to user interactions (zoom in/out via mouse wheel), it will not give an effect if the current image size is larger than the value set by the slider. Lastly, users can select a color scheme from the dropdown menu and change the dynamic range of images using the handlers in the color bar like the way in the [axis panel](#axis).
+
+![fig:imagepanel](imagepanel)
+*Image panel*
+
+### [Parallel Coordinate Plot (PCP) panel](#pcp)
+In the parallel coordinate plot (PCP) panel, users can explore the selected data using PCP. There are two interactions users can apply to the PCP. First, users can change the order of axies by dragging each axis by mouse. This will help to reveal the correlations among the selected attributes. The other interaction is to filter data points out by selecting range of interests in each attribute axis. As the PCP is tightly connected to the scatter plot, the change of the range will dynamically change the scatter plot. In addition, an attributes used for the color encoding is selected and the change will be also applied to the scatter plot (and [vise versa](#axis)). Lastly, users can add or delete available data attributes in this panel.
+
+![fig:pcppanel](pcppanel) 
+*PCP panel*
 
 [overview]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/overview.png
+[datapanel]:https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/data-panel.png
+[axispanel]:https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/axis-panel.png
+[imagepanel]:https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/image-panel.png
+[pcppanel]:https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/pcp-panel.png
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
