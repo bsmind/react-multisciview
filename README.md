@@ -3,7 +3,7 @@
 MultiSciView is an interactive visualization tool to explore and visualize large-scale data in which each data datum consists of multivariate attributes and an image. This tool is initially developed for X-ray images (high-resolution and -dynamic-range) obtained from synchrotron beamlines that are typically associated with a variety of metadata, but its utilization is not limited to specific data kinds.
 
 <video width="100%" height="50%" poster="img/overview.png" controls>
-    <source src="img/demo_multiview.mp4" type="video/mp4">
+    <source src="img/demo_multiview.mp4" type="video/mp4"></source>
 </video>
 
 
@@ -22,6 +22,8 @@ MultiSciView is an interactive visualization tool to explore and visualize large
     - [Image panel](#image-panel)
     - [Parallel Coordinate Plot (PCP) panel](#pcp-panel)
     - [Data picker](#data-picker)
+4. [Authors](#4-authors)
+5. [License](#5-license)
 
 ## [1. Structures](#1-structures)
 - config: containing config files for webpack
@@ -164,7 +166,10 @@ As an auxiliary feature, MultiSciView provides an easy way to review all attribu
     <figcaption>Data picker</figcaption>
 </figure>
 
+## [4. Authors](#4-authors)
+Sungsoo Ha (hasungsoo@gmail.com, sungsooha@bnl.gov)
 
+## [5. License](#3-license)
 
 
 
