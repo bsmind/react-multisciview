@@ -7,15 +7,8 @@ MultiSciView is an interactive visualization tool to explore and visualize large
     <p>Your browser does not support the video element.</p>
 </video>
 
-<video controls
-    src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4"
-    poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
-    width="620">
-
-Sorry, your browser doesn't support embedded videos, 
-but don't worry, you can <a href="https://archive.org/details/BigBuckBunny_124">download it</a> 
-and watch it with your favorite video player!
-
+<video src="https://archive.org/download/Sita_Sings_the_Blues/Sita_Sings_the_Blues_small.mp4" controls>
+Your browser does not support the video tag
 </video>
 
 ## Contents
