@@ -4,7 +4,10 @@ MultiSciView is an interactive visualization tool to explore and visualize large
 
 <video width="100%" height="50%" poster="img/overview.png" controls>
     <source src="img/demo_multiview.mp4" type="video/mp4"></source>
+    <p>Your browser does not support the video element.</p>
 </video>
+
+![](https://gfycat.com/GregariousInsidiousFlyingfish)
 
 
 ## Contents
