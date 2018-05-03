@@ -1,4 +1,12 @@
-<link href="markedStyle.css" rel="stylesheet"></link>
+<style>
+    figure {
+        display: table;
+    }
+    figcaption {
+        display: table-caption;
+        caption-side: bottom;
+    }
+</style>
 
 # MultiSciView
 
@@ -13,6 +21,12 @@ MultiSciView is an interactive visualization tool to explore and visualize large
     - [STEP 1: Build database with MongoDB](#step1)
     - [STEP 2: Run a web server](#step2)
 - [Play MultiSciView](#play)
+    - [Scatter plot](#scatter)
+    - [Data panel](#data)
+    - [Axis panel](#axis)
+    - [Image panel](#image)
+    - [Parallel Coordinate Plot (PCP) panel](#pcp)
+    - [Data picker](#picker)
 
 ## [Structures](#structures)
 - config: containing config files for webpack
@@ -98,46 +112,62 @@ SERVER_HOST = '0.0.0.0'
 ## [Play MultiSciView](#play)
 The MultiSciView largely consists of two parts. One part is to visualize data in scatter plot and the other part is a control panel. In the control panel, users can select data to be visualized in the scatter plot with selected two attributes. There are variety of color schemes users can select based on sample name or selected attributes and the range of color scheme can be interactively changed. Data points can be replaced with X-ray images with user interaction and the scatter plot can be zoomed-in until the pixel level of the images. Users also can select a color scheme and control its dynamic ranges, interactively. Finally, MultiSciView provides parallel coordinate plot that is connected with the scatter plot so that users can easily navigate (selected) attribute space and investigate their correlations. Furthermore, the parallel coordinate plot can be utilzed to filter some data points out from the scatter plot so that users can easily concentrate on the regions of interests in each attributes. In the following, we will describe how these functionalities is interactively used by users.  
 
-![fig:overview][img_overview]
-*Overview of MultiSciView*
+<figure>
+    <img src="img/overview.png" alt="fig:overview">
+    <figcaption>Overview of MultiSciView</figcaption>
+</figure>
+
+### [Scatter plot](#scatter)
+In the scatter plot, it supports smooth zoom in/out and translation of the data axis. More specifically, in wide data range, users might observe data patterns (or clusters) over lots of points. Using the mouse wheel or dragging one of axies, users can smoothly zoom in to the regions of interests. Users can also trigger to turn the data points into X-ray images and images over different data points can be compared. When there are interesting phenamenan in an image, users can further zoom in upto the pixel level and check its numerical value in each pixel. Within the scatter plot, there are many user interactions allowing users to explore large-scale high-dimensional data more efficiently as described in the following subsections.   
+
+<figure>
+    <img src="img/scatter.png" width="500" alt="fig:scatter">
+    <figcaption>Multi-levle data exploration in scatter plot</figcaption>
+</figure>
+
 
 ### [Data panel](#data)
 In the data panel, users can select (or query) from the connected database and delete samples from the visualization. All data can be selected or deleted by clicking a button on the top of the panel. Or, users can query specific samples containing user provided keyword using the searching box. Then, matched sample names will appear in the drop-down menu. Selected samples are listed below the searching box with randomly selected colors for each sample (colored rectangle box next to sample names) and the color can be used for any data visualizations in the tool. By clicking the box, users can change colors for each sample and clicking trash icons allows users deleting specific samples and corresponding data points from any data visualizations in the tool. 
 
-<p>
-    <img src="img/data-panel.png" width="450">
-</p>
-<p>
-    <em>Data panel</em>
-</p>
+<figure>
+    <img src="img/data-panel.png" width="400" alt="fig:data-panel">
+    <figcaption>Data panel</figcaption>
+</figure>
 
 ### [Axis panel](#axis)
 In the axis panel, users can select three attributes and a color schemes for the scatter. The first two attributes are for the x- and y-axis of the scatter plot and the third attribute is for the color encoding of the plot. For the color encoding, we provide a variaty of color schemes and users can easily control the range of a color scheme by dragging handlers (red colored triangles above the color bar). All attributes and a color scheme can be easily selected using the dropdown menu. Note that the color encoding scheme selected in this panel is also applied to the parallel coordinate plot for the consistency.
 
-![fig:axispanel][img_axispanel]
-*Axis panel*
+<figure>
+    <img src="img/axis-panel.png" width="450" alt="fig:axis-panel">
+    <figcaption>Axis panel</figcaption>
+</figure>
+
 
 ### [Image panel](#image)
 In the image panel, using a button labeled 'SHOW IMAGE', users can trigger to show X-ray images instead of data points in the scatter plot. There are one additional control parameter to show the images corresponding each data point in the scatter plot. It is the minimum number of data points appeared in the scatter plot that can be controlled by the slider right below the button. The other slider in the panel can be used to set initial image side. As the size of images is dynamically changing according to user interactions (zoom in/out via mouse wheel), it will not give an effect if the current image size is larger than the value set by the slider. Lastly, users can select a color scheme from the dropdown menu and change the dynamic range of images using the handlers in the color bar like the way in the [axis panel](#axis).
 
-![fig:imagepanel][img_imagepanel]
-*Image panel*
+<figure>
+    <img src="img/image-panel.png" width="450" alt="fig:image-panel">
+    <figcaption>Image panel</figcaption>
+</figure>
+
+
 
 ### [Parallel Coordinate Plot (PCP) panel](#pcp)
 In the parallel coordinate plot (PCP) panel, users can explore the selected data using PCP. There are two interactions users can apply to the PCP. First, users can change the order of axies by dragging each axis by mouse. This will help to reveal the correlations among the selected attributes. The other interaction is to filter data points out by selecting range of interests in each attribute axis. As the PCP is tightly connected to the scatter plot, the change of the range will dynamically change the scatter plot. In addition, an attributes used for the color encoding is selected and the change will be also applied to the scatter plot (and [vise versa](#axis)). Lastly, users can add or delete available data attributes in this panel.
 
-![fig:pcppanel][img_pcppanel] 
-*PCP panel*
+<figure>
+    <img src="img/pcp-panel.png" width="550" alt="fig:pcp-panel">
+    <figcaption>PCP panel</figcaption>
+</figure>
 
-[img_overview]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/overview.png
-[img_datapanel]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/data-panel.png
-[img_axispanel]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/axis-panel.png
-[img_imagepanel]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/image-panel.png
-[img_pcppanel]: https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/pcp-panel.png
+### [Data picker](#picker)
+As an auxiliary feature, MultiSciView provides an easy way to review all attributes and the corresponding X-ray image of a data point. It can be done by simply cliking one of data points in the scatter plot and that will pop up an window. In the scatter plot, it will set a flag with a id number to indicate this data point is in the data picker (the pop-up window). Consequtive clicking on the data points will add those data points into the internal array and users can see all details of them using the data picker. In the data picker, it largely consists of two parts. In the upper part, users can review a X-ray image of one of picked data point by translating or zooming in/out upto pixel level. In the bottom part, users can review details of all attributes the picked data point has. In case when there are multiple picked data points, users can navigate them either by clicking next or previous buttons (black colored triangle buttons in the upper part) or by clicking flags in the scatter plot. 
 
-
-
-
+<figure>
+    <img src="img/datapicker.png" width="250" alt="fig:datapicker">
+    <figcaption>Data picker</figcaption>
+</figure>
 
 
 
