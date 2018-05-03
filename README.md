@@ -2,8 +2,8 @@
 
 MultiSciView is an interactive visualization tool to explore and visualize large-scale data in which each data datum consists of multivariate attributes and an image. This tool is initially developed for X-ray images (high-resolution and -dynamic-range) obtained from synchrotron beamlines that are typically associated with a variety of metadata, but its utilization is not limited to specific data kinds.
 
-<video width="100%" height="50%" controls>
-    <source src="https://github.com/ComputationalScienceInitiative/react-multiview/blob/master/img/demo_multiview.mp4" type="video/mp4"></source>
+<video width="500" height="300" controls=true allowfullscreen=true>
+    <source src="img/html5-demo.mp4" type="video/mp4"></source>
     <p>Your browser does not support the video element.</p>
 </video>
 
