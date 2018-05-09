@@ -182,6 +182,9 @@ def watcher(dir='.', pattern=None):
     observer.join()
 
 if __name__ == '__main__':
+    #
+    # test
+    #
     watcher('/home/sungsooha/Desktop/Data/multiview/tmp')
 
 
