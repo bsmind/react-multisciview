@@ -177,6 +177,9 @@ class MultiViewMongo(object):
                 elif isinstance(value, float):
                     document[key] = float(value)
 
+            elif isinstance(value, ObjectId):
+                document[key] = value
+
         return document
 
 
