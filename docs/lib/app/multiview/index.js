@@ -22,6 +22,7 @@ import { AppBar } from "react-toolbox/lib/app_bar";
 import Navigation from "react-toolbox/lib/navigation";
 import Link from "react-toolbox/lib/link";
 import { Button } from 'react-toolbox/lib/button';
+import { NavDrawer } from 'react-toolbox';
 
 import { ConfigBox, ScatterBox } from "./layout";
 
@@ -155,6 +156,14 @@ class MultiViewApp extends React.Component {
 		const imgReqOnProgress = imageRequestOnProgress();
     	return (
     		<Layout>
+				<NavDrawer active={True}
+					pinned={False} permanentAt='xxxl'
+					onOverlayClick={null}
+				>
+					<p>
+						Navigation, account switcher, etc, go here
+					</p>
+				</NavDrawer>
     			<Panel>
 					<AppBar title="React-MultiView" 
 						leftIcon="menu" onLeftIconClick={null} 

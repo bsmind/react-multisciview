@@ -99,14 +99,32 @@ class Handler(FileSystemEventHandler):
         return the_job
 
     def _add_doc(self, doc):
-        query = {'item': doc['item']}
-        out = self.db.load(query, {}, getarrays=False)
-        if not out is None:
-            # to overwirte in the existing document
-            doc['_id'] = out['_id']
-        self.db.save(doc)
+        """
+        Add a document. If a document having same 'item' value,
+        it will update the exist one.
+        """
+        r = self.db.save_doc_one(doc)
+        action = 'ADD' if r is None else 'UPDATE'
+        print('[doc] {:s}: {:s}'.format(action, doc['item']))
+
+    def _add_img(self, doc, type='tiff'):
+        """
+        Add a tiff document. If a document having same 'item' value,
+        it will update the exist one.
+        """
+        r = self.db.save_img_one(doc, type)
+        action = 'ADD' if r is None else 'UPDATE'
+        print('[{:s}] {:s}: {:s}'.format(type, action, doc['item']))
 
     def _del_doc(self, src_path):
+        """
+        Delete a document if it exists
+
+        WARN: this will also delete all image data
+
+        :param src_path:
+        :return:
+        """
         item_name, _ = splitext(src_path)
         item_name = item_name.split('/')[-1]
         query = {'item': item_name}
@@ -125,13 +143,21 @@ class Handler(FileSystemEventHandler):
 
             src_path = job[0]
             event_type = job[1]
-            #file, ext = os.path.splitext(src_path)
+            _, ext = os.path.splitext(src_path)
 
             if event_type == 'created' or event_type == 'modified':
-                doc = self.xml.xml_to_doc(src_path)
-                self._add_doc(doc)
+                if ext == '.xml':
+                    doc = self.xml.xml_to_doc(src_path)
+                    self._add_doc(doc)
+                elif ext == '.tiff':
+                    doc = self.xml.tiff_to_doc(src_path)
+                    self._add_img(doc, 'tiff')
+                elif ext == '.jpg':
+                    doc = self.xml.jpg_to_doc(src_path)
+                    self._add_img(doc, 'jpg')
             elif event_type == 'deleted':
-                self._del_doc(src_path)
+                print("TODO: delete doc")
+                #self._del_doc(src_path)
             else:
                 print("Unknown event type: ", event_type)
 

@@ -1,5 +1,7 @@
 import os
+import numpy as np
 import xml.etree.ElementTree as ET
+from PIL import Image
 
 class xmlParser(object):
     def __init__(self, config):
@@ -57,7 +59,7 @@ class xmlParser(object):
 
             # special case for thumbnails protocol
             if pr_name == 'thumbnails':
-                self._add_protocol(pr_name, pr_time, item_name, doc)
+                #self._add_protocol(pr_name, pr_time, item_name, doc)
                 continue
 
             pr_dict = dict()
@@ -72,5 +74,45 @@ class xmlParser(object):
                 pr_dict[ex_name] = ex_value
             self._add_protocol(pr_name, pr_time, pr_dict, doc)
 
-        doc['tiff'] = item_name
+        #doc['tiff'] = item_name
+        return doc
+
+    def tiff_to_doc(self, filename):
+        im = Image.open(filename)
+        imarr = np.array(im)
+        dim = imarr.shape
+
+        tiff_doc = dict()
+        tiff_doc['data'] = imarr
+        tiff_doc['width'] = int(dim[1])
+        tiff_doc['height'] = int(dim[0])
+        tiff_doc['channel'] = int(1)
+        tiff_doc['min'] = float(imarr.min())
+        tiff_doc['max'] = float(imarr.max())
+
+        item = os.path.splitext(filename)[0]
+        item = item.split('/')[-1]
+        doc = dict()
+        doc['item'] = item
+        doc['tiff'] = tiff_doc
+
+        return doc
+
+    def jpg_to_doc(self, filename):
+        im = Image.open(filename)
+        imarr = np.array(im)
+        dim = imarr.shape
+
+        jpg_doc = dict()
+        jpg_doc['data'] = imarr
+        jpg_doc['width'] = int(dim[1])
+        jpg_doc['height'] = int(dim[0])
+        jpg_doc['channel'] = int(dim[2])
+
+        item = os.path.splitext(filename)[0]
+        item = item.split('/')[-1]
+        doc = dict()
+        doc['item'] = item
+        doc['jpg'] = jpg_doc
+
         return doc
