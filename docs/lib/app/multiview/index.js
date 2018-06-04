@@ -10,7 +10,8 @@ import {
 	AddData,
 	handleColorChange,
 	updateSelectedSamples,
-	imageRequestOnProgress
+	imageRequestOnProgress,
+	updateData
 } from "./actions/dataActions";
 
 import {
@@ -22,7 +23,6 @@ import { AppBar } from "react-toolbox/lib/app_bar";
 import Navigation from "react-toolbox/lib/navigation";
 import Link from "react-toolbox/lib/link";
 import { Button } from 'react-toolbox/lib/button';
-import { NavDrawer } from 'react-toolbox';
 
 import { ConfigBox, ScatterBox } from "./layout";
 
@@ -49,13 +49,16 @@ class MultiViewApp extends React.Component {
 
 	componentDidMount() {
 		this.props.getSampleKinds();
-		this.props.getAttributes();
+		//this.props.getAttributes();
 		this.props.getColorMap();
+
+		this.interval = setInterval(this.props.updateData, 10000)
 
 		window.addEventListener("resize", () => this.handleResize());
 	}
 
 	componentWillUnmount() {
+		clearInterval(this.interval)
 		window.removeEventListener("resize", () => this.handleResize());
 	}
 
@@ -156,14 +159,6 @@ class MultiViewApp extends React.Component {
 		const imgReqOnProgress = imageRequestOnProgress();
     	return (
     		<Layout>
-				<NavDrawer active={True}
-					pinned={False} permanentAt='xxxl'
-					onOverlayClick={null}
-				>
-					<p>
-						Navigation, account switcher, etc, go here
-					</p>
-				</NavDrawer>
     			<Panel>
 					<AppBar title="React-MultiView" 
 						leftIcon="menu" onLeftIconClick={null} 
@@ -246,7 +241,8 @@ function mapDispatchToProps(dispatch) {
 		setAttr,
 		handleColorChange,
 		updateSelectedSamples,
-		getColorMap
+		getColorMap,
+		updateData
 	}, dispatch);
 }
 

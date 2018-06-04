@@ -2,6 +2,7 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 import gridfs
 import pymongo
+from pymongo import ReturnDocument
 import pickle
 import numpy as np
 import datetime
@@ -98,8 +99,10 @@ class MultiViewMongo(object):
         r = self.collection.find_one_and_update(
             {'item': item},
             {'$set': doc},
-            upsert=True
+            upsert=True,
+            return_document=ReturnDocument.BEFORE
         )
+        #print('[save_doc_one]: ', r, item)
         return r
 
     def save_img_one(self, doc, type='tiff'):
@@ -182,7 +185,13 @@ class MultiViewMongo(object):
 
     def delete(self, objectId):
         documentToDelete = self.collection.find_one({"_id": objectId})
-        npObjectIdsToDelete = documentToDelete['_npObjectIDs']
+
+        npObjectIdsToDelete = []
+        if 'jpg' in documentToDelete:
+            npObjectIdsToDelete.append(documentToDelete['jpg']['data'])
+        if 'tiff' in documentToDelete:
+            npObjectIdsToDelete.append(documentToDelete['tiff']['data'])
+
         for npObjectID in npObjectIdsToDelete:
             self.fs.delete(npObjectID)
         self.collection.remove(objectId)

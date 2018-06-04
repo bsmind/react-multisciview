@@ -36,7 +36,9 @@
     "appclean": "rimraf -rf ./multiview/static/js/* && rimraf -rf ./multiview/templates/*",
     "appmodernizr": "modernizr -c config/modernizr-config.json -d ./multiview/static/js/modernizr.js",
     "appwatch": "cross-env BABEL_ENV=es webpack --config config/app.config.js --env watch && ncp docs/data/ multiview/static/resources/data && ncp docs/data/cm/ multiview/static/resources/data/cm",
-    "apptest": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && ncp docs/js/ multiview/static/js && npm run appwatch"
+    "apptest": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && ncp docs/js/ multiview/static/js && npm run appwatch",
+    "appwatch2": "cross-env BABEL_ENV=es webpack --config config/app.config.js --env watch",
+    "apptest2": "echo 'APP - BUILD' && npm run appclean && npm run appmodernizr && npm run appwatch2"
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -57,6 +59,7 @@
     "lodash.flattendeep": "^4.4.0",
     "lodash.foreach": "^4.5.0",
     "lodash.get": "^4.4.2",
+    "lodash.includes": "^4.3.0",
     "lodash.isarray": "^4.0.0",
     "lodash.keys": "^4.2.0",
     "lodash.set": "^4.3.2",

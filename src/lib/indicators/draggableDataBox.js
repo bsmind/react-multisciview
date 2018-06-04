@@ -206,9 +206,10 @@ class DraggableDataBox extends React.Component {
     }
 
     renderInfo = (info) => {
+        const {keyParser} = this.props;
         const tableContents = info.map(d => {
             return <tr>
-                <td width={'60%'}> {d.key} </td>
+                <td width={'60%'}> {keyParser(d.key)} </td>
                 <td width={'40%'} align={'center'}> {d.value} </td>
             </tr>;
         });
@@ -310,6 +311,7 @@ class DraggableDataBox extends React.Component {
                 word-wrap: break-word;
             }`}
         </style>;
+        //const infoHeight = height;
 
         const leftTrianglePath = `M 0 0 L 6 -6 L 6 6 z`;
         const rightTrianglePath = `M 0 0 L -6 -6 L -6 6 z`;
@@ -320,9 +322,7 @@ class DraggableDataBox extends React.Component {
             style={divStyle}
         >
             {infoStyle}
-            <div style={{
-                height: 100
-            }}>
+            <div style={{height: height/2}}>
                 <svg width={width} height={height/2}>
                     <defs>
                         <clipPath id={`${this.state.id}-img-area-clip`}>

@@ -2,6 +2,7 @@ import {
 	getSampleAttr,
 	getSampleKinds,
 	addDataSamples,
+	updateDataSamples,
 	handleSampleColorChange,
 	getTiff,
 	getColorMap,
@@ -17,10 +18,8 @@ const INITIAL_STATE = {
 	sampleColors: {},
 	sampleColorOpacity: 0.5,
 
-	attrKinds: {},
+	attrKinds: {'sample': 'sample'},
 	attrColorSchemes: {},
-	attrMinMax: {}, // global min, max
-	attrTypes: {},
 	attrFormat: attrKey => attrKey,
 
 	dataBySamples: {},
@@ -47,6 +46,7 @@ export function dataReducers(state = INITIAL_STATE, action) {
 	case "GET_SAMPLE_ATTR": return getSampleAttr(state, payload);
 
 	case "ADD_DATA_SAMPLES": return addDataSamples(state, payload);
+	case "UPDATE_DATA_SAMPLES": return updateDataSamples(state, payload);
 
 	case "ADD_SELECTED_SAMPLES": return addSelectedSamples(state, payload);
 	case "DEL_SELECTED_SAMPLES": return delSelectedSamples(state, payload);

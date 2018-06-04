@@ -13,7 +13,7 @@ export const getMinImageSize = state => state.vis.minImageSize;
 
 const getDataBySamples = state => state.data.dataBySamples;
 export const getSampleKinds = state => state.data.sampleKinds;
-const getAttrTypes = state => state.data.attrTypes;
+//const getAttrTypes = state => state.data.attrTypes;
 
 export const getSelectedSampleKeys = state => state.data.samples;
 export const getSelectedSampleColors = state => state.data.sampleColors;
@@ -46,14 +46,15 @@ export const getSelectedDataArray = createSelector(
 	[
 		getSelectedSampleNames,
 		getDataBySamples,
-		getAttrTypes,
+		//getAttrTypes,
 	],
 	(
 		selectedSampleNames,
 		data,
-		types,
+		//types,
 	) => {
 		let selectedDataArray = [];
+		const g_sampleNameList = []
 		const g_minmax = {};
 
 		forEach(data, (dataObject, sampleName) => {
@@ -62,26 +63,20 @@ export const getSelectedDataArray = createSelector(
 
 				selectedDataArray = selectedDataArray.concat(dataSample);
 
-				// console.log(sampleName, minmax);
 				forEach(minmax, (value, attr) => {
 					if (g_minmax[attr] == null) {
-						g_minmax[attr] = value; // eslint-disable-line
+						g_minmax[attr] = value;
 					} else {
-						const t = types[attr];
 						let g_value = g_minmax[attr];
-						if (t === "num") {
-							g_value[0] = Math.min(g_value[0], value[0]);
-							g_value[1] = Math.max(g_value[1], value[1]);
-						} else if (t === "str") {
-							g_value = uniqBy(g_value.concat(value), d => d);
-							g_minmax[attr] = g_value; // eslint-disable-line
-						} else {
-							// ignore unknown type
-						}
+						g_value[0] = Math.min(g_value[0], value[0]);
+						g_value[1] = Math.max(g_value[1], value[1]);
 					}
 				});
+
+				g_sampleNameList.push(sampleName)
 			}
 		});
+		g_minmax['sample'] = g_sampleNameList
 
 		return {
 			id: uniqueId("dataSeries_"),

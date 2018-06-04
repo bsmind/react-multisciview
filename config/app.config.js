@@ -13,12 +13,14 @@ function buildConfig(mode) {
 
     const context = rootPath;
     const docsEntry = {
-        "react-multiview-home": "./docs/indexFlask.js",
-        "react-multiview-documentation": "./docs/documentation.js",
+        "react-multiview-home": "./app/index.js"
+        // "react-multiview-home": "./docs/indexFlask.js",
+        // "react-multiview-documentation": "./docs/documentation.js",
     };
     const devServer = {
         contentBase: [
-            path.join(rootPath, "docs"),
+            //path.join(rootPath, "docs"),
+            path.join(rootPath, "app"),
             path.join(rootPath, "build"),
             path.join(rootPath, "node_modules")
         ],
@@ -97,19 +99,26 @@ function buildConfig(mode) {
                 },
             })),
             new HtmlWebpackPlugin({
-                template: "./docs/pageTemplateFlask.js",
+                template: "./app/pageTemplate.js",
                 inject: false,
                 page: "index",
                 mode,
                 filename: "./templates/index.html"
             }),
-            new HtmlWebpackPlugin({
-                template: "./docs/pageTemplateFlask.js",
-                inject: false,
-                page: "documentation",
-                mode,
-                filename: "./templates/documentation.html"
-            }),            
+            // new HtmlWebpackPlugin({
+            //     template: "./docs/pageTemplateFlask.js",
+            //     inject: false,
+            //     page: "index",
+            //     mode,
+            //     filename: "./templates/index.html"
+            // }),
+            // new HtmlWebpackPlugin({
+            //     template: "./docs/pageTemplateFlask.js",
+            //     inject: false,
+            //     page: "documentation",
+            //     mode,
+            //     filename: "./templates/documentation.html"
+            // }),            
             new webpack.LoaderOptionsPlugin({
                 options: { remarkable: getRemarkable(), context }
             }),
@@ -124,7 +133,7 @@ function buildConfig(mode) {
             alias: {
                 "react-multiview": path.join(rootPath, "src")
             },
-            modules: ["docs", "node_modules"]
+            modules: ["app", "node_modules"]
         }
     };
 }

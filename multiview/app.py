@@ -20,7 +20,7 @@ api = Api(app)
 
 mvdb = MultiViewDB(config=MONGODB_CONFIG)
 
-SERVER_HOST = '0.0.0.0' #'localhost'
+SERVER_HOST = 'localhost'
 SERVER_PORT = 8001
 
 

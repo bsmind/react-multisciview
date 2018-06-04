@@ -4,8 +4,8 @@ const INITIAL_STATE = {
 	samples: [], // unused
 	sampleColors: {}, // unused
 
-	attrx: "metadata_extract.data.sequence_ID",
-	attry: "metadata_extract.data.annealing_temperature",
+	attrx: "metadata_extract/data/sequence_ID",
+	attry: "metadata_extract/data/annealing_temperature",
 	attrz: "sample",
 
 	showImage: false,
@@ -15,10 +15,10 @@ const INITIAL_STATE = {
 	// for pcp
 	selectedDimension: [
 		"sample",
-		"metadata_extract.data.annealing_temperature",
-		"metadata_extract.data.annealing_time",
-		"linecut_qr.data.fit_peaks_d0",
-		"linecut_qr.data.fit_peaks_sigma1"
+		"metadata_extract/data/annealing_temperature",
+		"metadata_extract/data/annealing_time",
+		"linecut_qr/data/fit_peaks_d0",
+		"linecut_qr/data/fit_peaks_sigma1"
 	],
 
 	// for z-axis colorSchemes

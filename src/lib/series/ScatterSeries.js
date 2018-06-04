@@ -124,8 +124,8 @@ class ScatterSeries extends React.Component {
 
     	const nest = d3Nest()
     		.key(d => d.markerID)
-    		.entries(plotData);
-
+			.entries(plotData);
+			
     	const pointSet = [], minDist = { x: null, y: null };
     	nest.forEach(group => {
     		const { key: markerKey, values } = group;
@@ -137,7 +137,6 @@ class ScatterSeries extends React.Component {
 				
 				const isFiltered = dataFilter(d)
 				if (!isFiltered) {
-					//console.log(d)
 					return;
 				}
 
@@ -199,7 +198,7 @@ class ScatterSeries extends React.Component {
     }
 
     getDataFilter = (dataExtents, origDataExtents) => {
-    	const dataKeys = Object.keys(dataExtents);
+		const dataKeys = Object.keys(dataExtents);
     	return d => {
     		return dataKeys.map(key => {
     			const extents = dataExtents[key];

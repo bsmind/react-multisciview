@@ -1,4 +1,20 @@
-<!DOCTYPE html>
+function getIndexContent() {
+	return `<!-- Main jumbotron for a primary marketing message or call to action -->
+			<div id="app" class="react-multiview"></div>`;
+}
+
+function getDocumentationContent() {
+	return `<span id="debug_here">.</span>
+		<span id="iconPreload" class="glyphicon glyphicon-arrow-down"></span>
+		<div id="chart-goes-here"></div>`;
+}
+
+
+module.exports = function(params) {
+	const { page } = params.htmlWebpackPlugin.options;
+	const { chunks } = params.htmlWebpackPlugin.files;
+
+	return `<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -17,20 +33,18 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/16.1.1/umd/react.production.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/16.1.1/umd/react-dom.production.min.js"></script>
-        <!--
-        <script type="text/javascript" src="{{ url_for('static', filename='js/react.production.min.js') }}"></script>
-        <script type="text/javascript" src="{{ url_for('static', filename='js/react-dom.production.min.js') }}"></script>
-        -->
         <script type="text/javascript" src="{{ url_for('static', filename='js/modernizr.js') }}"></script>
         <style>html, body { margin: 0; padding: 0; }</style>
     </head>
     <body>
-        <span id="debug_here">.</span>
-		<span id="iconPreload" class="glyphicon glyphicon-arrow-down"></span>
-		<div id="chart-goes-here"></div>
+        ${page === "index" ? getIndexContent() : getDocumentationContent()}
 
         <!-- Placed at the end of the document so the pages load faster -->
-        <script type="text/javascript" src="{{ url_for('static', filename='../static/js/react-multiview-documentation.js') }}"></script>
+        ${page === "index"
+		? `<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-home"].entry}') }}"></script>`
+		: `<script type="text/javascript" src="{{ url_for('static', filename='../${chunks["react-multiview-documentation"].entry}') }}"></script>`
+}
 
     </body>
-</html>
+</html>`;
+};

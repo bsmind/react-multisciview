@@ -1,0 +1,42 @@
+@import 'colors.css';
+@import 'variables.css';
+@import 'autocomplete/theme.css';
+@import 'list/theme.css';
+@import 'list/config.css';
+
+:root {
+    --list-vertical-padding: calc(0.5 * var(--unit));
+    --list-item-max-height: calc(3.0 * var(--unit));
+    --btndiv-height: 25.83px;
+    --seldiv-height: 30.99px;
+    --rest-height: calc(100% - var(--seldiv-height) - var(--btndiv-height));
+    --listdiv-height: calc(0.65 * var(--rest-height));
+    --infodiv-height: calc(0.35 * var(--rest-height));
+}
+
+
+.autocomplete {
+    padding: 0;
+    padding-top: 0px;
+}
+
+.item {
+    max-width: 100%;
+    min-height: var(--list-item-max-height);
+    max-height: var(--list-item-max-height);
+}
+
+.knob {
+    z-index: 50;
+}
+
+.innerknob {
+    z-index: 50;
+}
+
+.tabDiv {
+    border-radius: 10px;
+    border: 1px dotted #707070;
+    padding: 0px 5px 0px 5px;
+    margin-bottom: 5px;
+}

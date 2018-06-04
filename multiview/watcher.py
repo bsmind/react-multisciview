@@ -1,12 +1,9 @@
 import os
-import re
 import threading
 import time
-import subprocess
 
-from os.path import splitext, expanduser, normpath
-
-from watchdog.events import FileSystemEventHandler, PatternMatchingEventHandler
+from os.path import splitext
+from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from db.saxs_v2.db_config import MONGODB_CONFIG
@@ -19,10 +16,8 @@ except ImportError:
     from queue import Queue
 
 
-
-
 class Handler(FileSystemEventHandler):
-    def __init__(self, pattern):
+    def __init__(self, db, parser, pattern=None):
         self.pattern = pattern or (".xml", ".tiff", ".jpg")
 
         self.eventScheduler = None
@@ -32,20 +27,31 @@ class Handler(FileSystemEventHandler):
         self.q = Queue()
 
         # job list, managed by eventScheduler
-        self.thresh = 1.
+        self.thresh = 2.
         self.joblist = []
+        self.jobdonelist = []
 
         # job queue, populated by eventScheduler and consumed by dbManager
         self.jobq = Queue()
+        self.jobq_hold_flag = False
 
         # database (MongoDB)
-        self.xml = xmlParser(config=MONGODB_CONFIG['XML'])
-        self.db = MultiViewMongo(
-            db_name='test',
-            collection_name='tmp',
-            hostname='localhost',
-            port=27017
-        )
+        self.xml = parser
+        self.db = db
+
+    def set_jobq_hold_flag(self, value):
+        self.jobq_hold_flag = value
+
+    def get_jobq_hold_flag(self):
+        return self.jobq_hold_flag
+
+    def get_jobdonelist(self):
+        cp = list(self.jobdonelist)
+        self.jobdonelist = []
+        return cp
+
+    def get_jobdonelist_size(self):
+        return len(self.jobdonelist)
 
     def start(self):
         self.eventScheduler = threading.Thread(target=self._process_q)
@@ -106,6 +112,7 @@ class Handler(FileSystemEventHandler):
         r = self.db.save_doc_one(doc)
         action = 'ADD' if r is None else 'UPDATE'
         print('[doc] {:s}: {:s}'.format(action, doc['item']))
+        return action, 'xml', doc['item']
 
     def _add_img(self, doc, type='tiff'):
         """
@@ -115,6 +122,7 @@ class Handler(FileSystemEventHandler):
         r = self.db.save_img_one(doc, type)
         action = 'ADD' if r is None else 'UPDATE'
         print('[{:s}] {:s}: {:s}'.format(type, action, doc['item']))
+        return action, type, doc['item']
 
     def _del_doc(self, src_path):
         """
@@ -133,10 +141,14 @@ class Handler(FileSystemEventHandler):
             # delete the document
             # WARN: this will also delete image data!!!!
             self.db.delete(out['_id'])
+            print('DEL: {:s}'.format(item_name))
+            return 'DELETE', 'xml', item_name
+        return None
 
     def _process_job(self):
         while True:
-            if self.jobq.empty():
+            if self.jobq.empty() and self.jobq_hold_flag:
+                time.sleep(1)
                 continue
 
             job, ts = self.jobq.get()
@@ -145,21 +157,27 @@ class Handler(FileSystemEventHandler):
             event_type = job[1]
             _, ext = os.path.splitext(src_path)
 
+            res = None
             if event_type == 'created' or event_type == 'modified':
                 if ext == '.xml':
                     doc = self.xml.xml_to_doc(src_path)
-                    self._add_doc(doc)
+                    res = self._add_doc(doc)
                 elif ext == '.tiff':
                     doc = self.xml.tiff_to_doc(src_path)
-                    self._add_img(doc, 'tiff')
+                    res = self._add_img(doc, 'tiff')
                 elif ext == '.jpg':
                     doc = self.xml.jpg_to_doc(src_path)
-                    self._add_img(doc, 'jpg')
-            elif event_type == 'deleted':
-                print("TODO: delete doc")
-                #self._del_doc(src_path)
+                    res = self._add_img(doc, 'jpg')
+            elif event_type == 'deleted' and ext == '.xml':
+                pass
+                #res = self._del_doc(src_path)
             else:
                 print("Unknown event type: ", event_type)
+
+            if res is not None:
+                self.jobdonelist.append(res)
+
+            time.sleep(1)
 
     def _process_q(self):
         """
@@ -175,6 +193,7 @@ class Handler(FileSystemEventHandler):
                 job = self.check_joblist(curr_ts)
                 if job is not None:
                     self.jobq.put((job, curr_ts))
+                time.sleep(1)
                 continue
 
             event, ts = self.q.get()
@@ -189,31 +208,7 @@ class Handler(FileSystemEventHandler):
 
             #last_ts = time.time()
 
-
-def watcher(dir='.', pattern=None):
-    observer = Observer()
-    handler = Handler(pattern)
-
-    handler.start()
-
-    observer.schedule(handler, dir, recursive=True)
-    observer.start()
-
-    try:
-        while True:
             time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()
-
-if __name__ == '__main__':
-    #
-    # test
-    #
-    watcher('/home/sungsooha/Desktop/Data/multiview/tmp')
-
-
 
 
 

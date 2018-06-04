@@ -11,16 +11,14 @@ const SAMPLE_TIMEOUT = 300;
 const TIFF_MAX_REQUEST = 5;
 const TIFF_TIMEOUT = 20;
 
-
-
 const tiffRequest = [];
 // const tiffQueue = [];
 const pqTiff = new PriorityQueue();
+
 export const imageRequestOnProgress = () => {
 	//console.log(tiffRequest.length, pqTiff.length())
 	return tiffRequest.length + pqTiff.length();
 }
-
 
 export function getSampleKinds() {
 	return dispatch => {
@@ -40,6 +38,7 @@ export function getSampleKinds() {
 	};
 }
 
+// deprecated
 export function getAttributes() {
 	return dispatch => {
 		axios.get("/api/data/attr")
@@ -106,6 +105,27 @@ export function AddData(action, sampleNames) {
 			}
 		}
 	};
+}
+
+export function updateData(){
+	return dispatch => {
+		axios.get("api/data/sample/update")
+			.then(response => {
+				const data = response.data
+				if (data.length > 0) {
+					dispatch({
+						type: 'UPDATE_DATA_SAMPLES',
+						payload: data
+					});
+				}
+			})
+			.catch(e => {
+				dispatch({
+					type: 'UPDATE_DATA_SAMPLES_REJECTED',
+					payload: e
+				});
+			});
+	}
 }
 
 export function updateSelectedSamples(selected, colors) {
