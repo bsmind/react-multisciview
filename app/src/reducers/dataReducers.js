@@ -64,6 +64,24 @@ const INIT_STATE = {
 		"linecut_qr/data/fit_peaks_d0",
 		"linecut_qr/data/fit_peaks_sigma1",
     ],
+
+    // file watcher
+    wID: null,
+    isConnected: false,
+    wdir: '/root',
+    wNodeKey: 'N0',
+    wNodeList: [['N0', {name: '/root', path: '/root', children: []}]],
+    wNodeMap: new Map([['N0', {name: '/root', path: '/root', children: []}]]),
+
+    // file syncer
+    sID: null,
+    total: 0,
+    processed: 0,
+
+    // temporal message
+    message: '',
+    messageReady: false,
+    messageType: 'warning', // accept: green, warning: yellow, cancel: red
 }
 
 const _update_sample_colors = (state, sampleList) => {
@@ -115,39 +133,6 @@ const del_data = (state, payload) => {
         delete dataBySamples[key];
     });
     return {...state, dataBySamples: dataBySamples};
-}
-
-const monitor_new_data = (state, payload) => {
-    const {sampleList, sampleData, stat} = payload;
-
-    if (sampleList.length == 0) 
-        return state;
-
-    const dataBySamples = {...state.dataBySamples};
-
-    // [WARN]: violate mutate??????????
-    sampleList.forEach((name, index) => {
-        if (dataBySamples[name] == null) {
-            console.log('[!] Sample selected, but no data???');
-        } else {
-            sampleData[name].forEach(doc => {
-                const foundIndex = dataBySamples[name].findIndex(o => o._id == doc._id || o.item == doc.item); 
-                if (foundIndex >= 0) {
-                    dataBySamples[name][foundIndex] = doc;
-                } else {
-                    dataBySamples[name].push(doc)
-                }                   
-            });
-        }
-    });
-
-    const sampleColors = _update_sample_colors(state, sampleList);
-
-    return {...state,
-        dataBySamples: dataBySamples,
-        sampleColors: sampleColors,
-        statBySamples: stat
-    };
 }
 
 const get_color_map = (state, payload) => {
@@ -226,6 +211,79 @@ const set_value = (state, payload) => {
     return state;
 }
 
+const get_root_dir_list = (state, payload) => {
+    const {dirList, nodeid} = payload;
+
+    return {
+        ...state,
+        wNodeKey: nodeid,
+        wNodeList: dirList,
+        wNodeMap: new Map(dirList)
+    };
+}
+
+const set_watcher_nodekey = (state, payload) => {
+    const nodekey = payload;
+    const {wNodeMap} = state;
+    const node = wNodeMap.get(nodekey);
+    return {
+        ...state,
+        wdir: node.path,
+        wNodeKey: nodekey
+    }
+}
+
+const set_watcher_connection = (state, payload) => {
+    const { status } = payload;
+    return {...state, isConnected: status};
+}
+
+const get_watcher_monitor = (state, payload) => {
+    const {sampleList, sampleData, stat} = payload;
+    //console.log(sampleList, stat)
+
+    if (sampleList.length == 0) 
+        return state;
+
+    const dataBySamples = {...state.dataBySamples};
+
+    // [WARN]: violate mutate??????????
+    let message = 'New sample added: ';
+    let messageReady = false;
+    //console.log(sampleList, stat)
+    sampleList.forEach((name, index) => {
+        if (dataBySamples[name] == null) {
+            messageReady = true;
+            message = message + `[${name}] `;
+            //console.log('[!] Sample selected, but no data???');
+        } else {
+            sampleData[name].forEach(doc => {
+                const foundIndex = dataBySamples[name].findIndex(o => o._id == doc._id || o.item == doc.item); 
+                if (foundIndex >= 0) {
+                    dataBySamples[name][foundIndex] = doc;
+                } else {
+                    dataBySamples[name].push(doc)
+                }                   
+            });
+        }
+    });
+
+    const sampleColors = _update_sample_colors(state, sampleList);
+
+    return {...state,
+        dataBySamples: dataBySamples,
+        sampleColors: sampleColors,
+        statBySamples: stat,
+        message: message,
+        messageReady: messageReady,
+        messageType: 'warning', // accept: green, warning: yellow, cancel: red
+    };
+}
+
+const set_sync_info = (state, payload) => {
+    const {id, processed, total} = payload;
+    return {...state, sID: id, total: total, processed: processed}
+}
 
 export function dataReducers(state = INIT_STATE, action) {
     const {type, payload} = action;
@@ -238,7 +296,6 @@ export function dataReducers(state = INIT_STATE, action) {
         case "GET_CURRENT_DATA_STAT": return get_current_data_stat(state, payload);
         case "GET_DATA": return get_data(state, payload);
         case "DEL_DATA": return del_data(state, payload);
-        case "MONITOR_NEW_DATA": return monitor_new_data(state, payload);
 
         case "GET_TIFF": return get_tiff(state, payload);
         case "GET_COLORMAP": return get_color_map(state, payload);
@@ -252,6 +309,15 @@ export function dataReducers(state = INIT_STATE, action) {
         case "CHANGE_IMAGE_COLOR_SCHEME": return {...state, imgColorScheme: payload};
         case "CHANGE_IMAGE_DOMAIN": return {...state, imgDomain: payload};
         case "CHANGE_PCP_SELECTED_ATTRS": return {...state, pcpSelectedAttrs: payload.slice()};
+
+        case "GET_ROOT_DIR_LIST": return get_root_dir_list(state, payload);
+        case "SET_WATCHER_NODEKEY": return set_watcher_nodekey(state, payload);
+        case "GET_WATCHER_CONNECT": return set_watcher_connection(state, payload);
+        case "GET_WATCHER_DISCONNECT": return set_watcher_connection(state, payload);
+        case "GET_WATCHER_MONITOR": return get_watcher_monitor(state, payload);
+
+        case "SET_SYNC_INFO": return set_sync_info(state, payload);
+        case "CLOSE_MESSAGE": return {...state, messageReady: false};
 
         case "REJECTED":
             console.log(payload);

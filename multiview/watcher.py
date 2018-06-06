@@ -20,6 +20,7 @@ class Handler(FileSystemEventHandler):
     def __init__(self, db, parser, pattern=None):
         self.pattern = pattern or (".xml", ".tiff", ".jpg")
 
+        self.stop_flag = False
         self.eventScheduler = None
         self.dbManager = None
 
@@ -34,6 +35,7 @@ class Handler(FileSystemEventHandler):
         # job queue, populated by eventScheduler and consumed by dbManager
         self.jobq = Queue()
         self.jobq_hold_flag = False
+        self.jobq_ready_flag = False
 
         # database (MongoDB)
         self.xml = parser
@@ -42,8 +44,14 @@ class Handler(FileSystemEventHandler):
     def set_jobq_hold_flag(self, value):
         self.jobq_hold_flag = value
 
+    def set_jobq_ready_flag(self, value):
+        self.jobq_ready_flag = value
+
     def get_jobq_hold_flag(self):
         return self.jobq_hold_flag
+
+    def get_jobq_ready_flag(self):
+        return self.jobq_ready_flag
 
     def get_jobdonelist(self):
         cp = list(self.jobdonelist)
@@ -54,13 +62,15 @@ class Handler(FileSystemEventHandler):
         return len(self.jobdonelist)
 
     def start(self):
+        # NOTE: need to create new thread every start() call
         self.eventScheduler = threading.Thread(target=self._process_q)
-        self.eventScheduler.daemon = True
-        self.eventScheduler.start()
-
         self.dbManager = threading.Thread(target=self._process_job)
-        self.dbManager.daemon = True
+        self.eventScheduler.start()
         self.dbManager.start()
+
+    def stop(self):
+        # set flag to exit loop for the two local threads
+        self.stop_flag = True
 
     def on_modified(self, event):
         if not event.is_directory and event.src_path.endswith(self.pattern):
@@ -146,12 +156,25 @@ class Handler(FileSystemEventHandler):
         return None
 
     def _process_job(self):
+        print('start process job')
         while True:
-            if self.jobq.empty() and self.jobq_hold_flag:
+            if self.stop_flag:
+                print("Exiting process job loop")
+                break
+
+            #print('job empty: ', self.jobq.empty())
+            if len(self.jobdonelist) and self.jobq_hold_flag:
+                self.jobq_ready_flag = True
+                time.sleep(1)
+                continue
+            self.jobq_ready_flag = False
+
+            if self.jobq.empty():
                 time.sleep(1)
                 continue
 
             job, ts = self.jobq.get()
+            #print('job: ', job)
 
             src_path = job[0]
             event_type = job[1]
@@ -176,8 +199,10 @@ class Handler(FileSystemEventHandler):
 
             if res is not None:
                 self.jobdonelist.append(res)
+                #print('[DEBUG]: add jobdone list: ', res)
 
             time.sleep(1)
+        print('end process job')
 
     def _process_q(self):
         """
@@ -186,7 +211,12 @@ class Handler(FileSystemEventHandler):
         :   1. update time stamp (when the event is inserted to job list)
         :   2. if the event exist, and time difference > threashold, pass to other thread (add to job queue)
         """
+        print('start process q')
         while True:
+            if self.stop_flag:
+                print("Exiting process q loop")
+                break
+
             curr_ts = time.time()
             if self.q.empty():
                 # update db (only one job at a time)
@@ -197,6 +227,7 @@ class Handler(FileSystemEventHandler):
                 continue
 
             event, ts = self.q.get()
+            #print('q: ', event)
 
             # update job list (event, ts)
             self.update_joblist(event.src_path, event.event_type, curr_ts)
@@ -209,6 +240,8 @@ class Handler(FileSystemEventHandler):
             #last_ts = time.time()
 
             time.sleep(1)
+
+        print('end process q')
 
 
 

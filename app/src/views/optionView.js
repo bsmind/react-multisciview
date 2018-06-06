@@ -7,7 +7,8 @@ import {
     DataTab,
     CoordTab,
     ImageTab,
-    PcpTab
+    PcpTab,
+    WatcherTab
 } from "./components";
 
 class OptionView extends React.Component {
@@ -29,6 +30,7 @@ class OptionView extends React.Component {
                 index={this.state.tabIndex}
                 onChange={this.handleTabChange}
             >
+                <Tab label="WATCHER"> <WatcherTab />  </Tab>
                 <Tab label="DATA"> <DataTab height={this.props.height}/> </Tab>
                 <Tab label="COORD"> <CoordTab /> </Tab>
                 <Tab label="IMAGE"> <ImageTab /> </Tab>

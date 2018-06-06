@@ -3,14 +3,18 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import {
+    get_root_dir_list,
     get_current_data_stat,
-    monitor_new_data,
+    get_watcher_monitor,
+    get_watcher_disconnect,
     get_color_map,
+    close_message,
 } from "./actions/dataActions";
 
 import { Layout, Panel } from "react-toolbox/lib/layout";
 import { AppBar } from "react-toolbox/lib/app_bar";
 import { Button } from "react-toolbox/lib/button";
+import { Snackbar } from "react-toolbox/lib/snackbar";
 import Navigation from "react-toolbox/lib/navigation";
 import theme from "./appIndex.css";
 
@@ -27,6 +31,7 @@ class MultiViewApp extends React.Component {
 
         this.pcpAttrSelect = {};
         this.__dataExtents = {};
+        this.interval = null;
     }
 
     componentWillMount() {
@@ -34,18 +39,34 @@ class MultiViewApp extends React.Component {
     }
 
     componentDidMount() {
-        // --------------------------------------------------------
-        // Query for initial DB conditions
-        // --------------------------------------------------------
-        this.props.get_current_data_stat();
         this.props.get_color_map();
-        this.interval = setInterval(this.props.monitor_new_data, 20000);
-        // --------------------------------------------------------
+        this.props.get_root_dir_list(this.props.wdir);
+        this.props.get_current_data_stat();
         window.addEventListener("resize", () => this.handleResize());
     }
 
+    componentWillReceiveProps(nextProps) {
+        const prevProps = this.props;
+        if (!nextProps.isConnected)
+            if (this.interval) {
+                clearInterval(this.interval);
+                this.interval = null
+                return;
+            }
+
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.interval = setInterval(this.props.get_watcher_monitor.bind(this,this.props.wdir), 10000);
+    }
+
     componentWillUnmount() {
-        clearInterval(this.interval);
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        if (this.props.isConnected) this.props.get_watcher_disconnect(this.props.wdir);
         window.removeEventListener("resize", () => this.handleResize());
     }
 
@@ -160,6 +181,15 @@ class MultiViewApp extends React.Component {
                         {this.renderOptionView(height)}
                     </div>
                 </div>
+                <Snackbar 
+                    label={this.props.message}
+                    action="Dismiss"
+                    active={this.props.messageReady}
+                    type={this.props.messageType}
+                    timeout={5000}
+                    onClick={(event, instance) => this.props.close_message()}
+                    onTimeout={(event, instance) => this.props.close_message()}
+                />
             </Layout>
         );
     }
@@ -169,14 +199,22 @@ function mapStateToProps(state) {
     return {
         imgReqOnProgress: state.data.numImageRequested,
         showImage: state.data.showImage,
+        wdir: state.data.wdir,
+        isConnected: state.data.isConnected,
+
+        message: state.data.message,
+        messageReady: state.data.messageReady,
+        messageType: state.data.messageType
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
+        get_root_dir_list,
         get_current_data_stat,
-        monitor_new_data,
+        get_watcher_monitor,
         get_color_map,
+        close_message
     }, dispatch);
 }
 

@@ -13,6 +13,110 @@ const imageRequestOnProgress = () => {
     return count;
 }
 
+export function get_root_dir_list(wdir) {
+    return dispatch => {
+        axios.get("/api/watcher/dirlist", {params:{wdir}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_ROOT_DIR_LIST",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_ROOT_DIR_LIST_REJECTED",
+                    payload: e
+                });
+            });
+    };
+}
+
+export function get_watcher_connect(wdir) {
+    return dispatch => {
+        axios.get("/api/watcher/connect", {params:{wdir}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_WATCHER_CONNECT",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_WATCHER_CONNECT_REJECTED",
+                    payload: e
+                });
+            });
+    };
+}
+
+export function get_watcher_disconnect(wdir) {
+    return dispatch => {
+        axios.get("/api/watcher/disconnect", {params:{wdir}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_WATCHER_DISCONNECT",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_WATCHER_DISCONNECT_REJECTED",
+                    payload: e
+                });
+            });
+    };
+}
+
+export function get_watcher_sync(wdir) {
+    return dispatch => {
+        axios.get("/api/watcher/sync", {params:{wdir}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_WATCHER_SYNC",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_WATCHER_SYNC_REJECTED",
+                    payload: e
+                });
+            });
+    }
+}
+
+export function set_watcher_nodekey(nodekey) {
+    return {
+        type: "SET_WATCHER_NODEKEY",
+        payload: nodekey
+    };
+}
+
+export function get_watcher_monitor(wdir) {
+    return dispatch => {
+        axios.get("/api/watcher/monitor", {params:{wdir}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_WATCHER_MONITOR",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_WATCHER_MONITOR_REJECTED",
+                    payload: e
+                });
+            });
+    };
+}
+
+export function set_sync_info(id, processed, total) {
+    return {
+        type: "SET_SYNC_INFO",
+        payload: {id, processed, total}
+    };
+}
+
 export function get_current_data_stat() {
     return dispatch => {
         axios.get("/api/data/stat")
@@ -25,24 +129,6 @@ export function get_current_data_stat() {
             .catch(e => {
                 dispatch({
                     type: "GET_CURRENT_DATA_STAT_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-export function monitor_new_data() {
-    return dispatch => {
-        axios.get("/api/data/sample/monitor")
-            .then(resp => {
-                dispatch({
-                    type: "MONITOR_NEW_DATA",
-                    payload: resp.data
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "MONITOR_NEW_DATA_REJECTED",
                     payload: e
                 });
             });
@@ -191,4 +277,11 @@ export function changePCPSelectedAttrs(newAttrs) {
         type: "CHANGE_PCP_SELECTED_ATTRS",
         payload: newAttrs
     };
+}
+
+export function close_message() {
+    return {
+        type: 'CLOSE_MESSAGE',
+        payload: null
+    }
 }
