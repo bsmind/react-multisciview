@@ -7,6 +7,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
 
 const rootPath = path.join(__dirname, "..");
+const rootPath2 = path.join(__dirname, "../../multisciview")
 
 function buildConfig(mode) {
     const { ifWatch, ifDocs } = getIfUtils(mode, ["docs", "watch"]);
@@ -66,7 +67,8 @@ function buildConfig(mode) {
         context,
         entry: docsEntry,
         output: {
-            path: path.join(rootPath, "multiview/"),
+            //path: path.join(rootPath, "multiview/"),
+            path: path.join(rootPath2),
             filename: `static/js/[name]${ifDocs(".[chunkhash]","")}.js`,
             publicPath: "",
             library: "ReMultiview",
@@ -103,7 +105,8 @@ function buildConfig(mode) {
                 inject: false,
                 page: "index",
                 mode,
-                filename: "./templates/index.html"
+                filename: path.join(rootPath2, "templates/index.html")
+                //filename: "./templates/index.html"
             }),
             // new HtmlWebpackPlugin({
             //     template: "./docs/pageTemplateFlask.js",

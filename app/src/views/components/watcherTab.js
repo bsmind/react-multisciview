@@ -12,6 +12,8 @@ import {
 
 import {TreeView} from "rt-treeview";
 import TreeViewDialog from "./rtDialog";
+
+import Autocomplete from "react-toolbox/lib/autocomplete";
 import Dialog from "react-toolbox/lib/dialog";
 import Button from "react-toolbox/lib/button";
 import ProgressBar from "react-toolbox/lib/progress_bar";

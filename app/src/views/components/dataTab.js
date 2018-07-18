@@ -92,6 +92,7 @@ class DataTab extends React.Component {
     }
 
     handleChange = (selectedItemKeys, event) => {
+        //console.log(selectedItemKeys)
     	const targetID = event.target.id;
     	const enterKey = event.which != null && event.which === 13;
     	if (targetID != null && targetID.length) {
@@ -165,6 +166,14 @@ class DataTab extends React.Component {
             </table>
         );
     }
+
+    renderDBOptions = () => {
+
+    }
+
+    renderWatcherOptions = () => {
+
+    }
     
     render() {
         const { sampleKinds, sampleSelected, height } = this.props;
@@ -186,9 +195,9 @@ class DataTab extends React.Component {
                 />
                 <List selectable>
                     <ListSubHeader caption={"Selected"} />
-    				<div style={{ height: `${ListHeight}px`, overflowY: "scroll" }}>
-    					{this.renderSelectedSamples()}
-    				</div>                    
+                    <div style={{ height: `${ListHeight}px`, overflowY: "scroll" }}>
+                        {this.renderSelectedSamples()}
+                    </div>                    
                 </List>
             </div>
         )

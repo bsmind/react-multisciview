@@ -31,6 +31,7 @@ class ScatterView extends React.Component {
             onDataRequest: this.handleDataImageRequest,
             onSelectDataItems: null,
         };
+
         return <ScatterChart 
             ref={"ScatterChartRef"}
             {...chartProps}

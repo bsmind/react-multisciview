@@ -19,7 +19,7 @@ const INIT_STATE = {
      * statBySamples
      * - {[sampleName]: count}
      */
-    statBySamples: {},
+    //statBySamples: {},
 
     /**
      * sampleSelected
@@ -65,6 +65,10 @@ const INIT_STATE = {
 		"linecut_qr/data/fit_peaks_sigma1",
     ],
 
+    // MongoDB
+    dbName: null,
+    colName: null,
+
     // file watcher
     wID: null,
     isConnected: false,
@@ -99,6 +103,7 @@ const _update_sample_colors = (state, sampleList) => {
     return sampleColors;
 }
 
+// deprecated
 const get_current_data_stat = (state, payload) => {
     const sampleNames = Object.keys(payload);
     const sampleColors = _update_sample_colors(state, sampleNames);
@@ -111,18 +116,21 @@ const get_current_data_stat = (state, payload) => {
 }
 
 const get_data = (state, payload) => {
-    const {sampleList, sampleData, stat} = payload;
+    const {data, db, col} = payload;
+    const {sampleList, sampleData} = data;
 
     const dataBySamples = {...state.dataBySamples};
-    sampleList.forEach(name => {
-        dataBySamples[name] = [...sampleData[name]];
+    const keyList = sampleList.map(name => {
+        const key = `[${db}][${col}]${name}`;
+        dataBySamples[key] = [...sampleData[name]];
+        return key;
     });
 
-    const sampleColors = _update_sample_colors(state, sampleList);
-    //console.log('reducer: ', dataBySamples);
+    const sampleColors = _update_sample_colors(state, keyList);
+    // console.log('reducer: ', dataBySamples);
+    // console.log('reducer: ', sampleColors)
     return {...state,
         dataBySamples: dataBySamples,
-        statBySamples: stat,
         sampleColors: sampleColors
     };
 }
@@ -285,6 +293,11 @@ const set_sync_info = (state, payload) => {
     return {...state, sID: id, total: total, processed: processed}
 }
 
+const update_db_info = (state, payload) => {
+    const {db, col} = payload;
+    return {...state, dbName:db, colName:col};
+}
+
 export function dataReducers(state = INIT_STATE, action) {
     const {type, payload} = action;
 
@@ -318,6 +331,8 @@ export function dataReducers(state = INIT_STATE, action) {
 
         case "SET_SYNC_INFO": return set_sync_info(state, payload);
         case "CLOSE_MESSAGE": return {...state, messageReady: false};
+
+        case "UPDATE_DB_INFO": return update_db_info(state, payload);
 
         case "REJECTED":
             console.log(payload);

@@ -10,6 +10,17 @@ export const getSelectedSamples = createSelector(
     }
 ); 
 
+export const getSelectedSamplesCounts = createSelector(
+    [
+        state => state.data.dataBySamples,
+        getSelectedSamples,
+    ],
+    (dataBySamples, keys) => {
+        return keys.map(key => dataBySamples[key].length);
+    }
+); 
+
+
 const _update_data_stat = (doc, stat={}) => {
     const fields = Object.keys(doc).filter(f => {
         return (!f.includes("_id") && !f.includes("item") && !f.includes("tiff") && !f.includes("jpg"));
@@ -199,6 +210,7 @@ export const getSelectedSampleColors = createSelector(
     }
 );
 
+// deprecated (not used for v2)
 export const datatab_get_sample_status = createSelector(
     [
         state => state.data.statBySamples,

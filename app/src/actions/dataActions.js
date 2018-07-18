@@ -13,6 +13,24 @@ const imageRequestOnProgress = () => {
     return count;
 }
 
+// export function get_db_info(db, col) {
+//     return dispatch => {
+//         axios.get("/api/db", {params: {db, col}})
+//             .then(resp => {
+//                 dispatch({
+//                     type: "GET_DB_INFO",
+//                     payload: resp.data
+//                 });
+//             })
+//             .catch(e => {
+//                 dispatch({
+//                     type: "GET_DB_INFO_REJECTED",
+//                     payload: e
+//                 });
+//             });
+//     }
+// }
+
 export function get_root_dir_list(wdir) {
     return dispatch => {
         axios.get("/api/watcher/dirlist", {params:{wdir}})
@@ -135,14 +153,14 @@ export function get_current_data_stat() {
     };
 }
 
-export function get_data(sampleNames) {
+export function get_data(db, col, sampleNames) {
     return dispatch => {
-        axios.get("/api/data/sample", {params: {name: sampleNames}})
+        axios.get("/api/data/sample", {params: {db, col, name: sampleNames}})
             .then(resp => {
                 const data = resp.data;
                 dispatch({
                     type: "GET_DATA",
-                    payload: data
+                    payload: {data, db, col}
                 });
             })
             .catch(e => {
@@ -283,5 +301,12 @@ export function close_message() {
     return {
         type: 'CLOSE_MESSAGE',
         payload: null
+    }
+}
+
+export function update_db_info(db, col) {
+    return {
+        type: "UPDATE_DB_INFO",
+        payload: {db, col}
     }
 }

@@ -41,7 +41,7 @@ class MultiViewApp extends React.Component {
     componentDidMount() {
         this.props.get_color_map();
         this.props.get_root_dir_list(this.props.wdir);
-        this.props.get_current_data_stat();
+        //this.props.get_current_data_stat();
         window.addEventListener("resize", () => this.handleResize());
     }
 
@@ -211,7 +211,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         get_root_dir_list,
-        get_current_data_stat,
+        //get_current_data_stat,
         get_watcher_monitor,
         get_color_map,
         close_message
