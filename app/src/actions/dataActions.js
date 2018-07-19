@@ -206,8 +206,14 @@ export function get_color_map() {
 }
 
 function get_tiff(id) {
+    const pos1 = id.indexOf(']');
+    const pos2 = id.indexOf(']', pos1+1);
+    const db = id.slice(1, pos1);
+    const col = id.slice(pos1+2, pos2);
+    const _id = id.slice(pos2+1)
+
     return dispatch => {
-        axios.get("/api/data/tiff/" + id)
+        axios.get("/api/data/tiff", {params: {db, col, _id}})
             .then(resp => {
                 const idx = tiffRequest.indexOf(id);
                 if (idx > -1) tiffRequest.splice(idx, 1);

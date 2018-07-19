@@ -518,14 +518,14 @@ class ScatterSeries extends React.Component {
     		if (d._id == null) {
     			console.log("error in ", d);
     			return;
-    		}
+			}
     		imageSet.push(<ImgViewer
     			key={`imgViewer-${d._id}`}
     			x={xAccessor(d)}
     			y={yAccessor(d)}
     			imgRefWidth={this.__imgRefWidth}
     			imgRefHeight={this.__imgRefHeight}
-    			id={d._id}
+				id={d._id}
     			imgPool={imgPool}
     			onImageRequest={handleImageRequest}
     			showGrid={showGrid}
