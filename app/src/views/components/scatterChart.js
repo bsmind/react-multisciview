@@ -82,7 +82,7 @@ class ScatterChart extends React.Component {
             width, height, margin, ratio,
             data, dimension, seriesName, samples,
             xAttr, yAttr, zAttr,
-            onScatterPanZoom,
+            onScatterPanZoom, dataExtents,
             imgPool, showImage, minPoints, minImageSize, imageColorTable
         } = this.props;
         const { markerProvider } = this.state;
@@ -96,6 +96,9 @@ class ScatterChart extends React.Component {
             name = name + '/' + tokens[tokens.length-1];
             return name;
         }
+
+        //console.log(dataExtents)
+
         return (
             <ChartCanvas
                 ref={node => this.ScatterChartCanvasNode = node}
@@ -108,6 +111,7 @@ class ScatterChart extends React.Component {
                 samples={samples}
                 data={data}
                 dataExtents={dimension}
+                dataExtentsExt={dataExtents}
                 dataAccessor={(d,name) => get(d, name)}
                 xAttr={xAttr}
                 yAttr={yAttr}

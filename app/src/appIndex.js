@@ -154,6 +154,7 @@ class MultiViewApp extends React.Component {
             width={width}
             height={height}
             onScatterPanZoom={this.handleScatterPanZoom}
+            dataExtents={this.__dataExtents}
         />;
     }
 

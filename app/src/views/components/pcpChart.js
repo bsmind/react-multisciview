@@ -29,6 +29,13 @@ class PcpChart extends React.Component {
             onPCPAxisSelect, pcpAttrSelect
         } = this.props;
 
+        if (dimOrder.length === 0 || data.length === 0)
+            return (
+                <div> 
+                    Select data or dimension first!
+                </div>
+            );
+
         return (
             <PCPCanvas
                 ref={'PCPCanvasRef'}

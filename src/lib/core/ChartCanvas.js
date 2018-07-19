@@ -162,6 +162,7 @@ class ChartCanvas extends React.Component {
 			samples,
 			seriesName,
 			dataExtents: dataExtentsProp,
+			dataExtentsExt,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
@@ -217,6 +218,10 @@ class ChartCanvas extends React.Component {
 				: dataExtentsProp[name].slice();
 		});
 
+		Object.keys(dataExtentsExt).forEach(key => {
+			dataExtents[key] = dataExtentsExt[key];
+		});
+
 		return {
 			plotData,
 			seriesName,
@@ -235,6 +240,7 @@ class ChartCanvas extends React.Component {
 			seriesName: seriesNameProps,
 			samples: samplesProp,
 			dataExtents: dataExtentsProp,
+			dataExtentsExt,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
@@ -343,6 +349,11 @@ class ChartCanvas extends React.Component {
 		//	samples = samplesState;
 		//	seriesName = seriesNameState;
 		// }
+
+		Object.keys(dataExtentsExt).forEach(key => {
+			dataExtentsState[key] = dataExtentsExt[key];
+		});
+
 
 		return {
 			plotData,
