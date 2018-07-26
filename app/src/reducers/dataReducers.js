@@ -70,6 +70,14 @@ const INIT_STATE = {
     dbName: null,
     colName: null,
 
+    isMonitoring: false,
+    isSyncing: false,
+    syncerID: null,
+    syncTotal: 0,
+    syncProcessed: 0,
+
+
+
     // file watcher
     wID: null,
     isConnected: false,
@@ -79,11 +87,7 @@ const INIT_STATE = {
     //wNodeList: [['N0', {name: '/root', path: '/root', children: []}]],
     //wNodeMap: new Map([['N0', {name: '/root', path: '/root', children: []}]]),
 
-    // file syncer
-    isSyncing: false,
-    syncTotal: 0,
-    syncProcessed: 0,
-
+    
     // temporal message
     message: '',
     messageReady: false,
@@ -286,16 +290,14 @@ const get_watcher_monitor = (state, payload) => {
     };
 }
 
-const update_sync_info = (state, payload) => {
-    const {data, db, col} = payload;
-    const {status, total, processed} = data;
+const set_sync_info = (state, payload) => {
+    const {status, id, processed, total} = payload;
     return {
         ...state, 
         isSyncing: status,
+        syncerID: id,
         syncTotal: total, 
         syncProcessed: processed,
-        dbName: db,
-        colName: col
     };
 }
 
@@ -330,6 +332,7 @@ export function dataReducers(state = INIT_STATE, action) {
         case "CHANGE_PCP_SELECTED_ATTRS": return {...state, pcpSelectedAttrs: payload.slice()};
 
         case "SET_WDIR": return set_wdir(state, payload);
+        case "SET_SYNC_INFO": return set_sync_info(state, payload);
 
 
         case "GET_ROOT_DIR_LIST": return get_root_dir_list(state, payload);

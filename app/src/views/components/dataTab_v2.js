@@ -13,6 +13,7 @@ import theme from "./index.css"
 
 import { sortAlphaNum } from "../../utils";
 import { hexToRGBA } from "react-multiview/lib/utils";
+import throttle from "lodash.throttle";
 
 import {
     get_data,
@@ -33,6 +34,8 @@ import {
     getSelectedSamples,
     getSelectedSamplesCounts
 } from "../../selectors";
+
+const THROTTLE_INTERVAL = 100;
 
 const DataListItem = (props) => {
 	const { id, name, color, onColorChange, onItemDelete, count } = props;
@@ -61,12 +64,16 @@ class DataTab extends React.Component {
         super();
         this.state = {
             sampleList: [],
-
-            id: null,
-            total: 0
+            db: null,
+            col: null,
         }
 
         this.q_sample = null;
+        this.asyncUpdateSampleList = throttle(
+            this.asyncUpdateSampleList, 
+            THROTTLE_INTERVAL,
+            {'leading': true, 'trailing': true}
+        );
 
         // interval id to get progress of a syncer
         this.interval = null;
@@ -77,9 +84,28 @@ class DataTab extends React.Component {
         if (wdir == null || db == null || col == null) {
             return;
         }
+
+        const { 
+            sampleSelected, 
+            sampleSelectedCounts,
+        } = props;
+
         axios.get("/api/db/samplelist", {params:{db, col}})
             .then(resp => {
-                this.setState({sampleList: resp.data})
+                // if the number of samples are different, add samples..
+                const sampleList = resp.data;
+                const samplesToAdd = sampleList.map(item => {
+                    const {_id, count} = item;
+                    const key = `[${db}][${col}]${_id}`;
+                    const idx = sampleSelected.indexOf(key);
+                    if (idx >= 0 && sampleSelectedCounts[idx] != count) {
+                        return _id;
+                    }
+                }).filter(d => d!=null);
+                this.setState({sampleList, db, col});
+                if (samplesToAdd.length && props.onSampleAdd) {
+                    props.onSampleAdd(db, col, samplesToAdd);
+                }
             })
             .catch(e => {
                 console.log(e)
@@ -88,24 +114,10 @@ class DataTab extends React.Component {
 
     componentDidMount() {
         this.asyncUpdateSampleList()
-
-        // const {sID} = this.props;
-        // if (this.interval == null && sID != null) {
-        //     this.updateSyncProgress(sID);
-        //     this.interval = setInterval(this.updateSyncProgress.bind(this, sID), 3000);
-        // } else if (this.interval) {
-        //     clearInterval(this.interval);
-        // }        
     }
 
     componentWillReceiveProps(nextProps) {
         this.asyncUpdateSampleList(nextProps)
-        // if there are updates by wacher, need to refresh db information
-        // const { watcherFlag, db, col, set_watcher_update_flag } = nextProps;
-        // if (watcherFlag && set_watcher_update_flag) {
-        //     set_watcher_update_flag(false);
-        //     this.asyncUpdateDBInfo()
-        // }
     }
 
     componentWillUnmount() {
@@ -131,80 +143,21 @@ class DataTab extends React.Component {
             this.props.get_watcher_disconnect(wdir, db, col);
     }
     // end of watcher --------------------------------------------------------
-
-    // syncer --------------------------------------------------------------
-    handleSyncStart = () => {
-        if (this.interval) {
-            console.log('Unexpected error! Syncer is already running!');
-            console.log('Maybe restart???')
-            return;
-        }
-
-        const { wdir } = this.props;
-        const { db, col } = this.state;
-        axios.get('/api/sync', {params:{wdir, db, col}})
-            .then(resp => {
-                const data = resp.data;
-                this.interval = setInterval(this.updateSyncProgress.bind(this, wdir, db, col), 3000);
-                this.props.get_syncer_connect(wdir, db, col);
-            })
-            .catch(e => {
-                console.log(e);
-            });        
-    }
-
-
-    updateSyncProgress = (wdir, db, col) => {
-        axios.get('/api/sync/progress', {params:{wdir, db, col}})
-            .then(resp => {
-                const data = resp.data;
-                // need a flag to know if syncing is done or not
-                // if (finished) {
-                //     clearInterval(this.interval);
-                //     this.interval = null
-                // }
-                this.props.get_sync_info(finished ? null: id, processed, total)
-            })
-            .catch(e => {
-                console.log(e);
-            });
-    }
-
-
-    handleSyncStop = () => {
-        const {sID} = this.props;
-        if (sID == null) return;
-
-        const node = this.getNode();
-        axios.get('/api/sync/stop', {params:{id:sID}})
-            .then(resp => {
-                if (this.interval) clearInterval(this.interval);
-                this.props.set_sync_info(null, 0, 0)
-            })
-            .catch(e => {
-                console.log(e);
-            });
-    }
-    // end of watcher ----------------------------------------------------------------
     
 
-    // db -------------------------------------------------------------------
-    // end of db ------------------------------------------------------------
-
-    // samples --------------------------------------------------------------
     addSamples = (keyArray) => {
-        const { sampleList, db, col } = this.state;
-        const { sampleSelected } = this.props;
+        const { sampleList, db:dbState, col:colState } = this.state;
+        const { sampleSelected, db:dbProp, col:colProp } = this.props;
 
         const samplesToAdd = keyArray.map(key => {
             const {_id, count} = sampleList[key];
-            const name = `[${db}][${col}]${_id}`;
+            const name = `[${dbState}][${colState}]${_id}`;
             if (sampleSelected.indexOf(name) === -1) 
                 return _id;
         }).filter(d => d != null);
 
         if (samplesToAdd.length && this.props.onSampleAdd) {
-            this.props.onSampleAdd(db, col, samplesToAdd);
+            this.props.onSampleAdd(dbState, colState, samplesToAdd);
         }
     }
 
@@ -268,16 +221,16 @@ class DataTab extends React.Component {
             width: '65%',
             marginRight: '10px'    
         }
-        const {db, col, sampleList} = this.state;
-        const { height, sampleSelected } = this.props;
-        const ListHeight = height - 200;
+        const { sampleList, db:dbState, col:colState } = this.state;
+        const { height, sampleSelected, db:dbProp, col:colProp } = this.props;
+        const ListHeight = height - 300;
 
         const samples = {};
         const local_selected = sampleList.map( (sample, idx) => {
             const {_id, count} = sample;
             samples[idx] = `[${count}] ${_id}`;
 
-            const key = `[${db}][${col}]${_id}`;
+            const key = `[${dbState}][${colState}]${_id}`;
             if (sampleSelected.indexOf(key) >= 0)
                 return idx;
         }).filter(d => d != null);
@@ -327,14 +280,21 @@ class DataTab extends React.Component {
             </div>
         );
     }
-    // end of samples -------------------------------------------------------
 
     renderDBView = () => {
         const { 
             wdir, db, col, 
+            isSyncing, syncerID, syncTotal, syncProcessed,
+            isMonitoring,
             isConnected,
             set_working_directory,
+            set_sync_info,
         } = this.props;
+        const divStyle = {
+            display: 'inline-block',
+            width: '50%',
+            paddingRight: '10px'    
+        }
         return (
             <div className={theme.tabDiv}>
                 <DBView
@@ -344,7 +304,13 @@ class DataTab extends React.Component {
                     inputLabel="Selected directory"
                     dialogTitle="Select a working directory"
                     updateWorkDir={set_working_directory}
-                    disabled={isConnected}
+                    disabled={false}
+                    isSyncing={isSyncing}
+                    syncerID={syncerID}
+                    syncTotal={syncTotal}
+                    syncProcessed={syncProcessed}
+                    updateSyncInfo={set_sync_info}
+                    isMonitoring={isMonitoring}
                 />
             </div>
         );
@@ -370,6 +336,14 @@ function mapStateToProps(state) {
         db: state.data.dbName,
         col: state.data.colName,
 
+        isSyncing: state.data.isSyncing,
+        syncerID: state.data.syncerID,
+        syncTotal: state.data.syncTotal,
+        syncProcessed: state.data.syncProcessed,
+
+        isMonitoring: state.data.isMonitoring,
+
+
         isConnected: state.data.isConnected,
 
 
@@ -383,18 +357,19 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        //onUpdateDB: update_db_info,
         onSampleAdd: get_data,
         onSampleDel: del_data,
         onColorChange: changeSelectedSampleColors,
 
-        // for watcher view
         set_working_directory,
+        set_sync_info,
+
+
 
         get_watcher_connect,
         get_watcher_disconnect,
         set_watcher_update_flag,
-        set_sync_info
+        
     }, dispatch);
 }
 

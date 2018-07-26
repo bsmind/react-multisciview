@@ -9,6 +9,7 @@
 
 .input {
     cursor: pointer;
+    padding-bottom: 3px;
 }
 
 .error {
@@ -16,3 +17,5 @@
     font-size: 12px;
     line-height: 20px;
 }
+
+

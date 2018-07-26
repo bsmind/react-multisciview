@@ -1,12 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import axios from 'axios';
 
 import {Dialog, Input} from 'react-toolbox';
-import { Button, IconButton } from "react-toolbox/lib/button";
+import { Button } from "react-toolbox/lib/button";
 import { TreeView } from 'rt-treeview';
+import throttle from "lodash.throttle";
+
 
 import dialogTheme from './dialog.css';
+
+const SYNC_PROGRESS_INTERVAL = 5000;
+const THROTTLE_INTERVAL = 100;
+
 
 class DBView extends React.Component {
     constructor() {
@@ -21,9 +26,16 @@ class DBView extends React.Component {
             optionTitle: '',
             optionMessage: '',
 
-            newDBName: 'Type_new_db_name',
-            newColName: 'Type_new_collection_name'
+            newDBName: 'Type_new_name',
+            newColName: 'Type_new_name'
         };
+
+        this.syncInterval = null;
+        this.asyncSyncer = throttle(
+            this.asyncSyncer, 
+            THROTTLE_INTERVAL,
+            {'leading': true, 'trailing': true}
+        );
     }
 
     asyncCreateDB = (wdir, db, col) => {
@@ -40,11 +52,67 @@ class DBView extends React.Component {
                 else {
                     console.log('todo: show message - fail to update db')
                 }
-                this.setState({newDBName: 'Type_new_db_name', newColName: 'Type_new_collection_name'})
+                this.setState({newDBName: 'Type_new_name', newColName: 'Type_new_name'})
             })
             .catch(e => {
                 console.log(e);
             });
+    }
+
+    asyncSyncer = (mode, wdir, syncerID) => {
+        axios.get('/api/syncer', {params: {mode, wdir, syncerID}})
+            .then(resp => {
+                const data = resp.data;
+                if (data.status) {
+                    const {status, id, total, processed, completed} = data;
+                    // set interval to track process ...
+                    if (id!=null && !completed && status) {
+                        if (id == syncerID) {
+                            if (this.syncInterval == null)
+                                this.syncInterval = setInterval(
+                                    this.asyncSyncer.bind(this, 'PROGRESS', wdir, id), 
+                                    SYNC_PROGRESS_INTERVAL
+                                );
+                        }
+                        else {
+                            if (this.syncInterval) clearInterval(this.syncInterval);
+                            this.syncInterval = setInterval(
+                                this.asyncSyncer.bind(this, 'PROGRESS', wdir, id), 
+                                SYNC_PROGRESS_INTERVAL
+                            );    
+                        }
+                    } else {
+                        if (this.syncInterval) clearInterval(this.syncInterval);
+                        this.syncInterval = null;
+                    }
+                    if (this.props.updateSyncInfo) {
+                        this.props.updateSyncInfo(id!=null, id, processed, total);
+                    }
+                } else {   
+                    console.log('todo: show error message - ', data.message);
+                    if (this.syncInterval) clearInterval(this.syncInterval);
+                    this.syncInterval = null;
+
+                    if (this.props.updateSyncInfo) {
+                        this.props.updateSyncInfo(false, null, 0, 0);
+                    }
+                }
+            })
+            .catch(e => {
+                console.log(e)
+            });
+    }
+
+    componentDidMount() {
+        const {wdir, isSyncing, syncerID} = this.props;
+        if (isSyncing) {
+            this.asyncSyncer('PROGRESS', wdir, syncerID);
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.syncInterval) clearInterval(this.syncInterval);
+        this.syncInterval = null;
     }
 
     handleToggleWithUpdate = () => {
@@ -83,6 +151,12 @@ class DBView extends React.Component {
             return;
         }
         this.asyncCreateDB(wdir, newDBName, newColName);
+    }
+
+    handleToggleSync = () => {
+        const {wdir, isSyncing, syncerID} = this.props;
+        const mode = isSyncing ? "STOP": "START";
+        this.asyncSyncer(mode, wdir, syncerID);
     }
 
     renderDatabaseView = () => {
@@ -156,9 +230,10 @@ class DBView extends React.Component {
 
     }
 
-    render() {
+    renderDirectoryView = () => {
         const { wNodeMap } = this.state;
         const { wdir, db, col } = this.props;
+
         const divStyle = {
             display: 'inline-block',
             width: '50%',
@@ -167,45 +242,40 @@ class DBView extends React.Component {
 
         return (
             <div>
-                <Input
-                    label={this.props.inputLabel}
-                    value={wdir || 'Select a directory to retrieve/monitor/sync'}
-                    onClick={this.handleToggleWithUpdate}
-                    readOnly={true}
-                    style={{cursor: 'pointer'}}
-                    disabled={this.props.disabled}
+                <div style={divStyle}>
+                    <Input 
+                        label={"Selected DB Name"}
+                        value={db || "Undefined"}
+                        readOnly={true}
+                    />
+                </div>
+                <div style={divStyle}>
+                    <Input 
+                        label={"Selected DB Name"}
+                        value={col || "Undefined"}
+                        readOnly={true} 
+                    />
+                </div>
+        
+                <TreeView 
+                    nodes={wNodeMap}
+                    search={true}
+                    onNodeSelect={this.handleNodeSelect}
+                    size={'xs'}
                 />
-                <Dialog
-                    active={this.state.isOpen}
-                    actions={[
-                        { label: "PUSH", onClick: this.handleToggle.bind(this, true) },
-                        { label: "CLOSE", onClick: this.handleToggle.bind(this, false) }
-                    ]}
-                    onEscKeyDown={this.handleToggle.bind(this, false)}
-                    onOverlayClick={this.handleToggle.bind(this, false)}
-                    title={this.props.dialogTitle ? this.props.dialogTitle : ""}
-                    theme={dialogTheme}
-                >
-                    { wNodeMap != null &&
-                        <TreeView 
-                            nodes={wNodeMap}
-                            search={true}
-                            onNodeSelect={this.handleNodeSelect}
-                            size={'xs'}
-                        />
-                    }
-                </Dialog>
-                <Dialog
-                    active={!this.state.isOpen && wdir != null && db == null}
-                    title={"DATABASE"}
-                    actions={[
-                        { label: "APPLY", onClick: this.handleCreateDB }
-                    ]}
-                >
-                    { wNodeMap != null && !this.state.isOpen && wdir != null && db == null &&
-                        this.renderDatabaseView()
-                    }
-                </Dialog>
+            </div>
+        );
+    }
+
+    renderSelectedDB = (style) => {
+        const { wdir, db, col } = this.props;
+        const divStyle = {
+            display: 'inline-block',
+            width: '50%',
+            paddingRight: '10px'    
+        }
+        return (
+            <div style={style}>
                 <div style={divStyle}>
                     <Input 
                         label={"DB Name"} 
@@ -222,6 +292,89 @@ class DBView extends React.Component {
                         readOnly={true} 
                     />
                 </div>
+            </div>
+        );
+    }
+
+    renderOptions = (style) => {
+        const {isSyncing, syncTotal, syncProcessed} = this.props;
+        const divStyle = {
+            display: 'inline-block',
+            width: '30%',
+            paddingRight: '10px'    
+        }
+
+        const syncLabel = isSyncing ? "SYNC.STOP ": "SYNC.START";
+        const progress = syncTotal ? Math.trunc(syncProcessed / syncTotal * 100): 0;
+        return (
+            <div style={style}>
+                <div style={divStyle}>
+                    <Button 
+                        primary={!isSyncing} 
+                        accent={isSyncing} 
+                        label={syncLabel}
+                        onClick={this.handleToggleSync} 
+                    />
+                </div>
+                <div style={divStyle}>
+                    <Button flat primary label={"MONITOR"} />
+                </div>
+                {isSyncing &&
+                    <div style={{...divStyle, width:'30%', paddingRight: '0px'}}>
+                        <span style={{color:'red'}}>{`${progress}%`}</span>
+                    </div>
+                }
+            </div>
+        );
+    }
+
+    render() {
+        const { wNodeMap } = this.state;
+        const { wdir, db, col } = this.props;
+        const divStyle = {
+            display: 'inline-block',
+            width: '60%',
+            paddingRight: '10px'    
+        }
+        return (
+            <div>
+                <Input
+                    label={this.props.inputLabel}
+                    value={wdir || 'Select a directory to retrieve/monitor/sync'}
+                    onClick={this.handleToggleWithUpdate}
+                    readOnly={true}
+                    style={{cursor: 'pointer'}}
+                    disabled={this.props.disabled}
+                    theme={dialogTheme}
+                />
+                <Dialog
+                    active={this.state.isOpen}
+                    actions={[
+                        { label: "PUSH", onClick: this.handleToggle.bind(this, true) },
+                        { label: "CLOSE", onClick: this.handleToggle.bind(this, false) }
+                    ]}
+                    onEscKeyDown={this.handleToggle.bind(this, false)}
+                    onOverlayClick={this.handleToggle.bind(this, false)}
+                    title={this.props.dialogTitle ? this.props.dialogTitle : ""}
+                    theme={dialogTheme}
+                >
+                    { wNodeMap != null &&
+                        this.renderDirectoryView()
+                    }
+                </Dialog>
+                <Dialog
+                    active={!this.state.isOpen && wdir != null && db == null}
+                    title={"DATABASE"}
+                    actions={[
+                        { label: "APPLY", onClick: this.handleCreateDB }
+                    ]}
+                >
+                    { wNodeMap != null && !this.state.isOpen && wdir != null && db == null &&
+                        this.renderDatabaseView()
+                    }
+                </Dialog>
+                {this.renderSelectedDB(divStyle)}
+                {this.renderOptions({...divStyle, width:'40%', paddingRight: '10px'})}
             </div>
 
         )

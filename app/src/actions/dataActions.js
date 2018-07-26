@@ -136,10 +136,10 @@ export function get_syncer_connect(wdir, db, col) {
 }
 
 
-export function set_sync_info(id, processed, total) {
+export function set_sync_info(status, id, processed, total) {
     return {
         type: "SET_SYNC_INFO",
-        payload: {id, processed, total}
+        payload: {status, id, processed, total}
     };
 }
 
@@ -160,6 +160,9 @@ export function get_current_data_stat() {
             });
     };
 }
+
+
+
 
 export function get_data(db, col, sampleNames) {
     return dispatch => {
