@@ -41,14 +41,5 @@
     margin-bottom: 5px;
 }
 
-.rowC {
-    display: flex;
-    flex-direction: row;
-}
 
-.col3 {
-    display: inline-block;
-    width: 33.3%;
-    height: 300px;
-}
 

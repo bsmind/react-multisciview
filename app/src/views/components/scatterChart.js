@@ -52,7 +52,9 @@ class ScatterChart extends React.Component {
 
 		if (zAttr === "sample") {
 			mProvider.colorSet(colorsByGroup);
-		}
+        }
+        //console.log(zAttr, data)
+        //console.log(colorDomain)
         mProvider.calculateMarkers(data);
 		return mProvider;
 	}
@@ -98,6 +100,7 @@ class ScatterChart extends React.Component {
         }
 
         //console.log(dataExtents)
+        //debugger;
 
         return (
             <ChartCanvas

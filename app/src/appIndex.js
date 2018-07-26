@@ -3,8 +3,8 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import {
-    get_root_dir_list,
-    get_current_data_stat,
+    //get_root_dir_list,
+    //get_current_data_stat,
     get_watcher_monitor,
     get_watcher_disconnect,
     get_color_map,
@@ -40,25 +40,37 @@ class MultiViewApp extends React.Component {
 
     componentDidMount() {
         this.props.get_color_map();
-        this.props.get_root_dir_list(this.props.wdir);
-        //this.props.get_current_data_stat();
         window.addEventListener("resize", () => this.handleResize());
+        // window.addEventListener('unload', function(event) {
+        //     //call function to save you state in API or save in localStore
+        //     console.warn('bye bye~!')
+        //  });
     }
 
     componentWillReceiveProps(nextProps) {
-        const prevProps = this.props;
-        if (!nextProps.isConnected)
+        const { 
+            isConnected:isStreamMode,
+            wdir,
+            db,
+            col,
+            intervalTime 
+        } = nextProps;
+        // const { wdir, db, col } = this.props;
+
+        if (isStreamMode) {
             if (this.interval) {
                 clearInterval(this.interval);
-                this.interval = null
-                return;
+                this.interval = null;
+            } 
+            this.interval = setInterval(
+                this.props.get_watcher_monitor.bind(this,wdir), 
+                intervalTime);            
+        } else {
+            if (this.interval) {
+                clearInterval(this.interval);
+                this.interval = null;
             }
-
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
         }
-        this.interval = setInterval(this.props.get_watcher_monitor.bind(this,this.props.wdir), 10000);
     }
 
     componentWillUnmount() {
@@ -81,6 +93,7 @@ class MultiViewApp extends React.Component {
     }
 
     handlePCPAxisSelect = (axisTitle, domain, inProgress, aux) => {
+        // console.log('handlePCPAxisSelect: ', axisTitle, domain, inProgress, aux)
         const ScatterViewRef = this.refs["ScatterViewRef"].getWrappedInstance();
         const ScatterChartRef = ScatterViewRef.refs["ScatterChartRef"].getWrappedInstance();
         const ScatterCanvasNode = ScatterChartRef.getScatterChartCanvasNode();
@@ -100,6 +113,7 @@ class MultiViewApp extends React.Component {
         Object.keys(newDataExtents).forEach(key => {
             this.__dataExtents[key] = newDataExtents[key].slice();
         });
+        //console.log('handleScatterPanZoom: ', newDataExtents, inProgress)
         const OptionViewRef = this.refs["OptionViewRef"].getWrappedInstance();
         if (OptionViewRef.refs["PCPTabRef"]) {
             const PCPTabRef = OptionViewRef.refs["PCPTabRef"].getWrappedInstance();
@@ -187,7 +201,7 @@ class MultiViewApp extends React.Component {
                     action="Dismiss"
                     active={this.props.messageReady}
                     type={this.props.messageType}
-                    timeout={5000}
+                    timeout={60000}
                     onClick={(event, instance) => this.props.close_message()}
                     onTimeout={(event, instance) => this.props.close_message()}
                 />
@@ -200,8 +214,12 @@ function mapStateToProps(state) {
     return {
         imgReqOnProgress: state.data.numImageRequested,
         showImage: state.data.showImage,
+
         wdir: state.data.wdir,
         isConnected: state.data.isConnected,
+        db: state.data.dbName,
+        col: state.data.colName,
+        intervalTime: state.data.watcherIntervalTime,
 
         message: state.data.message,
         messageReady: state.data.messageReady,
@@ -211,7 +229,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        get_root_dir_list,
+        //get_root_dir_list,
         //get_current_data_stat,
         get_watcher_monitor,
         get_color_map,

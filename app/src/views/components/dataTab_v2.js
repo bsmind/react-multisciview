@@ -8,6 +8,7 @@ import axios from "axios";
 import Autocomplete from "react-toolbox/lib/autocomplete";
 import { Button, IconButton } from "react-toolbox/lib/button";
 import { List, ListItem, ListSubHeader } from "react-toolbox/lib/list";
+import DBView from "./dbview";
 import theme from "./index.css"
 
 import { sortAlphaNum } from "../../utils";
@@ -17,14 +18,21 @@ import {
     get_data,
     del_data,
     changeSelectedSampleColors,
-    update_db_info,
+    //update_db_info,
+
+    // for watcher view
+    set_working_directory,
+    get_watcher_connect,
+    get_watcher_disconnect,
+    set_watcher_update_flag,
+
+    set_sync_info
 } from "../../actions/dataActions";
 
 import {
     getSelectedSamples,
     getSelectedSamplesCounts
 } from "../../selectors";
-
 
 const DataListItem = (props) => {
 	const { id, name, color, onColorChange, onItemDelete, count } = props;
@@ -49,27 +57,29 @@ const DataListItem = (props) => {
 
 
 class DataTab extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.state = {
-            db: props.db,
-            col: props.col,
+            sampleList: [],
 
-            dbList: [],
-            colList: [],
-            sampleList: []
+            id: null,
+            total: 0
         }
 
-        this.q_db = null
-        this.q_col = null
-        this.q_sample = null
+        this.q_sample = null;
+
+        // interval id to get progress of a syncer
+        this.interval = null;
     }
 
-    asyncUpdateDBInfo = (db, col) => {
-        axios.get("/api/db", {params: {db,  col}})
+    asyncUpdateSampleList = (props = this.props) => {
+        const {wdir, db, col} = props;
+        if (wdir == null || db == null || col == null) {
+            return;
+        }
+        axios.get("/api/db/samplelist", {params:{db, col}})
             .then(resp => {
-                const data = resp.data;
-                this.setState({...data});
+                this.setState({sampleList: resp.data})
             })
             .catch(e => {
                 console.log(e)
@@ -77,56 +87,111 @@ class DataTab extends React.Component {
     }
 
     componentDidMount() {
-        const {db, col} = this.state;
-        this.asyncUpdateDBInfo(db, col);
+        this.asyncUpdateSampleList()
+
+        // const {sID} = this.props;
+        // if (this.interval == null && sID != null) {
+        //     this.updateSyncProgress(sID);
+        //     this.interval = setInterval(this.updateSyncProgress.bind(this, sID), 3000);
+        // } else if (this.interval) {
+        //     clearInterval(this.interval);
+        // }        
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.asyncUpdateSampleList(nextProps)
+        // if there are updates by wacher, need to refresh db information
+        // const { watcherFlag, db, col, set_watcher_update_flag } = nextProps;
+        // if (watcherFlag && set_watcher_update_flag) {
+        //     set_watcher_update_flag(false);
+        //     this.asyncUpdateDBInfo()
+        // }
     }
 
     componentWillUnmount() {
-        const {db, col} = this.state;
-        if (this.props.onUpdateDB)
-            this.props.onUpdateDB(db, col);
+        // const {db, col} = this.state;
+        // if (this.props.onUpdateDB)
+        //     this.props.onUpdateDB(db, col);
+
+        if (this.interval) clearInterval(this.interval);
     }
 
-    handleDBChange = (selectedDB, event) => {
-        if (selectedDB == null) selectedDB = "";
-
-        const isEnterKey = event.which != null && event.which === 13;
-        const isNewDB = selectedDB.length === 0 && this.q_db != null && this.q_db.length;
-        const { dbList } = this.state;
-
-        if (isEnterKey && isNewDB) {
-            const newDB = this.q_db.trim().replace(/ /g, "_");
-            this.asyncUpdateDBInfo(newDB, null);
-        } else if (dbList.indexOf(selectedDB) >= 0) {
-            this.asyncUpdateDBInfo(selectedDB, null)
-        } else {
-            console.log('[handleDBChange] Unexpected cases');
-        }
-
-        this.q_db = null;
+    // watcher --------------------------------------------------------------
+    handleConnect = () => {
+        const { wdir } = this.props;
+        const { db, col } = this.state;
+        if (this.props.get_watcher_connect)
+            this.props.get_watcher_connect(wdir, db, col);
     }
 
-    handleColChange = (selectedCol, event) => {
-        if (selectedCol == null) selectedCol = "";
-        const { db, colList } = this.state;
-        if (db == null)
+    handleDisconnect = () => {
+        const { wdir } = this.props;
+        const { db, col } = this.state;
+        if (this.props.get_watcher_disconnect)
+            this.props.get_watcher_disconnect(wdir, db, col);
+    }
+    // end of watcher --------------------------------------------------------
+
+    // syncer --------------------------------------------------------------
+    handleSyncStart = () => {
+        if (this.interval) {
+            console.log('Unexpected error! Syncer is already running!');
+            console.log('Maybe restart???')
             return;
-
-        const isEnterKey = event.which != null && event.which === 13;
-        const isNewCol = selectedCol.length === 0 && this.q_col != null && this.q_col.length;
-
-        if (isEnterKey && isNewCol) {
-            const newCol = this.q_col.trim().replace(/ /g, "_");
-            this.asyncUpdateDBInfo(db, newCol);
-        } else if (colList.indexOf(selectedCol) >= 0) {
-            this.asyncUpdateDBInfo(db, selectedCol);
-        } else {
-            console.log("[handleColChange] Unexpected cases");
         }
 
-        this.q_col = null;
+        const { wdir } = this.props;
+        const { db, col } = this.state;
+        axios.get('/api/sync', {params:{wdir, db, col}})
+            .then(resp => {
+                const data = resp.data;
+                this.interval = setInterval(this.updateSyncProgress.bind(this, wdir, db, col), 3000);
+                this.props.get_syncer_connect(wdir, db, col);
+            })
+            .catch(e => {
+                console.log(e);
+            });        
     }
 
+
+    updateSyncProgress = (wdir, db, col) => {
+        axios.get('/api/sync/progress', {params:{wdir, db, col}})
+            .then(resp => {
+                const data = resp.data;
+                // need a flag to know if syncing is done or not
+                // if (finished) {
+                //     clearInterval(this.interval);
+                //     this.interval = null
+                // }
+                this.props.get_sync_info(finished ? null: id, processed, total)
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+
+
+    handleSyncStop = () => {
+        const {sID} = this.props;
+        if (sID == null) return;
+
+        const node = this.getNode();
+        axios.get('/api/sync/stop', {params:{id:sID}})
+            .then(resp => {
+                if (this.interval) clearInterval(this.interval);
+                this.props.set_sync_info(null, 0, 0)
+            })
+            .catch(e => {
+                console.log(e);
+            });
+    }
+    // end of watcher ----------------------------------------------------------------
+    
+
+    // db -------------------------------------------------------------------
+    // end of db ------------------------------------------------------------
+
+    // samples --------------------------------------------------------------
     addSamples = (keyArray) => {
         const { sampleList, db, col } = this.state;
         const { sampleSelected } = this.props;
@@ -163,52 +228,6 @@ class DataTab extends React.Component {
         }
 
         this.q_sample = null;
-    }
-
-    renderDBView = () => {
-        const {db, dbList, col, colList} = this.state;
-        const divStyle = {
-            display: 'inline-block',
-            width: '42%',
-            marginRight: '10px'    
-        }
-        return (
-            <div className={theme.tabDiv}>
-                <div style={divStyle}>
-                    <Autocomplete 
-                        direction="down"
-                        selectedPosition="none"
-                        label="Select or Write a DB name"
-                        suggestionMatch="anywhere"
-                        source={dbList}
-                        value={db}
-                        multiple={false}
-                        showSuggestionsWhenValueIsSet={true}
-                        onQueryChange={q => this.q_db = q}
-                        onChange={(selected, e) => this.handleDBChange(selected, e)}
-                        theme={theme}
-                    />
-                </div>
-                <div style={divStyle}>
-                    <Autocomplete 
-                        direction="down"
-                        selectedPosition="none"
-                        label="Select or Write a collection name"
-                        suggestionMatch="anywhere"
-                        source={colList}
-                        value={col}
-                        multiple={false}
-                        showSuggestionsWhenValueIsSet={true}
-                        onQueryChange={q => this.q_col = q}
-                        onChange={(selected, e) => this.handleColChange(selected, e)}
-                        theme={theme}                
-                    />
-                </div>
-                <div style={{...divStyle, width: '10%', marginRight: '0px'}}>
-                    <IconButton icon='refresh' />
-                </div>
-            </div>
-        );
     }
 
     renderSelectedSamples = () => {
@@ -308,6 +327,28 @@ class DataTab extends React.Component {
             </div>
         );
     }
+    // end of samples -------------------------------------------------------
+
+    renderDBView = () => {
+        const { 
+            wdir, db, col, 
+            isConnected,
+            set_working_directory,
+        } = this.props;
+        return (
+            <div className={theme.tabDiv}>
+                <DBView
+                    wdir={wdir}
+                    db={db}
+                    col={col}
+                    inputLabel="Selected directory"
+                    dialogTitle="Select a working directory"
+                    updateWorkDir={set_working_directory}
+                    disabled={isConnected}
+                />
+            </div>
+        );
+    }
 
     render() {
         return (
@@ -324,17 +365,36 @@ function mapStateToProps(state) {
         sampleSelected: getSelectedSamples(state),
         sampleSelectedCounts: getSelectedSamplesCounts(state),
         sampleColors: state.data.sampleColors,
+
+        wdir: state.data.wdir,
         db: state.data.dbName,
-        col: state.data.colName
+        col: state.data.colName,
+
+        isConnected: state.data.isConnected,
+
+
+        // for watcher view
+        watcherFlag: state.data.isUpdatedByWatcher,
+        // sID: state.data.sID,
+        // total: state.data.total,
+        // processed: state.data.processed            
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        onUpdateDB: update_db_info,
+        //onUpdateDB: update_db_info,
         onSampleAdd: get_data,
         onSampleDel: del_data,
         onColorChange: changeSelectedSampleColors,
+
+        // for watcher view
+        set_working_directory,
+
+        get_watcher_connect,
+        get_watcher_disconnect,
+        set_watcher_update_flag,
+        set_sync_info
     }, dispatch);
 }
 

@@ -32,6 +32,9 @@ class ScatterView extends React.Component {
             onSelectDataItems: null,
         };
 
+        //debugger;
+        //console.log(chartProps)
+
         return <ScatterChart 
             ref={"ScatterChartRef"}
             {...chartProps}

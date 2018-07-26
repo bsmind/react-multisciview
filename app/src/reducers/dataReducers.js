@@ -65,22 +65,24 @@ const INIT_STATE = {
 		"linecut_qr/data/fit_peaks_sigma1",
     ],
 
-    // MongoDB
+    // MongoDB 
+    wdir: null,  // working directory for sync, watcher and db
     dbName: null,
     colName: null,
 
     // file watcher
     wID: null,
     isConnected: false,
-    wdir: '/root',
-    wNodeKey: 'N0',
-    wNodeList: [['N0', {name: '/root', path: '/root', children: []}]],
-    wNodeMap: new Map([['N0', {name: '/root', path: '/root', children: []}]]),
+    isUpdatedByWatcher: false,
+    watcherIntervalTime: 5000,
+    //wNodeKey: 'N0',
+    //wNodeList: [['N0', {name: '/root', path: '/root', children: []}]],
+    //wNodeMap: new Map([['N0', {name: '/root', path: '/root', children: []}]]),
 
     // file syncer
-    sID: null,
-    total: 0,
-    processed: 0,
+    isSyncing: false,
+    syncTotal: 0,
+    syncProcessed: 0,
 
     // temporal message
     message: '',
@@ -219,36 +221,32 @@ const set_value = (state, payload) => {
     return state;
 }
 
-const get_root_dir_list = (state, payload) => {
-    const {dirList, nodeid} = payload;
+// const get_root_dir_list = (state, payload) => {
+//     const {dirList, nodeid} = payload;
 
-    return {
-        ...state,
-        wNodeKey: nodeid,
-        wNodeList: dirList,
-        wNodeMap: new Map(dirList)
-    };
-}
+//     return {
+//         ...state,
+//         wNodeKey: nodeid,
+//         wNodeList: dirList,
+//         wNodeMap: new Map(dirList)
+//     };
+// }
 
-const set_watcher_nodekey = (state, payload) => {
-    const nodekey = payload;
-    const {wNodeMap} = state;
-    const node = wNodeMap.get(nodekey);
-    return {
-        ...state,
-        wdir: node.path,
-        wNodeKey: nodekey
-    }
+const set_wdir = (state, payload) => {
+    const {wdir, db} = payload;
+    if (db == null)
+        return {...state, wdir, dbName: null, colName: null};
+    return {...state, wdir, dbName: db[0], colName: db[1]};
 }
 
 const set_watcher_connection = (state, payload) => {
-    const { status } = payload;
-    return {...state, isConnected: status};
+    const { data, db, col } = payload;
+    const { status } = data;
+    return {...state, isConnected: status, dbName: db, colName: col};
 }
 
 const get_watcher_monitor = (state, payload) => {
-    const {sampleList, sampleData, stat} = payload;
-    //console.log(sampleList, stat)
+    const {sampleList, sampleData} = payload;
 
     if (sampleList.length == 0) 
         return state;
@@ -259,10 +257,10 @@ const get_watcher_monitor = (state, payload) => {
     let message = 'New sample added: ';
     let messageReady = false;
     //console.log(sampleList, stat)
-    sampleList.forEach((name, index) => {
+    sampleList.forEach(name => {
         if (dataBySamples[name] == null) {
             messageReady = true;
-            message = message + `[${name}] `;
+            message = message + `${name}  | `;
             //console.log('[!] Sample selected, but no data???');
         } else {
             sampleData[name].forEach(doc => {
@@ -281,16 +279,24 @@ const get_watcher_monitor = (state, payload) => {
     return {...state,
         dataBySamples: dataBySamples,
         sampleColors: sampleColors,
-        statBySamples: stat,
         message: message,
         messageReady: messageReady,
         messageType: 'warning', // accept: green, warning: yellow, cancel: red
+        isUpdatedByWatcher: true
     };
 }
 
-const set_sync_info = (state, payload) => {
-    const {id, processed, total} = payload;
-    return {...state, sID: id, total: total, processed: processed}
+const update_sync_info = (state, payload) => {
+    const {data, db, col} = payload;
+    const {status, total, processed} = data;
+    return {
+        ...state, 
+        isSyncing: status,
+        syncTotal: total, 
+        syncProcessed: processed,
+        dbName: db,
+        colName: col
+    };
 }
 
 const update_db_info = (state, payload) => {
@@ -323,16 +329,22 @@ export function dataReducers(state = INIT_STATE, action) {
         case "CHANGE_IMAGE_DOMAIN": return {...state, imgDomain: payload};
         case "CHANGE_PCP_SELECTED_ATTRS": return {...state, pcpSelectedAttrs: payload.slice()};
 
+        case "SET_WDIR": return set_wdir(state, payload);
+
+
         case "GET_ROOT_DIR_LIST": return get_root_dir_list(state, payload);
-        case "SET_WATCHER_NODEKEY": return set_watcher_nodekey(state, payload);
         case "GET_WATCHER_CONNECT": return set_watcher_connection(state, payload);
         case "GET_WATCHER_DISCONNECT": return set_watcher_connection(state, payload);
         case "GET_WATCHER_MONITOR": return get_watcher_monitor(state, payload);
 
-        case "SET_SYNC_INFO": return set_sync_info(state, payload);
+        case "GET_SYNCER_CONNECT": return update_sync_info(state, payload);
+        case "GET_SYNCER_DISCONNECT": return update_sync_info(state, payload);
+
         case "CLOSE_MESSAGE": return {...state, messageReady: false};
 
         case "UPDATE_DB_INFO": return update_db_info(state, payload);
+
+        case "SET_WATCHER_UPDATE_FLAG": return {...state, isUpdatedByWatcher: payload};
 
         case "REJECTED":
             console.log(payload);

@@ -31,31 +31,31 @@ const imageRequestOnProgress = () => {
 //     }
 // }
 
-export function get_root_dir_list(wdir) {
-    return dispatch => {
-        axios.get("/api/watcher/dirlist", {params:{wdir}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_ROOT_DIR_LIST",
-                    payload: resp.data
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_ROOT_DIR_LIST_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
+// export function get_root_dir_list(wdir) {
+//     return dispatch => {
+//         axios.get("/api/watcher/dirlist", {params:{wdir}})
+//             .then(resp => {
+//                 dispatch({
+//                     type: "GET_ROOT_DIR_LIST",
+//                     payload: resp.data
+//                 });
+//             })
+//             .catch(e => {
+//                 dispatch({
+//                     type: "GET_ROOT_DIR_LIST_REJECTED",
+//                     payload: e
+//                 });
+//             });
+//     };
+// }
 
-export function get_watcher_connect(wdir) {
+export function get_watcher_connect(wdir, db, col) {
     return dispatch => {
-        axios.get("/api/watcher/connect", {params:{wdir}})
+        axios.get("/api/watcher/connect", {params:{wdir, db, col}})
             .then(resp => {
                 dispatch({
                     type: "GET_WATCHER_CONNECT",
-                    payload: resp.data
+                    payload: {data: resp.data, db, col}
                 });
             })
             .catch(e => {
@@ -67,13 +67,13 @@ export function get_watcher_connect(wdir) {
     };
 }
 
-export function get_watcher_disconnect(wdir) {
+export function get_watcher_disconnect(wdir, db, col) {
     return dispatch => {
-        axios.get("/api/watcher/disconnect", {params:{wdir}})
+        axios.get("/api/watcher/disconnect", {params:{wdir, db, col}})
             .then(resp => {
                 dispatch({
                     type: "GET_WATCHER_DISCONNECT",
-                    payload: resp.data
+                    payload: {data:resp.data, db, col}
                 });
             })
             .catch(e => {
@@ -85,28 +85,10 @@ export function get_watcher_disconnect(wdir) {
     };
 }
 
-export function get_watcher_sync(wdir) {
-    return dispatch => {
-        axios.get("/api/watcher/sync", {params:{wdir}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_WATCHER_SYNC",
-                    payload: resp.data
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_WATCHER_SYNC_REJECTED",
-                    payload: e
-                });
-            });
-    }
-}
-
-export function set_watcher_nodekey(nodekey) {
+export function set_working_directory(wdir, db) {
     return {
-        type: "SET_WATCHER_NODEKEY",
-        payload: nodekey
+        type: "SET_WDIR",
+        payload: {wdir, db}
     };
 }
 
@@ -127,6 +109,32 @@ export function get_watcher_monitor(wdir) {
             });
     };
 }
+
+export function set_watcher_update_flag(flag) {
+    return {
+        type: "SET_WATCHER_UPDATE_FLAG",
+        payload: flag
+    }
+}
+
+export function get_syncer_connect(wdir, db, col) {
+    return dispatch => {
+        axios.get("/api/watcher/sync", {params:{wdir, db, col}})
+            .then(resp => {
+                dispatch({
+                    type: "GET_SYNCER_CONNECT",
+                    payload: {data: resp.data, db, col}
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_WATCHER_SYNC_REJECTED",
+                    payload: e
+                });
+            });
+    }
+}
+
 
 export function set_sync_info(id, processed, total) {
     return {
@@ -310,6 +318,7 @@ export function close_message() {
     }
 }
 
+// to be deleted
 export function update_db_info(db, col) {
     return {
         type: "UPDATE_DB_INFO",

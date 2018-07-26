@@ -113,6 +113,7 @@ providerProto.calculateMarkers = function(data) { //eslint-disable-line
 		const value = accessor(d);
 		const color = value == null ? defaultColor : colorScale(value);
 
+		//console.log(d, value, color)
 		if (markers[color] == null) {
 			const irow = Math.floor(i / gridWidth),
 				icol = i % gridWidth;

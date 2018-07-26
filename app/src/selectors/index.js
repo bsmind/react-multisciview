@@ -109,9 +109,17 @@ export const getScatterColorScheme = createSelector(
             reverse: false
         };
         const tempExtents = stat[attrz];
-        const minDomain = tempExtents && attrz !== 'sample' ? tempExtents[0]: 0;
-        const maxDomain = tempExtents && attrz !== 'sample' ? tempExtents[1]: 10;
+        let minDomain = tempExtents && attrz !== 'sample' ? tempExtents[0]: 0;
+        let maxDomain = tempExtents && attrz !== 'sample' ? tempExtents[1]: 10;
         const tempScheme = colorSchemes[attrz] ? colorSchemes[attrz]: {};
+
+        // This may happen when all values for the selected attribute are same.
+        // If minDomain is equal to maxDomain, it will cause error in compuing
+        // scale in d3.
+        if (Math.abs(maxDomain - minDomain) < 1e-12) {
+            minDomain = minDomain - 1;
+            maxDomain = maxDomain + 1;
+        }
 
         _update_colorDomain(minDomain, maxDomain, tempScheme);
 
