@@ -5,6 +5,11 @@
 .body {
     overflow-y: scroll;
     color: #000;
+    padding-bottom: 0px;
+}
+
+.navigation {
+    padding-top: 0px;
 }
 
 .input {

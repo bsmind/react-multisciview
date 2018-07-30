@@ -174,8 +174,9 @@ class MultiViewApp extends React.Component {
 
     render() {
         const {width, height} = this.state;
-        const l_width = Math.min(Math.floor(0.6 * width), Math.floor(height))
-        const r_width = Math.floor(width - l_width)
+        const MAX_TABVIEW_WIDTH = 416;
+        const r_width = Math.min(Math.floor(0.35 * width), MAX_TABVIEW_WIDTH);
+        const l_width = width - r_width;
         const {imgReqOnProgress, showImage} = this.props;
         return (
             <Layout>
@@ -190,7 +191,7 @@ class MultiViewApp extends React.Component {
                 
                 <div className={theme.chartbox}>
                     <div style={{width: l_width, float: "left"}}>
-                        {this.renderScatterView(l_width, l_width)}
+                        {this.renderScatterView(l_width, height)}
                     </div>
                     <div style={{marginLeft: l_width}}>
                         {this.renderOptionView(height)}

@@ -15,7 +15,10 @@ module.exports = {
                         unit: '6.5px'
                     }
                 }
-            }
-        }
+            },
+            browsers: ['last 2 versions', '> 5%']
+        },
+        'postcss-nesting': {},
+        'postcss-nested': {},
     }
 }

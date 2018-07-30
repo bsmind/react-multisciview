@@ -1,16 +1,24 @@
 import React from 'react';
 import axios from 'axios';
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 
 import {Dialog, Input} from 'react-toolbox';
 import { Button } from "react-toolbox/lib/button";
-import { TreeView } from 'rt-treeview';
+import { Checkbox } from "react-toolbox/lib/checkbox";
+//import { TreeView } from 'rt-treeview';
+//import { TreeView } from "../../components/treeview";
+//import PathSelectTreeView from "./pathSelectTreeView";
+import { DirTreeView } from "./dirTreeview";
 import throttle from "lodash.throttle";
 
 
-import dialogTheme from './dialog.css';
+//import dialogTheme from './dialog.css';
 
 const SYNC_PROGRESS_INTERVAL = 5000;
 const THROTTLE_INTERVAL = 100;
+
+
 
 
 class DBView extends React.Component {
@@ -20,11 +28,6 @@ class DBView extends React.Component {
         this.state = {
             wNodeMap: null,
             isOpen: false,
-
-            isOpenOptionDialog: false,
-            optionAction: null,
-            optionTitle: '',
-            optionMessage: '',
 
             newDBName: 'Type_new_name',
             newColName: 'Type_new_name'
@@ -115,10 +118,11 @@ class DBView extends React.Component {
         this.syncInterval = null;
     }
 
+    // moved to DirTreeView
     handleToggleWithUpdate = () => {
         const isOpen = !this.state.isOpen;
         if (isOpen)
-            axios.get('/api/db/fsmap')
+            axios.post('/api/db/fsmap')
                 .then(resp => {
                     this.setState({wNodeMap: new Map(resp.data), isOpen});
                 })
@@ -129,6 +133,7 @@ class DBView extends React.Component {
             this.setState({isOpen});
     }
 
+    // moved to DirTreeview
     handleToggle = (flag = false, event) => {
         if (flag) {
             const { wdir, db, col } = this.props;
@@ -159,8 +164,37 @@ class DBView extends React.Component {
         this.asyncSyncer(mode, wdir, syncerID);
     }
 
-    renderDatabaseView = () => {
-        const { wNodeMap } = this.state;
+    renderDatabaseViewDialog = () => {
+        const { wNodeMap, isOpen } = this.state;
+        const { wdir, isRecursive } = this.props;
+        if (isOpen) return null;
+        if (wdir == null) return null;
+
+        const nodeName = node => {
+            return (
+                <div style={{display: 'inline-block'}}>
+                    {node.name}
+                </div>
+            );
+        }
+
+        return (
+            <Dialog
+                active={true}
+                title={"DATABASE"}
+            >
+                <TreeView 
+                    nodes={wNodeMap}
+                    nodeName={nodeName}
+                    search={true}
+                    onNodeSelect={this.handleNodeSelect}
+                    size={'xs'}
+                />
+            </Dialog>
+        );
+
+        console.log(wNodeMap.get(wdir))
+        return null;
         
         const dbmap = {}
         wNodeMap.forEach((value, key) => {
@@ -230,40 +264,32 @@ class DBView extends React.Component {
 
     }
 
-    renderDirectoryView = () => {
+    renderDirectoryViewDialog = () => {
         const { wNodeMap } = this.state;
-        const { wdir, db, col } = this.props;
+        if (wNodeMap == null) return null;
 
-        const divStyle = {
-            display: 'inline-block',
-            width: '50%',
-            paddingRight: '10px'    
+        const nodeName = node => {
+            return <PathNode node={node} />;
         }
 
         return (
-            <div>
-                <div style={divStyle}>
-                    <Input 
-                        label={"Selected DB Name"}
-                        value={db || "Undefined"}
-                        readOnly={true}
-                    />
-                </div>
-                <div style={divStyle}>
-                    <Input 
-                        label={"Selected DB Name"}
-                        value={col || "Undefined"}
-                        readOnly={true} 
-                    />
-                </div>
-        
-                <TreeView 
+            <Dialog
+                active={this.state.isOpen}
+                actions={[
+                    { label: "SELECT", onClick: this.handleToggle.bind(this, false) }
+                ]}
+                onEscKeyDown={this.handleToggle.bind(this, false)}
+                onOverlayClick={this.handleToggle.bind(this, false)}
+                title={this.props.dialogTitle ? this.props.dialogTitle : ""}
+                theme={dialogTheme}
+            >
+                <PathSelectTreeView 
                     nodes={wNodeMap}
                     search={true}
-                    onNodeSelect={this.handleNodeSelect}
+                    recursive={true}
                     size={'xs'}
                 />
-            </div>
+            </Dialog>
         );
     }
 
@@ -330,7 +356,7 @@ class DBView extends React.Component {
 
     render() {
         const { wNodeMap } = this.state;
-        const { wdir, db, col } = this.props;
+        const { wdir, isRecursive, db, col } = this.props;
         const divStyle = {
             display: 'inline-block',
             width: '60%',
@@ -338,31 +364,36 @@ class DBView extends React.Component {
         }
         return (
             <div>
-                <Input
-                    label={this.props.inputLabel}
-                    value={wdir || 'Select a directory to retrieve/monitor/sync'}
-                    onClick={this.handleToggleWithUpdate}
-                    readOnly={true}
-                    style={{cursor: 'pointer'}}
-                    disabled={this.props.disabled}
-                    theme={dialogTheme}
+                <DirTreeView 
+                    selectedDir={wdir}
+                    recursive={isRecursive}
+                    size={'xs'}
                 />
-                <Dialog
-                    active={this.state.isOpen}
-                    actions={[
-                        { label: "PUSH", onClick: this.handleToggle.bind(this, true) },
-                        { label: "CLOSE", onClick: this.handleToggle.bind(this, false) }
-                    ]}
-                    onEscKeyDown={this.handleToggle.bind(this, false)}
-                    onOverlayClick={this.handleToggle.bind(this, false)}
-                    title={this.props.dialogTitle ? this.props.dialogTitle : ""}
-                    theme={dialogTheme}
-                >
-                    { wNodeMap != null &&
-                        this.renderDirectoryView()
-                    }
-                </Dialog>
-                <Dialog
+                {/* <div style={{...divStyle, width: '70%'}}>
+                    <Input
+                        label={this.props.inputLabel}
+                        value={wdir || 'Select a directory to retrieve/monitor/sync'}
+                        onClick={this.handleToggleWithUpdate}
+                        readOnly={true}
+                        style={{cursor: 'pointer'}}
+                        disabled={this.props.disabled}
+                        theme={dialogTheme}
+                    />
+                </div>
+                <div style={{...divStyle, width: '30%', paddingRight: '0px'}}>
+                    <Checkbox 
+                        checked={isRecursive}
+                        label="recursive"
+                        onChange={null}
+                    />
+                </div> */}
+                {/* Dialog to open directory selection view */}
+                {/* {this.renderDirectoryViewDialog()} */}
+                {/* Dialog to open database setting view. */}
+                {/* Open when the selected path is not associated with MongoDB. */}
+                {/* In recursive mode, need to check all sub-directories. */}
+                {/* {this.renderDatabaseViewDialog()} */}
+                {/* <Dialog
                     active={!this.state.isOpen && wdir != null && db == null}
                     title={"DATABASE"}
                     actions={[
@@ -372,13 +403,26 @@ class DBView extends React.Component {
                     { wNodeMap != null && !this.state.isOpen && wdir != null && db == null &&
                         this.renderDatabaseView()
                     }
-                </Dialog>
-                {this.renderSelectedDB(divStyle)}
-                {this.renderOptions({...divStyle, width:'40%', paddingRight: '10px'})}
+                </Dialog> */}
+                {/* {this.renderSelectedDB(divStyle)} */}
+                {/* {this.renderOptions({...divStyle, width:'40%', paddingRight: '10px'})} */}
             </div>
 
         )
     }
 }
 
-export default DBView;
+function mapStateToProps(state) {
+    return {
+        wdir: state.data.wdir,
+        isRecursive: state.data.isRecursive
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+
+    }, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DBView);

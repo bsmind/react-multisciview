@@ -5,6 +5,7 @@ const { getIfUtils, removeEmpty } = require("webpack-config-utils");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+//const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const rootPath = path.join(__dirname, "..");
 const rootPath2 = path.join(__dirname, "../../multisciview")
@@ -132,7 +133,7 @@ function buildConfig(mode) {
             "react-dom": "ReactDOM",
         },
         resolve: {
-            extensions: [".js", ".scss", ".md"],
+            extensions: [".js", ".scss", ".css", ".md"],
             alias: {
                 "react-multiview": path.join(rootPath, "src")
             },

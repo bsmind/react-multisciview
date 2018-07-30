@@ -283,7 +283,7 @@ class DataTab extends React.Component {
 
     renderDBView = () => {
         const { 
-            wdir, db, col, 
+            wdir, isRecursive, db, col, 
             isSyncing, syncerID, syncTotal, syncProcessed,
             isMonitoring,
             isConnected,
@@ -298,7 +298,6 @@ class DataTab extends React.Component {
         return (
             <div className={theme.tabDiv}>
                 <DBView
-                    wdir={wdir}
                     db={db}
                     col={col}
                     inputLabel="Selected directory"
@@ -333,6 +332,8 @@ function mapStateToProps(state) {
         sampleColors: state.data.sampleColors,
 
         wdir: state.data.wdir,
+        isRecursive: state.data.isRecursive,
+
         db: state.data.dbName,
         col: state.data.colName,
 
