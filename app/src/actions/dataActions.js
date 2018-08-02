@@ -8,46 +8,39 @@ const TIFF_TIMEOUT = 20;
 const tiffRequest = [];
 const pqTiff = new PriorityQueue();
 
+export function setValue(name, value) {
+    return {
+        type: "SET_VALUE",
+        payload: {name, value}
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 const imageRequestOnProgress = () => {
     const count = tiffRequest.length + pqTiff.length();
     return count;
 }
 
-// export function get_db_info(db, col) {
-//     return dispatch => {
-//         axios.get("/api/db", {params: {db, col}})
-//             .then(resp => {
-//                 dispatch({
-//                     type: "GET_DB_INFO",
-//                     payload: resp.data
-//                 });
-//             })
-//             .catch(e => {
-//                 dispatch({
-//                     type: "GET_DB_INFO_REJECTED",
-//                     payload: e
-//                 });
-//             });
-//     }
-// }
 
-// export function get_root_dir_list(wdir) {
-//     return dispatch => {
-//         axios.get("/api/watcher/dirlist", {params:{wdir}})
-//             .then(resp => {
-//                 dispatch({
-//                     type: "GET_ROOT_DIR_LIST",
-//                     payload: resp.data
-//                 });
-//             })
-//             .catch(e => {
-//                 dispatch({
-//                     type: "GET_ROOT_DIR_LIST_REJECTED",
-//                     payload: e
-//                 });
-//             });
-//     };
-// }
+
+
+export function set_working_directory(wdir) {
+    return {
+        type: "SET_WDIR",
+        payload: {wdir}
+    };
+}
+
 
 export function get_watcher_connect(wdir, db, col) {
     return dispatch => {
@@ -85,12 +78,6 @@ export function get_watcher_disconnect(wdir, db, col) {
     };
 }
 
-export function set_working_directory(wdir, db) {
-    return {
-        type: "SET_WDIR",
-        payload: {wdir, db}
-    };
-}
 
 export function get_watcher_monitor(wdir) {
     return dispatch => {
@@ -286,12 +273,7 @@ export function changeScatterColorScheme(scheme) {
     };
 }
 
-export function setValue(name, value) {
-    return {
-        type: "SET_VALUE",
-        payload: {name, value}
-    }
-}
+
 
 export function changeImgColorScheme(newScheme) {
 	return {

@@ -6,10 +6,28 @@ import theme from './treeview.css';
 
 class TreeView extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
+
+        const {nodes, selectedNode} = props;
+        const expandedNodes = [];
+        if (selectedNode && nodes.has(selectedNode)) {
+
+            const node = nodes.get(selectedNode);
+            if (node.children && node.children.length > 0)
+                expandedNodes.push(selectedNode);
+
+            function _recursive_search(_node) {
+                if (_node.parent && nodes.has(_node.parent)) {
+                    expandedNodes.push(_node.parent);
+                    _recursive_search(nodes.get(_node.parent));
+                }
+            }
+            _recursive_search(node);
+        }
+
         this.state = {
-            selectedNode: props.selectedNode,
-            expandedNodes: []
+            selectedNode: selectedNode,
+            expandedNodes
         }
     }
 

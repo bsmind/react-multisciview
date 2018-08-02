@@ -16,18 +16,6 @@ const INIT_STATE = {
     dataBySamples: {},
 
     /**
-     * statBySamples
-     * - {[sampleName]: count}
-     */
-    //statBySamples: {},
-
-    /**
-     * sampleSelected
-     * - array of sampleName selected for visualization
-     */
-    //sampleSelected: [],
-
-    /**
      * sampleColors
      * - colors of each sample
      * - [sampleName]: color
@@ -68,8 +56,8 @@ const INIT_STATE = {
     // MongoDB 
     wdir: null,        // working directory for sync, watcher and db
     isRecursive: true, // if true, retrieve data, recursively from wdir to its sub-directories
-    dbName: null,
-    colName: null,
+    //dbName: null,
+    //colName: null,
 
     isMonitoring: false,
     isSyncing: false,
@@ -94,6 +82,28 @@ const INIT_STATE = {
     messageReady: false,
     messageType: 'warning', // accept: green, warning: yellow, cancel: red
 }
+
+// set value
+// - used to set simple value
+const set_value = (state, payload) => {
+    const {name, value} = payload;
+    if (state.hasOwnProperty(name)) {
+        return {...state, [name]: value};
+    }
+    return state;
+}
+
+const set_wdir = (state, payload) => {
+    const {wdir} = payload;
+    return {...state, wdir};
+}
+
+
+
+
+
+
+
 
 const _update_sample_colors = (state, sampleList) => {
     const sampleColors = {...state.sampleColors};
@@ -218,13 +228,6 @@ const change_scatter_color_scheme = (state, payload) => {
     };
 }
 
-const set_value = (state, payload) => {
-    const {name, value} = payload;
-    if (state[name] != null) {
-        return {...state, [name]: value};
-    }
-    return state;
-}
 
 // const get_root_dir_list = (state, payload) => {
 //     const {dirList, nodeid} = payload;
@@ -237,12 +240,6 @@ const set_value = (state, payload) => {
 //     };
 // }
 
-const set_wdir = (state, payload) => {
-    const {wdir, db} = payload;
-    if (db == null)
-        return {...state, wdir, dbName: null, colName: null};
-    return {...state, wdir, dbName: db[0], colName: db[1]};
-}
 
 const set_watcher_connection = (state, payload) => {
     const { data, db, col } = payload;

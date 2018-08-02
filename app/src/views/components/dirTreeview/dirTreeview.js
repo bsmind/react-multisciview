@@ -6,6 +6,8 @@ import TreeView from "./treeview";
 
 import dialogTheme from './dialog.css';
 
+
+// todo: search
 class DirTreeView extends React.Component {
     constructor(props) {
         super(props);
@@ -30,6 +32,10 @@ class DirTreeView extends React.Component {
                 this.setState({
                     nodes: new Map(resp.data),
                     isOpen
+                }, () => {
+                    if (this.props.onDirSelect && !isOpen) {
+                        this.props.onDirSelect(this.state.selectedDir)
+                    }                    
                 });
             })
             .catch(e => {
@@ -83,7 +89,7 @@ class DirTreeView extends React.Component {
     }
 
     handleRefresh = () => {
-        this.asyncUpdate();
+        this.asyncUpdate(true, false);
     }
 
     handleSave = () => {
@@ -100,15 +106,24 @@ class DirTreeView extends React.Component {
             this.asyncUpdate(isOpen);
         }
         else
-            this.setState({isOpen});
+            this.setState({isOpen}, () => {
+                if (this.props.onDirSelect) {
+                    this.props.onDirSelect(this.state.selectedDir)
+                }
+            });
     }
 
     handleToggle = () => {
-        this.setState({isOpen: !this.state.isOpen});
+        this.setState({isOpen: !this.state.isOpen}, () => {
+            if (this.props.onDirSelect) {
+                this.props.onDirSelect(this.state.selectedDir)
+            }
+        });
     }
 
     render() {
         const { recursive, disabled, size } = this.props;
+        const { onTraverseModeChange } = this.props;
         const { nodes, isOpen, selectedDir } = this.state;
         return (
             <div>
@@ -138,7 +153,7 @@ class DirTreeView extends React.Component {
                     <Checkbox 
                         checked={recursive}
                         label="recursive"
-                        onChange={null}
+                        onChange={onTraverseModeChange}
                     />
                 </div>
                 <Dialog
@@ -157,6 +172,7 @@ class DirTreeView extends React.Component {
                     {nodes &&
                         <TreeView 
                             nodes={nodes}
+                            selectedNode={selectedDir}
                             size={size}
                             onDBChange={this.handleDBChange}
                             onColChange={this.handleColChange}
