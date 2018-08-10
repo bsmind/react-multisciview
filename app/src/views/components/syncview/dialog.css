@@ -23,4 +23,11 @@
     line-height: 20px;
 }
 
+.tabDiv {
+    border-radius: 10px;
+    border: 1px dotted #707070;
+    padding: 0px 5px 0px 5px;
+    margin-bottom: 5px;
+}
+
 

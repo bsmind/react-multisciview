@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 
-import {Dialog, Input, Button, Checkbox} from "react-toolbox";
+import {Dialog, Input, Checkbox} from "react-toolbox";
 import TreeView from "./treeview";
 
 import dialogTheme from './dialog.css';
@@ -29,10 +29,7 @@ class DirTreeView extends React.Component {
 
         axios.post('/api/db/fsmap', payload)
             .then(resp => {
-                this.setState({
-                    nodes: new Map(resp.data),
-                    isOpen
-                }, () => {
+                this.setState({nodes: new Map(resp.data), isOpen}, () => {
                     if (this.props.onDirSelect && !isOpen) {
                         this.props.onDirSelect(this.state.selectedDir)
                     }                    

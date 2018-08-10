@@ -133,17 +133,22 @@ class DBView extends React.Component {
     }
 
     render() {
-        const { wdir, isRecursive, setValue } = this.props;
+        const { wdir, isRecursive, setValue, syncInfo } = this.props;
         const { isOpen } = this.state;
         return (
             <div>
-                <div style={{display: 'inline-block', width: '85%', paddingRight: '0px'}}>
+                <div style={{
+                    display: 'inline-block', 
+                    width: '85%', 
+                    paddingRight: '0px'}}
+                >
                     <DirTreeView 
                         selectedDir={wdir}
                         recursive={isRecursive}
                         size={'xs'}
                         onDirSelect={setValue.bind(this, 'wdir')}
-                        onTraverseModeChange={setValue.bind(this, 'isRecursive')}
+                        onTraverseModeChange={
+                            setValue.bind(this, 'isRecursive')}
                     />
                 </div>
                 <div style={{display: 'inline-block', width: '15%'}}>
@@ -156,12 +161,15 @@ class DBView extends React.Component {
                     />
                 </div>
                 {/* SyncView is a dialog. */
-                    // Internally, SyncView component is mounted when dbview is mounted.
-                    // This is to keep the nice transition effect in Dialog component.
+                    // Internally, SyncView component is mounted when dbview 
+                    // is mounted. This is to keep the nice transition effect 
+                    // in Dialog component.
                     <SyncView 
                         active={isOpen}
                         selectedDir={wdir}
                         recursive={isRecursive}
+                        syncInfo={syncInfo}
+                        updateSyncInfo={setValue.bind(this, 'syncInfo')}
                         close={this.handleToggle}
                     />
                 }
@@ -173,13 +181,14 @@ class DBView extends React.Component {
 function mapStateToProps(state) {
     return {
         wdir: state.data.wdir,
-        isRecursive: state.data.isRecursive
+        isRecursive: state.data.isRecursive,
+        syncInfo: state.data.syncInfo,
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        setValue
+        setValue,
     }, dispatch);
 }
 

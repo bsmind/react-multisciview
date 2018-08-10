@@ -1,0 +1,55 @@
+.input {
+    cursor: pointer;
+    padding-bottom: 3px;
+}
+
+.syncview {
+    & > ul {
+        list-style-type: none;
+        padding-left: 0;
+
+        & li {
+            & > .node {
+
+                & > .infonode {
+                    display: inline-block;
+                    width: 87%;
+
+                    &:hover {
+                        background: rgb(238, 238, 238);
+                    }    
+
+                    & > .nameInput {
+                        display: inline-block;
+                        width: 47%;
+                        padding-right: 5px;
+                    }
+    
+                    & > .sepInput {
+                        display: inline-block;
+                        width: 8%;
+                        padding-right: 5px;
+                    }
+    
+                    & > .groupInput {
+                        display: inline-block;
+                        width: 25%;
+                        padding-right: 5px;
+                    }
+    
+                    & > .statusInput {
+                        display: inline-block;
+                        width: 20%;
+                        padding-right: 0px;
+                    }
+                        
+                }
+
+                & > .cmdnode {
+                    display: inline-block;
+                    width: 13%;
+                }
+            }
+        }
+    }    
+}

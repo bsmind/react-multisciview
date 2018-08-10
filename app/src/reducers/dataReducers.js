@@ -56,6 +56,8 @@ const INIT_STATE = {
     // MongoDB 
     wdir: null,        // working directory for sync, watcher and db
     isRecursive: true, // if true, retrieve data, recursively from wdir to its sub-directories
+    syncInfo: {},
+    
     //dbName: null,
     //colName: null,
 

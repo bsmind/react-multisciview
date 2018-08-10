@@ -7,7 +7,7 @@
 }
 
 :root {
-    --unit: '6.5px';
+    --unit: '7px';
     --appbar-color: var(--palette-grey-400);
     --appbar-contrast: var(--color-black);
     --appbar-height: 41.6px;
