@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import axios from 'axios';
-import {Dialog, Input, Button, IconButton} from 'react-toolbox';
+import {Dialog, Input, IconButton} from 'react-toolbox';
 import theme from './syncview.css';
 import dialogTheme from './dialog.css';
 
@@ -188,38 +188,6 @@ class SyncView extends React.Component {
         }
     }
 
-    handleStart = () => {
-        // const { file_dir_map, dir_file_map } = this.state;
-
-        // let err = false;
-        // Object.keys(file_dir_map).forEach(file => {
-        //     if (file_dir_map[file].sep.length == 0)
-        //         err = true;
-        // });
-
-        // if (err) {
-        //     this.setState({err});
-        //     return;
-        // }
-
-        // const payload = {};
-        // Object.keys(dir_file_map).forEach(dir => {
-        //     const file = dir_file_map[dir];
-        //     payload[dir] = file_dir_map[file].sep;
-        // });
-
-        // axios.post('/api/syncer/start', payload)
-        //     .then(resp => {
-        //         console.log(resp.data)
-        //         // update state && store (syncer id)
-        //     })
-        //     .catch(e => {
-        //         console.log(e);
-        //     })
-
-        // this.setState({err});
-    }
-
     handleSeparatorChange = (path, new_sep) => {
         new_sep = new_sep.replace(/ /g, "");
         const { syncInfo } = this.state;
@@ -277,7 +245,7 @@ class SyncView extends React.Component {
         }
     }
 
-    renderUnqueued = () => {
+    renderView = () => {
         const { syncInfo } = this.state;
 
         const items = Object.keys(syncInfo)
@@ -318,13 +286,7 @@ class SyncView extends React.Component {
                 title={'Syncronize DB with filesystem'}
                 theme={dialogTheme}
             >
-                {this.renderUnqueued()}
-                {/* {this.renderProgress()} */}
-                {/* when syncer is not running */}
-                {/* <p><span style={{color: err ? "red": "black"}}>Set missing separators</span></p> */}
-                {/* {this.renderSampleFiles()} */}
-
-                {/* when syncer is running */}
+                {this.renderView()}
             </Dialog>
         );
     }

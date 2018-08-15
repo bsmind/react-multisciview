@@ -3,10 +3,6 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import {
-    //get_root_dir_list,
-    //get_current_data_stat,
-    get_watcher_monitor,
-    get_watcher_disconnect,
     get_color_map,
     close_message,
 } from "./actions/dataActions";
@@ -21,6 +17,9 @@ import theme from "./appIndex.css";
 import OptionView from "./views/optionView";
 import ScatterView from "./views/scatterView";
 
+const github="https://github.com/ComputationalScienceInitiative/react-multiview"
+
+
 class MultiViewApp extends React.Component {
     constructor(){
         super();
@@ -31,7 +30,7 @@ class MultiViewApp extends React.Component {
 
         this.pcpAttrSelect = {};
         this.__dataExtents = {};
-        this.interval = null;
+        this.evtSource = null;
     }
 
     componentWillMount() {
@@ -41,44 +40,15 @@ class MultiViewApp extends React.Component {
     componentDidMount() {
         this.props.get_color_map();
         window.addEventListener("resize", () => this.handleResize());
-        // window.addEventListener('unload', function(event) {
-        //     //call function to save you state in API or save in localStore
-        //     console.warn('bye bye~!')
-        //  });
-    }
 
-    componentWillReceiveProps(nextProps) {
-        const { 
-            isConnected:isStreamMode,
-            wdir,
-            db,
-            col,
-            intervalTime 
-        } = nextProps;
-        // const { wdir, db, col } = this.props;
-
-        if (isStreamMode) {
-            if (this.interval) {
-                clearInterval(this.interval);
-                this.interval = null;
-            } 
-            this.interval = setInterval(
-                this.props.get_watcher_monitor.bind(this,wdir), 
-                intervalTime);            
-        } else {
-            if (this.interval) {
-                clearInterval(this.interval);
-                this.interval = null;
-            }
+        this.evtSource = new EventSource('/stream');
+        this.evtSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log(data)
         }
     }
 
     componentWillUnmount() {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
-        }
-        if (this.props.isConnected) this.props.get_watcher_disconnect(this.props.wdir);
         window.removeEventListener("resize", () => this.handleResize());
     }
 
@@ -126,21 +96,29 @@ class MultiViewApp extends React.Component {
 
     renderHeader = () => {
         const imgReqOnProgress = this.props.imgReqOnProgress;
+    
         return (
             <Panel>
                 <AppBar title="React-MultiSciView"
-                        leftIcon="menu" onLeftIconClick={null} theme={theme} fixed flat
+                        leftIcon="menu" 
+                        onLeftIconClick={null} 
+                        theme={theme} 
+                        fixed flat
                 >
                     <Navigation type="horizontal">
                         <ul style={{listStyle: 'none'}}>
                                 {imgReqOnProgress > 0 &&
 									<li className={theme.hLi}>
-										<Button icon='cloud_upload' label={`${imgReqOnProgress}`} accent />
+                                        <Button 
+                                            icon='cloud_upload' 
+                                            label={`${imgReqOnProgress}`} 
+                                            accent 
+                                        />
 									</li>									
 								}                        
                             <li className={theme.hLi}>
                                 <a style={{textDecoration: 'none'}}
-                                    href="https://github.com/ComputationalScienceInitiative/react-multiview"
+                                    href={github}
                                     target="_blank"
                                 >
                                     Github
@@ -215,13 +193,6 @@ function mapStateToProps(state) {
     return {
         imgReqOnProgress: state.data.numImageRequested,
         showImage: state.data.showImage,
-
-        wdir: state.data.wdir,
-        isConnected: state.data.isConnected,
-        db: state.data.dbName,
-        col: state.data.colName,
-        intervalTime: state.data.watcherIntervalTime,
-
         message: state.data.message,
         messageReady: state.data.messageReady,
         messageType: state.data.messageType
@@ -230,15 +201,14 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        //get_root_dir_list,
-        //get_current_data_stat,
-        get_watcher_monitor,
         get_color_map,
         close_message
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(MultiViewApp);
+export default connect(
+    mapStateToProps, mapDispatchToProps, 
+    null, {withRef: true})(MultiViewApp);
 
 
 

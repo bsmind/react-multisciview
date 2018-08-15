@@ -29,6 +29,7 @@ class DirTreeView extends React.Component {
 
         axios.post('/api/db/fsmap', payload)
             .then(resp => {
+                //console.log(resp.data)
                 this.setState({nodes: new Map(resp.data), isOpen}, () => {
                     if (this.props.onDirSelect && !isOpen) {
                         this.props.onDirSelect(this.state.selectedDir)
@@ -93,10 +94,6 @@ class DirTreeView extends React.Component {
         this.asyncUpdate(true, true);
     }
 
-    handleSaveAndClose = () => {
-        this.asyncUpdate(false, true);
-    }
-
     handleToggleWidthUpdate = () => {
         const isOpen = !this.state.isOpen;
         if (isOpen) {
@@ -158,7 +155,6 @@ class DirTreeView extends React.Component {
                     actions={[
                         {label: 'REFRESH', onClick: this.handleRefresh},
                         {label: 'SAVE', onClick: this.handleSave},
-                        {label: 'SAVE & CLOSE', onClick: this.handleSaveAndClose},
                         {label: 'CLOSE', onClick: this.handleToggle}
                     ]}
                     onEscKeyDown={this.handleToggle}

@@ -1,12 +1,11 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import axios from "axios";
 
 import Autocomplete from "react-toolbox/lib/autocomplete";
-import { Button, IconButton } from "react-toolbox/lib/button";
+import { Button } from "react-toolbox/lib/button";
 import { List, ListItem, ListSubHeader } from "react-toolbox/lib/list";
 import DBView from "./dbview";
 import theme from "./index.css"
@@ -19,15 +18,7 @@ import {
     get_data,
     del_data,
     changeSelectedSampleColors,
-    //update_db_info,
-
-    // for watcher view
-    set_working_directory,
-    get_watcher_connect,
-    get_watcher_disconnect,
-    set_watcher_update_flag,
-
-    set_sync_info
+    setValue
 } from "../../actions/dataActions";
 
 import {
@@ -63,9 +54,7 @@ class DataTab extends React.Component {
     constructor() {
         super();
         this.state = {
-            sampleList: [],
-            db: null,
-            col: null,
+            sampleList: []
         }
 
         this.q_sample = null;
@@ -74,14 +63,11 @@ class DataTab extends React.Component {
             THROTTLE_INTERVAL,
             {'leading': true, 'trailing': true}
         );
-
-        // interval id to get progress of a syncer
-        this.interval = null;
     }
 
     asyncUpdateSampleList = (props = this.props) => {
-        const {wdir, db, col} = props;
-        if (wdir == null || db == null || col == null) {
+        const {wdir, isRecursive} = props;
+        if (wdir == null) {
             return;
         }
 
@@ -90,22 +76,35 @@ class DataTab extends React.Component {
             sampleSelectedCounts,
         } = props;
 
-        axios.get("/api/db/samplelist", {params:{db, col}})
+        const payload = {
+            path: wdir,
+            recursive: isRecursive
+        }
+
+        axios.post("/api/data/samplelist", payload)
             .then(resp => {
-                // if the number of samples are different, add samples..
-                const sampleList = resp.data;
-                const samplesToAdd = sampleList.map(item => {
-                    const {_id, count} = item;
-                    const key = `[${db}][${col}]${_id}`;
+                // if the number of samples are different, add samples.
+                const data = resp.data;
+                const sampleList = [];
+                const samplesToAdd = Object.keys(data).map(key => {
+                    const count = data[key];
+
+                    sampleList.push({
+                        '_id': key,
+                        'count': count
+                    });
+
                     const idx = sampleSelected.indexOf(key);
                     if (idx >= 0 && sampleSelectedCounts[idx] != count) {
-                        return _id;
+                        return key;
                     }
                 }).filter(d => d!=null);
-                this.setState({sampleList, db, col});
-                if (samplesToAdd.length && props.onSampleAdd) {
-                    props.onSampleAdd(db, col, samplesToAdd);
-                }
+
+                this.setState({sampleList}, () => {
+                    if (samplesToAdd.length && props.onSampleAdd) {
+                        props.onSampleAdd(samplesToAdd, wdir, isRecursive);
+                    }
+                });
             })
             .catch(e => {
                 console.log(e)
@@ -120,44 +119,40 @@ class DataTab extends React.Component {
         this.asyncUpdateSampleList(nextProps)
     }
 
-    componentWillUnmount() {
-        // const {db, col} = this.state;
-        // if (this.props.onUpdateDB)
-        //     this.props.onUpdateDB(db, col);
-
-        if (this.interval) clearInterval(this.interval);
-    }
-
-    // watcher --------------------------------------------------------------
-    handleConnect = () => {
-        const { wdir } = this.props;
-        const { db, col } = this.state;
-        if (this.props.get_watcher_connect)
-            this.props.get_watcher_connect(wdir, db, col);
-    }
-
-    handleDisconnect = () => {
-        const { wdir } = this.props;
-        const { db, col } = this.state;
-        if (this.props.get_watcher_disconnect)
-            this.props.get_watcher_disconnect(wdir, db, col);
-    }
-    // end of watcher --------------------------------------------------------
-    
-
     addSamples = (keyArray) => {
-        const { sampleList, db:dbState, col:colState } = this.state;
-        const { sampleSelected, db:dbProp, col:colProp } = this.props;
+        const { sampleList } = this.state;
+        const { sampleSelected, wdir, isRecursive } = this.props;
 
         const samplesToAdd = keyArray.map(key => {
             const {_id, count} = sampleList[key];
-            const name = `[${dbState}][${colState}]${_id}`;
-            if (sampleSelected.indexOf(name) === -1) 
+            if (sampleSelected.indexOf(_id) === -1) 
                 return _id;
         }).filter(d => d != null);
 
         if (samplesToAdd.length && this.props.onSampleAdd) {
-            this.props.onSampleAdd(dbState, colState, samplesToAdd);
+            this.props.onSampleAdd(samplesToAdd, wdir, isRecursive);
+        }
+    }
+
+    handleAddAll = () => {
+        const { sampleList } = this.state;
+        const { sampleSelected } = this.props;
+        const samplesToAdd = sampleList.map( sample => {
+            const {_id, count} = sample;
+            if (sampleSelected.indexOf(_id) == -1)
+                return _id;
+        }).filter(d => d != null);
+
+        const { wdir, isRecursive, onSampleAdd} = this.props;
+        if (onSampleAdd) {
+            onSampleAdd(samplesToAdd, wdir, isRecursive);
+        }
+    }
+
+    handleDelAll = () => {
+        const { sampleSelected } = this.props;
+        if (sampleSelected.length && this.props.onSampleDel) {
+            this.props.onSampleDel(sampleSelected);
         }
     }
 
@@ -221,17 +216,15 @@ class DataTab extends React.Component {
             width: '65%',
             marginRight: '10px'    
         }
-        const { sampleList, db:dbState, col:colState } = this.state;
-        const { height, sampleSelected, db:dbProp, col:colProp } = this.props;
-        const ListHeight = height - 300;
+        const { sampleList } = this.state;
+        const { height, sampleSelected } = this.props;
+        const ListHeight = height - 200;
 
         const samples = {};
         const local_selected = sampleList.map( (sample, idx) => {
             const {_id, count} = sample;
             samples[idx] = `[${count}] ${_id}`;
-
-            const key = `[${dbState}][${colState}]${_id}`;
-            if (sampleSelected.indexOf(key) >= 0)
+            if (sampleSelected.indexOf(_id) >= 0)
                 return idx;
         }).filter(d => d != null);
 
@@ -282,34 +275,12 @@ class DataTab extends React.Component {
     }
 
     renderDBView = () => {
-        const { 
-            wdir, isRecursive, db, col, 
-            isSyncing, syncerID, syncTotal, syncProcessed,
-            isMonitoring,
-            isConnected,
-            set_working_directory,
-            set_sync_info,
-        } = this.props;
-        const divStyle = {
-            display: 'inline-block',
-            width: '50%',
-            paddingRight: '10px'    
-        }
         return (
             <div className={theme.tabDiv}>
                 <DBView
-                    db={db}
-                    col={col}
                     inputLabel="Selected directory"
                     dialogTitle="Select a working directory"
-                    updateWorkDir={set_working_directory}
                     disabled={false}
-                    isSyncing={isSyncing}
-                    syncerID={syncerID}
-                    syncTotal={syncTotal}
-                    syncProcessed={syncProcessed}
-                    updateSyncInfo={set_sync_info}
-                    isMonitoring={isMonitoring}
                 />
             </div>
         );
@@ -330,29 +301,8 @@ function mapStateToProps(state) {
         sampleSelected: getSelectedSamples(state),
         sampleSelectedCounts: getSelectedSamplesCounts(state),
         sampleColors: state.data.sampleColors,
-
         wdir: state.data.wdir,
         isRecursive: state.data.isRecursive,
-
-        db: state.data.dbName,
-        col: state.data.colName,
-
-        isSyncing: state.data.isSyncing,
-        syncerID: state.data.syncerID,
-        syncTotal: state.data.syncTotal,
-        syncProcessed: state.data.syncProcessed,
-
-        isMonitoring: state.data.isMonitoring,
-
-
-        isConnected: state.data.isConnected,
-
-
-        // for watcher view
-        watcherFlag: state.data.isUpdatedByWatcher,
-        // sID: state.data.sID,
-        // total: state.data.total,
-        // processed: state.data.processed            
     };
 }
 
@@ -361,16 +311,7 @@ function mapDispatchToProps(dispatch) {
         onSampleAdd: get_data,
         onSampleDel: del_data,
         onColorChange: changeSelectedSampleColors,
-
-        set_working_directory,
-        set_sync_info,
-
-
-
-        get_watcher_connect,
-        get_watcher_disconnect,
-        set_watcher_update_flag,
-        
+        onWdirChange: setValue
     }, dispatch);
 }
 

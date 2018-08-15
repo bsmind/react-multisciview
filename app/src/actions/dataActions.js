@@ -8,6 +8,8 @@ const TIFF_TIMEOUT = 20;
 const tiffRequest = [];
 const pqTiff = new PriorityQueue();
 
+// used to set state (only for simple assignment)
+// it is requried to know field name
 export function setValue(name, value) {
     return {
         type: "SET_VALUE",
@@ -15,168 +17,8 @@ export function setValue(name, value) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-const imageRequestOnProgress = () => {
-    const count = tiffRequest.length + pqTiff.length();
-    return count;
-}
-
-
-
-
-export function set_working_directory(wdir) {
-    return {
-        type: "SET_WDIR",
-        payload: {wdir}
-    };
-}
-
-
-export function get_watcher_connect(wdir, db, col) {
-    return dispatch => {
-        axios.get("/api/watcher/connect", {params:{wdir, db, col}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_WATCHER_CONNECT",
-                    payload: {data: resp.data, db, col}
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_WATCHER_CONNECT_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-export function get_watcher_disconnect(wdir, db, col) {
-    return dispatch => {
-        axios.get("/api/watcher/disconnect", {params:{wdir, db, col}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_WATCHER_DISCONNECT",
-                    payload: {data:resp.data, db, col}
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_WATCHER_DISCONNECT_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-
-export function get_watcher_monitor(wdir) {
-    return dispatch => {
-        axios.get("/api/watcher/monitor", {params:{wdir}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_WATCHER_MONITOR",
-                    payload: resp.data
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_WATCHER_MONITOR_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-export function set_watcher_update_flag(flag) {
-    return {
-        type: "SET_WATCHER_UPDATE_FLAG",
-        payload: flag
-    }
-}
-
-export function get_syncer_connect(wdir, db, col) {
-    return dispatch => {
-        axios.get("/api/watcher/sync", {params:{wdir, db, col}})
-            .then(resp => {
-                dispatch({
-                    type: "GET_SYNCER_CONNECT",
-                    payload: {data: resp.data, db, col}
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_WATCHER_SYNC_REJECTED",
-                    payload: e
-                });
-            });
-    }
-}
-
-
-export function set_sync_info(status, id, processed, total) {
-    return {
-        type: "SET_SYNC_INFO",
-        payload: {status, id, processed, total}
-    };
-}
-
-export function get_current_data_stat() {
-    return dispatch => {
-        axios.get("/api/data/stat")
-            .then(resp => {
-                dispatch({
-                    type: "GET_CURRENT_DATA_STAT",
-                    payload: resp.data
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_CURRENT_DATA_STAT_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-
-
-
-export function get_data(db, col, sampleNames) {
-    return dispatch => {
-        axios.get("/api/data/sample", {params: {db, col, name: sampleNames}})
-            .then(resp => {
-                const data = resp.data;
-                dispatch({
-                    type: "GET_DATA",
-                    payload: {data, db, col}
-                });
-            })
-            .catch(e => {
-                dispatch({
-                    type: "GET_DATA_REJECTED",
-                    payload: e
-                });
-            });
-    };
-}
-
-export function del_data(sampleNames) {
-    return {
-        type: "DEL_DATA",
-        payload: sampleNames
-    };
-}
-
+// used one time from appIndex.js
+// todo: can move into appIndex.js as local function
 export function get_color_map() {
 	return dispatch => {
 		axios.get("/static/resources/data/cm/Cool.csv")
@@ -202,6 +44,56 @@ export function get_color_map() {
 			});
 	};    
 }
+
+// used to close snckbar from appIndex.js
+export function close_message() {
+    return {
+        type: 'CLOSE_MESSAGE',
+        payload: null
+    }
+}
+
+
+const imageRequestOnProgress = () => {
+    const count = tiffRequest.length + pqTiff.length();
+    return count;
+}
+
+// used to get data by sample names
+export function get_data(sampleNames, path, recursive) {
+    return dispatch => {
+        axios.post("/api/data/sample", {sampleNames, path, recursive})
+            .then(resp => {
+                dispatch({
+                    type: "GET_DATA",
+                    payload: resp.data
+                });
+            })
+            .catch(e => {
+                dispatch({
+                    type: "GET_DATA_REJECTED",
+                    payload: e
+                });
+            });
+    }
+}
+
+// used to delte data by sample names
+export function del_data(sampleNames) {
+    return {
+        type: "DEL_DATA",
+        payload: sampleNames
+    };
+}
+
+// used to change sample color
+export function changeSelectedSampleColors(sampleName) {
+    return {
+        type: "CHANGE_SELECTED_SAMPLE_COLORS",
+        payload: sampleName
+    };
+}
+
 
 function get_tiff(id) {
     const pos1 = id.indexOf(']');
@@ -245,12 +137,7 @@ export function get_tiff_with_priority(id, priority=PRIORITY.LOW_MID) {
     };
 }
 
-export function changeSelectedSampleColors(sampleName) {
-    return {
-        type: "CHANGE_SELECTED_SAMPLE_COLORS",
-        payload: sampleName
-    };
-}
+
 
 export function changeDataAttr(dim, attr) {
     return {
@@ -296,12 +183,7 @@ export function changePCPSelectedAttrs(newAttrs) {
     };
 }
 
-export function close_message() {
-    return {
-        type: 'CLOSE_MESSAGE',
-        payload: null
-    }
-}
+
 
 // to be deleted
 export function update_db_info(db, col) {

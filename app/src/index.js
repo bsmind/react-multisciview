@@ -6,15 +6,8 @@ import reducers from "./reducers";
 
 import MultiViewApp from "./appIndex";
 
-
 const middleware = applyMiddleware(thunk);
 const store = createStore(reducers, middleware);
-
-const evtSource = new EventSource('/stream');
-evtSource.onmessage = function (event) {
-    console.log(event, event.data);
-}
-
 
 export default () => {
     return (
