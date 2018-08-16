@@ -68,10 +68,10 @@ class ScatterChart extends React.Component {
     	if (this.ScatterChartCanvasNode) return this.ScatterChartCanvasNode;
     }
 
-    handleDataRequest = (dataID, priority) => {
+    handleDataRequest = (dataID, path, priority) => {
     	//console.log('handleDataRequest: ', dataID)
     	if (this.props.onDataRequest)
-    		this.props.onDataRequest(dataID, priority);
+    		this.props.onDataRequest(dataID, path, priority);
     }
 
     handleSelectDataItems = (selectedDataList) => {

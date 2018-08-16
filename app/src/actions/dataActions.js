@@ -53,12 +53,6 @@ export function close_message() {
     }
 }
 
-
-const imageRequestOnProgress = () => {
-    const count = tiffRequest.length + pqTiff.length();
-    return count;
-}
-
 // used to get data by sample names
 export function get_data(sampleNames, path, recursive) {
     return dispatch => {
@@ -78,6 +72,14 @@ export function get_data(sampleNames, path, recursive) {
     }
 }
 
+// used to add data
+export function add_data(data) {
+    return {
+        type: 'ADD_DATA',
+        payload: {data}
+    }
+}
+
 // used to delte data by sample names
 export function del_data(sampleNames) {
     return {
@@ -94,22 +96,28 @@ export function changeSelectedSampleColors(sampleName) {
     };
 }
 
+// used to handle image data request
+const imageRequestOnProgress = () => {
+    const count = tiffRequest.length + pqTiff.length();
+    return count;
+}
 
-function get_tiff(id) {
-    const pos1 = id.indexOf(']');
-    const pos2 = id.indexOf(']', pos1+1);
-    const db = id.slice(1, pos1);
-    const col = id.slice(pos1+2, pos2);
-    const _id = id.slice(pos2+1)
-
+function get_tiff(key) {
     return dispatch => {
-        axios.get("/api/data/tiff", {params: {db, col, _id}})
+        const tokens = key.split("::");
+        const id = tokens[0];
+        const path = tokens[1];
+        axios.post("/api/data/tiff", {id, path})
             .then(resp => {
-                const idx = tiffRequest.indexOf(id);
+                const idx = tiffRequest.indexOf(key);
                 if (idx > -1) tiffRequest.splice(idx, 1);
                 dispatch({
                     type: "GET_TIFF",
-                    payload: {id, data: resp.data, count: imageRequestOnProgress()}
+                    payload: {
+                        id, 
+                        data: resp.data, 
+                        count: imageRequestOnProgress()
+                    }
                 });
             })
             .catch(e => {
@@ -121,11 +129,12 @@ function get_tiff(id) {
     };
 }
 
-export function get_tiff_with_priority(id, priority=PRIORITY.LOW_MID) {
+export function get_tiff_with_priority(id, path, priority=PRIORITY.LOW_MID) {
     return dispatch => {
-        if (tiffRequest.indexOf(id) > -1) return;
+        const key = `${id}::${path}`
+        if (tiffRequest.indexOf(key) > -1) return;
 
-        pqTiff.replace(id, priority, (a, b) => a === b);
+        pqTiff.replace(key, priority, (a, b) => a === b);
         if (tiffRequest.length > TIFF_MAX_REQUEST) return;
         
         const pended = pqTiff.front();
@@ -136,6 +145,9 @@ export function get_tiff_with_priority(id, priority=PRIORITY.LOW_MID) {
         }, TIFF_TIMEOUT * tiffRequest.length / pended.priority);
     };
 }
+
+
+
 
 
 

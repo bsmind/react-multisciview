@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import {
+    add_data,
     get_color_map,
     close_message,
 } from "./actions/dataActions";
@@ -44,7 +45,9 @@ class MultiViewApp extends React.Component {
         this.evtSource = new EventSource('/stream');
         this.evtSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log(data)
+            if (this.props.add_data) {
+                this.props.add_data(data);
+            }
         }
     }
 
@@ -201,6 +204,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
+        add_data,
         get_color_map,
         close_message
     }, dispatch);

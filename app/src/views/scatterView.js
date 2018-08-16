@@ -17,10 +17,18 @@ import {
 import { ScatterChart } from "./components"
 
 class ScatterView extends React.Component {
-    handleDataImageRequest = (dataID, priority = 3) => {
-    	const { imgPool } = this.props;
-    	if (this.props.get_tiff_with_priority && imgPool[dataID] == null)
-    		this.props.get_tiff_with_priority(dataID, priority);
+    handleDataImageRequest = (data, priority = 3) => {
+        const { imgPool } = this.props;
+        const id = data._id;
+        const path = data.path;
+
+        if (id == null || path == null) {
+            console.log('Invlid image request: ', data);
+            return;
+        }
+
+    	if (this.props.get_tiff_with_priority && imgPool[id] == null)
+    		this.props.get_tiff_with_priority(id, path, priority);
     }
     
     render() {
@@ -31,9 +39,6 @@ class ScatterView extends React.Component {
             onDataRequest: this.handleDataImageRequest,
             onSelectDataItems: null,
         };
-
-        //debugger;
-        //console.log(chartProps)
 
         return <ScatterChart 
             ref={"ScatterChartRef"}

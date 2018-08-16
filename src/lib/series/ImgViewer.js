@@ -12,17 +12,17 @@ class ImgViewer extends React.Component {
 	}
 
 	componentDidMount() {
-		const { imgPool, id } = this.props;
+		const { imgPool, id, data } = this.props;
 		if (imgPool && imgPool[id]) {
 			this.setState({ id, img: imgPool[id] });
 		}
 		if (this.props.onImageRequest) {
-			this.props.onImageRequest(id, 5);
+			this.props.onImageRequest(data, 5);
 		}
 	}
 
 	componentWillReceiveProps(nextProps) {
-		const { imgPool, id, onImageRequest } = nextProps;
+		const { imgPool, id, onImageRequest, data } = nextProps;
 		const oldId = this.state.id;
 		if (oldId && id === oldId) {
 			return;
@@ -32,7 +32,7 @@ class ImgViewer extends React.Component {
 			return;
 		}
 		if (onImageRequest) {
-			onImageRequest(id, 5);
+			onImageRequest(data, 5);
 		}
 		this.setState({ id: null, img: null });
 	}

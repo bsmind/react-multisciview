@@ -289,7 +289,7 @@ class DraggableDataBox extends React.Component {
             boxShadow: '3px 3px 6px #888888'
         };
 
-        const {id, info} = selected[currSelectedIndex];
+        const {id, info, data} = selected[currSelectedIndex];
         const {
             imgRefWidth, imgRefHeight, 
             imgCenterX, imgCenterY, 
@@ -336,6 +336,7 @@ class DraggableDataBox extends React.Component {
                             imgRefWidth={imgRefWidth}
                             imgRefHeight={imgRefHeight}
                             id={id}  
+                            data={data}
                             imgPool={imgPool}       
                             onImageRequest={ (id, priority) => handleImageRequest(id, 2*priority)}
                             showGrid={showGrid}

@@ -149,6 +149,25 @@ const get_data = (state, payload) => {
     };
 }
 
+// - used to update dataBySamples
+// - unlike get_data method, this will add/modify individual items.
+// - update will only happen when users already have same sample group.
+const add_data = (state, payload) => {
+    const { data } = payload
+    const dataBySamples = {...state.dataBySamples};
+    data.forEach(d => {
+        if (d.hasOwnProperty('sample')) {
+            const name = d.sample;
+            if (dataBySamples.hasOwnProperty(name)) {
+                const arr = dataBySamples[name];
+                const idx = arr.findIndex(a => a._id === d._id);
+                idx >= 0 ? arr[idx] = {...d}: arr.push(d)
+            }
+        }
+    });
+    return {...state, dataBySamples};
+}
+
 // used to update dataBySamples
 // - it deletes data by selected sample names
 const del_data = (state, payload) => {
@@ -174,17 +193,6 @@ const change_selected_sample_colors = (state, payload) => {
 }
 
 
-// deprecated
-const get_current_data_stat = (state, payload) => {
-    const sampleNames = Object.keys(payload);
-    const sampleColors = _update_sample_colors(state, sampleNames);
-
-	return {
-		...state,
-		statBySamples: payload,
-		sampleColors
-	};    
-}
 
 
 
@@ -239,11 +247,10 @@ export function dataReducers(state = INIT_STATE, action) {
         case "GET_COLORMAP": return get_color_map(state, payload);
 
         case "GET_DATA": return get_data(state, payload);
+        case "ADD_DATA": return add_data(state, payload);
         case "DEL_DATA": return del_data(state, payload);
         case "CHANGE_SELECTED_SAMPLE_COLORS": 
             return change_selected_sample_colors(state, payload);
-
-
 
         case "GET_TIFF": return get_tiff(state, payload);
         

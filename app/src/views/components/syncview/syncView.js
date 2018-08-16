@@ -172,10 +172,10 @@ class SyncView extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         const {selectedDir, recursive} = nextProps;
-        const isSameDir = selectedDir === this.props.selectedDir;
-        const isSameMode = recursive === this.props.recursive;
-        if (!(isSameDir && isSameMode))
-            this.asyncGetSampleFiles(selectedDir, recursive);
+        // const isSameDir = selectedDir === this.props.selectedDir;
+        // const isSameMode = recursive === this.props.recursive;
+        // if (!(isSameDir && isSameMode))
+        this.asyncGetSampleFiles(selectedDir, recursive);
     }
 
     componentWillUnmount() {

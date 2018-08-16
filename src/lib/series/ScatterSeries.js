@@ -526,6 +526,7 @@ class ScatterSeries extends React.Component {
     			imgRefWidth={this.__imgRefWidth}
     			imgRefHeight={this.__imgRefHeight}
 				id={d._id}
+				data={d}
     			imgPool={imgPool}
     			onImageRequest={handleImageRequest}
     			showGrid={showGrid}

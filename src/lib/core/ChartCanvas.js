@@ -973,23 +973,23 @@ class ChartCanvas extends React.Component {
 
 	handleMouseMove = (mouseXY, e) => {
 		return;
-		if (!this.state.enableHitTest) return; 
+		// if (!this.state.enableHitTest) return; 
 
-		if (!this.waitingForAnimationFrame) { // eslint-disable-line
-			this.waitingForAnimationFrame = true;
-			const state = this.getHoveredDataItem(mouseXY);
-			this.triggerEvent("mousemove", {
-				mouseXY: state
-			}, e);
-			requestAnimationFrame(() => {
-				this.clearMouseCoordCanvas();
-				this.draw({ trigger: "mousemove" });
-				this.waitingForAnimationFrame = false;
-				if (this.props.onDataRequest && state.id) {
-					this.props.onDataRequest(state.id);
-				}
-			});
-		}
+		// if (!this.waitingForAnimationFrame) { // eslint-disable-line
+		// 	this.waitingForAnimationFrame = true;
+		// 	const state = this.getHoveredDataItem(mouseXY);
+		// 	this.triggerEvent("mousemove", {
+		// 		mouseXY: state
+		// 	}, e);
+		// 	requestAnimationFrame(() => {
+		// 		this.clearMouseCoordCanvas();
+		// 		this.draw({ trigger: "mousemove" });
+		// 		this.waitingForAnimationFrame = false;
+		// 		if (this.props.onDataRequest && state.id) {
+		// 			this.props.onDataRequest(state.id);
+		// 		}
+		// 	});
+		// }
 	}
 
 	searchDataItemOnPath = (startXY, endXY) => {
