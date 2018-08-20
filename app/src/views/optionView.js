@@ -7,8 +7,7 @@ import {
     DataTab,
     CoordTab,
     ImageTab,
-    PcpTab,
-    WatcherTab
+    PcpTab
 } from "./components";
 
 class OptionView extends React.Component {
@@ -32,8 +31,10 @@ class OptionView extends React.Component {
             >
                 {/* <Tab label="WATCHER"> <WatcherTab />  </Tab> */}
                 <Tab label="DATA"> <DataTab height={this.props.height}/> </Tab>
-                <Tab label="COORD"> <CoordTab /> </Tab>
-                <Tab label="IMAGE"> <ImageTab /> </Tab>
+                <Tab label="COORD/IMAGE"> 
+                    <CoordTab />
+                    <ImageTab /> 
+                </Tab>
                 <Tab label="PCP"> 
                     <PcpTab 
                         ref={"PCPTabRef"}
