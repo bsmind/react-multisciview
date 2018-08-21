@@ -12,10 +12,13 @@ module.exports = {
             features: {
                 customProperties: {
                     variables: {
-                        unit: '6.5px'
+                        unit: '7px'
                     }
                 }
-            }
-        }
+            },
+            browsers: ['last 2 versions', '> 5%']
+        },
+        'postcss-nesting': {},
+        'postcss-nested': {},
     }
 }

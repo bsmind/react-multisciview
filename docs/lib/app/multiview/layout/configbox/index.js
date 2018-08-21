@@ -70,7 +70,7 @@ class ConfigBox extends React.Component {
 			attrKinds,
     	} = this.props;
 
-    	const oldAttr = attrFormat(attr[dim]);
+		const oldAttr = attrFormat(attr[dim]);
     	if (value !== oldAttr && this.props.setAttr) {
     		const attrKeys = Object.keys(attrKinds);
     		const index = attrKeys.findIndex(key => key.includes(value));

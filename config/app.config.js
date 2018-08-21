@@ -5,20 +5,24 @@ const { getIfUtils, removeEmpty } = require("webpack-config-utils");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+//const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const rootPath = path.join(__dirname, "..");
+const rootPath2 = path.join(__dirname, "../../multisciview")
 
 function buildConfig(mode) {
     const { ifWatch, ifDocs } = getIfUtils(mode, ["docs", "watch"]);
 
     const context = rootPath;
     const docsEntry = {
-        "react-multiview-home": "./docs/indexFlask.js",
-        "react-multiview-documentation": "./docs/documentation.js",
+        "react-multiview-home": "./app/index.js"
+        // "react-multiview-home": "./docs/indexFlask.js",
+        // "react-multiview-documentation": "./docs/documentation.js",
     };
     const devServer = {
         contentBase: [
-            path.join(rootPath, "docs"),
+            //path.join(rootPath, "docs"),
+            path.join(rootPath, "app"),
             path.join(rootPath, "build"),
             path.join(rootPath, "node_modules")
         ],
@@ -64,7 +68,8 @@ function buildConfig(mode) {
         context,
         entry: docsEntry,
         output: {
-            path: path.join(rootPath, "multiview/"),
+            //path: path.join(rootPath, "multiview/"),
+            path: path.join(rootPath2),
             filename: `static/js/[name]${ifDocs(".[chunkhash]","")}.js`,
             publicPath: "",
             library: "ReMultiview",
@@ -97,19 +102,27 @@ function buildConfig(mode) {
                 },
             })),
             new HtmlWebpackPlugin({
-                template: "./docs/pageTemplateFlask.js",
+                template: "./app/pageTemplate.js",
                 inject: false,
                 page: "index",
                 mode,
-                filename: "./templates/index.html"
+                filename: path.join(rootPath2, "templates/index.html")
+                //filename: "./templates/index.html"
             }),
-            new HtmlWebpackPlugin({
-                template: "./docs/pageTemplateFlask.js",
-                inject: false,
-                page: "documentation",
-                mode,
-                filename: "./templates/documentation.html"
-            }),            
+            // new HtmlWebpackPlugin({
+            //     template: "./docs/pageTemplateFlask.js",
+            //     inject: false,
+            //     page: "index",
+            //     mode,
+            //     filename: "./templates/index.html"
+            // }),
+            // new HtmlWebpackPlugin({
+            //     template: "./docs/pageTemplateFlask.js",
+            //     inject: false,
+            //     page: "documentation",
+            //     mode,
+            //     filename: "./templates/documentation.html"
+            // }),            
             new webpack.LoaderOptionsPlugin({
                 options: { remarkable: getRemarkable(), context }
             }),
@@ -120,11 +133,11 @@ function buildConfig(mode) {
             "react-dom": "ReactDOM",
         },
         resolve: {
-            extensions: [".js", ".scss", ".md"],
+            extensions: [".js", ".scss", ".css", ".md"],
             alias: {
                 "react-multiview": path.join(rootPath, "src")
             },
-            modules: ["docs", "node_modules"]
+            modules: ["app", "node_modules"]
         }
     };
 }

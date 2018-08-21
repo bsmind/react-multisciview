@@ -124,8 +124,8 @@ class ScatterSeries extends React.Component {
 
     	const nest = d3Nest()
     		.key(d => d.markerID)
-    		.entries(plotData);
-
+			.entries(plotData);
+			
     	const pointSet = [], minDist = { x: null, y: null };
     	nest.forEach(group => {
     		const { key: markerKey, values } = group;
@@ -137,7 +137,6 @@ class ScatterSeries extends React.Component {
 				
 				const isFiltered = dataFilter(d)
 				if (!isFiltered) {
-					//console.log(d)
 					return;
 				}
 
@@ -199,7 +198,7 @@ class ScatterSeries extends React.Component {
     }
 
     getDataFilter = (dataExtents, origDataExtents) => {
-    	const dataKeys = Object.keys(dataExtents);
+		const dataKeys = Object.keys(dataExtents);
     	return d => {
     		return dataKeys.map(key => {
     			const extents = dataExtents[key];
@@ -519,14 +518,15 @@ class ScatterSeries extends React.Component {
     		if (d._id == null) {
     			console.log("error in ", d);
     			return;
-    		}
+			}
     		imageSet.push(<ImgViewer
     			key={`imgViewer-${d._id}`}
     			x={xAccessor(d)}
     			y={yAccessor(d)}
     			imgRefWidth={this.__imgRefWidth}
     			imgRefHeight={this.__imgRefHeight}
-    			id={d._id}
+				id={d._id}
+				data={d}
     			imgPool={imgPool}
     			onImageRequest={handleImageRequest}
     			showGrid={showGrid}

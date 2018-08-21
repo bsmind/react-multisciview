@@ -1,0 +1,115 @@
+@import 'colors.css';
+@import 'variables.css';
+@import 'app_bar/config.css';
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+:root {
+    --unit: '7px';
+    --appbar-color: var(--palette-grey-400);
+    --appbar-contrast: var(--color-black);
+    --appbar-height: 41.6px;
+    --appbar-title-font-size: calc(1.8 * var(--unit));
+    --footer-height: calc(0.1 * var(--appbar-height));
+    --content-height: calc(100% - var(--appbar-height) - var(--footer-height));
+    --databox-width: 200px;
+    --chartbox-width: calc(100% - var(--databox-width));
+    --toolbox-height: 56.81px;
+}
+
+.appBar {
+    background: var(--appbar-color);
+    color: var(--appbar-contrast);
+}
+
+.footer {
+    background: var(--appbar-color);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--footer-height);
+    z-index: var(--z-index-high);    
+}
+
+.ctlbox {
+    font-family: var(--preferred-font);
+    font-size: var(--appbar-title-font-size);
+    position: fixed;
+    left: var(--databox-width);
+    top: 0;
+    height: var(--appbar-height);
+    align-items: center;
+    display: flex;
+    width: 100%;
+}
+
+.databox {
+    background: var(--color-background);
+    padding: 0px 1px 0px 1px;
+    position: fixed;
+    left: 0;
+    top: var(--appbar-height);
+    width: var(--databox-width);
+    z-index: var(--z-index-high);
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);
+    height: var(--content-height);
+}
+
+.toolbox {
+    background: var(--color-background);
+    padding: 0px 1px 0px 1px;
+    position: fixed;
+    left: 0;
+    top: var(--appbar-height);
+    width: 100%;
+    z-index: var(--z-index-high);
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);    
+}
+
+.chartbox {
+    background: var(--color-background);
+    padding: 0px 0px 0px 0px;
+    position: absolute;
+    left: 0;
+    top: var(--appbar-height);
+    width: 100%;
+    font-family: var(--preferred-font);
+    font-size: var(--font-size);    
+}
+
+@keyframes progressAnimation {
+    from {background-color: rgb(255, 0, 0)}
+    to {background-color: rgb(0, 0, 255)}
+}
+
+.myProgressBarWithAnimation {
+    position: 'absolute';
+    left: 0%;
+    width: 100%;
+    height: 2px;
+    z-index: 1000;
+    background-color: rgb(255, 0, 0);
+    animation-name: progressAnimation;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.myProgressBar {
+    position: 'absolute';
+    left: 0%;
+    width: 40px;
+    height: 2px;
+    z-index: 1000;
+    background-color: rgba(255, 0, 0, 0);
+}
+
+.hLi {
+    font-size: 11px;
+    display: inline;
+}

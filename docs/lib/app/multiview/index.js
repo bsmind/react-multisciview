@@ -10,7 +10,8 @@ import {
 	AddData,
 	handleColorChange,
 	updateSelectedSamples,
-	imageRequestOnProgress
+	imageRequestOnProgress,
+	updateData
 } from "./actions/dataActions";
 
 import {
@@ -48,13 +49,16 @@ class MultiViewApp extends React.Component {
 
 	componentDidMount() {
 		this.props.getSampleKinds();
-		this.props.getAttributes();
+		//this.props.getAttributes();
 		this.props.getColorMap();
+
+		this.interval = setInterval(this.props.updateData, 10000)
 
 		window.addEventListener("resize", () => this.handleResize());
 	}
 
 	componentWillUnmount() {
+		clearInterval(this.interval)
 		window.removeEventListener("resize", () => this.handleResize());
 	}
 
@@ -237,7 +241,8 @@ function mapDispatchToProps(dispatch) {
 		setAttr,
 		handleColorChange,
 		updateSelectedSamples,
-		getColorMap
+		getColorMap,
+		updateData
 	}, dispatch);
 }
 

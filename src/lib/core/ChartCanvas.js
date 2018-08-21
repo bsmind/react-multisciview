@@ -162,6 +162,7 @@ class ChartCanvas extends React.Component {
 			samples,
 			seriesName,
 			dataExtents: dataExtentsProp,
+			dataExtentsExt,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
@@ -217,6 +218,10 @@ class ChartCanvas extends React.Component {
 				: dataExtentsProp[name].slice();
 		});
 
+		// Object.keys(dataExtentsExt).forEach(key => {
+		// 	dataExtents[key] = dataExtentsExt[key];
+		// });
+
 		return {
 			plotData,
 			seriesName,
@@ -235,6 +240,7 @@ class ChartCanvas extends React.Component {
 			seriesName: seriesNameProps,
 			samples: samplesProp,
 			dataExtents: dataExtentsProp,
+			dataExtentsExt,
 			dataAccessor,
 			xAttr: xAttrProp,
 			yAttr: yAttrProp,
@@ -333,16 +339,14 @@ class ChartCanvas extends React.Component {
 
 			return flattened;
 		});
-		//console.log(data)
-		//console.log(plotData)
-		/* eslint-enable */
+
 		const samples = samplesProp.slice();
 		const seriesName = seriesNameProps;
-		// } else {
-		//	plotData = this.state.plotData;
-		//	samples = samplesState;
-		//	seriesName = seriesNameState;
-		// }
+
+		// Object.keys(dataExtentsExt).forEach(key => {
+		// 	dataExtentsState[key] = dataExtentsExt[key];
+		// });
+
 
 		return {
 			plotData,
@@ -408,8 +412,10 @@ class ChartCanvas extends React.Component {
 			zoomFactor: 1,
 			enableHitTest: true,
 		});
+
 		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(newDataExtents, false);
+			//this.props.onScatterPanZoom(newDataExtents, false);
+			this.props.onScatterPanZoom({[name]: newDomain}, false)
 		}
 	}
 
@@ -439,7 +445,8 @@ class ChartCanvas extends React.Component {
 			enableHitTest: true,
     	});
     	if (this.props.onScatterPanZoom) {
-    		this.props.onScatterPanZoom(false, newDataExtents);
+			//this.props.onScatterPanZoom(false, newDataExtents);
+			this.props.onScatterPanZoom({[name]:newDomain}, false);
     	}
     }
 
@@ -511,7 +518,11 @@ class ChartCanvas extends React.Component {
 			enableHitTest: true
 		});
 		if (this.props.onScatterPanZoom) {
-			this.props.onScatterPanZoom(newDataExtents, false);
+			//this.props.onScatterPanZoom(newDataExtents, false);
+			this.props.onScatterPanZoom({
+				[xName]: newDomainX.slice(),
+				[yName]: newDomainY.slice()
+			}, false);
 		}
 	}
 
@@ -594,8 +605,13 @@ class ChartCanvas extends React.Component {
 					enableHitTest: true,
     			});
     			if (this.props.onScatterPanZoom) {
-    				this.props.onScatterPanZoom(newDataExtents, false);
-    			}
+					//this.props.onScatterPanZoom(newDataExtents, false);
+					//console.log('fix')
+					this.props.onScatterPanZoom({
+						[newXAttr.name]: newDataExtents[newXAttr.name],
+						[newYAttr.name]: newDataExtents[newYAttr.name]
+					}, false);
+			}
     			// this.__xAttr = null;
     			// this.__yAttr = null;
     			// this.__dataExtents = null;
@@ -611,7 +627,12 @@ class ChartCanvas extends React.Component {
     				this.clearAxisAndChartOnCanvas();
     				this.draw({ trigger: "pan" });
     				if (this.props.onScatterPanZoom) {
-    					this.props.onScatterPanZoom(newDataExtents, true);
+						//this.props.onScatterPanZoom(newDataExtents, true);
+						//console.log(newXAttr, newDataExtents)
+						this.props.onScatterPanZoom({
+							[newXAttr.name]: newDataExtents[newXAttr.name],
+							[newYAttr.name]: newDataExtents[newYAttr.name]
+						}, true);
     				}
     			});
     		}
@@ -642,7 +663,11 @@ class ChartCanvas extends React.Component {
 				enableHitTest: true
     		});
     		if (this.props.onScatterPanZoom) {
-    			this.props.onScatterPanZoom(newDataExtents, false);
+				//this.props.onScatterPanZoom(newDataExtents, false);
+				this.props.onScatterPanZoom({
+					[newXAttr.name]: newDataExtents[newXAttr.name],
+					[newYAttr.name]: newDataExtents[newYAttr.name]
+				}, false)		
     		}
     	} else {
     		this.triggerEvent("panend", state, e);
@@ -657,7 +682,11 @@ class ChartCanvas extends React.Component {
 					enableHitTest: true
     			});
     			if (this.props.onScatterPanZoom) {
-    				this.props.onScatterPanZoom(newDataExtents, false);
+					//this.props.onScatterPanZoom(newDataExtents, false);
+					this.props.onScatterPanZoom({
+						[newXAttr.name]: newDataExtents[newXAttr.name],
+						[newYAttr.name]: newDataExtents[newYAttr.name]
+					}, false);				
     			}
     		});
     	}
@@ -705,7 +734,10 @@ class ChartCanvas extends React.Component {
 				this.clearAxisAndChartOnCanvas();
 				this.setState({ zAttr, dataExtents });
 				if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
-					this.props.onScatterPanZoom(dataExtents, false);
+					//this.props.onScatterPanZoom(dataExtents, false);
+					this.props.onScatterPanZoom({
+						[zAttr.name]: dataExtents[zAttr.name],
+					}, false)
 				}
 			} else {
 				this.__zAttr = zAttr;
@@ -717,7 +749,10 @@ class ChartCanvas extends React.Component {
 					this.clearAxisAndChartOnCanvas();
 					this.draw({ trigger: "pan" });
 					if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
-						this.props.onScatterPanZoom(dataExtents, true);
+						//this.props.onScatterPanZoom(dataExtents, true);
+						this.props.onScatterPanZoom({
+							[zAttr.name]: dataExtents[zAttr.name],
+						}, true)	
 					}
 				});
 			}
@@ -736,7 +771,10 @@ class ChartCanvas extends React.Component {
 			this.clearAxisAndChartOnCanvas();
 			this.setState({ zAttr, dataExtents });
 			if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
-				this.props.onScatterPanZoom(dataExtents, false);
+				//this.props.onScatterPanZoom(dataExtents, false);
+				this.props.onScatterPanZoom({
+					[zAttr.name]: dataExtents[zAttr.name],
+				}, false)
 			}
 		} else {
 			this.triggerEvent("pan", { zAttr, dataExtents }, e);
@@ -745,7 +783,10 @@ class ChartCanvas extends React.Component {
 				this.setState({ zAttr, dataExtents });
 				// connect to pcp
 				if (this.props.onScatterPanZoom && zAttr.name !== "sample") {
-					this.props.onScatterPanZoom(dataExtents, false);
+					//this.props.onScatterPanZoom(dataExtents, false);
+					this.props.onScatterPanZoom({
+						[zAttr.name]: dataExtents[zAttr.name],
+					}, false)
 				}
 			});
 		}
@@ -768,7 +809,10 @@ class ChartCanvas extends React.Component {
 			this.setState({ zAttr: newZAttr, dataExtents: newDataExtents });
 			// connect to pcp
 			if (this.props.onScatterPanZoom) {
-				this.props.onScatterPanZoom(newDataExtents, false);
+				//this.props.onScatterPanZoom(newDataExtents, false);
+				this.props.onScatterPanZoom({
+					[newZAttr.name]: newDataExtents[newZAttr.name],
+				}, false)
 			}
 		} else {
 			this.setState({ zAttr: newZAttr });
@@ -929,23 +973,23 @@ class ChartCanvas extends React.Component {
 
 	handleMouseMove = (mouseXY, e) => {
 		return;
-		if (!this.state.enableHitTest) return; 
+		// if (!this.state.enableHitTest) return; 
 
-		if (!this.waitingForAnimationFrame) { // eslint-disable-line
-			this.waitingForAnimationFrame = true;
-			const state = this.getHoveredDataItem(mouseXY);
-			this.triggerEvent("mousemove", {
-				mouseXY: state
-			}, e);
-			requestAnimationFrame(() => {
-				this.clearMouseCoordCanvas();
-				this.draw({ trigger: "mousemove" });
-				this.waitingForAnimationFrame = false;
-				if (this.props.onDataRequest && state.id) {
-					this.props.onDataRequest(state.id);
-				}
-			});
-		}
+		// if (!this.waitingForAnimationFrame) { // eslint-disable-line
+		// 	this.waitingForAnimationFrame = true;
+		// 	const state = this.getHoveredDataItem(mouseXY);
+		// 	this.triggerEvent("mousemove", {
+		// 		mouseXY: state
+		// 	}, e);
+		// 	requestAnimationFrame(() => {
+		// 		this.clearMouseCoordCanvas();
+		// 		this.draw({ trigger: "mousemove" });
+		// 		this.waitingForAnimationFrame = false;
+		// 		if (this.props.onDataRequest && state.id) {
+		// 			this.props.onDataRequest(state.id);
+		// 		}
+		// 	});
+		// }
 	}
 
 	searchDataItemOnPath = (startXY, endXY) => {

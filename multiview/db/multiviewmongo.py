@@ -2,6 +2,7 @@ from bson.binary import Binary
 from bson.objectid import ObjectId
 import gridfs
 import pymongo
+from pymongo import ReturnDocument
 import pickle
 import numpy as np
 import datetime
@@ -42,6 +43,8 @@ class MultiViewMongo(object):
     def __del__(self):
         self._close()
 
+    def update(self):
+        self.collection.update()
 
     # core methods. load(), save(), delete()
     def save(self, document):
@@ -83,6 +86,60 @@ class MultiViewMongo(object):
             id_values.append(new_id)
 
         return id_values
+
+    def save_doc_one(self, doc, type='doc'):
+        """
+        insert new document.
+        if it exsits in the database, replace existing fields.
+        :param doc: document
+        :param type: one of ['doc', 'tiff', 'jpg']
+        :return: previous document (None if there is no previous one)
+        """
+        item = doc['item']
+        r = self.collection.find_one_and_update(
+            {'item': item},
+            {'$set': doc},
+            upsert=True,
+            return_document=ReturnDocument.BEFORE
+        )
+        #print('[save_doc_one]: ', r, item)
+        return r
+
+    def save_img_one(self, doc, type='tiff'):
+        """
+        insert new image document
+        :param doc: image document
+        :param type: one of ['tiff', 'jpg']
+        :return: previous document (None if there is no previous one)
+        """
+        docCopy = copy.deepcopy(doc)
+
+        # make a list of any existing referenced gridfs files
+        # there are no old IDs... always treat it as new
+        self.temp_oldNpObjectIDs = []
+        self.temp_newNpObjectIds = []
+        # replace np arrays with either a new gridfs file or
+        # a reference to the old gridfs file
+        docCopy = self._stashNPArrays(docCopy)
+
+        # cleanup any remaining gridfs files
+        # (these used to be pointed to by document,
+        # but no longer match any np.array that was in the db)
+        for id in self.temp_oldNpObjectIDs:
+            self.fs.delete(id)
+        self.temp_oldNpObjectIDs = []
+
+        r = self.save_doc_one(docCopy, type)
+        # delete old image data, if there is
+        if r is not None:
+            try:
+                old_img_doc = r[type]
+            except KeyError:
+                old_img_doc = None
+            if old_img_doc is not None:
+                self.fs.delete(old_img_doc['data'])
+        return r
+
 
     def loadFromIds(self, Ids):
 
@@ -128,7 +185,13 @@ class MultiViewMongo(object):
 
     def delete(self, objectId):
         documentToDelete = self.collection.find_one({"_id": objectId})
-        npObjectIdsToDelete = documentToDelete['_npObjectIDs']
+
+        npObjectIdsToDelete = []
+        if 'jpg' in documentToDelete:
+            npObjectIdsToDelete.append(documentToDelete['jpg']['data'])
+        if 'tiff' in documentToDelete:
+            npObjectIdsToDelete.append(documentToDelete['tiff']['data'])
+
         for npObjectID in npObjectIdsToDelete:
             self.fs.delete(npObjectID)
         self.collection.remove(objectId)

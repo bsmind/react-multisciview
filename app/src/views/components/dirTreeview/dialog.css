@@ -1,0 +1,26 @@
+.wrapper {
+    z-index: 500;
+}
+
+.body {
+    overflow-y: scroll;
+    color: #000;
+    padding-bottom: 0px;
+}
+
+.navigation {
+    padding-top: 0px;
+}
+
+.input {
+    cursor: pointer;
+    padding-bottom: 3px;
+}
+
+.error {
+    color: #de3226;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+
