@@ -58,6 +58,7 @@ export function get_data(sampleNames, path, recursive) {
     return dispatch => {
         axios.post("/api/data/sample", {sampleNames, path, recursive})
             .then(resp => {
+                //console.log(resp.data)
                 dispatch({
                     type: "GET_DATA",
                     payload: resp.data

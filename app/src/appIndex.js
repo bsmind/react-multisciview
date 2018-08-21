@@ -45,6 +45,7 @@ class MultiViewApp extends React.Component {
         this.evtSource = new EventSource('/stream');
         this.evtSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            //console.log(data);
             if (this.props.add_data) {
                 this.props.add_data(data);
             }
@@ -155,8 +156,9 @@ class MultiViewApp extends React.Component {
 
     render() {
         const {width, height} = this.state;
-        const MAX_TABVIEW_WIDTH = 416;
+        const MAX_TABVIEW_WIDTH = 700;
         const r_width = Math.min(Math.floor(0.35 * width), MAX_TABVIEW_WIDTH);
+        //console.log(r_width)
         const l_width = width - r_width;
         const {imgReqOnProgress, showImage} = this.props;
         return (

@@ -136,8 +136,12 @@ const _update_sample_colors = (state, sampleList) => {
 const get_data = (state, payload) => {
     const {sampleList, sampleData} = payload;
 
+    //console.log(sampleList)
+    //console.log(sampleData)
+
     const dataBySamples = {...state.dataBySamples};
     const keyList = sampleList.map(name => {
+        //console.log(name)
         dataBySamples[name] = [...sampleData[name]];
         return name;
     });
