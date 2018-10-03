@@ -21,13 +21,14 @@ class PcpChart extends React.Component {
     }
 
     render() {
-        const margin = {left: 60, right: 40, top: 20, bottom: 10};
         const {
             width, height, ratio,
             dimension, data, dimOrder, 
             colorAccessor, titleFormat, 
-            onPCPAxisSelect, pcpAttrSelect
+            onPCPAxisSelect, pcpAttrSelect,
+            fontSize
         } = this.props;
+        const margin = {left: 60, right: 40, top: 20 + fontSize, bottom: 10};
 
         if (dimOrder.length === 0 || data.length === 0)
             return (
@@ -54,6 +55,7 @@ class PcpChart extends React.Component {
                 axisWidth={26}
 
                 titleFormat={titleFormat}
+                fontSize={fontSize}
 
                 onPCPAxisSelect={onPCPAxisSelect}
                 dataExtents={this.props.dataExtents}

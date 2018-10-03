@@ -8,6 +8,7 @@ import Autocomplete from "react-toolbox/lib/autocomplete";
 import { Button } from "react-toolbox/lib/button";
 import { List, ListItem, ListSubHeader } from "react-toolbox/lib/list";
 import DBView from "./dbview";
+import DataMgrView from "./dataMgrView";
 import theme from "./index.css"
 
 import { sortAlphaNum } from "../../utils";
@@ -286,10 +287,19 @@ class DataTab extends React.Component {
         );
     }
 
+    renderDataMgrView = () => {
+        return (
+            <div className={theme.tabDiv}>
+                <DataMgrView />
+            </div>
+        );
+    }
+
     render() {
         return (
             <div>
-                {this.renderDBView()}
+                {/* {this.renderDBView()} */}
+                {this.renderDataMgrView()}
                 {this.renderSampleView()}
             </div>
         );

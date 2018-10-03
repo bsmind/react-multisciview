@@ -42,14 +42,14 @@ class MultiViewApp extends React.Component {
         this.props.get_color_map();
         window.addEventListener("resize", () => this.handleResize());
 
-        this.evtSource = new EventSource('/stream');
-        this.evtSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            //console.log(data);
-            if (this.props.add_data) {
-                this.props.add_data(data);
-            }
-        }
+        // this.evtSource = new EventSource('/stream');
+        // this.evtSource.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     //console.log(data);
+        //     if (this.props.add_data) {
+        //         this.props.add_data(data);
+        //     }
+        // }
     }
 
     componentWillUnmount() {
@@ -60,7 +60,7 @@ class MultiViewApp extends React.Component {
         let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-        const app_bar_h = 41.6
+        const app_bar_h = 57.59
         h = h - app_bar_h
 
         this.setState({width: w, height: h});

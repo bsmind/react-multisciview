@@ -15,7 +15,7 @@ import { format as d3Format } from "d3-format";
 class PCPYAxis extends React.Component {
     getTicks = (yScale) => {
     	const { ticks, tickFormat, innerTickSize, orient } = this.props;
-    	const { fontSize } = this.props.labelStyle;
+		const { fontSize } = this.props.labelStyle;
 
     	const baseFormat = yScale.tickFormat
     		? yScale.tickFormat(ticks)
@@ -47,7 +47,7 @@ class PCPYAxis extends React.Component {
 
     getTicksOrdinary = (yScale, moreProps) => {
     	const { innerTickSize, orient, height } = this.props;
-    	const { fontSize } = this.props.labelStyle;
+		const { fontSize } = this.props.labelStyle;
     	const { step: yStep, extents: yExtents } = moreProps.dimConfig;
 
     	const sign = orient === "left" || orient === "top" ? -1 : 1;
@@ -98,11 +98,11 @@ class PCPYAxis extends React.Component {
 
     draw = (ctx, moreProps) => {
     	const {
-    		height,
+    		height, width, opacity,
     		showDomain, showTicks, showTitle, showTickLabel,
     		titleFormat,
     		labelStyle } = this.props;
-    	const { fontSize } = labelStyle;
+		const { fontSize } = labelStyle;
     	const {
     		scale: yScale,
     		position: axisLocation,
@@ -118,11 +118,12 @@ class PCPYAxis extends React.Component {
     		drawAxisTitle(ctx, {
     			label: titleFormat(title),
     			x: 0,
-    			y: -fontSize
+    			y: -20 - 0.2 * fontSize
     		}, {
     			...labelStyle,
-    			textAnchor: "middle"
-    		});
+				textAnchor: "middle",
+				tickLabelFill: hexToRGBA(labelStyle.tickLabelFill, opacity)
+    		}, width);
     	}
 
     	if (showDomain) {
@@ -134,9 +135,17 @@ class PCPYAxis extends React.Component {
     		const { orient } = this.props;
     		const textAnchor = orient === "left" ? "end" : "start";
     		drawTicks(ctx,
-    			ordinary ? this.getTicksOrdinary(yScale, moreProps) : this.getTicks(yScale),
-    			this.props.tickStyle,
-    			showTickLabel ? { ...labelStyle, textAnchor } : null
+				ordinary ? this.getTicksOrdinary(yScale, moreProps) 
+						 : this.getTicks(yScale),
+    			{
+					...this.props.tickStyle,
+					tickStrokeOpacity: opacity
+				},
+    			showTickLabel ? { 
+					...labelStyle, 
+					textAnchor,
+					tickLabelFill: hexToRGBA(labelStyle.tickLabelFill, opacity) 
+				} : null
     		);
     	}
 
@@ -153,14 +162,14 @@ class PCPYAxis extends React.Component {
     }
 
     getDrawRegion = () => {
-    	const { axisWidth, height } = this.props;
-    	const { margin } = this.props.shared;
+    	const { axisWidth, height, dimConfig } = this.props;
+		const { margin } = this.props.shared;
 
     	const
     		x = 0,
-    		y = margin.top / 2,
+    		y = -1 * margin.top,
     		w = axisWidth,
-    		h = height;
+    		h = height + 1.5 * margin.top;
 
     	return { x, y, width: w, height: h };
     }
@@ -183,6 +192,11 @@ class PCPYAxis extends React.Component {
 		}
 	}
 
+	handleMouseOver = (is_inside) => {
+		if (this.props.onMouseOver)
+			this.props.onMouseOver(is_inside);
+	}
+
 	render() {
 		const { axisLocation } = this.props;
 		const rect = this.getDrawRegion();
@@ -194,6 +208,7 @@ class PCPYAxis extends React.Component {
 					onRangeSelect={this.handleRangeSelect}
 					onRangeSelectEnd={this.handleRangeSelectEnd}
 					onRangeSelectCancle={this.handleRangeSelectCancel}
+					onMouseOver={this.handleMouseOver}
 					moveCursorClassName={"react-multiview-grabbing-cursor"}
 					zoomCursorClassName={"react-multiview-ns-resize-cursor"}
 				/>
@@ -277,7 +292,7 @@ PCPYAxis.propTypes = {
 };
 
 PCPYAxis.defaultProps = {
-	ticks: 10,
+	ticks: 5,
 
 	outerTickSize: 0,
 	stroke: "#000000",
@@ -292,7 +307,7 @@ PCPYAxis.defaultProps = {
 	},
 
 	labelStyle: {
-		fontSize: 6,
+		fontSize: 11,
 		fontFamily: "Roboto, sans-serif",
 		textAnchor: "start",
 		tickLabelFill: "#000000"

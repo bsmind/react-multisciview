@@ -102,6 +102,7 @@ class PcpTab extends React.Component {
         const {
             data, dimension, dimOrder,
             colorScheme, zAttr, colorsByGroup,
+            fontSize
         } = this.props;
         const colorExtents = dimension[zAttr];
         const {type, colorDomain} = colorScheme;
@@ -132,6 +133,7 @@ class PcpTab extends React.Component {
                         dimension={dimension}
                         colorAccessor={colorAccessor}
                         titleFormat={titleFormat} 
+                        fontSize={fontSize}
 
                         updateDimOrder={this.props.updateDimOrder}
                         onPCPAxisSelect={this.props.onPCPAxisSelect}
@@ -154,6 +156,7 @@ function mapStateToProps(state) {
         zAttr: state.data.attrz,
         colorsByGroup: getSelectedSampleColors(state),
         dimKinds: getDataAttr(state),
+        fontSize: state.env.fontSize
     };
 }
 
