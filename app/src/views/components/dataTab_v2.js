@@ -7,8 +7,7 @@ import axios from "axios";
 import Autocomplete from "react-toolbox/lib/autocomplete";
 import { Button } from "react-toolbox/lib/button";
 import { List, ListItem, ListSubHeader } from "react-toolbox/lib/list";
-import DBView from "./dbview";
-import DataMgrView from "./dataMgrView";
+import { Dropdown } from "react-toolbox";
 import theme from "./index.css"
 
 import { sortAlphaNum } from "../../utils";
@@ -55,6 +54,7 @@ class DataTab extends React.Component {
     constructor() {
         super();
         this.state = {
+            selected_project: '',
             sampleList: []
         }
 
@@ -113,25 +113,52 @@ class DataTab extends React.Component {
     }
 
     componentDidMount() {
-        this.asyncUpdateSampleList()
+        //this.asyncUpdateSampleList()
     }
 
     componentWillReceiveProps(nextProps) {
-        this.asyncUpdateSampleList(nextProps)
+        //this.asyncUpdateSampleList(nextProps)
+    }
+
+    handleProjectSelect = (project_name) => {
+        const idx = this.props.projects.findIndex(p => p.name === project_name);
+        if (idx === -1) {
+            console.log('Unknown project name: ', project_name);
+            return;
+        }
+
+        const project = this.props.projects[idx];
+        axios.post("/api/data/samplelist", project)
+            .then(resp => {
+                this.setState({
+                    selected_project: project.name,
+                    sampleList: resp.data
+                });
+            })
+            .catch(e => {
+                console.log('[ERROR] getSampleList: ', e);
+            });
     }
 
     addSamples = (keyArray) => {
-        const { sampleList } = this.state;
-        const { sampleSelected, wdir, isRecursive } = this.props;
+        const { sampleList, selected_project } = this.state;
+        const { sampleSelected, projects } = this.props;
 
         const samplesToAdd = keyArray.map(key => {
+            // _id: sample name
             const {_id, count} = sampleList[key];
             if (sampleSelected.indexOf(_id) === -1) 
                 return _id;
         }).filter(d => d != null);
 
+        const idx = projects.findIndex(p => p.name === selected_project);
+        if (idx === -1) {
+            console.log('Unknown project name: ', selected_project);
+            return;
+        }
+
         if (samplesToAdd.length && this.props.onSampleAdd) {
-            this.props.onSampleAdd(samplesToAdd, wdir, isRecursive);
+            this.props.onSampleAdd(samplesToAdd, projects[idx]);
         }
     }
 
@@ -211,6 +238,28 @@ class DataTab extends React.Component {
         });
     }
 
+    projectItem = (project) => {
+        const containerStyle = {
+            display: 'flex',
+            flexDirection: 'row'
+        };
+        const contentStyle = {
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 2
+        };
+
+        const statistics = `xml: ${project.xml}, jpg: ${project.jpg}, tiff: ${project.tiff}`;
+        return (
+            <div style={containerStyle}>
+                <div style={contentStyle}>
+                    <span><strong>{project.name}</strong><small>{` :${project.path}`}</small></span>
+                    <small>{`${project.author}, ${statistics}, ${project.last_updated}`}</small>
+                </div>
+            </div>
+        );
+    }
+
     renderSampleView = () => {
         const divStyle = {
             display: 'inline-block',
@@ -223,14 +272,29 @@ class DataTab extends React.Component {
 
         const samples = {};
         const local_selected = sampleList.map( (sample, idx) => {
+            // _id: sample group name
+            // count: the number of items in the sample group
             const {_id, count} = sample;
             samples[idx] = `[${count}] ${_id}`;
             if (sampleSelected.indexOf(_id) >= 0)
                 return idx;
         }).filter(d => d != null);
 
+        const projects = this.props.projects.map(p => {
+            if (p.valid === 'true')
+                return {...p, value: p.name};
+        }).filter(d => d!=null);
+
         return (
             <div className={theme.tabDiv}>
+                <Dropdown
+                    auto={true}
+                    source={projects}
+                    onChange={this.handleProjectSelect}
+                    label='Select a project'
+                    value={this.state.selected_project}
+                    template={this.projectItem}
+                />
                 <div style={divStyle}>
                     <Autocomplete 
                         direction="down"
@@ -287,19 +351,10 @@ class DataTab extends React.Component {
         );
     }
 
-    renderDataMgrView = () => {
-        return (
-            <div className={theme.tabDiv}>
-                <DataMgrView />
-            </div>
-        );
-    }
-
     render() {
         return (
             <div>
                 {/* {this.renderDBView()} */}
-                {this.renderDataMgrView()}
                 {this.renderSampleView()}
             </div>
         );
@@ -311,8 +366,7 @@ function mapStateToProps(state) {
         sampleSelected: getSelectedSamples(state),
         sampleSelectedCounts: getSelectedSamplesCounts(state),
         sampleColors: state.data.sampleColors,
-        wdir: state.data.wdir,
-        isRecursive: state.data.isRecursive,
+        projects: state.data.projects,
     };
 }
 

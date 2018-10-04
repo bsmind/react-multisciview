@@ -9,6 +9,7 @@ import ProjectForm from "./form";
 import theme from './index.css';
 
 const project_template = {
+    'valid': 'false',
     'filename': '',
     'name': 'new project',
     'path': '',
@@ -24,7 +25,6 @@ const project_template = {
 };
 
 const error_template = {
-    'valid': false,
     'filename': 'required',
     'name': '',
     'path': 'invalid path',
@@ -33,7 +33,6 @@ const error_template = {
     'col': 'required',
     'author': 'required'
 };
-
 
 class DataMgrView extends React.Component {
     constructor() {
@@ -61,6 +60,11 @@ class DataMgrView extends React.Component {
     componentDidMount() {
         //this.getProject();
         // initialize 
+        //console.log('componentDidMount');
+    }
+
+    componentWillUnmount() {
+        //console.log('componentWillUnmount');
     }
 
     // to be deleted
@@ -96,7 +100,6 @@ class DataMgrView extends React.Component {
         const idx = this.state.selected_idx;
         const form = this.get_selected_project();
         const error = {
-            'valid': false,
             'author': form.author.length ? '': 'required',
             'filename': form.filename.length ? '': 'required',
             'name': form.name.length ? '': 'required',
@@ -109,7 +112,11 @@ class DataMgrView extends React.Component {
             error['path'] = 'required';
             const errors = [...this.state.errors];
             errors[idx] = {...error, valid: false};
-            this.setState({errors});
+
+            form['valid'] = 'false';
+            const projects = [...this.state.projects];
+            projects[idx] = form;
+            this.setState({errors, projects});
         } else {
             axios.post('/api/project/validate', {'path': form.path})
                 .then(resp => {
@@ -120,8 +127,13 @@ class DataMgrView extends React.Component {
                             isValid = false;
                     });
                     const errors = [...this.state.errors];
-                    errors[idx] = {...error, valid: isValid};
-                    this.setState({errors});
+                    errors[idx] = error;
+
+                    form['valid'] = isValid ? 'true': 'false';
+                    const projects = [...this.state.projects];
+                    projects[idx] = form;
+        
+                    this.setState({errors, projects});
                 })
                 .catch(e => {
                     console.log('validateProject: ', e);
@@ -190,8 +202,33 @@ class DataMgrView extends React.Component {
         reader.readAsText(e.target.files[0]);
     }
 
+    // save (download) a project to a local dist (client side)
+    saveProject = (e) => {
+        const selected_idx = this.state.selected_idx;
+        if (selected_idx < 0) return;
+
+        const project = this.state.projects[selected_idx];
+        const blob = new Blob(
+            [JSON.stringify(project, null, 4)], {
+                type: 'application/octet-stream'
+            }
+        );
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', project.filename);
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
     // toggle project list & form dialog
     handleToggle = () => {
+        const isOpen = this.state.isOpen;
+
+        if (isOpen && this.props.updateProjects)
+        {
+            this.props.updateProjects(this.state.projects);
+        }
         this.setState({isOpen: !this.state.isOpen});
     }
 
@@ -206,9 +243,8 @@ class DataMgrView extends React.Component {
         if (selected_idx < 0) return;
         
         const projects = [...this.state.projects];
-        const errors = this.get_selected_error();
-        errors.valid = false;
         projects[selected_idx][field] = value;
+        projects[selected_idx]['valid'] = 'false';
         this.setState({projects});
     }
 
@@ -239,8 +275,12 @@ class DataMgrView extends React.Component {
                             flag = true;
                         }
                 if (flag) {
-                    this.setState({projects});
+                    this.setState({projects}, () => {
+                        if (this.props.updateProjects)
+                            this.props.updateProjects(this.state.projects);
+                    });
                 } else {
+                    console.log('[DEBUG] clear interval');
                     clearInterval(this.interval);
                     this.interval = null;
                 }
@@ -271,38 +311,6 @@ class DataMgrView extends React.Component {
                 console.log('[ERROR] handleUpdateDB: ', e);
             });
     }
-
-    handleProjectSave = () => {
-        // const cp_proj = {...this.state.selected};
-        // const projects = [...this.state.projects];
-
-        // if (cp_proj.name.length === 0) {
-        //     cp_proj.name = 'Untitled';
-        // }
-
-        // if (this.state.selected_idx < 0) {
-        //     let count = 0;
-        //     projects.forEach(proj => {
-        //         if (proj.name === cp_proj.name || proj.name.includes(cp_proj.name))
-        //             count += 1;
-        //     });
-
-        //     if (count) {
-        //         cp_proj.name = `${cp_proj.name}_${count}`;
-        //     }
-
-        //     projects.push(cp_proj);
-        //     this.setState({
-        //         projects, 
-        //         selected: cp_proj,
-        //         selected_idx: projects.length - 1});
-        // } else {
-        //     projects[this.state.selected_idx] = {...cp_proj};
-        //     this.setState({projects});
-        // }
-
-    }
-
 
     renderPage = () => {
         const BtnStyle = {
@@ -344,7 +352,7 @@ class DataMgrView extends React.Component {
                 }}>
                     <Button label="NEW" onClick={this.addNewProject} />
                     <Button label="DELETE" onClick={this.delProject} />
-                    <Button label="SAVE" onClick={null} />
+                    <Button label="SAVE" onClick={this.saveProject} />
                     <input ref={ref => this.inputFile=ref} 
                         type="file" name="file" id="file" multiple={false} 
                         onChange={this.loadProject}
@@ -378,19 +386,13 @@ class DataMgrView extends React.Component {
     }
 
     render() {
-        const actions = [
-            { label: "Cancel", onClick: this.handleToggle },
-            { label: "Save", onClick: this.handleToggle}
-        ];
-
         return (
-            <div>
+            <div style={{display: 'inline-block'}}>
                 <Button 
-                    label='Open Data Manager Dialog'
+                    label='Open Data Manager'
                     onClick={this.handleToggle}
                 />
                 <Dialog
-                    actions={actions}
                     active={this.state.isOpen}
                     onEscKeyDown={this.handleToggle}
                     onOverlayClick={this.handleToggle}

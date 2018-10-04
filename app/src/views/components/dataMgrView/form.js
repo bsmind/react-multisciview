@@ -42,13 +42,14 @@ class ProjectForm extends React.Component {
         const BtnStyle = {
             minWidth: '10px', maxHeight: '10px'
         };
-        const {onValidate, onUpdate, errors} = this.props;
+        const {onValidate, onUpdate, project} = this.props;
+        const isValid = project.hasOwnProperty('valid') ? project.valid === "true": false;
         return (
             <div>
                 <Button raised style={
-                    {...BtnStyle, backgroundColor: errors.valid ? "#00ff00": "#ff0000"}} />
+                    {...BtnStyle, backgroundColor: isValid ? "#00ff00": "#ff0000"}} />
                 <Button label="VALIDATE" onClick={onValidate} />
-                <Button label="UPDATE DB" onClick={onUpdate} />
+                <Button label="UPDATE DB" onClick={onUpdate} disabled={!isValid} />
             </div>
         );
     }
@@ -64,9 +65,12 @@ class ProjectForm extends React.Component {
             );
         }
 
+        const isValid = project.valid === 'true';
         const db_labels = ['separator', 'db', 'col'];
         const db_values = db_labels.map(key => project[key]);
-        const db_errors = db_labels.map(key => errors[key]);
+        const db_errors = db_labels.map(key => {
+            return isValid ? '': errors[key]
+        });
 
         const f_labels = ['xml', 'jpg', 'tiff'];
         const f_values = f_labels.map(key => project[key]);
@@ -76,10 +80,10 @@ class ProjectForm extends React.Component {
             <div>
                 {this.renderButtons()}
                 <section>
-                    {this.input('text', 'author', project.author, errors.author)}
-                    {this.input('text', 'filename', project.filename, errors.filename)}
-                    {this.input('text', 'name', project.name, errors.name)}
-                    {this.input('text', 'path', project.path, errors.path)}
+                    {this.input('text', 'author', project.author, isValid ? '': errors.author)}
+                    {this.input('text', 'filename', project.filename, isValid ? '': errors.filename)}
+                    {this.input('text', 'name', project.name, isValid ? '': errors.name)}
+                    {this.input('text', 'path', project.path, isValid ? '': errors.path)}
                     {this.input_arr('text', db_labels, db_values, db_errors)}
                     {this.input_arr('text', f_labels, f_values, f_errors, true)}
                     {this.input('text', 'last_updated', project.last_updated, '', true)}

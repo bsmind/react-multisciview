@@ -18,17 +18,22 @@ import { ScatterChart } from "./components"
 
 class ScatterView extends React.Component {
     handleDataImageRequest = (data, priority = 3) => {
-        const { imgPool } = this.props;
+        const { imgPool, projects } = this.props;
         const id = data._id;
-        const path = data.path;
 
-        if (id == null || path == null) {
-            console.log('Invlid image request: ', data);
+        if (id == null) {
+            console.log('[Image Request] Invlid image request: ', data);
             return;
         }
 
+        const idx = projects.findIndex(p => p.name === data.project);
+        if (idx === -1) {
+            console.log('[Image Request] Unknown project: ', data.project);
+            return;
+        }
+        const project = projects[idx];
     	if (this.props.get_tiff_with_priority && imgPool[id] == null)
-    		this.props.get_tiff_with_priority(id, path, priority);
+    		this.props.get_tiff_with_priority(id, project, priority);
     }
     
     render() {
@@ -58,6 +63,8 @@ function mapStateToProps(state) {
         samples: getSelectedSamples(state),
         data: getDataArray(state),
         dimension: getDataStat(state),
+
+        projects: state.data.projects,
 
         imgPool: state.data.imgPool,
         opacity: state.data.scatterColorOpacity,

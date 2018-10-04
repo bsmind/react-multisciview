@@ -6,6 +6,7 @@ import {
     add_data,
     get_color_map,
     close_message,
+    updateProjects
 } from "./actions/dataActions";
 
 import { Layout, Panel } from "react-toolbox/lib/layout";
@@ -17,6 +18,7 @@ import theme from "./appIndex.css";
 
 import OptionView from "./views/optionView";
 import ScatterView from "./views/scatterView";
+import DataMgrView from "./views/components/dataMgrView";
 
 const github="https://github.com/ComputationalScienceInitiative/react-multiview"
 
@@ -31,7 +33,7 @@ class MultiViewApp extends React.Component {
 
         this.pcpAttrSelect = {};
         this.__dataExtents = {};
-        this.evtSource = null;
+        this.evtSource = null;  // for streaming data
     }
 
     componentWillMount() {
@@ -111,20 +113,14 @@ class MultiViewApp extends React.Component {
                 >
                     <Navigation type="horizontal">
                         <ul style={{listStyle: 'none'}}>
-                                {imgReqOnProgress > 0 &&
-									<li className={theme.hLi}>
-                                        <Button 
-                                            icon='cloud_upload' 
-                                            label={`${imgReqOnProgress}`} 
-                                            accent 
-                                        />
-									</li>									
-								}                        
                             <li className={theme.hLi}>
-                                <a style={{textDecoration: 'none'}}
-                                    href={github}
-                                    target="_blank"
-                                >
+                                <DataMgrView updateProjects={this.props.updateProjects} />
+                            </li>
+                            <li className={theme.hLi}>
+                                <Button icon='cloud_upload' label={`${imgReqOnProgress}`} accent />
+                            </li>									
+                            <li className={theme.hLi}>
+                                <a style={{textDecoration: 'none'}} href={github} target="_blank">
                                     Github
                                 </a>
                             </li>
@@ -208,7 +204,8 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         add_data,
         get_color_map,
-        close_message
+        close_message,
+        updateProjects
     }, dispatch);
 }
 
