@@ -458,7 +458,7 @@ class ChartCanvas extends React.Component {
 			yAttr: { scale: initialYScale, extents: yExtents, name: yName, ordinary: yOrdinary }
 		} = this.state;
 
-		const SCALE_FACTOR = 0.001;
+		const SCALE_FACTOR = 0.001 * this.props.zoomSensitivity;
 		const zoomFactor = Math.max(Math.min(1 + e.deltaY * SCALE_FACTOR, 3), 0.1);
 		const centerX = initialXScale.invert(mouseXY[0]),
 			beginX = initialXScale.domain()[0],

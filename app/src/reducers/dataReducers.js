@@ -5,6 +5,7 @@ import { get_tiff } from "./getImage";
 
 const INIT_STATE = {
     projects: [],
+    selected_project: '',
 
     /**
      * dataBySamples
@@ -55,7 +56,12 @@ const INIT_STATE = {
 		"linecut_qr/data/fit_peaks_sigma1",
     ],
 
-    // MongoDB 
+    // histogram options
+    numBins: 50,
+    isStacked: true,
+    selected_attr: "metadata_extract/data/annealing_time",
+
+    // MongoDB (deprecated)
     wdir: null,        // working directory for sync, watcher and db
     isRecursive: true, // if true, retrieve data, recursively from wdir to its sub-directories
     syncInfo: {},

@@ -12,11 +12,13 @@ import {
     getScatterColorScheme,
     getSelectedSampleColors,
     pcptab_get_dimorder,
+    getSelectedSamples,
 } from "../../selectors";
 
 import {
     changePCPSelectedAttrs,
-    changeDataAttr
+    changeDataAttr,
+    setValue,
 } from "../../actions/dataActions";
 
 import { getColorInterpolator } from "../../utils";
@@ -24,6 +26,7 @@ import { scaleSequential } from "d3-scale";
 import get from "lodash.get"
 
 import PcpChart from "./pcpChart";
+import HistChart from "./histChart";
 
 import theme from "./index.css";
 
@@ -125,6 +128,20 @@ class PcpTab extends React.Component {
         return (
             <div>
                 <div className={theme.tabDiv}>
+                    <HistChart 
+                        height={250}
+                        data={data}
+                        fontSize={fontSize}
+                        colorAccessor={d => colorsByGroup[d]}
+                        dimKinds={this.props.dimKinds}
+                        samples={this.props.samples}
+                        numBins={this.props.numBins}
+                        isStacked={this.props.isStacked}
+                        selected_attr={this.props.selected_attr}
+                        onChange={this.props.setHistChange}
+                    />
+                </div>
+                <div className={theme.tabDiv}>
                     <PcpChart 
                         ref={"PCPChartRef"}
                         height={250}
@@ -156,7 +173,12 @@ function mapStateToProps(state) {
         zAttr: state.data.attrz,
         colorsByGroup: getSelectedSampleColors(state),
         dimKinds: getDataAttr(state),
-        fontSize: state.env.fontSize
+        fontSize: state.env.pcpFontSize,
+        samples: getSelectedSamples(state),
+
+        numBins: state.data.numBins,
+        isStacked: state.data.isStacked,
+        selected_attr: state.data.selected_attr,
     };
 }
 
@@ -164,6 +186,7 @@ function mapDispatchToProps(dispatch){
     return bindActionCreators({
         updateDimOrder: changePCPSelectedAttrs,
         changeColorAttr: changeDataAttr,
+        setHistChange: setValue,
     }, dispatch);
 }
 

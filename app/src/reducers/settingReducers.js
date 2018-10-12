@@ -1,5 +1,10 @@
 const INIT_STATE = {
-    fontSize: 7
+    fontSize: 11,
+    iconSize: 10,
+    iconType: 'square',
+    pcpFontSize: 11,
+    zoomSensitivity: 1,
+    imageScale: 1
 }
 
 const set_value = (state, payload) => {

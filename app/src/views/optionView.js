@@ -15,7 +15,7 @@ class OptionView extends React.Component {
     constructor() {
         super();
         this.state = {
-            tabIndex: 1,
+            tabIndex: 0,
         };
     }
 
@@ -30,9 +30,6 @@ class OptionView extends React.Component {
                 index={this.state.tabIndex}
                 onChange={this.handleTabChange}
             >
-                <Tab label="SETTING">
-                    <SettingTab />
-                </Tab>
                 <Tab label="DATA"> 
                     <DataTab height={this.props.height}/> 
                 </Tab>

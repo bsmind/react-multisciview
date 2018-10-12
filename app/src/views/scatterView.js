@@ -37,7 +37,7 @@ class ScatterView extends React.Component {
     }
     
     render() {
-        const margin = {left: 60, right: 10, top: 30, bottom: 40};
+        const margin = {left: 100, right: 30, top: 30, bottom: 60};
         const chartProps = {
             ...this.props,
             margin,
@@ -65,6 +65,12 @@ function mapStateToProps(state) {
         dimension: getDataStat(state),
 
         projects: state.data.projects,
+
+        fontSize: state.env.fontSize,
+        iconSize: state.env.iconSize,
+        iconType: state.env.iconType,
+        zoomSensitivity: state.env.zoomSensitivity,
+        imageScale: state.env.imageScale,
 
         imgPool: state.data.imgPool,
         opacity: state.data.scatterColorOpacity,

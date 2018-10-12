@@ -19,6 +19,7 @@ import theme from "./appIndex.css";
 import OptionView from "./views/optionView";
 import ScatterView from "./views/scatterView";
 import DataMgrView from "./views/components/dataMgrView";
+import SettingView from "./views/settingView";
 
 const github="https://github.com/ComputationalScienceInitiative/react-multiview"
 
@@ -113,6 +114,9 @@ class MultiViewApp extends React.Component {
                 >
                     <Navigation type="horizontal">
                         <ul style={{listStyle: 'none'}}>
+                            <li className={theme.hLi}>
+                                <SettingView />
+                            </li>
                             <li className={theme.hLi}>
                                 <DataMgrView updateProjects={this.props.updateProjects} />
                             </li>

@@ -65,6 +65,8 @@ class Pivots extends React.Component {
             if (x == null || y == null) return;
             if (!dataFilter(data)) return;
 
+            const fontSize = ((index+1) > 10 ? 5: 8) * scale / 0.35;
+
             return <g>
                 <g transform={`translate(${x},${y}) scale(${scale})`}>
                     <path
@@ -79,11 +81,12 @@ class Pivots extends React.Component {
                 </g>
                 <text
                     x={x}
-                    y={y - 5}
+                    y={y - 6 * scale / 0.35}
                     fill={'#ffffff'}
                     textAnchor={'middle'}
                     fontFamily={'Roboto, sans-serif'}
-                    fontSize={6}
+                    fontSize={fontSize}
+                    fontWeight={'bold'}
                     onClick={() => clickCallback(index)}
                     cursor={'pointer'}
                 >
