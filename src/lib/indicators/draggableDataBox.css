@@ -3,7 +3,6 @@
 @import 'button/theme.css';
 
 .button {
-    font-size: 7px;
     height: 15px;
     line-height: 15px;
 }

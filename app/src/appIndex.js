@@ -6,6 +6,7 @@ import {
     add_data,
     get_color_map,
     close_message,
+    updateProjects
 } from "./actions/dataActions";
 
 import { Layout, Panel } from "react-toolbox/lib/layout";
@@ -17,6 +18,8 @@ import theme from "./appIndex.css";
 
 import OptionView from "./views/optionView";
 import ScatterView from "./views/scatterView";
+import DataMgrView from "./views/components/dataMgrView";
+import SettingView from "./views/settingView";
 
 const github="https://github.com/ComputationalScienceInitiative/react-multiview"
 
@@ -31,7 +34,7 @@ class MultiViewApp extends React.Component {
 
         this.pcpAttrSelect = {};
         this.__dataExtents = {};
-        this.evtSource = null;
+        this.evtSource = null;  // for streaming data
     }
 
     componentWillMount() {
@@ -42,14 +45,14 @@ class MultiViewApp extends React.Component {
         this.props.get_color_map();
         window.addEventListener("resize", () => this.handleResize());
 
-        this.evtSource = new EventSource('/stream');
-        this.evtSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            //console.log(data);
-            if (this.props.add_data) {
-                this.props.add_data(data);
-            }
-        }
+        // this.evtSource = new EventSource('/stream');
+        // this.evtSource.onmessage = (event) => {
+        //     const data = JSON.parse(event.data);
+        //     //console.log(data);
+        //     if (this.props.add_data) {
+        //         this.props.add_data(data);
+        //     }
+        // }
     }
 
     componentWillUnmount() {
@@ -60,7 +63,7 @@ class MultiViewApp extends React.Component {
         let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-        const app_bar_h = 41.6
+        const app_bar_h = 57.59
         h = h - app_bar_h
 
         this.setState({width: w, height: h});
@@ -111,20 +114,17 @@ class MultiViewApp extends React.Component {
                 >
                     <Navigation type="horizontal">
                         <ul style={{listStyle: 'none'}}>
-                                {imgReqOnProgress > 0 &&
-									<li className={theme.hLi}>
-                                        <Button 
-                                            icon='cloud_upload' 
-                                            label={`${imgReqOnProgress}`} 
-                                            accent 
-                                        />
-									</li>									
-								}                        
                             <li className={theme.hLi}>
-                                <a style={{textDecoration: 'none'}}
-                                    href={github}
-                                    target="_blank"
-                                >
+                                <SettingView />
+                            </li>
+                            <li className={theme.hLi}>
+                                <DataMgrView updateProjects={this.props.updateProjects} />
+                            </li>
+                            <li className={theme.hLi}>
+                                <Button icon='cloud_upload' label={`${imgReqOnProgress}`} accent />
+                            </li>									
+                            <li className={theme.hLi}>
+                                <a style={{textDecoration: 'none'}} href={github} target="_blank">
                                     Github
                                 </a>
                             </li>
@@ -208,7 +208,8 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         add_data,
         get_color_map,
-        close_message
+        close_message,
+        updateProjects
     }, dispatch);
 }
 

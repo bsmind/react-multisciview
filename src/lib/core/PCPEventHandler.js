@@ -51,7 +51,8 @@ class PCPEventHandler extends React.Component {
     handleMouseDown = (e) => {
     	e.preventDefault();
 
-    	const mouseXY = mousePosition(e);
+		const mouseXY = mousePosition(e);
+		//console.log('mousedown')
 
     	if (this.inAxisHandlerY(mouseXY[1])) {
     		// console.log('inside')

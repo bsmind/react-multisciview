@@ -29,12 +29,14 @@ class ScatterChart extends React.Component {
 			opacity,
 			data,
 			dimension,
-			colorScheme
+            colorScheme,
+            iconSize,
+            iconType,
 		} = props;
 		const shape = {
-			type: "square",
-			width: 6,
-			height: 6,
+			type: iconType,
+			width: iconSize,
+			height: iconSize,
 			defaultColor: "#FF0000",
 			style: {
 				strokeWidth: 1,
@@ -68,10 +70,9 @@ class ScatterChart extends React.Component {
     	if (this.ScatterChartCanvasNode) return this.ScatterChartCanvasNode;
     }
 
-    handleDataRequest = (dataID, path, priority) => {
-    	//console.log('handleDataRequest: ', dataID)
+    handleDataRequest = (dataID, priority) => {
     	if (this.props.onDataRequest)
-    		this.props.onDataRequest(dataID, path, priority);
+    		this.props.onDataRequest(dataID, priority);
     }
 
     handleSelectDataItems = (selectedDataList) => {
@@ -85,7 +86,8 @@ class ScatterChart extends React.Component {
             data, dimension, seriesName, samples,
             xAttr, yAttr, zAttr,
             onScatterPanZoom, dataExtents,
-            imgPool, showImage, minPoints, minImageSize, imageColorTable
+            imgPool, showImage, minPoints, minImageSize, imageColorTable,
+            fontSize, iconSize, zoomSensitivity, imageScale,
         } = this.props;
         const { markerProvider } = this.state;
         const pivot = 'M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z';		
@@ -99,8 +101,10 @@ class ScatterChart extends React.Component {
             return name;
         }
 
+        //console.log(data);
         //console.log(dataExtents)
         //debugger;
+        //console.log(fontSize)
 
         return (
             <ChartCanvas
@@ -124,36 +128,50 @@ class ScatterChart extends React.Component {
                 imageColorTable={imageColorTable}
                 onScatterPanZoom={onScatterPanZoom}
                 onDataRequest={this.handleDataRequest}
+                zoomSensitivity={zoomSensitivity}
                 // onSelectDataItems={this.handleSelectDataItems}
             >
                 <XAxis 
                     axisAt="bottom"
                     orient="bottom"
                     axisHeight={25}
+                    labelStyle={{
+                        fontSize: fontSize,
+                        fontFamily: "Roboto, sans-serif",
+                        textAnchor: "middle",
+                        tickLabelFill: "#000000"
+                    }}
                 />
                 <YAxis 
                     axisAt="left"
                     orient="left"
                     axisWidth={40}
+                    labelStyle={{
+                        fontSize: fontSize,
+                        fontFamily: "Roboto, sans-serif",
+                        textAnchor: "middle",
+                        tickLabelFill: "#000000"
+                    }}
                 />
                 <Series>
                     <ScatterSeries 
                         markerProvider={markerProvider}
                         minPoints={minPoints}
                         minImageSize={minImageSize}
+                        imageScale={imageScale}
                     />
                 </Series>
                 <Pivots 
                     pivot={pivot} 
                     normal={'#000000'} 
                     accent={'#ff0000'} 
-                    opacity={0.6} 
-                    scale={0.25} 
+                    opacity={0.65} 
+                    scale={Math.min(1.5, Math.max(0.35, 0.35 * (iconSize/12)))} 
                 />
                 <DraggableDataBox 
                     initialPos={{x: margin.left + 5, y: margin.top + 5}}
-                    width={250}
-                    height={300}
+                    width={400}
+                    height={600}
                     keyParser={attrParser}
                 />
             </ChartCanvas>

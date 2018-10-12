@@ -38,34 +38,48 @@ class PCPAxisEventHandler extends React.Component {
 	}
 
     handleEnter = () => {
-    	this.setState({ mouseInside: true });
+    	this.setState({ mouseInside: true }, () => {
+			if (this.props.onMouseOver)
+				this.props.onMouseOver(true);
+		});
     }
 
     handleLeave = () => {
-    	this.setState({ mouseInside: false });
+    	this.setState({ mouseInside: false }, () => {
+			if (this.props.onMouseOver)
+				this.props.onMouseOver(false);
+		});
+    }
+
+	getMouseY = () => {
+		//return Math.round(mouse(this.node)[1] - this.props.y);
+		return Math.max(
+			Math.round(mouse(this.node)[1]) + 0.5 * this.props.y
+		, 0);
     }
 
     handleMouseDown = (e) => {
     	if (e.button !== 0) return;
     	if (!this.state.mouseInside) return;
 
-    	const mouseXY = mousePosition(e);
-    	select(d3Window(this.node))
+		const mouseXY = mousePosition(e);
+		const startY = mouseXY[1] + 1.5 * this.props.y;
+		if (startY < 0) return;
+		//if (startY > this.props.height + this.props.y - 12) return;
+
+		select(d3Window(this.node))
     		.on("mousemove", this.handleRangeSelect)
     		.on("mouseup", this.handleRangeSelectEnd);
 
-    	this.setState({ startY: mouseXY[1] });
+		this.setState({ startY });
     	e.preventDefault();
     }
 
-    getMouseY = () => {
-    	return Math.round(mouse(this.node)[1] - this.props.y);
-    }
 
     handleRangeSelect = () => {
     	const e = d3Event;
 
-    	const mouseY = this.getMouseY();
+		const mouseY = this.getMouseY();
     	if (this.props.onRangeSelect) {
     		this.props.onRangeSelect(this.state.startY, mouseY, e);
     	}

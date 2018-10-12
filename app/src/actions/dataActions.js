@@ -54,11 +54,10 @@ export function close_message() {
 }
 
 // used to get data by sample names
-export function get_data(sampleNames, path, recursive) {
+export function get_data(sampleNames, project) {
     return dispatch => {
-        axios.post("/api/data/sample", {sampleNames, path, recursive})
+        axios.post("/api/data/sample", {sampleNames, project})
             .then(resp => {
-                //console.log(resp.data)
                 dispatch({
                     type: "GET_DATA",
                     payload: resp.data
@@ -107,8 +106,9 @@ function get_tiff(key) {
     return dispatch => {
         const tokens = key.split("::");
         const id = tokens[0];
-        const path = tokens[1];
-        axios.post("/api/data/tiff", {id, path})
+        const db = tokens[1];
+        const col = tokens[2];
+        axios.post("/api/data/tiff", {id, db, col})
             .then(resp => {
                 const idx = tiffRequest.indexOf(key);
                 if (idx > -1) tiffRequest.splice(idx, 1);
@@ -130,9 +130,11 @@ function get_tiff(key) {
     };
 }
 
-export function get_tiff_with_priority(id, path, priority=PRIORITY.LOW_MID) {
+export function get_tiff_with_priority(id, project, priority=PRIORITY.LOW_MID) {
     return dispatch => {
-        const key = `${id}::${path}`
+        const db = project['db'];
+        const col = project['col'];
+        const key = `${id}::${db}::${col}`
         if (tiffRequest.indexOf(key) > -1) return;
 
         pqTiff.replace(key, priority, (a, b) => a === b);
@@ -147,6 +149,12 @@ export function get_tiff_with_priority(id, path, priority=PRIORITY.LOW_MID) {
     };
 }
 
+export function updateProjects(projects) {
+    return {
+        type: "UPDATE_PROJECTS",
+        payload: {data: projects}
+    };
+}
 
 
 

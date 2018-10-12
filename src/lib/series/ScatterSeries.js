@@ -454,7 +454,6 @@ class ScatterSeries extends React.Component {
 
 		const pointSet = [], minDist = { x: null, y: null };
 		
-
     	plotData.forEach(d => {
     		if (d._id == null) {
     			console.log("unknown error:missing id ", d);
@@ -483,7 +482,8 @@ class ScatterSeries extends React.Component {
     		});
     	}
 
-    	this.updateRefImageSize(minDist, pointSet.length, zoomFactor);
+		this.updateRefImageSize(minDist, pointSet.length, zoomFactor);
+		
     	if (this.__imgRefWidth == null && this.__imgRefHeight == null) {
     		if (this.SubscriberExtNode == null) return;
     		const { getCanvasContexts } = this.props.shared;
@@ -523,8 +523,8 @@ class ScatterSeries extends React.Component {
     			key={`imgViewer-${d._id}`}
     			x={xAccessor(d)}
     			y={yAccessor(d)}
-    			imgRefWidth={this.__imgRefWidth}
-    			imgRefHeight={this.__imgRefHeight}
+    			imgRefWidth={this.__imgRefWidth * this.props.imageScale}
+    			imgRefHeight={this.__imgRefHeight * this.props.imageScale}
 				id={d._id}
 				data={d}
     			imgPool={imgPool}

@@ -40,6 +40,7 @@ class PCPCanvas extends React.Component {
 		this.axisMoveInProgress = false;
 		this.axisSelectInProgress = false;
 	}
+
     getCanvasContexts = () => {
     	if (this.canvasContainerNode)
     		return this.canvasContainerNode.getCanvas();
@@ -267,7 +268,11 @@ class PCPCanvas extends React.Component {
     }
 
     axisMoveHelper = (dx, axisToMove, initDimOrder, force = false) => {
-    	const {
+		if (initDimOrder == null) {
+			return null;
+		}
+
+		const {
     		dimConfig: initDimConfig,
     	} = this.state;
 
@@ -309,6 +314,14 @@ class PCPCanvas extends React.Component {
     	};
     }
 
+	handleMouseOverOnAxis = (axisTitle, is_inside) => {
+		const dimConfig = {...this.state.dimConfig};
+		const config = dimConfig[axisTitle];
+		config['opacity'] = is_inside ? 1.0: 0.5;
+		this.clearAxesAndPCPOnCanvas();
+		this.setState({...this.state, dimConfig});
+	}
+
     handleAxisMove = (axisTitle, moveDist, e) => {
     	if (!this.waitingForAxisMoveAnimationFrame && !this.axisSelectInProgress) {
     		this.waitingForAxisMoveAnimationFrame = true;
@@ -332,26 +345,27 @@ class PCPCanvas extends React.Component {
     }
 
     handleAxisMoveEnd = (axisTitle, moveDist, e) => {
-
     	const state = this.axisMoveHelper(moveDist, axisTitle, this.__dimOrder, true);
 
     	this.__dimConfig = null;
     	this.__dimOrder = null;
     	this.axisMoveInProgress = false;
 
-    	const {
-    		dimConfig,
-    		xScale
-    	} = state;
-    	this.triggerEvent("moveaxis", state, e);
+		if (state != null) {
+			const {
+				dimConfig,
+				xScale
+			} = state;
+			this.triggerEvent("moveaxis", state, e);
 
-    	requestAnimationFrame(() => {
-    		this.clearAxesAndPCPOnCanvas();
-    		this.setState({
-    			dimConfig,
-    			xScale
-    		});
-    	});
+			requestAnimationFrame(() => {
+				this.clearAxesAndPCPOnCanvas();
+				this.setState({
+					dimConfig,
+					xScale
+				});
+			});
+		}
     }
 
     rangeSelectHelper = (axisTitle, start, end, initDimConfig) => {
@@ -636,7 +650,8 @@ class PCPCanvas extends React.Component {
     		axisWidth: axisWidthProp,
     		dimName
     	} = this.props;
-    	const axisWidth = (axisWidthProp % 2 === 0) ? axisWidthProp : axisWidthProp + 1 || 26;
+		const axisWidth = (axisWidthProp % 2 === 0) 
+				? axisWidthProp : axisWidthProp + 1 || 26;
     	const canvasDim = getCanvasDimension({ width, height, margin });
 
     	const shared = {
@@ -655,27 +670,37 @@ class PCPCanvas extends React.Component {
     	};
 
     	const pcpYAxisList = [];
-
+		const pcpYAxisWidth = dimName.length 
+			? canvasDim.width / dimName.length: 0;
     	dimName.forEach(name => {
 			const config = this.state.dimConfig[name];
 			if (config == null) return;
     		// console.log(config, name)
-    		const title = config.title;
+			const title = config.title;
     		pcpYAxisList.push(
     			<PCPYAxis key={`pcp-yaxis-${title}`}
     				title={title}
     				axisLocation={config.position}
     				axisWidth={axisWidth}
-    				height={canvasDim.height}
+					height={canvasDim.height}
+					width={pcpYAxisWidth}
     				orient={"left"}
     				shared={shared}
     				ordinary={config.ordinary}
     				dimConfig={config}
     				onRangeSelect={this.handleRangeSelect}
     				onRangeSelectEnd={this.handleRangeSelectEnd}
-    				onRangeSelectCancel={this.handleRangeSelectCancel}
-    				titleFormat={this.props.titleFormat}
-    			/>
+					onRangeSelectCancel={this.handleRangeSelectCancel}
+					onMouseOver={this.handleMouseOverOnAxis.bind(this, name)}
+					titleFormat={this.props.titleFormat}
+					labelStyle={{
+						fontSize: this.props.fontSize,
+						fontFamily: "Roboto, sans-serif",
+						textAnchor: "start",
+						tickLabelFill: "#000000"
+					}}
+					opacity={config['opacity'] || 0.5}
+				/>
     		);
     	});
 

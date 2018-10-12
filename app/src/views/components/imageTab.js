@@ -19,23 +19,28 @@ import {
     changeImgDomain,
 } from "../../actions/dataActions";
 
+import { setValue as setEnvValue } from "../../actions/settingActions"; 
+
 
 class ImageTab extends React.Component {
     render() {
-        const {showImage, minPoints, minImageSize} = this.props;
-        const {onSwitchChange, onSliderChange} = this.props;
+        const {showImage, minPoints, minImageSize, imageScale} = this.props;
+        const {onSwitchChange, onSliderChange, onImageScaleChange} = this.props;
 
         return (
             <div>
                 <div className={theme.tabDiv}>
                     <Button icon="photo" label="Show Image" accent={showImage}
                         onClick={() => onSwitchChange("showImage", !showImage)} />				
-                    <p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px'}}>MIN. # POINTS (on scatter plot to show images):</p>
+                    <p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '11px'}}>MIN. # POINTS (on scatter plot to show images):</p>
                     <Slider pinned min={20} max={400} step={10} value={minPoints} disabled={!showImage} theme={theme}
                         onChange={value => onSliderChange("minPoints", value)} />
-                    <p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '8px'}}>MIN. IMAGE SIDE (initial):</p>
-                    <Slider pinned min={5} max={40} step={5} value={minImageSize} disabled={!showImage} theme={theme}
-                        onChange={value => onSliderChange("minImageSize", value)} />
+                    <p style={{fontFamily: 'Roboto, Helvetica, Arial, sans-serif', fontSize: '11px'}}>Image scale:</p>
+                    <Slider min={0.001} max={5} value={imageScale} disabled={!showImage} theme={theme} 
+                        onChange={v => onImageScaleChange("imageScale", v)}
+                    />
+                    {/* <Slider pinned min={5} max={40} step={5} value={minImageSize} disabled={!showImage} theme={theme}
+                        onChange={value => onSliderChange("minImageSize", value)} /> */}
                 </div>
                 <div className={theme.tabDiv}>
                     <Autocomplete 
@@ -79,6 +84,8 @@ function mapStateToProps(state) {
         imgColorScheme: state.data.imgColorScheme,
         imgColorInterpolator: getImageColorInterpolator(state),
 
+        imageScale: state.env.imageScale,
+
         postProcessor: state.data.getOrigImgValue,
     };
 }
@@ -89,6 +96,7 @@ function mapDispatchToProps(dispatch) {
         onSliderChange: setValue,
         onImgColorSchemeChange: changeImgColorScheme,
         onImageDomainChange: changeImgDomain,
+        onImageScaleChange: setEnvValue,
     }, dispatch);
 }
 

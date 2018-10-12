@@ -12,7 +12,7 @@ module.exports = {
             features: {
                 customProperties: {
                     variables: {
-                        unit: '7px'
+                        unit: '9px'
                     }
                 }
             },

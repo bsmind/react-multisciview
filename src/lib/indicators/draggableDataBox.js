@@ -25,8 +25,8 @@ class DraggableDataBox extends React.Component {
             dragging: false,
             rel: null,
 
-            width: props.width || 150,
-            height: props.height || 200,
+            width: props.width || 400,
+            height: props.height || 600,
             ...state,
             // imgCenterX: width/2,
             // imgCenterY: height/4,
@@ -240,7 +240,11 @@ class DraggableDataBox extends React.Component {
             this.setState({...state});
         };
 
-        return (<table style={{width: '100%', textAlign: 'center'}}>
+        return (<table style={{
+            width: '100%', 
+            textAlign: 'center',
+            marginTop: '13px'
+        }}>
             <tbody>
             <tr>
                 <td>
@@ -273,7 +277,6 @@ class DraggableDataBox extends React.Component {
         const { width, height } = this.state;
         if (selected.length === 0 || !showDataBox)
             return null;
-
         const divStyle = {
             position: 'absolute',
             left: this.state.pos.x,
@@ -307,14 +310,14 @@ class DraggableDataBox extends React.Component {
         const infoStyle = <style type="text/css">
             {`td {
                 font-family: Roboto, sans-serif;
-                font-size: 7px;
+                font-size: ${13}px;
                 word-wrap: break-word;
             }`}
         </style>;
         //const infoHeight = height;
 
-        const leftTrianglePath = `M 0 0 L 6 -6 L 6 6 z`;
-        const rightTrianglePath = `M 0 0 L -6 -6 L -6 6 z`;
+        const leftTrianglePath = `M 0 0 L 10 -10 L 10 10 z`;
+        const rightTrianglePath = `M 0 0 L -10 -10 L -10 10 z`;
 
         return (
         <div ref={node => this.node = node}
@@ -373,11 +376,11 @@ class DraggableDataBox extends React.Component {
                             />
                         </g>
                         <text
-                            x={3}
-                            y={10}
+                            x={10}
+                            y={20}
                             textAnchor={'start'}
                             fontFamily={'Roboto, sans-serif'}
-                            fontSize={7}
+                            fontSize={15}
                         >
                             {`${currSelectedIndex+1}/${selected.length}`}
                         </text>
@@ -385,7 +388,7 @@ class DraggableDataBox extends React.Component {
                 </svg>
             </div>
             <div style={{
-                height: height/2 - 20,
+                height: height/2 - 50,
                 overflow: 'auto',
             }}>
                 {this.renderInfo(info)}

@@ -18,21 +18,26 @@ import { ScatterChart } from "./components"
 
 class ScatterView extends React.Component {
     handleDataImageRequest = (data, priority = 3) => {
-        const { imgPool } = this.props;
+        const { imgPool, projects } = this.props;
         const id = data._id;
-        const path = data.path;
 
-        if (id == null || path == null) {
-            console.log('Invlid image request: ', data);
+        if (id == null) {
+            console.log('[Image Request] Invlid image request: ', data);
             return;
         }
 
+        const idx = projects.findIndex(p => p.name === data.project);
+        if (idx === -1) {
+            console.log('[Image Request] Unknown project: ', data.project);
+            return;
+        }
+        const project = projects[idx];
     	if (this.props.get_tiff_with_priority && imgPool[id] == null)
-    		this.props.get_tiff_with_priority(id, path, priority);
+    		this.props.get_tiff_with_priority(id, project, priority);
     }
     
     render() {
-        const margin = {left: 60, right: 10, top: 30, bottom: 40};
+        const margin = {left: 100, right: 30, top: 30, bottom: 60};
         const chartProps = {
             ...this.props,
             margin,
@@ -58,6 +63,14 @@ function mapStateToProps(state) {
         samples: getSelectedSamples(state),
         data: getDataArray(state),
         dimension: getDataStat(state),
+
+        projects: state.data.projects,
+
+        fontSize: state.env.fontSize,
+        iconSize: state.env.iconSize,
+        iconType: state.env.iconType,
+        zoomSensitivity: state.env.zoomSensitivity,
+        imageScale: state.env.imageScale,
 
         imgPool: state.data.imgPool,
         opacity: state.data.scatterColorOpacity,

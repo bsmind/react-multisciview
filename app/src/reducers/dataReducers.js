@@ -4,6 +4,9 @@ import { interpolateRgb } from "d3-interpolate";
 import { get_tiff } from "./getImage";
 
 const INIT_STATE = {
+    projects: [],
+    selected_project: '',
+
     /**
      * dataBySamples
      * - {[sampleName]: data object}
@@ -53,7 +56,12 @@ const INIT_STATE = {
 		"linecut_qr/data/fit_peaks_sigma1",
     ],
 
-    // MongoDB 
+    // histogram options
+    numBins: 50,
+    isStacked: true,
+    selected_attr: "metadata_extract/data/annealing_time",
+
+    // MongoDB (deprecated)
     wdir: null,        // working directory for sync, watcher and db
     isRecursive: true, // if true, retrieve data, recursively from wdir to its sub-directories
     syncInfo: {},
@@ -135,13 +143,8 @@ const _update_sample_colors = (state, sampleList) => {
 
 const get_data = (state, payload) => {
     const {sampleList, sampleData} = payload;
-
-    //console.log(sampleList)
-    //console.log(sampleData)
-
     const dataBySamples = {...state.dataBySamples};
     const keyList = sampleList.map(name => {
-        //console.log(name)
         dataBySamples[name] = [...sampleData[name]];
         return name;
     });
@@ -246,6 +249,9 @@ export function dataReducers(state = INIT_STATE, action) {
         _type = "REJECTED"
 
     switch (_type) {
+        case "UPDATE_PROJECTS": 
+            return {...state, projects: [...payload.data]};
+
         case "SET_VALUE": return set_value(state, payload);
         case "CLOSE_MESSAGE": return {...state, messageReady: false};
         case "GET_COLORMAP": return get_color_map(state, payload);
